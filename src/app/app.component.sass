@@ -8,6 +8,7 @@ mat-sidenav
 a
   text-decoration: none
   color: white
+  cursor: pointer
 
   &:hover, &:active
     color: lightgray
@@ -21,13 +22,16 @@ a
 .icon
   display: inline-block
   height: 30px
-  margin: 0 auto
-  padding-right: 5px
   text-align: center
   vertical-align: middle
+  
+.mat-menu-item .icon
+  margin-right: 10px
 
 .label
   display: inline-block
-  line-height: 30px
   margin: 0
-  width: 85%
+  font-size: 18px
+
+.topMenu
+    height: 44px
