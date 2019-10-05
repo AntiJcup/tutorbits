@@ -45,11 +45,17 @@
      </div>
     </mat-toolbar>
     <main fxLayout fxLayoutGap="5px" class="tutorialContainer">
+      <div>
       <vg-player class="tutorialVideo">
           <video class="tutorialVideo" [vgMedia]="media" #media id="singleVideo" preload="auto" controls>
               <source src="http://static.videogular.com/assets/videos/videogular.mp4" type="video/mp4">
           </video>
       </vg-player>
+      <tree class='tutorialFileExplorer'
+      [tree]="tree"
+      [settings]="settings">
+      </tree>
+      </div>
       <ngx-monaco-editor [options]="editorOptions" [(ngModel)]="code" class="codeEditor"></ngx-monaco-editor>
     </main>
   </mat-sidenav-content>
