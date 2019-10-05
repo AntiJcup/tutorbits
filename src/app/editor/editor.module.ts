@@ -3,7 +3,8 @@ import { MonacoEditorModule, NGX_MONACO_EDITOR_CONFIG, NgxMonacoEditorConfig } f
 import { FormsModule } from '@angular/forms';
 
 const monacoEditorConfig: NgxMonacoEditorConfig = {
-  baseUrl: './assets'
+  baseUrl: './assets',
+  defaultOptions: {automaticLayout: true}
 };
 
 @NgModule({

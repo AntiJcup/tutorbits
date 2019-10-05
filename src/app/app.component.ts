@@ -7,5 +7,5 @@ import { Component } from '@angular/core';
 export class AppComponent {
   title = 'tutorbits';
   editorOptions = {theme: 'vs-dark', language: 'javascript'};
-  code = 'function x() {\nconsole.log("Hello world!");\n}';
+  code = 'function x() {\n\tconsole.log("Hello world!");\n}';
 }

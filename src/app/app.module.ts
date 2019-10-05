@@ -7,6 +7,8 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import {MaterialModule} from './material/material-module';
 import {FlexLayoutModule} from '@angular/flex-layout';
 import { EditorModule } from './editor/editor.module';
+import { VideoPlayerModule } from './video-player/video-player.module';
+import { FileTreeModule } from './file-tree/file-tree.module';
 
 @NgModule({
   declarations: [
@@ -17,7 +19,9 @@ import { EditorModule } from './editor/editor.module';
     BrowserAnimationsModule,
     MaterialModule,
     FlexLayoutModule,
-    EditorModule
+    EditorModule,
+    VideoPlayerModule,
+    FileTreeModule
   ],
   providers: [],
   bootstrap: [AppComponent]

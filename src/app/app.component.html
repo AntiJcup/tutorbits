@@ -29,7 +29,7 @@
                   <mat-icon class="icon">assignment</mat-icon>
                   <span  class="label">Tutorials</span>
                 </button>
-                 <mat-menu #appMenu="matMenu" >
+                 <mat-menu #appMenu="matMenu">
                     <button mat-menu-item>HTML</button>
                     <button mat-menu-item>JS</button>
                     <button mat-menu-item>CSS</button>
@@ -44,8 +44,13 @@
         </ul>
      </div>
     </mat-toolbar>
-    <main>
-        <ngx-monaco-editor [options]="editorOptions" [(ngModel)]="code"></ngx-monaco-editor>
+    <main fxLayout fxLayoutGap="5px" class="tutorialContainer">
+      <vg-player class="tutorialVideo">
+          <video class="tutorialVideo" [vgMedia]="media" #media id="singleVideo" preload="auto" controls>
+              <source src="http://static.videogular.com/assets/videos/videogular.mp4" type="video/mp4">
+          </video>
+      </vg-player>
+      <ngx-monaco-editor [options]="editorOptions" [(ngModel)]="code" class="codeEditor"></ngx-monaco-editor>
     </main>
   </mat-sidenav-content>
 </mat-sidenav-container>
