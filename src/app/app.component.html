@@ -1,60 +1,60 @@
 <mat-sidenav-container>
-  <mat-sidenav  #sidenav role="navigation">
-   <mat-nav-list>
+  <mat-sidenav #sidenav role="navigation">
+    <mat-nav-list>
       <a mat-list-item>
-          <mat-icon class="icon">assignment</mat-icon>
-            <span class="label">Tutorials</span>
-        </a>
-    <a mat-list-item>
-      <mat-icon class="icon">input</mat-icon>
-      <span class="label">Login</span>
-    </a>
-    
+        <mat-icon class="icon">assignment</mat-icon>
+        <span class="label">Tutorials</span>
+      </a>
+      <a mat-list-item>
+        <mat-icon class="icon">input</mat-icon>
+        <span class="label">Login</span>
+      </a>
+
     </mat-nav-list>
   </mat-sidenav>
   <mat-sidenav-content>
     <mat-toolbar color="primary" class="topMenu">
-     <div fxHide.gt-xs>
-       <button mat-icon-button>
-        <mat-icon>menu</mat-icon>
-      </button>
-    </div>
-     <div>
-      TutorBits
-     </div>
-     <div fxFlex fxLayout fxLayoutAlign="flex-end"  fxHide.xs>
+      <div fxHide.gt-xs>
+        <button mat-icon-button>
+          <mat-icon>menu</mat-icon>
+        </button>
+      </div>
+      <div>
+        TutorBits
+      </div>
+      <div fxFlex fxLayout fxLayoutAlign="flex-end" fxHide.xs>
         <ul fxLayout fxLayoutGap="5px" class="navigation-items">
-            <li>
-                <button mat-menu-item [matMenuTriggerFor]="appMenu">
-                  <mat-icon class="icon">assignment</mat-icon>
-                  <span  class="label">Tutorials</span>
-                </button>
-                 <mat-menu #appMenu="matMenu">
-                    <button mat-menu-item>HTML</button>
-                    <button mat-menu-item>JS</button>
-                    <button mat-menu-item>CSS</button>
-                  </mat-menu>
-            </li>
-            <li>
-                <button mat-menu-item>
-                    <mat-icon class="icon">input</mat-icon>
-                    <span class="label">Login</span>
-                </button>
-            </li>
+          <li>
+            <button mat-menu-item [matMenuTriggerFor]="appMenu">
+              <mat-icon class="icon">assignment</mat-icon>
+              <span class="label">Tutorials</span>
+            </button>
+            <mat-menu #appMenu="matMenu">
+              <button mat-menu-item>HTML</button>
+              <button mat-menu-item>JS</button>
+              <button mat-menu-item>CSS</button>
+            </mat-menu>
+          </li>
+          <li>
+            <button mat-menu-item>
+              <mat-icon class="icon">input</mat-icon>
+              <span class="label">Login</span>
+            </button>
+          </li>
         </ul>
-     </div>
+      </div>
     </mat-toolbar>
     <main fxLayout fxLayoutGap="5px" class="tutorialContainer">
       <div>
-      <vg-player class="tutorialVideo">
+        <vg-player class="tutorialVideo">
           <video class="tutorialVideo" [vgMedia]="media" #media id="singleVideo" preload="auto" controls>
-              <source src="http://static.videogular.com/assets/videos/videogular.mp4" type="video/mp4">
+            <source src="http://static.videogular.com/assets/videos/videogular.mp4" type="video/mp4">
           </video>
-      </vg-player>
-      <tree class='tutorialFileExplorer'
-      [tree]="tree"
-      [settings]="settings">
-      </tree>
+        </vg-player>
+        <div class="tutorialFileExplorerContainer">
+          <tree id="tutorialFileExplorer" class='tutorialFileExplorer' [tree]="tree" [settings]="settings" (nodeSelected)="nodeSelected($event)">
+          </tree>
+        </div>
       </div>
       <ngx-monaco-editor [options]="editorOptions" [(ngModel)]="code" class="codeEditor"></ngx-monaco-editor>
     </main>

@@ -9,4 +9,35 @@ body
     margin-right: 5px
     
 .node-name
-  color: white
+  color: #c4c4c4
+
+.tutorialFileExplorerContainer
+    background-color: #1a1a1a
+    margin-left: 5px
+    padding: 1px
+    margin-top: 5px
+    margin-bottom: 5px
+    height: 100%
+
+tree-internal
+    .tree
+        .node-value
+            padding: 1px
+            &::after
+                display: none
+                height: 0px
+                width: 0px
+            &:hover
+                background-color: #424242
+                border-radius: 3px
+                
+        .node-selected
+            padding: 1px
+            border-radius: 3px
+            background-color: #3b3b3b
+            &::after
+                display: none
+                height: 0px
+                width: 0px
+                
+
