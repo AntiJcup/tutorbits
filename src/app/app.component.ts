@@ -57,7 +57,7 @@ export class AppComponent {
   @ViewChild(TreeComponent, { static: true }) treeComp: TreeComponent;
 
   public codeEditor: editor.IEditor;
-  private newCode = "function helloWorld(){\n console.log('helloWorld');\n}\n\nhellowWorld();";
+  private newCode = "function helloWorld(){\n\tconsole.log('helloWorld');\n}\n\nhellowWorld();";
   private newCodePosition: number = 0;
 
   onInit(editor) {
