@@ -56,7 +56,8 @@
           </tree>
         </div>
       </div>
-      <ngx-monaco-editor [options]="editorOptions" [(ngModel)]="code" class="codeEditor"></ngx-monaco-editor>
+      <ngx-monaco-editor [options]="editorOptions" [(ngModel)]="code" class="codeEditor" (onInit)="onInit($event)"></ngx-monaco-editor>
+      <ngx-monaco-editor [options]="editorOptions" [(ngModel)]="teacherCode" class="teacherCodeEditor" (onInit)="teacherOnInit($event)"></ngx-monaco-editor>
     </main>
   </mat-sidenav-content>
 </mat-sidenav-container>

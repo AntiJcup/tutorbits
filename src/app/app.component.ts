@@ -1,5 +1,8 @@
 import { Component, ContentChild, ViewChild } from '@angular/core';
 import { TreeModel, NodeMenuItemAction, Ng2TreeSettings, TreeComponent } from 'ng2-tree';
+import { NgxEditorModel } from 'ngx-monaco-editor';
+import { editor } from 'monaco-editor/esm/vs/editor/editor.api'
+import { EditorModule } from './editor/editor.module';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -12,7 +15,8 @@ export class AppComponent {
 
   title = 'tutorbits';
   editorOptions = { theme: 'vs-dark', language: 'javascript' };
-  code = 'function x() {\n\tconsole.log("Hello world!");\n}';
+  code = '';
+  teacherCode = '';
   public tree: TreeModel = {
     value: '/',
     id: 1,
@@ -33,111 +37,15 @@ export class AppComponent {
     },
     children: [
       {
-        value: 'bin',
+        value: 'project',
         id: 2,
         children: [
-          { value: 'bash', id: 3 },
-          { value: 'umount', id: 4 },
-          { value: 'cp', id: 5 },
-          { value: 'less', id: 6 },
-          { value: 'rmdir', id: 7 },
-          { value: 'touch', id: 8 },
-          { value: 'chgrp', id: 9 },
-          { value: 'chmod', id: 10 },
-          { value: 'chown', id: 11 },
-          { value: 'nano', id: 12 }
+          { value: 'helloworld.js', id: 3 },
         ],
         settings: {
-          isCollapsedOnInit: true
+          isCollapsedOnInit: false
         }
-      },
-      {
-        value: 'boot',
-        id: 13,
-        settings: {
-          isCollapsedOnInit: true,
-        },
-        children: [
-          {
-            value: 'grub',
-            id: 14,
-            children: [
-              { value: 'fonts', id: 15 },
-              { value: 'gfxblacklist.txt', id: 16 },
-              { value: 'grub.cfg', id: 17 },
-              { value: 'grubenv', id: 18 },
-              { value: 'i386-pc', id: 19 },
-              { value: 'locale', id: 20 },
-              { value: 'unicode.pf2', id: 21 }
-            ]
-          },
-          {
-            value: 'lost+found',
-            id: 22,
-            children: [],
-            settings: {
-              checked: true
-            }
-          },
-          { value: 'abi-4.4.0-57-generic', id: 23 },
-          { value: 'config-4.4.0-57-generic', id: 24 },
-          { value: 'initrd.img-4.4.0-47-generic', id: 25 },
-          { value: 'initrd.img-4.4.0-57-generic', id: 26 },
-          { value: 'memtest86+.bin', id: 27 },
-          { value: 'System.map-4.4.0-57-generic', id: 28 },
-          { value: 'memtest86+.elf', id: 29 },
-          { value: 'vmlinuz-4.4.0-57-generic', id: 30 },
-          { value: 'memtest86+_multiboot.bin', id: 31 }
-        ]
-      },
-      {
-        value: 'build-no-left-no-right-menus',
-        id: 32,
-        settings: {
-          leftMenu: false,
-          rightMenu: false
-        },
-        children: [
-          {
-            value: 'php5-left-menu',
-            id: 33,
-            settings: {
-              leftMenu: true
-            }
-          },
-          {
-            value: 'grails-left-menu',
-            id: 335,
-            settings: {
-              leftMenu: true
-            }
-          },
-          {
-            value: 'python-right-menu',
-            id: 333,
-            settings: {
-              rightMenu: true
-            }
-          }
-        ]
-      },
-      { value: 'cdrom', id: 34, children: [] },
-      { value: 'dev', id: 35, children: [] },
-      {
-        value: 'etc',
-        id: 36,
-        loadChildren: callback => {
-          console.log('callback function called to load etc`s children');
-          setTimeout(() => {
-            callback([
-              { value: 'apache2', id: 82, children: [] },
-              { value: 'nginx', id: 83, children: [] },
-              { value: 'dhcp', id: 84, children: [] },
-              { value: 'dpkg', id: 85, children: [] }
-            ]);
-          });
-        }
-      },
+      }
     ]
   };
 
@@ -146,15 +54,38 @@ export class AppComponent {
     showCheckboxes: false
   };
 
-  @ViewChild(TreeComponent, {static: true}) treeComp: TreeComponent;
+  @ViewChild(TreeComponent, { static: true }) treeComp: TreeComponent;
+
+  public codeEditor: editor.IEditor;
+  private newCode = "function helloWorld(){\n console.log('helloWorld');\n}\n\nhellowWorld();";
+  private newCodePosition: number = 0;
+
+  onInit(editor) {
+
+  }
+
+  teacherOnInit(editor) {
+    this.codeEditor = editor;
+    this.codeEditor.updateOptions({automaticLayout: true, readOnly: true});
+    let line = this.codeEditor.getPosition();
+    let model: editor.ITextModel = this.codeEditor.getModel() as editor.ITextModel;
+    console.log(model.getValue());
+
+    var interval = setInterval(() => {
+      model.setValue(model.getValue() + this.newCode.charAt(this.newCodePosition++));
+      if (this.newCodePosition >= this.newCode.length) {
+        clearInterval(interval);
+      }
+    }, 125);
+    console.log(line);
+  }
 
   public nodeSelected(event: any) {
     var test = this.treeComp.getControllerByNodeId(event.node.id);
     console.log(test.isCollapsed());
-    if(!test.isCollapsed())
-    {
+    if (!test.isCollapsed()) {
       test.collapse();
-    }else{
+    } else {
       test.expand();
     }
     console.log(event);
