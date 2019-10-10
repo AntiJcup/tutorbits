@@ -52,12 +52,20 @@
           </video>
         </vg-player>
         <div class="tutorialFileExplorerContainer">
-          <tree id="tutorialFileExplorer" class='tutorialFileExplorer' [tree]="tree" [settings]="settings" (nodeSelected)="nodeSelected($event)">
+          <tree id="tutorialFileExplorer" class='tutorialFileExplorer' [tree]="tree" [settings]="settings"
+            (nodeSelected)="nodeSelected($event)">
           </tree>
         </div>
       </div>
-      <ngx-monaco-editor [options]="editorOptions" [(ngModel)]="code" class="codeEditor" (onInit)="onInit($event)"></ngx-monaco-editor>
-      <ngx-monaco-editor [options]="editorOptions" [(ngModel)]="teacherCode" class="teacherCodeEditor" (onInit)="teacherOnInit($event)"></ngx-monaco-editor>
+      <div class="editorContainer">
+        <div class="editorContainerTitle"><span>helloworld.js</span></div>
+        <div class="editorContainer" fxLayout fxLayoutGap="5px">
+          <ngx-monaco-editor [options]="editorOptions" [(ngModel)]="code" class="codeEditor" (onInit)="onInit($event)">
+          </ngx-monaco-editor>
+          <ngx-monaco-editor [options]="editorOptions" [(ngModel)]="teacherCode" class="teacherCodeEditor"
+            (onInit)="teacherOnInit($event)"></ngx-monaco-editor>
+        </div>
+      </div>
     </main>
   </mat-sidenav-content>
 </mat-sidenav-container>
