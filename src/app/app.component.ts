@@ -60,6 +60,14 @@ export class AppComponent {
   private newCode = "function helloWorld(){\n\tconsole.log('helloWorld');\n}\n\nhellowWorld();\n\nfunction helloWorld(){\n\tconsole.log('helloWorld');\n}\n\nhellowWorld();\n\nfunction helloWorld(){\n\tconsole.log('helloWorld');\n}\n\nhellowWorld();\n\nfunction helloWorld(){\n\tconsole.log('helloWorld');\n}\n\nhellowWorld();\n\nfunction helloWorld(){\n\tconsole.log('helloWorld');\n}\n\nhellowWorld();\n\nfunction helloWorld(){\n\tconsole.log('helloWorld');\n}\n\nhellowWorld();\n\nfunction helloWorld(){\n\tconsole.log('helloWorld');\n}\n\nhellowWorld();\n\n";
   private newCodePosition: number = 0;
 
+  ngOnInit(): void {
+    document.addEventListener("keydown", function(e) {
+      if (e.keyCode == 83 && (navigator.platform.match('Mac') ? e.metaKey : e.ctrlKey)) {
+        e.preventDefault();
+      }
+    }, false);
+  }
+
   onInit(editor) {
 
   }
