@@ -1,8 +1,13 @@
 import { Component, ContentChild, ViewChild } from '@angular/core';
 import { TreeModel, NodeMenuItemAction, Ng2TreeSettings, TreeComponent } from 'ng2-tree';
 import { NgxEditorModel } from 'ngx-monaco-editor';
-import { editor } from 'monaco-editor/esm/vs/editor/editor.api'
+import { editor } from 'monaco-editor/esm/vs/editor/editor.api';
 import { EditorModule } from './editor/editor.module';
+import { LocalTransactionLoader, LocalTransactionWriter } from 'shared/Tracer/lib/ts/LocalTransaction';
+import { TraceProject } from 'shared/Tracer/models/ts/Tracer_pb';
+import { Guid } from 'guid-typescript'
+import { TransactionTracker } from 'shared/Tracer/lib/ts/TransactionTracker';
+
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -10,6 +15,26 @@ import { EditorModule } from './editor/editor.module';
 })
 export class AppComponent {
   constructor() {
+    const proj = new TraceProject();
+    proj.setId(Guid.create().toString());
+    proj.setPartitionSize(30);
+    proj.setDuration(0);
+
+    const writer = new LocalTransactionWriter(proj);
+    const tracker = new TransactionTracker(proj, [], 0, writer);
+    tracker.CreateFile(0, 'winning');
+    tracker.CreateFile(2, 'winning2');
+    tracker.InsertFile(42, 'winning2', 0, 0, 'GOTCHABITCH');
+
+    tracker.SaveChanges();
+
+    const loader = new LocalTransactionLoader();
+    const loadedProj = loader.LoadProject(proj.getId());
+    const transactionLogs = loader.GetTransactionLogs(loadedProj, 0, 1000);
+    console.log(loadedProj.toObject());
+    for (const transactionLog of transactionLogs) {
+      console.log(transactionLog.toObject());
+    }
 
   }
 
@@ -61,7 +86,7 @@ export class AppComponent {
   private newCodePosition: number = 0;
 
   ngOnInit(): void {
-    document.addEventListener("keydown", function(e) {
+    document.addEventListener("keydown", function (e) {
       if (e.keyCode == 83 && (navigator.platform.match('Mac') ? e.metaKey : e.ctrlKey)) {
         e.preventDefault();
       }
@@ -74,7 +99,7 @@ export class AppComponent {
 
   teacherOnInit(editor) {
     this.codeEditor = editor;
-    this.codeEditor.updateOptions({automaticLayout: true, readOnly: true});
+    this.codeEditor.updateOptions({ automaticLayout: true, readOnly: true });
     let line = this.codeEditor.getPosition();
     let model: editor.ITextModel = this.codeEditor.getModel() as editor.ITextModel;
     console.log(model.getValue());
