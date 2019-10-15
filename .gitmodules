@@ -1,0 +1,3 @@
+[submodule "shared/Tracer"]
+	path = shared/Tracer
+	url = https://github.com/AntiJcup/Tracer.git

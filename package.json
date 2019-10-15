@@ -25,6 +25,8 @@
     "@angular/router": "~8.2.8",
     "@types/core-js": "^2.5.2",
     "font-awesome": "^4.7.0",
+    "google-protobuf": "^3.10.0",
+    "guid-typescript": "^1.0.9",
     "hammerjs": "^2.0.8",
     "monaco-editor": "^0.18.1",
     "ng2-tree": "^2.0.0-rc.11",
