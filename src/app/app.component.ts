@@ -1,10 +1,11 @@
 import { Component, ContentChild, ViewChild, OnInit } from '@angular/core';
 import { TreeModel, NodeMenuItemAction, Ng2TreeSettings, TreeComponent } from 'ng2-tree';
-import { editor } from 'monaco-editor/esm/vs/editor/editor.api';
+import { editor, IPosition, Range } from 'monaco-editor/esm/vs/editor/editor.api';
 import { LocalTransactionLoader, LocalTransactionWriter } from 'shared/Tracer/lib/ts/LocalTransaction';
-import { TraceProject } from 'shared/Tracer/models/ts/Tracer_pb';
+import { TraceProject, TraceTransaction } from 'shared/Tracer/models/ts/Tracer_pb';
 import { Guid } from 'guid-typescript'
 import { TransactionTracker } from 'shared/Tracer/lib/ts/TransactionTracker';
+import { debug } from 'util';
 
 @Component({
   selector: 'app-root',
@@ -13,29 +14,31 @@ import { TransactionTracker } from 'shared/Tracer/lib/ts/TransactionTracker';
 })
 export class AppComponent implements OnInit {
   public tracker: TransactionTracker;
+  public loader: LocalTransactionLoader;
+  public proj: TraceProject;
 
   constructor() {
-    const proj = new TraceProject();
-    proj.setId(Guid.create().toString());
-    proj.setPartitionSize(30);
-    proj.setDuration(0);
+    this.proj = new TraceProject();
+    this.proj.setId(Guid.create().toString());
+    this.proj.setPartitionSize(30);
+    this.proj.setDuration(0);
 
-    const writer = new LocalTransactionWriter(proj);
-    this.tracker = new TransactionTracker(proj, [], 0, writer);
-    this.tracker.CreateFile(0, 'winning');
-    this.tracker.CreateFile(2, 'winning2');
-    this.tracker.InsertFile(42, 'winning2', 0, 0, 0, 'GOTCHABITCH');
-    this.tracker.InsertFile(42, 'winning2', 0, 0, 11, 'NOWIGOTCHA');
+    const writer = new LocalTransactionWriter(this.proj);
+    this.tracker = new TransactionTracker(this.proj, [], 0, writer);
+    // this.tracker.CreateFile(0, 'winning');
+    // this.tracker.CreateFile(2, 'winning2');
+    // this.tracker.InsertFile(42, 'winning2', 0, 0, 0, 'GOTCHABITCH');
+    // this.tracker.InsertFile(42, 'winning2', 0, 0, 11, 'NOWIGOTCHA');
 
     this.tracker.SaveChanges();
 
-    const loader = new LocalTransactionLoader();
-    const loadedProj = loader.LoadProject(proj.getId());
-    const transactionLogs = loader.GetTransactionLogs(loadedProj, 0, 1000);
-    console.log(loadedProj.toObject());
-    for (const transactionLog of transactionLogs) {
-      console.log(transactionLog.toObject());
-    }
+    this.loader = new LocalTransactionLoader();
+    const loadedProj = this.loader.LoadProject(this.proj.getId());
+    // const transactionLogs = this.loader.GetTransactionLogs(loadedProj, 0, 1000);
+    // console.log(loadedProj.toObject());
+    // for (const transactionLog of transactionLogs) {
+    //   console.log(transactionLog.toObject());
+    // }
 
   }
 
@@ -82,7 +85,7 @@ export class AppComponent implements OnInit {
 
   @ViewChild(TreeComponent, { static: true }) treeComp: TreeComponent;
 
-  public codeEditor: editor.IEditor;
+  public codeEditor: editor.ICodeEditor;
   private newCode = 'function helloWorld(){\n\tconsole.log(\'helloWorld\');\n}\n\nhellowWorld();\n\nfunction helloWorld(){\n\tconsole.log(\'helloWorld\');\n}\n\nhellowWorld();\n\nfunction helloWorld(){\n\tconsole.log(\'helloWorld\');\n}\n\nhellowWorld();\n\nfunction helloWorld(){\n\tconsole.log(\'helloWorld\');\n}\n\nhellowWorld();\n\nfunction helloWorld(){\n\tconsole.log(\'helloWorld\');\n}\n\nhellowWorld();\n\nfunction helloWorld(){\n\tconsole.log(\'helloWorld\');\n}\n\nhellowWorld();\n\nfunction helloWorld(){\n\tconsole.log(\'helloWorld\');\n}\n\nhellowWorld();\n\n';
   private newCodePosition = 0;
 
@@ -124,20 +127,58 @@ export class AppComponent implements OnInit {
           }
         }
       }
+      this.tracker.SaveChanges();
     });
   }
 
   teacherOnInit(codeEditor: editor.IEditor) {
-    this.codeEditor = codeEditor;
-    this.codeEditor.updateOptions({ automaticLayout: true, readOnly: true });
+    this.codeEditor = codeEditor as editor.ICodeEditor;
+    //this.codeEditor.updateOptions({ automaticLayout: true, readOnly: true });
     const line = this.codeEditor.getPosition();
     const model: editor.ITextModel = this.codeEditor.getModel() as editor.ITextModel;
     console.log(model.getValue());
 
+    // const interval = setInterval(() => {
+    //   model.setValue(model.getValue() + this.newCode.charAt(this.newCodePosition++));
+    //   if (this.newCodePosition >= this.newCode.length) {
+    //     clearInterval(interval);
+    //   }
+    // }, 125);
+
+    let lastChecked = 0; // Date.now();
+    const start = Date.now();
     const interval = setInterval(() => {
-      model.setValue(model.getValue() + this.newCode.charAt(this.newCodePosition++));
-      if (this.newCodePosition >= this.newCode.length) {
-        clearInterval(interval);
+      const now = Date.now() - (start + lastChecked);
+      const previous = lastChecked;
+      const transactionLogs = this.loader.GetTransactionLogs(this.proj, lastChecked, lastChecked + now);
+      lastChecked += now;
+      const edits: editor.IIdentifiedSingleEditOperation[] = [];
+      for (const transactionLog of transactionLogs) {
+        console.log(transactionLog.toObject());
+        const transactions = transactionLog.getTransactionsList();
+        for (const transaction of transactions) {
+          switch (transaction.getType()) {
+            case TraceTransaction.TraceTransactionType.INSERTFILE:
+              console.log(transaction.toObject());
+              const newEdit: editor.IIdentifiedSingleEditOperation = {
+                range: {
+                  startLineNumber: transaction.getInsertFile().getLine(),
+                  endLineNumber: transaction.getInsertFile().getLine(),
+                  startColumn: transaction.getInsertFile().getOffsetStart(),
+                  endColumn: transaction.getInsertFile().getOffsetEnd(),
+                } as Range, // new Range(0, 0, 0, 0),
+                text: transaction.getInsertFile().getData()
+              };
+
+              edits.push(newEdit);
+              break;
+          }
+        }
+      }
+
+      if (edits.length > 0) {
+        debugger;
+        this.codeEditor.executeEdits('teacher', edits);
       }
     }, 125);
     console.log(line);
