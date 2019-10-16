@@ -11,11 +11,11 @@ const monacoEditorConfig: NgxMonacoEditorConfig = {
   declarations: [],
   imports: [
     MonacoEditorModule,
-    FormsModule 
+    FormsModule
   ],
   exports: [
     MonacoEditorModule,
-    FormsModule 
+    FormsModule
   ],
   providers: [
     { provide: NGX_MONACO_EDITOR_CONFIG, useValue: monacoEditorConfig }
