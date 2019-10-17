@@ -3,7 +3,7 @@ import { TreeModel, NodeMenuItemAction, Ng2TreeSettings, TreeComponent } from 'n
 import { editor, IPosition, Range } from 'monaco-editor/esm/vs/editor/editor.api';
 import { LocalTransactionLoader, LocalTransactionWriter } from 'shared/Tracer/lib/ts/LocalTransaction';
 import { TraceProject, TraceTransaction } from 'shared/Tracer/models/ts/Tracer_pb';
-import { Guid } from 'guid-typescript'
+import { Guid } from 'guid-typescript';
 import { TransactionTracker } from 'shared/Tracer/lib/ts/TransactionTracker';
 import { debug } from 'util';
 
@@ -25,20 +25,11 @@ export class AppComponent implements OnInit {
 
     const writer = new LocalTransactionWriter(this.proj);
     this.tracker = new TransactionTracker(this.proj, [], 0, writer);
-    // this.tracker.CreateFile(0, 'winning');
-    // this.tracker.CreateFile(2, 'winning2');
-    // this.tracker.ModifyFile(42, 'winning2', 0, 0, 0, 'GOTCHABITCH');
-    // this.tracker.ModifyFile(42, 'winning2', 0, 0, 11, 'NOWIGOTCHA');
+    this.tracker.CreateFile(0, 'project/helloworld.js');
 
     this.tracker.SaveChanges();
 
     this.loader = new LocalTransactionLoader();
-    const loadedProj = this.loader.LoadProject(this.proj.getId());
-    // const transactionLogs = this.loader.GetTransactionLogs(loadedProj, 0, 1000);
-    // console.log(loadedProj.toObject());
-    // for (const transactionLog of transactionLogs) {
-    //   console.log(transactionLog.toObject());
-    // }
 
   }
 
@@ -86,8 +77,6 @@ export class AppComponent implements OnInit {
   @ViewChild(TreeComponent, { static: true }) treeComp: TreeComponent;
 
   public codeEditor: editor.ICodeEditor;
-  private newCode = 'function helloWorld(){\n\tconsole.log(\'helloWorld\');\n}\n\nhellowWorld();\n\nfunction helloWorld(){\n\tconsole.log(\'helloWorld\');\n}\n\nhellowWorld();\n\nfunction helloWorld(){\n\tconsole.log(\'helloWorld\');\n}\n\nhellowWorld();\n\nfunction helloWorld(){\n\tconsole.log(\'helloWorld\');\n}\n\nhellowWorld();\n\nfunction helloWorld(){\n\tconsole.log(\'helloWorld\');\n}\n\nhellowWorld();\n\nfunction helloWorld(){\n\tconsole.log(\'helloWorld\');\n}\n\nhellowWorld();\n\nfunction helloWorld(){\n\tconsole.log(\'helloWorld\');\n}\n\nhellowWorld();\n\n';
-  private newCodePosition = 0;
 
   ngOnInit(): void {
     document.addEventListener('keydown', (e) => {
@@ -118,19 +107,20 @@ export class AppComponent implements OnInit {
 
   teacherOnInit(codeEditor: editor.IEditor) {
     this.codeEditor = codeEditor as editor.ICodeEditor;
-    // this.codeEditor.updateOptions({ automaticLayout: true, readOnly: true });
+
+    const readOnlyOptions: editor.IEditorOptions = {
+      readOnly: true
+    };
+    const editOptions: editor.IEditorOptions = {
+      readOnly: false
+    };
+    this.codeEditor.updateOptions(readOnlyOptions);
+
     const line = this.codeEditor.getPosition();
     const model: editor.ITextModel = this.codeEditor.getModel() as editor.ITextModel;
     console.log(model.getValue());
 
-    // const interval = setInterval(() => {
-    //   model.setValue(model.getValue() + this.newCode.charAt(this.newCodePosition++));
-    //   if (this.newCodePosition >= this.newCode.length) {
-    //     clearInterval(interval);
-    //   }
-    // }, 125);
-
-    let lastChecked = 0; // Date.now();
+    let lastChecked = 0;
     const start = Date.now();
     const interval = setInterval(() => {
       const now = Date.now() - (start + lastChecked);
@@ -139,7 +129,6 @@ export class AppComponent implements OnInit {
       lastChecked += now;
       const edits: editor.IIdentifiedSingleEditOperation[] = [];
       for (const transactionLog of transactionLogs) {
-        // console.log(transactionLog.toObject());
         const transactions = transactionLog.getTransactionsList();
         if (transactions.length > 0) {
           console.log('previous: ' + previous);
@@ -174,10 +163,14 @@ export class AppComponent implements OnInit {
       }
 
       if (edits.length > 0) {
-        // debugger;
+        this.codeEditor.updateOptions(editOptions);
+        if (this.codeEditor.hasTextFocus()) {
+          (document.activeElement as HTMLElement).blur();
+        }
         this.codeEditor.executeEdits('teacher', edits);
+        this.codeEditor.updateOptions(readOnlyOptions);
       }
-    }, 125);
+    }, 3250);
     console.log(line);
   }
 
