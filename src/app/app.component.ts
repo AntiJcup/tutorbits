@@ -27,8 +27,8 @@ export class AppComponent implements OnInit {
     this.tracker = new TransactionTracker(this.proj, [], 0, writer);
     // this.tracker.CreateFile(0, 'winning');
     // this.tracker.CreateFile(2, 'winning2');
-    // this.tracker.InsertFile(42, 'winning2', 0, 0, 0, 'GOTCHABITCH');
-    // this.tracker.InsertFile(42, 'winning2', 0, 0, 11, 'NOWIGOTCHA');
+    // this.tracker.ModifyFile(42, 'winning2', 0, 0, 0, 'GOTCHABITCH');
+    // this.tracker.ModifyFile(42, 'winning2', 0, 0, 11, 'NOWIGOTCHA');
 
     this.tracker.SaveChanges();
 
@@ -103,29 +103,14 @@ export class AppComponent implements OnInit {
     model.onDidChangeContent((e: editor.IModelContentChangedEvent) => {
       for (const change of e.changes) {
         console.log(change);
-        const position = model.getPositionAt(change.rangeOffset);
-        let offset = position.column;
-        let lineOffset = 0;
-        let remainingRange = change.rangeLength;
-        const lineChanges = change.text.split(e.eol);
-        for (const lineChange of lineChanges) {
-          const currentLine = position.lineNumber + lineOffset;
-          const lineLength = model.getLineLength(currentLine);
-          const currentRange = Math.min(remainingRange, lineLength);
-          const timeOffset = Date.now() - start;
-          this.tracker.InsertFile(timeOffset, 'winning2', currentLine, offset,
-            offset + currentRange, lineChange);
-          console.log(timeOffset);
-          console.log(currentLine);
-          console.log(offset);
-          console.log(currentRange);
-          console.log(lineChange);
-          lineOffset++;
-          offset = 0;
-          if (remainingRange > 0) {
-            remainingRange -= currentRange;
-          }
-        }
+
+        const timeOffset = Date.now() - start;
+        this.tracker.ModifyFile(timeOffset, 'winning2', change.rangeOffset,
+          change.rangeOffset + change.rangeLength, change.text);
+        console.log(timeOffset);
+        console.log(change.rangeOffset);
+        console.log(change.rangeLength);
+        console.log(change.text);
       }
       this.tracker.SaveChanges();
     });
@@ -133,7 +118,7 @@ export class AppComponent implements OnInit {
 
   teacherOnInit(codeEditor: editor.IEditor) {
     this.codeEditor = codeEditor as editor.ICodeEditor;
-    //this.codeEditor.updateOptions({ automaticLayout: true, readOnly: true });
+    // this.codeEditor.updateOptions({ automaticLayout: true, readOnly: true });
     const line = this.codeEditor.getPosition();
     const model: editor.ITextModel = this.codeEditor.getModel() as editor.ITextModel;
     console.log(model.getValue());
@@ -154,20 +139,32 @@ export class AppComponent implements OnInit {
       lastChecked += now;
       const edits: editor.IIdentifiedSingleEditOperation[] = [];
       for (const transactionLog of transactionLogs) {
-        console.log(transactionLog.toObject());
+        // console.log(transactionLog.toObject());
         const transactions = transactionLog.getTransactionsList();
+        if (transactions.length > 0) {
+          console.log('previous: ' + previous);
+          console.log(transactions);
+        }
         for (const transaction of transactions) {
+          if (transaction.getTimeOffsetMs() <= previous) {
+            continue;
+          }
+          lastChecked = transaction.getTimeOffsetMs();
           switch (transaction.getType()) {
-            case TraceTransaction.TraceTransactionType.INSERTFILE:
+            case TraceTransaction.TraceTransactionType.MODIFYFILE:
               console.log(transaction.toObject());
+
+              const startPos = model.getPositionAt(transaction.getModifyFile().getOffsetStart());
+              const endPos = model.getPositionAt(transaction.getModifyFile().getOffsetEnd());
+
               const newEdit: editor.IIdentifiedSingleEditOperation = {
-                range: {
-                  startLineNumber: transaction.getInsertFile().getLine(),
-                  endLineNumber: transaction.getInsertFile().getLine(),
-                  startColumn: transaction.getInsertFile().getOffsetStart(),
-                  endColumn: transaction.getInsertFile().getOffsetEnd(),
-                } as Range, // new Range(0, 0, 0, 0),
-                text: transaction.getInsertFile().getData()
+                range: new monaco.Range(
+                  startPos.lineNumber,
+                  startPos.column,
+                  endPos.lineNumber,
+                  endPos.column),
+                text: transaction.getModifyFile().getData(),
+                forceMoveMarkers: true
               };
 
               edits.push(newEdit);
@@ -177,7 +174,7 @@ export class AppComponent implements OnInit {
       }
 
       if (edits.length > 0) {
-        debugger;
+        // debugger;
         this.codeEditor.executeEdits('teacher', edits);
       }
     }, 125);
