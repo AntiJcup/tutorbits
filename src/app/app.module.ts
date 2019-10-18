@@ -9,6 +9,7 @@ import {FlexLayoutModule} from '@angular/flex-layout';
 import { EditorModule } from './editor/editor.module';
 import { VideoPlayerModule } from './video-player/video-player.module';
 import { FileTreeModule } from './file-tree/file-tree.module';
+import { HttpClientModule } from '@angular/common/http';
 
 @NgModule({
   declarations: [
@@ -21,7 +22,8 @@ import { FileTreeModule } from './file-tree/file-tree.module';
     FlexLayoutModule,
     EditorModule,
     VideoPlayerModule,
-    FileTreeModule
+    FileTreeModule,
+    HttpClientModule
   ],
   providers: [],
   bootstrap: [AppComponent]

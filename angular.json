@@ -73,6 +73,8 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
             "browserTarget": "tutorbits:build",
+            "port": 80,
+            "host": "local.tutorbits.com"
           },
           "configurations": {
             "production": {

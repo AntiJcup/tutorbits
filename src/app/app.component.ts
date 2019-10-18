@@ -6,6 +6,7 @@ import { TraceProject, TraceTransaction } from 'shared/Tracer/models/ts/Tracer_p
 import { Guid } from 'guid-typescript';
 import { TransactionTracker } from 'shared/Tracer/lib/ts/TransactionTracker';
 import { debug } from 'util';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-root',
@@ -17,7 +18,7 @@ export class AppComponent implements OnInit {
   public loader: LocalTransactionLoader;
   public proj: TraceProject;
 
-  constructor() {
+  constructor(private http: HttpClient) {
     this.proj = new TraceProject();
     this.proj.setId(Guid.create().toString());
     this.proj.setPartitionSize(30);
@@ -94,8 +95,12 @@ export class AppComponent implements OnInit {
         console.log(change);
 
         const timeOffset = Date.now() - start;
-        this.tracker.ModifyFile(timeOffset, 'winning2', change.rangeOffset,
+        const transaction = this.tracker.ModifyFile(timeOffset, 'winning2', change.rangeOffset,
           change.rangeOffset + change.rangeLength, change.text);
+
+        this.http.post('http://api.tutorbits.com:5000/api/Recording', new Blob([transaction.serializeBinary()])).toPromise().then(r => {
+          console.log(r.toString());
+        });
         console.log(timeOffset);
         console.log(change.rangeOffset);
         console.log(change.rangeLength);
@@ -170,7 +175,7 @@ export class AppComponent implements OnInit {
         this.codeEditor.executeEdits('teacher', edits);
         this.codeEditor.updateOptions(readOnlyOptions);
       }
-    }, 3250);
+    }, 125);
     console.log(line);
   }
 
