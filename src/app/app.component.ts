@@ -2,7 +2,7 @@ import { Component, ContentChild, ViewChild, OnInit } from '@angular/core';
 import { TreeModel, NodeMenuItemAction, Ng2TreeSettings, TreeComponent } from 'ng2-tree';
 import { editor, IPosition, Range } from 'monaco-editor/esm/vs/editor/editor.api';
 import { LocalTransactionLoader, LocalTransactionWriter } from 'shared/Tracer/lib/ts/LocalTransaction';
-import { TraceProject, TraceTransaction } from 'shared/Tracer/models/ts/Tracer_pb';
+import { TraceProject, TraceTransaction, TraceTransactionLog } from 'shared/Tracer/models/ts/Tracer_pb';
 import { Guid } from 'guid-typescript';
 import { TransactionTracker } from 'shared/Tracer/lib/ts/TransactionTracker';
 import { debug } from 'util';
@@ -14,14 +14,11 @@ import { HttpClient } from '@angular/common/http';
   styleUrls: ['./app.component.sass']
 })
 export class AppComponent implements OnInit {
-  public tracker: TransactionTracker;
-  public loader: LocalTransactionLoader;
-  public proj: TraceProject;
 
   constructor(private http: HttpClient) {
     this.proj = new TraceProject();
-    this.proj.setId(Guid.create().toString());
-    this.proj.setPartitionSize(30);
+    this.proj.setId("cfc60589-bdc1-4b9b-ce93-08d756a3d323");
+    this.proj.setPartitionSize(10000);
     this.proj.setDuration(0);
 
     const writer = new LocalTransactionWriter(this.proj);
@@ -33,6 +30,9 @@ export class AppComponent implements OnInit {
     this.loader = new LocalTransactionLoader();
 
   }
+  public tracker: TransactionTracker;
+  public loader: LocalTransactionLoader;
+  public proj: TraceProject;
 
   title = 'tutorbits';
   editorOptions = { theme: 'vs-dark', language: 'javascript' };
@@ -79,6 +79,8 @@ export class AppComponent implements OnInit {
 
   public codeEditor: editor.ICodeEditor;
 
+  public timer: number = null;
+
   ngOnInit(): void {
     document.addEventListener('keydown', (e) => {
       if (e.keyCode === 83 && (navigator.platform.match('Mac') ? e.metaKey : e.ctrlKey)) {
@@ -91,22 +93,30 @@ export class AppComponent implements OnInit {
     const model: editor.ITextModel = codeEditor.getModel() as editor.ITextModel;
     const start = Date.now();
     model.onDidChangeContent((e: editor.IModelContentChangedEvent) => {
-      for (const change of e.changes) {
-        console.log(change);
+      // for (const change of e.changes) {
+      //   console.log(change);
 
-        const timeOffset = Date.now() - start;
-        const transaction = this.tracker.ModifyFile(timeOffset, 'winning2', change.rangeOffset,
-          change.rangeOffset + change.rangeLength, change.text);
+      //   const timeOffset = Date.now() - start;
+      //   const transaction = this.tracker.ModifyFile(timeOffset, 'winning2', change.rangeOffset,
+      //     change.rangeOffset + change.rangeLength, change.text);
 
-        this.http.post('http://api.tutorbits.com:5000/api/Recording', new Blob([transaction.serializeBinary()])).toPromise().then(r => {
-          console.log(r.toString());
-        });
-        console.log(timeOffset);
-        console.log(change.rangeOffset);
-        console.log(change.rangeLength);
-        console.log(change.text);
-      }
-      this.tracker.SaveChanges();
+
+      //   if (this.timer == null) {
+      //     this.timer = setTimeout(() => {
+      //       const transactionLog = this.tracker.GetTransactionLogByTimeOffset(timeOffset);
+      //       this.http.post('http://api.tutorbits.com:5000/api/Recording/AddTransactionLog?projectId=cfc60589-bdc1-4b9b-ce93-08d756a3d323',
+      //         new Blob([transactionLog.serializeBinary()])).toPromise().then(r => {
+      //           console.log(r.toString());
+      //         });
+      //       this.timer = null;
+      //     }, 1000 * 5) as any;
+      //   }
+      //   console.log(timeOffset);
+      //   console.log(change.rangeOffset);
+      //   console.log(change.rangeLength);
+      //   console.log(change.text);
+      // }
+      // this.tracker.SaveChanges();
     });
   }
 
@@ -127,55 +137,69 @@ export class AppComponent implements OnInit {
 
     let lastChecked = 0;
     const start = Date.now();
-    const interval = setInterval(() => {
-      const now = Date.now() - (start + lastChecked);
+    const lambda = () => {
+      const now = (Date.now() - (start + lastChecked)) + this.proj.getPartitionSize();
       const previous = lastChecked;
-      const transactionLogs = this.loader.GetTransactionLogs(this.proj, lastChecked, lastChecked + now);
+      this.http.get(`http://api.tutorbits.com:5000/api/Streaming/GetTransactionLogs?projectId=${this.proj.getId()}&offsetStart=${Math.floor(lastChecked / 1000)}&offsetEnd=${Math.ceil((lastChecked + now) / 1000)}`,
+        {
+          responseType: 'json'
+        })
+        .toPromise().then(urlsResponse => {
+          console.log(urlsResponse.toString());
+          // tslint:disable-next-line: forin
+          for (const urlkey in urlsResponse) {
+            const url = urlsResponse[urlkey];
+            this.http.get(url, {
+              responseType: 'arraybuffer'
+            }).toPromise().then(transactionLogBuffer => {
+              const transactionLog = TraceTransactionLog.deserializeBinary(new Uint8Array(transactionLogBuffer));
+              const transactions = transactionLog.getTransactionsList();
+              if (transactions.length > 0) {
+                console.log('previous: ' + previous);
+                console.log(transactions);
+              }
+              const edits: editor.IIdentifiedSingleEditOperation[] = [];
+              for (const transaction of transactions) {
+                if (transaction.getTimeOffsetMs() <= previous) {
+                  continue;
+                }
+                lastChecked = transaction.getTimeOffsetMs();
+                switch (transaction.getType()) {
+                  case TraceTransaction.TraceTransactionType.MODIFYFILE:
+                    console.log(transaction.toObject());
+
+                    const startPos = model.getPositionAt(transaction.getModifyFile().getOffsetStart());
+                    const endPos = model.getPositionAt(transaction.getModifyFile().getOffsetEnd());
+
+                    const newEdit: editor.IIdentifiedSingleEditOperation = {
+                      range: new monaco.Range(
+                        startPos.lineNumber,
+                        startPos.column,
+                        endPos.lineNumber,
+                        endPos.column),
+                      text: transaction.getModifyFile().getData(),
+                      forceMoveMarkers: true
+                    };
+
+                    edits.push(newEdit);
+                    break;
+                }
+              }
+              if (edits.length > 0) {
+                this.codeEditor.updateOptions(editOptions);
+                if (this.codeEditor.hasTextFocus()) {
+                  (document.activeElement as HTMLElement).blur();
+                }
+                this.codeEditor.executeEdits('teacher', edits);
+                this.codeEditor.updateOptions(readOnlyOptions);
+              }
+            });
+          }
+        });
       lastChecked += now;
-      const edits: editor.IIdentifiedSingleEditOperation[] = [];
-      for (const transactionLog of transactionLogs) {
-        const transactions = transactionLog.getTransactionsList();
-        if (transactions.length > 0) {
-          console.log('previous: ' + previous);
-          console.log(transactions);
-        }
-        for (const transaction of transactions) {
-          if (transaction.getTimeOffsetMs() <= previous) {
-            continue;
-          }
-          lastChecked = transaction.getTimeOffsetMs();
-          switch (transaction.getType()) {
-            case TraceTransaction.TraceTransactionType.MODIFYFILE:
-              console.log(transaction.toObject());
-
-              const startPos = model.getPositionAt(transaction.getModifyFile().getOffsetStart());
-              const endPos = model.getPositionAt(transaction.getModifyFile().getOffsetEnd());
-
-              const newEdit: editor.IIdentifiedSingleEditOperation = {
-                range: new monaco.Range(
-                  startPos.lineNumber,
-                  startPos.column,
-                  endPos.lineNumber,
-                  endPos.column),
-                text: transaction.getModifyFile().getData(),
-                forceMoveMarkers: true
-              };
-
-              edits.push(newEdit);
-              break;
-          }
-        }
-      }
-
-      if (edits.length > 0) {
-        this.codeEditor.updateOptions(editOptions);
-        if (this.codeEditor.hasTextFocus()) {
-          (document.activeElement as HTMLElement).blur();
-        }
-        this.codeEditor.executeEdits('teacher', edits);
-        this.codeEditor.updateOptions(readOnlyOptions);
-      }
-    }, 125);
+    };
+    lambda();
+    const interval = setInterval(lambda, this.proj.getPartitionSize());
     console.log(line);
   }
 
