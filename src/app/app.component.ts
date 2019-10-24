@@ -25,7 +25,8 @@ export class AppComponent implements OnInit {
     this.tracker = new TransactionTracker(this.proj, [], 0, writer);
     this.tracker.CreateFile(0, 'project/helloworld.js');
 
-    this.tracker.SaveChanges();
+    this.tracker.SaveProject().then(null);
+    this.tracker.SaveTransactionLogs().then(null);
 
     this.loader = new LocalTransactionLoader();
 
