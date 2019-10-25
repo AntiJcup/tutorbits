@@ -7,6 +7,8 @@ import { Guid } from 'guid-typescript';
 import { TransactionTracker } from 'shared/Tracer/lib/ts/TransactionTracker';
 import { debug } from 'util';
 import { HttpClient } from '@angular/common/http';
+import { MonacoPlayer } from './player/monaco.player';
+import { OnlineTransactionLoader, OnlineTransactionRequest, OnlineTransactionRequestInfo } from 'shared/Tracer/lib/ts/OnlineTransaction';
 
 @Component({
   selector: 'app-root',
@@ -18,17 +20,17 @@ export class AppComponent implements OnInit {
   constructor(private http: HttpClient) {
     this.proj = new TraceProject();
     this.proj.setId("cfc60589-bdc1-4b9b-ce93-08d756a3d323");
-    this.proj.setPartitionSize(10000);
-    this.proj.setDuration(0);
+    this.proj.setPartitionSize(10);
+    // this.proj.setDuration(0);
 
     const writer = new LocalTransactionWriter(this.proj);
     this.tracker = new TransactionTracker(this.proj, [], 0, writer);
-    this.tracker.CreateFile(0, 'project/helloworld.js');
+    // this.tracker.CreateFile(0, 'project/helloworld.js');
 
-    this.tracker.SaveProject().then(null);
-    this.tracker.SaveTransactionLogs().then(null);
+    // this.tracker.SaveProject().then(null);
+    // this.tracker.SaveTransactionLogs().then(null);
 
-    this.loader = new LocalTransactionLoader();
+    // this.loader = new LocalTransactionLoader();
 
   }
   public tracker: TransactionTracker;
@@ -82,6 +84,8 @@ export class AppComponent implements OnInit {
 
   public timer: number = null;
 
+  public teacherCodePlayer: MonacoPlayer;
+
   ngOnInit(): void {
     document.addEventListener('keydown', (e) => {
       if (e.keyCode === 83 && (navigator.platform.match('Mac') ? e.metaKey : e.ctrlKey)) {
@@ -93,6 +97,7 @@ export class AppComponent implements OnInit {
   onInit(codeEditor: editor.IEditor) {
     const model: editor.ITextModel = codeEditor.getModel() as editor.ITextModel;
     const start = Date.now();
+    let transactionLogsToSave = [];
     model.onDidChangeContent((e: editor.IModelContentChangedEvent) => {
       // for (const change of e.changes) {
       //   console.log(change);
@@ -100,15 +105,17 @@ export class AppComponent implements OnInit {
       //   const timeOffset = Date.now() - start;
       //   const transaction = this.tracker.ModifyFile(timeOffset, 'winning2', change.rangeOffset,
       //     change.rangeOffset + change.rangeLength, change.text);
-
-
+      //   const transactionLog = this.tracker.GetTransactionLogByTimeOffset(timeOffset);
+      //   transactionLogsToSave.push(transactionLog);
       //   if (this.timer == null) {
       //     this.timer = setTimeout(() => {
-      //       const transactionLog = this.tracker.GetTransactionLogByTimeOffset(timeOffset);
-      //       this.http.post('http://api.tutorbits.com:5000/api/Recording/AddTransactionLog?projectId=cfc60589-bdc1-4b9b-ce93-08d756a3d323',
-      //         new Blob([transactionLog.serializeBinary()])).toPromise().then(r => {
-      //           console.log(r.toString());
-      //         });
+      //       for (const transactionLogToSave of transactionLogsToSave) {
+      //         this.http.post('http://api.tutorbits.com:5000/api/Recording/AddTransactionLog?projectId=cfc60589-bdc1-4b9b-ce93-08d756a3d323',
+      //           new Blob([transactionLogToSave.serializeBinary()])).toPromise().then(r => {
+      //             console.log(r.toString());
+      //           });
+      //       }
+      //       transactionLogsToSave = [];
       //       this.timer = null;
       //     }, 1000 * 5) as any;
       //   }
@@ -117,91 +124,20 @@ export class AppComponent implements OnInit {
       //   console.log(change.rangeLength);
       //   console.log(change.text);
       // }
-      // this.tracker.SaveChanges();
+      // this.tracker.SaveTransactionLogs().then();
     });
   }
 
   teacherOnInit(codeEditor: editor.IEditor) {
     this.codeEditor = codeEditor as editor.ICodeEditor;
 
-    const readOnlyOptions: editor.IEditorOptions = {
-      readOnly: true
-    };
-    const editOptions: editor.IEditorOptions = {
-      readOnly: false
-    };
-    this.codeEditor.updateOptions(readOnlyOptions);
+    this.teacherCodePlayer = new MonacoPlayer(this.codeEditor, new OnlineTransactionLoader(new OnlineTransactionRequest({
+      host: 'http://api.tutorbits.com:5000'
+    } as OnlineTransactionRequestInfo)), 'cfc60589-bdc1-4b9b-ce93-08d756a3d323');
 
-    const line = this.codeEditor.getPosition();
-    const model: editor.ITextModel = this.codeEditor.getModel() as editor.ITextModel;
-    console.log(model.getValue());
-
-    let lastChecked = 0;
-    const start = Date.now();
-    const lambda = () => {
-      const now = (Date.now() - (start + lastChecked)) + this.proj.getPartitionSize();
-      const previous = lastChecked;
-      this.http.get(`http://api.tutorbits.com:5000/api/Streaming/GetTransactionLogs?projectId=${this.proj.getId()}&offsetStart=${Math.floor(lastChecked / 1000)}&offsetEnd=${Math.ceil((lastChecked + now) / 1000)}`,
-        {
-          responseType: 'json'
-        })
-        .toPromise().then(urlsResponse => {
-          console.log(urlsResponse.toString());
-          // tslint:disable-next-line: forin
-          for (const urlkey in urlsResponse) {
-            const url = urlsResponse[urlkey];
-            this.http.get(url, {
-              responseType: 'arraybuffer'
-            }).toPromise().then(transactionLogBuffer => {
-              const transactionLog = TraceTransactionLog.deserializeBinary(new Uint8Array(transactionLogBuffer));
-              const transactions = transactionLog.getTransactionsList();
-              if (transactions.length > 0) {
-                console.log('previous: ' + previous);
-                console.log(transactions);
-              }
-              const edits: editor.IIdentifiedSingleEditOperation[] = [];
-              for (const transaction of transactions) {
-                if (transaction.getTimeOffsetMs() <= previous) {
-                  continue;
-                }
-                lastChecked = transaction.getTimeOffsetMs();
-                switch (transaction.getType()) {
-                  case TraceTransaction.TraceTransactionType.MODIFYFILE:
-                    console.log(transaction.toObject());
-
-                    const startPos = model.getPositionAt(transaction.getModifyFile().getOffsetStart());
-                    const endPos = model.getPositionAt(transaction.getModifyFile().getOffsetEnd());
-
-                    const newEdit: editor.IIdentifiedSingleEditOperation = {
-                      range: new monaco.Range(
-                        startPos.lineNumber,
-                        startPos.column,
-                        endPos.lineNumber,
-                        endPos.column),
-                      text: transaction.getModifyFile().getData(),
-                      forceMoveMarkers: true
-                    };
-
-                    edits.push(newEdit);
-                    break;
-                }
-              }
-              if (edits.length > 0) {
-                this.codeEditor.updateOptions(editOptions);
-                if (this.codeEditor.hasTextFocus()) {
-                  (document.activeElement as HTMLElement).blur();
-                }
-                this.codeEditor.executeEdits('teacher', edits);
-                this.codeEditor.updateOptions(readOnlyOptions);
-              }
-            });
-          }
-        });
-      lastChecked += now;
-    };
-    lambda();
-    const interval = setInterval(lambda, this.proj.getPartitionSize());
-    console.log(line);
+    this.teacherCodePlayer.Load().then(() => {
+      this.teacherCodePlayer.Play();
+    });
   }
 
   public nodeSelected(event: any) {
