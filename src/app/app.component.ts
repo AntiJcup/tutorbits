@@ -7,14 +7,14 @@ import { Guid } from 'guid-typescript';
 import { TransactionTracker } from 'shared/Tracer/lib/ts/TransactionTracker';
 import { debug } from 'util';
 import { HttpClient } from '@angular/common/http';
-import { MonacoPlayer } from './player/monaco.player';
+import { MonacoPlayer } from './sub-components/player/monaco.player';
 import {
   OnlineTransactionLoader,
   OnlineTransactionRequest,
   OnlineTransactionRequestInfo,
   OnlineTransactionWriter
 } from 'shared/Tracer/lib/ts/OnlineTransaction';
-import { MonacoRecorder } from './recorder/monaco.recorder';
+import { MonacoRecorder } from './sub-components/recorder/monaco.recorder';
 
 @Component({
   selector: 'app-root',
