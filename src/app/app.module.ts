@@ -11,11 +11,41 @@ import { VideoPlayerModule } from './sub-components/video-player/video-player.mo
 import { FileTreeModule } from './sub-components/file-tree/file-tree.module';
 import { HttpClientModule } from '@angular/common/http';
 import { WatchComponent } from './components/watch/watch.component';
+import { Routes, RouterModule } from '@angular/router';
+import { HomeComponent } from './components/home/home.component';
+import { RecordComponent } from './components/record/record.component';
+
+const appRoutes: Routes = [
+  {
+    path: 'home',
+    component: HomeComponent,
+    data: { title: 'Home' }
+  },
+  {
+    path: 'watch',
+    component: WatchComponent,
+    data: { title: 'Watch' }
+  },
+  {
+    path: 'record',
+    component: RecordComponent,
+    data: { title: 'Record' }
+  },
+  {
+    path: '',
+    redirectTo: '/home',
+    pathMatch: 'full'
+  },
+  { path: '**', component: HomeComponent }
+];
+
 
 @NgModule({
   declarations: [
     AppComponent,
-    WatchComponent
+    WatchComponent,
+    HomeComponent,
+    RecordComponent
   ],
   imports: [
     BrowserModule,
@@ -25,7 +55,11 @@ import { WatchComponent } from './components/watch/watch.component';
     EditorModule,
     VideoPlayerModule,
     FileTreeModule,
-    HttpClientModule
+    HttpClientModule,
+    RouterModule.forRoot(
+      appRoutes,
+      { enableTracing: true }
+    )
   ],
   providers: [],
   bootstrap: [AppComponent]
