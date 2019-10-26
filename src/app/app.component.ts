@@ -8,7 +8,13 @@ import { TransactionTracker } from 'shared/Tracer/lib/ts/TransactionTracker';
 import { debug } from 'util';
 import { HttpClient } from '@angular/common/http';
 import { MonacoPlayer } from './player/monaco.player';
-import { OnlineTransactionLoader, OnlineTransactionRequest, OnlineTransactionRequestInfo } from 'shared/Tracer/lib/ts/OnlineTransaction';
+import {
+  OnlineTransactionLoader,
+  OnlineTransactionRequest,
+  OnlineTransactionRequestInfo,
+  OnlineTransactionWriter
+} from 'shared/Tracer/lib/ts/OnlineTransaction';
+import { MonacoRecorder } from './recorder/monaco.recorder';
 
 @Component({
   selector: 'app-root',
@@ -19,12 +25,12 @@ export class AppComponent implements OnInit {
 
   constructor(private http: HttpClient) {
     this.proj = new TraceProject();
-    this.proj.setId("cfc60589-bdc1-4b9b-ce93-08d756a3d323");
+    this.proj.setId('cfc60589-bdc1-4b9b-ce93-08d756a3d323');
     this.proj.setPartitionSize(10);
     // this.proj.setDuration(0);
 
     const writer = new LocalTransactionWriter(this.proj);
-    this.tracker = new TransactionTracker(this.proj, [], 0, writer);
+    this.tracker = new TransactionTracker(this.proj, writer);
     // this.tracker.CreateFile(0, 'project/helloworld.js');
 
     // this.tracker.SaveProject().then(null);
@@ -85,6 +91,7 @@ export class AppComponent implements OnInit {
   public timer: number = null;
 
   public teacherCodePlayer: MonacoPlayer;
+  public codeRecorder: MonacoRecorder;
 
   ngOnInit(): void {
     document.addEventListener('keydown', (e) => {
@@ -95,37 +102,13 @@ export class AppComponent implements OnInit {
   }
 
   onInit(codeEditor: editor.IEditor) {
-    const model: editor.ITextModel = codeEditor.getModel() as editor.ITextModel;
-    const start = Date.now();
-    let transactionLogsToSave = [];
-    model.onDidChangeContent((e: editor.IModelContentChangedEvent) => {
-      // for (const change of e.changes) {
-      //   console.log(change);
+    this.codeRecorder = new MonacoRecorder(codeEditor as editor.ICodeEditor,
+      this.proj,
+      new OnlineTransactionWriter(new OnlineTransactionRequest({
+        host: 'http://api.tutorbits.com:5000'
+      } as OnlineTransactionRequestInfo), 'cfc60589-bdc1-4b9b-ce93-08d756a3d323', this.proj));
 
-      //   const timeOffset = Date.now() - start;
-      //   const transaction = this.tracker.ModifyFile(timeOffset, 'winning2', change.rangeOffset,
-      //     change.rangeOffset + change.rangeLength, change.text);
-      //   const transactionLog = this.tracker.GetTransactionLogByTimeOffset(timeOffset);
-      //   transactionLogsToSave.push(transactionLog);
-      //   if (this.timer == null) {
-      //     this.timer = setTimeout(() => {
-      //       for (const transactionLogToSave of transactionLogsToSave) {
-      //         this.http.post('http://api.tutorbits.com:5000/api/Recording/AddTransactionLog?projectId=cfc60589-bdc1-4b9b-ce93-08d756a3d323',
-      //           new Blob([transactionLogToSave.serializeBinary()])).toPromise().then(r => {
-      //             console.log(r.toString());
-      //           });
-      //       }
-      //       transactionLogsToSave = [];
-      //       this.timer = null;
-      //     }, 1000 * 5) as any;
-      //   }
-      //   console.log(timeOffset);
-      //   console.log(change.rangeOffset);
-      //   console.log(change.rangeLength);
-      //   console.log(change.text);
-      // }
-      // this.tracker.SaveTransactionLogs().then();
-    });
+    // this.codeRecorder.StartRecording();
   }
 
   teacherOnInit(codeEditor: editor.IEditor) {
@@ -137,6 +120,9 @@ export class AppComponent implements OnInit {
 
     this.teacherCodePlayer.Load().then(() => {
       this.teacherCodePlayer.Play();
+      // setTimeout(() => {
+      //   this.teacherCodePlayer.position = 0;
+      // }, 5000);
     });
   }
 

@@ -13,7 +13,7 @@ export class MonacoPlayer extends TransactionPlayer {
             speedMultiplier: 1,
             lookAheadSize: 1000 * 5,
             loadChunkSize: 1000 * 10,
-            updateInterval: 100,
+            updateInterval: 10,
             loadInterval: 1000 * 3
         } as TransactionPlayerSettings, loader, projectId);
 
