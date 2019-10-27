@@ -10,7 +10,9 @@ import { environment } from 'src/environments/environment';
   styleUrls: ['./record.component.sass']
 })
 export class RecordComponent implements OnInit {
+  public projectId: string;
   constructor(private route: ActivatedRoute) {
+    this.projectId = this.route.snapshot.paramMap.get('projectId');
   }
 
   title = 'tutorbits';
@@ -53,7 +55,6 @@ export class RecordComponent implements OnInit {
 
   @ViewChild(TreeComponent, { static: true }) treeComp: TreeComponent;
 
-  project = new TraceProject();
   requestInfo: OnlineTransactionRequestInfo = {
     host: environment.apiHost,
     credentials: undefined,
@@ -61,9 +62,6 @@ export class RecordComponent implements OnInit {
   };
 
   ngOnInit(): void {
-    const projectId = this.route.snapshot.paramMap.get('projectId');
-
-    this.project.setId(projectId);
 
   }
 

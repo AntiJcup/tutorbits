@@ -2,15 +2,20 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { OnlineTransactionRequestInfo } from 'shared/Tracer/lib/ts/OnlineTransaction';
 import { TreeModel, Ng2TreeSettings, TreeComponent } from 'ng2-tree';
 import { environment } from 'src/environments/environment';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   templateUrl: './watch.component.html',
   styleUrls: ['./watch.component.sass']
 })
-export class WatchComponent implements OnInit {
-  constructor() {
-  }
 
+export class WatchComponent implements OnInit {
+  public projectId: string;
+  requestInfo: OnlineTransactionRequestInfo = {
+    host: environment.apiHost,
+    credentials: undefined,
+    headers: {},
+  };
   title = 'tutorbits';
   public tree: TreeModel = {
     value: '/',
@@ -51,12 +56,10 @@ export class WatchComponent implements OnInit {
 
   @ViewChild(TreeComponent, { static: true }) treeComp: TreeComponent;
 
-  projectId = 'cfc60589-bdc1-4b9b-ce93-08d756a3d323';
-  requestInfo: OnlineTransactionRequestInfo = {
-    host: environment.apiHost,
-    credentials: undefined,
-    headers: {},
-  };
+  constructor(private route: ActivatedRoute) {
+    this.projectId = this.route.snapshot.paramMap.get('projectId');
+  }
+
 
   ngOnInit(): void {
 

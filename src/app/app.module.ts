@@ -24,7 +24,7 @@ const appRoutes: Routes = [
     data: { title: 'Home' }
   },
   {
-    path: 'watch',
+    path: 'watch/:projectId',
     component: WatchComponent,
     data: { title: 'Watch' }
   },

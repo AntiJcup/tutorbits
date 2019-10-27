@@ -40,8 +40,10 @@ export class UserEditorComponent implements OnInit {
       new OnlineTransactionWriter(requestObj,
         this.projectId));
 
-    this.codeRecorder.Load().then(() => {
-      this.codeRecorder.StartRecording();
+    this.codeRecorder.DeleteProject(this.projectId).then(() => {
+      this.codeRecorder.New().then(() => {
+        this.codeRecorder.StartRecording();
+      });
     });
   }
 
