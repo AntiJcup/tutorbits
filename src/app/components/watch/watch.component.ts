@@ -1,11 +1,7 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { OnlineTransactionRequestInfo, OnlineTransactionWriter, OnlineTransactionRequest, OnlineTransactionLoader } from 'shared/Tracer/lib/ts/OnlineTransaction';
-import { TraceProject } from 'shared/Tracer/models/ts/Tracer_pb';
-import { TransactionTracker } from 'shared/Tracer/lib/ts/TransactionTracker';
+import { OnlineTransactionRequestInfo } from 'shared/Tracer/lib/ts/OnlineTransaction';
 import { TreeModel, Ng2TreeSettings, TreeComponent } from 'ng2-tree';
-import { editor } from 'monaco-editor';
-import { MonacoPlayer } from 'src/app/sub-components/player/monaco.player';
-import { MonacoRecorder } from 'src/app/sub-components/recorder/monaco.recorder';
+import { environment } from 'src/environments/environment';
 
 @Component({
   templateUrl: './watch.component.html',
@@ -13,17 +9,9 @@ import { MonacoRecorder } from 'src/app/sub-components/recorder/monaco.recorder'
 })
 export class WatchComponent implements OnInit {
   constructor() {
-    this.proj = new TraceProject();
-    this.proj.setId('cfc60589-bdc1-4b9b-ce93-08d756a3d323');
-    this.proj.setPartitionSize(5000);
   }
-  public tracker: TransactionTracker;
-  public proj: TraceProject;
 
   title = 'tutorbits';
-  editorOptions = { theme: 'vs-dark', language: 'javascript' };
-  code = '';
-  teacherCode = '';
   public tree: TreeModel = {
     value: '/',
     id: 1,
@@ -63,44 +51,15 @@ export class WatchComponent implements OnInit {
 
   @ViewChild(TreeComponent, { static: true }) treeComp: TreeComponent;
 
-  public codeEditor: editor.ICodeEditor;
-
-  public timer: number = null;
-
-  public teacherCodePlayer: MonacoPlayer;
-  public codeRecorder: MonacoRecorder;
+  projectId = 'cfc60589-bdc1-4b9b-ce93-08d756a3d323';
+  requestInfo: OnlineTransactionRequestInfo = {
+    host: environment.apiHost,
+    credentials: undefined,
+    headers: {},
+  };
 
   ngOnInit(): void {
-    document.addEventListener('keydown', (e) => {
-      if (e.keyCode === 83 && (navigator.platform.match('Mac') ? e.metaKey : e.ctrlKey)) {
-        e.preventDefault();
-      }
-    }, false);
-  }
 
-  onInit(codeEditor: editor.IEditor) {
-    this.codeRecorder = new MonacoRecorder(codeEditor as editor.ICodeEditor,
-      this.proj,
-      new OnlineTransactionWriter(new OnlineTransactionRequest({
-        host: 'http://api.tutorbits.com:5000'
-      } as OnlineTransactionRequestInfo), 'cfc60589-bdc1-4b9b-ce93-08d756a3d323', this.proj));
-
-    // this.codeRecorder.StartRecording();
-  }
-
-  teacherOnInit(codeEditor: editor.IEditor) {
-    this.codeEditor = codeEditor as editor.ICodeEditor;
-
-    this.teacherCodePlayer = new MonacoPlayer(this.codeEditor, new OnlineTransactionLoader(new OnlineTransactionRequest({
-      host: 'http://api.tutorbits.com:5000'
-    } as OnlineTransactionRequestInfo)), 'cfc60589-bdc1-4b9b-ce93-08d756a3d323');
-
-    this.teacherCodePlayer.Load().then(() => {
-      this.teacherCodePlayer.Play();
-      // setTimeout(() => {
-      //   this.teacherCodePlayer.position = 0;
-      // }, 5000);
-    });
   }
 
   public nodeSelected(event: any) {

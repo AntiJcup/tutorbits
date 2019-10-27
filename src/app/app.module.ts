@@ -14,6 +14,8 @@ import { WatchComponent } from './components/watch/watch.component';
 import { Routes, RouterModule } from '@angular/router';
 import { HomeComponent } from './components/home/home.component';
 import { RecordComponent } from './components/record/record.component';
+import { TeacherEditorComponent } from './sub-components/teacher-editor/teacher-editor.component';
+import { UserEditorComponent } from './sub-components/user-editor/user-editor.component';
 
 const appRoutes: Routes = [
   {
@@ -27,7 +29,7 @@ const appRoutes: Routes = [
     data: { title: 'Watch' }
   },
   {
-    path: 'record',
+    path: 'record/:projectId',
     component: RecordComponent,
     data: { title: 'Record' }
   },
@@ -45,7 +47,9 @@ const appRoutes: Routes = [
     AppComponent,
     WatchComponent,
     HomeComponent,
-    RecordComponent
+    RecordComponent,
+    TeacherEditorComponent,
+    UserEditorComponent
   ],
   imports: [
     BrowserModule,

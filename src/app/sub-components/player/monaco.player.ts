@@ -1,21 +1,28 @@
-import { TransactionPlayerState, TransactionPlayer, TransactionPlayerSettings } from 'shared/Tracer/lib/ts/TransactionPlayer';
+import { TransactionPlayer, TransactionPlayerSettings } from 'shared/Tracer/lib/ts/TransactionPlayer';
 import { TraceTransaction } from 'shared/Tracer/models/ts/Tracer_pb';
 import { editor } from 'monaco-editor';
 import { TransactionLoader } from 'shared/Tracer/lib/ts/TransactionLoader';
+import { ProjectLoader } from 'shared/Tracer/lib/ts/ProjectLoader';
 
 export class MonacoPlayer extends TransactionPlayer {
     constructor(
         protected codeEditor: editor.ICodeEditor,
-        loader: TransactionLoader,
+        projectLoader: ProjectLoader,
+        transactionLoader: TransactionLoader,
         projectId: string,
         settings?: TransactionPlayerSettings) {
-        super(settings ? settings : {
-            speedMultiplier: 1,
-            lookAheadSize: 1000 * 5,
-            loadChunkSize: 1000 * 10,
-            updateInterval: 10,
-            loadInterval: 1000 * 3
-        } as TransactionPlayerSettings, loader, projectId);
+        super(settings ?
+            settings :
+            {
+                speedMultiplier: 1,
+                lookAheadSize: 1000 * 5,
+                loadChunkSize: 1000 * 10,
+                updateInterval: 10,
+                loadInterval: 1000 * 3
+            } as TransactionPlayerSettings,
+            projectLoader,
+            transactionLoader,
+            projectId);
 
         this.codeEditor.updateOptions(MonacoPlayer.readOnlyOptions);
     }

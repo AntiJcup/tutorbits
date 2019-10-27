@@ -1,18 +1,21 @@
 import { TraceTransaction, TraceProject, TraceTransactionLog } from 'shared/Tracer/models/ts/Tracer_pb';
 import { editor, IDisposable } from 'monaco-editor';
-import { TransactionTracker } from 'shared/Tracer/lib/ts/TransactionTracker';
+import { TransactionRecorder } from 'shared/Tracer/lib/ts/TransactionRecorder';
 import { TransactionWriter } from 'shared/Tracer/lib/ts/TransactionWriter';
+import { ProjectLoader } from 'shared/Tracer/lib/ts/ProjectLoader';
+import { ProjectWriter } from 'shared/Tracer/lib/ts/ProjectWriter';
 
-export class MonacoRecorder extends TransactionTracker {
+export class MonacoRecorder extends TransactionRecorder {
     private changeListener: IDisposable = null;
     private internalFileName = '_unassigned_';
     constructor(
         protected codeEditor: editor.ICodeEditor,
-        project: TraceProject,
+        projectId: string,
+        projectLoader: ProjectLoader,
+        projectWriter: ProjectWriter,
         transactionWriter: TransactionWriter,
-        transactionLogs?: TraceTransactionLog[],
-        partitionOffset?: number) {
-        super(project, transactionWriter, transactionLogs, partitionOffset);
+        transactionLogs?: TraceTransactionLog[]) {
+        super(projectId, projectLoader, projectWriter, transactionWriter, transactionLogs);
     }
 
     public get CurrentFileName(): string {
