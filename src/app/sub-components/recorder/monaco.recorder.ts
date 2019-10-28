@@ -38,7 +38,7 @@ export class MonacoRecorder extends TransactionRecorder {
                 console.log(change);
                 const previousData = change.rangeLength <= 0 ?
                     undefined :
-                    this.GetCacheForCurrentFile().substring(change.rangeOffset, change.rangeLength);
+                    this.GetCacheForCurrentFile().substring(change.rangeOffset, change.rangeOffset + change.rangeLength);
                 console.log(`Previous: ${previousData}`);
                 timeOffset = Date.now() - start;
                 this.ModifyFile(timeOffset, this.internalFileName, change.rangeOffset,

@@ -34,7 +34,7 @@ export class MonacoPlayer extends TransactionPlayer {
         readOnly: true
     };
 
-    protected HandleTransaction(transaction: TraceTransaction): void {
+    protected HandleTransaction(transaction: TraceTransaction, undo?: boolean): void {
         const edits: editor.IIdentifiedSingleEditOperation[] = [];
         switch (transaction.getType()) {
             case TraceTransaction.TraceTransactionType.MODIFYFILE:
@@ -44,16 +44,32 @@ export class MonacoPlayer extends TransactionPlayer {
                 const startPos = editorModel.getPositionAt(transaction.getModifyFile().getOffsetStart());
                 const endPos = editorModel.getPositionAt(transaction.getModifyFile().getOffsetEnd());
 
-                const newEdit: editor.IIdentifiedSingleEditOperation = {
-                    range: new monaco.Range(
-                        startPos.lineNumber,
-                        startPos.column,
-                        endPos.lineNumber,
-                        endPos.column),
-                    text: transaction.getModifyFile().getData(),
-                    forceMoveMarkers: true
-                };
-
+                let newEdit: editor.IIdentifiedSingleEditOperation = null;
+                if (!undo) {
+                    newEdit = {
+                        range: new monaco.Range(
+                            startPos.lineNumber,
+                            startPos.column,
+                            endPos.lineNumber,
+                            endPos.column),
+                        text: transaction.getModifyFile().getData(),
+                        forceMoveMarkers: true
+                    };
+                } else {
+                    const previousData = transaction.getModifyFile().getPreviousData();
+                    const offset = transaction.getModifyFile().getData().length;
+                    const undoEndPos = previousData.length > 0 ? endPos : editorModel.getPositionAt(transaction.getModifyFile().getOffsetEnd() + offset);
+                    newEdit = {
+                        range: new monaco.Range(
+                            startPos.lineNumber,
+                            startPos.column,
+                            undoEndPos.lineNumber,
+                            undoEndPos.column),
+                        text: previousData,
+                        forceMoveMarkers: true
+                    };
+                }
+                console.log(`Edit: ${JSON.stringify(newEdit)}`);
                 edits.push(newEdit);
                 break;
         }
