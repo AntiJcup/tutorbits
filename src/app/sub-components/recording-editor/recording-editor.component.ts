@@ -5,12 +5,12 @@ import { MonacoRecorder } from '../recorder/monaco.recorder';
 import { TraceProject } from 'shared/Tracer/models/ts/Tracer_pb';
 
 @Component({
-  selector: 'app-user-editor',
-  templateUrl: './user-editor.component.html',
-  styleUrls: ['./user-editor.component.sass']
+  selector: 'app-recording-editor',
+  templateUrl: './recording-editor.component.html',
+  styleUrls: ['./recording-editor.component.sass']
 })
 
-export class UserEditorComponent implements OnInit {
+export class RecordingEditorComponent implements OnInit {
   editorOptions = { theme: 'vs-dark', language: 'javascript' };
   startingCode = '';
 

@@ -4,12 +4,12 @@ import { MonacoPlayer } from '../player/monaco.player';
 import { OnlineTransactionLoader, OnlineTransactionRequest, OnlineTransactionRequestInfo, OnlineProjectLoader } from 'shared/Tracer/lib/ts/OnlineTransaction';
 
 @Component({
-  selector: 'app-teacher-editor',
-  templateUrl: './teacher-editor.component.html',
-  styleUrls: ['./teacher-editor.component.sass']
+  selector: 'app-playback-editor',
+  templateUrl: './playback-editor.component.html',
+  styleUrls: ['./playback-editor.component.sass']
 })
 
-export class TeacherEditorComponent implements OnInit {
+export class PlaybackEditorComponent implements OnInit {
   editorOptions = { theme: 'vs-dark', language: 'javascript' };
   startingCode = '';
 

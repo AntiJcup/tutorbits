@@ -14,8 +14,8 @@ import { WatchComponent } from './components/watch/watch.component';
 import { Routes, RouterModule } from '@angular/router';
 import { HomeComponent } from './components/home/home.component';
 import { RecordComponent } from './components/record/record.component';
-import { TeacherEditorComponent } from './sub-components/teacher-editor/teacher-editor.component';
-import { UserEditorComponent } from './sub-components/user-editor/user-editor.component';
+import { PlaybackEditorComponent } from './sub-components/playback-editor/playback-editor.component';
+import { RecordingEditorComponent } from './sub-components/recording-editor/recording-editor.component';
 
 const appRoutes: Routes = [
   {
@@ -48,8 +48,8 @@ const appRoutes: Routes = [
     WatchComponent,
     HomeComponent,
     RecordComponent,
-    TeacherEditorComponent,
-    UserEditorComponent
+    PlaybackEditorComponent,
+    RecordingEditorComponent
   ],
   imports: [
     BrowserModule,
