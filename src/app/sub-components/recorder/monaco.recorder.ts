@@ -8,6 +8,7 @@ import { ProjectWriter } from 'shared/Tracer/lib/ts/ProjectWriter';
 export class MonacoRecorder extends TransactionRecorder {
     private changeListener: IDisposable = null;
     private internalFileName = '_unassigned_';
+    private fileCache: { [fileName: string]: string } = {};
     constructor(
         protected codeEditor: editor.ICodeEditor,
         projectId: string,
@@ -30,18 +31,24 @@ export class MonacoRecorder extends TransactionRecorder {
         const start = Date.now();
         let timeOffset = Date.now() - start;
         const textEditorModel = this.codeEditor.getModel() as editor.ITextModel;
+        this.UpdateCacheForCurrentFile();
         this.changeListener = textEditorModel.onDidChangeContent((e: editor.IModelContentChangedEvent) => {
+            console.log(`Change count: `, e.changes.length);
             for (const change of e.changes) {
                 console.log(change);
-
+                const previousData = change.rangeLength <= 0 ?
+                    undefined :
+                    this.GetCacheForCurrentFile().substring(change.rangeOffset, change.rangeLength);
+                console.log(`Previous: ${previousData}`);
                 timeOffset = Date.now() - start;
                 this.ModifyFile(timeOffset, this.internalFileName, change.rangeOffset,
-                    change.rangeOffset + change.rangeLength, change.text);
+                    change.rangeOffset + change.rangeLength, change.text, previousData);
                 console.log(timeOffset);
                 console.log(change.rangeOffset);
                 console.log(change.rangeLength);
                 console.log(change.text);
             }
+            this.UpdateCacheForCurrentFile();
 
             // Try to delay saves by partition size to increase odds we save this partition
             setTimeout(() => {
@@ -57,5 +64,16 @@ export class MonacoRecorder extends TransactionRecorder {
         if (this.changeListener) {
             this.changeListener.dispose();
         }
+    }
+
+    private UpdateCacheForCurrentFile(): void {
+        const textModel = this.codeEditor.getModel() as editor.ITextModel;
+        const clone = textModel.getValue();
+        this.fileCache[this.internalFileName] = clone;
+    }
+
+    protected GetCacheForCurrentFile(): string {
+        console.log(`CacheVersion: ${this.fileCache[this.internalFileName]}`);
+        return this.fileCache[this.internalFileName];
     }
 }
