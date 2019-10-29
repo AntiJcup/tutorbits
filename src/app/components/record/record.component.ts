@@ -1,10 +1,10 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { OnlineTransactionRequestInfo, OnlineTransactionRequest, OnlineProjectLoader, OnlineProjectWriter, OnlineTransactionWriter } from 'shared/Tracer/lib/ts/OnlineTransaction';
-import { TreeComponent, Ng2TreeSettings, TreeModel } from 'ng2-tree';
 import { ActivatedRoute } from '@angular/router';
 import { environment } from 'src/environments/environment';
 import { MonacoRecorder } from 'src/app/sub-components/recorder/monaco.recorder';
 import { RecordingEditorComponent } from 'src/app/sub-components/recording-editor/recording-editor.component';
+import { RecordingFileTreeComponent } from 'src/app/sub-components/recording-file-tree/recording-file-tree.component';
 
 @Component({
   templateUrl: './record.component.html',
@@ -13,7 +13,9 @@ import { RecordingEditorComponent } from 'src/app/sub-components/recording-edito
 export class RecordComponent implements OnInit {
   public projectId: string;
 
-  recordingEditor: RecordingEditorComponent;
+  @ViewChild(RecordingFileTreeComponent, { static: true }) recordingTreeComponent: RecordingFileTreeComponent;
+  @ViewChild(RecordingEditorComponent, { static: true }) recordingEditor: RecordingEditorComponent;
+
   codeRecorder: MonacoRecorder;
   requestInfo: OnlineTransactionRequestInfo = {
     host: environment.apiHost,
@@ -29,10 +31,10 @@ export class RecordComponent implements OnInit {
   }
 
   onCodeInitialized(recordingEditor: RecordingEditorComponent) {
-    this.recordingEditor = recordingEditor;
     const requestObj = new OnlineTransactionRequest(this.requestInfo);
     this.codeRecorder = new MonacoRecorder(
-      this.recordingEditor.codeEditor,
+      this.recordingEditor,
+      this.recordingTreeComponent.treeComponent,
       this.projectId,
       new OnlineProjectLoader(requestObj),
       new OnlineProjectWriter(requestObj),
