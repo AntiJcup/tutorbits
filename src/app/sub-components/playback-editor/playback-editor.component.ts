@@ -39,11 +39,11 @@ export class PlaybackEditorComponent implements OnInit {
       this.projectId);
 
     this.codePlayer.Load().then(() => {
-      //this.codePlayer.position = 20000;
+      //this.codePlayer.position = 40000;
       this.codePlayer.Play();
-      setTimeout(() => {
-        this.codePlayer.position = 0;
-      }, 15000);
+      // setTimeout(() => {
+      //   this.codePlayer.position = 0;
+      // }, 7000);
     });
   }
 

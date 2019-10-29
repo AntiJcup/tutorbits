@@ -58,7 +58,7 @@ export class MonacoPlayer extends TransactionPlayer {
                 } else {
                     const previousData = transaction.getModifyFile().getPreviousData();
                     const offset = transaction.getModifyFile().getData().length;
-                    const undoEndPos = previousData.length > 0 ? endPos : editorModel.getPositionAt(transaction.getModifyFile().getOffsetEnd() + offset);
+                    const undoEndPos = editorModel.getPositionAt(transaction.getModifyFile().getOffsetEnd() + offset);
                     newEdit = {
                         range: new monaco.Range(
                             startPos.lineNumber,
@@ -69,7 +69,7 @@ export class MonacoPlayer extends TransactionPlayer {
                         forceMoveMarkers: true
                     };
                 }
-                console.log(`Edit: ${JSON.stringify(newEdit)}`);
+                console.log(`Edit: ${JSON.stringify(newEdit)} Undo: ${undo}`);
                 edits.push(newEdit);
                 break;
         }
