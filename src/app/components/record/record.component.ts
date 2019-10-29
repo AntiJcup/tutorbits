@@ -31,12 +31,12 @@ export class RecordComponent implements OnInit {
   onCodeInitialized(recordingEditor: RecordingEditorComponent) {
     this.recordingEditor = recordingEditor;
     const requestObj = new OnlineTransactionRequest(this.requestInfo);
-    this.codeRecorder = new MonacoRecorder(this.recordingEditor.codeEditor,
+    this.codeRecorder = new MonacoRecorder(
+      this.recordingEditor.codeEditor,
       this.projectId,
       new OnlineProjectLoader(requestObj),
       new OnlineProjectWriter(requestObj),
-      new OnlineTransactionWriter(requestObj,
-        this.projectId));
+      new OnlineTransactionWriter(requestObj, this.projectId));
 
     this.codeRecorder.DeleteProject(this.projectId).then(() => {
       this.codeRecorder.New().then(() => {
