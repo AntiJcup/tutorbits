@@ -34,7 +34,7 @@ export class RecordComponent implements OnInit {
     const requestObj = new OnlineTransactionRequest(this.requestInfo);
     this.codeRecorder = new MonacoRecorder(
       this.recordingEditor,
-      this.recordingTreeComponent.treeComponent,
+      this.recordingTreeComponent,
       this.projectId,
       new OnlineProjectLoader(requestObj),
       new OnlineProjectWriter(requestObj),

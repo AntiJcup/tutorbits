@@ -8,6 +8,7 @@ import { TreeComponent, NodeSelectedEvent } from 'ng2-tree';
 import { stringify } from 'querystring';
 import { Subscription } from 'rxjs';
 import { MonacoEditorComponent } from '../editor/monaco-editor.component';
+import { NG2FileTreeComponent } from '../file-tree/ng2-file-tree.component';
 
 export class MonacoRecorder extends TransactionRecorder {
     private fileChangeListener: IDisposable = null;
@@ -17,7 +18,7 @@ export class MonacoRecorder extends TransactionRecorder {
     private start: number;
     constructor(
         protected codeComponent: MonacoEditorComponent,
-        protected fileTree: TreeComponent,
+        protected fileTreeComponent: NG2FileTreeComponent,
         projectId: string,
         projectLoader: ProjectLoader,
         projectWriter: ProjectWriter,
@@ -35,7 +36,7 @@ export class MonacoRecorder extends TransactionRecorder {
             this.OnFileModified(e);
         });
 
-        this.fileSelectedListener = this.fileTree.nodeSelected.subscribe((e: NodeSelectedEvent) => {
+        this.fileSelectedListener = this.fileTreeComponent.treeComponent.nodeSelected.subscribe((e: NodeSelectedEvent) => {
             this.OnFileSelected(e);
         });
     }
@@ -81,9 +82,8 @@ export class MonacoRecorder extends TransactionRecorder {
         if (e.node.isBranch()) {
             return;
         }
-
         const oldFileName = this.codeComponent.currentFilePath;
-        const newFileName = e.node.value;
+        const newFileName = this.fileTreeComponent.getPathForNode(e.node);
         this.codeComponent.currentFilePath = newFileName;
         this.timeOffset = Date.now() - this.start;
         this.SelectFile(this.timeOffset, oldFileName, newFileName);

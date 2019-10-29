@@ -1,8 +1,6 @@
 import { Component, OnInit, Input, ViewChild } from '@angular/core';
-import { editor } from 'monaco-editor';
-import { OnlineTransactionRequest, OnlineTransactionRequestInfo, OnlineTransactionWriter, OnlineProjectLoader, OnlineProjectWriter } from 'shared/Tracer/lib/ts/OnlineTransaction';
-import { MonacoRecorder } from '../recorder/monaco.recorder';
-import { TreeModel, Ng2TreeSettings, TreeComponent } from 'ng2-tree';
+import { TreeModel, Ng2TreeSettings, TreeComponent, NodeMenuItemAction } from 'ng2-tree';
+import { NG2FileTreeComponent } from '../file-tree/ng2-file-tree.component';
 
 @Component({
   selector: 'app-recording-file-tree',
@@ -10,26 +8,17 @@ import { TreeModel, Ng2TreeSettings, TreeComponent } from 'ng2-tree';
   styleUrls: ['./recording-file-tree.component.sass']
 })
 
-export class RecordingFileTreeComponent implements OnInit {
-  editorOptions = { theme: 'vs-dark', language: 'javascript' };
-  startingCode = '';
-
-  codeEditor: editor.ICodeEditor;
-  codeRecorder: MonacoRecorder;
-
-  @Input() projectId: string;
-
-  public settings: Ng2TreeSettings = {
-    rootIsVisible: false,
-    showCheckboxes: false
-  };
-
-  @ViewChild(TreeComponent, { static: true }) treeComponent: TreeComponent;
-
+export class RecordingFileTreeComponent extends NG2FileTreeComponent implements OnInit {
   public tree: TreeModel = {
     value: '/',
     id: 1,
     settings: {
+      menuItems: [
+        { action: NodeMenuItemAction.NewFolder, name: 'Add folder', cssClass: '' },
+        { action: NodeMenuItemAction.NewTag, name: 'Add file', cssClass: '' },
+        { action: NodeMenuItemAction.Remove, name: 'Delete', cssClass: '' },
+        { action: NodeMenuItemAction.Rename, name: 'Rename', cssClass: '' }
+      ],
       cssClasses: {
         expanded: 'fa fa-caret-down',
         collapsed: 'fa fa-caret-right',
@@ -41,8 +30,6 @@ export class RecordingFileTreeComponent implements OnInit {
         leaf: '<i class="fa fa-file-o"></i>'
       },
       keepNodesInDOM: true,
-      static: true,
-      selectionAllowed: false,
     },
     children: [
       {
@@ -58,24 +45,6 @@ export class RecordingFileTreeComponent implements OnInit {
     ]
   };
 
-  constructor() { }
-
-  public get CodeRecorder(): MonacoRecorder {
-    return this.codeRecorder;
-  }
-
   ngOnInit() {
   }
-
-  public nodeSelected(event: any) {
-    const test = this.treeComponent.getControllerByNodeId(event.node.id);
-    console.log(test.isCollapsed());
-    if (!test.isCollapsed()) {
-      test.collapse();
-    } else {
-      test.expand();
-    }
-    console.log(event);
-  }
-
 }
