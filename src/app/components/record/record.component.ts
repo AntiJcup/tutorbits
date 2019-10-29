@@ -1,9 +1,10 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { OnlineTransactionRequestInfo } from 'shared/Tracer/lib/ts/OnlineTransaction';
+import { OnlineTransactionRequestInfo, OnlineTransactionRequest, OnlineProjectLoader, OnlineProjectWriter, OnlineTransactionWriter } from 'shared/Tracer/lib/ts/OnlineTransaction';
 import { TreeComponent, Ng2TreeSettings, TreeModel } from 'ng2-tree';
-import { TraceProject } from 'shared/Tracer/models/ts/Tracer_pb';
 import { ActivatedRoute } from '@angular/router';
 import { environment } from 'src/environments/environment';
+import { MonacoRecorder } from 'src/app/sub-components/recorder/monaco.recorder';
+import { RecordingEditorComponent } from 'src/app/sub-components/recording-editor/recording-editor.component';
 
 @Component({
   templateUrl: './record.component.html',
@@ -11,68 +12,38 @@ import { environment } from 'src/environments/environment';
 })
 export class RecordComponent implements OnInit {
   public projectId: string;
-  constructor(private route: ActivatedRoute) {
-    this.projectId = this.route.snapshot.paramMap.get('projectId');
-  }
 
-  title = 'tutorbits';
-  public tree: TreeModel = {
-    value: '/',
-    id: 1,
-    settings: {
-      cssClasses: {
-        expanded: 'fa fa-caret-down',
-        collapsed: 'fa fa-caret-right',
-        empty: 'fa fa-caret-right disabled',
-        leaf: 'fa'
-      },
-      templates: {
-        node: '<i class="fa fa-folder-o"></i>',
-        leaf: '<i class="fa fa-file-o"></i>'
-      },
-      keepNodesInDOM: true,
-      static: true,
-      selectionAllowed: false,
-    },
-    children: [
-      {
-        value: 'project',
-        id: 2,
-        children: [
-          { value: 'helloworld.js', id: 3 },
-        ],
-        settings: {
-          isCollapsedOnInit: false
-        }
-      }
-    ]
-  };
-
-  public settings: Ng2TreeSettings = {
-    rootIsVisible: false,
-    showCheckboxes: false
-  };
-
-  @ViewChild(TreeComponent, { static: true }) treeComp: TreeComponent;
-
+  recordingEditor: RecordingEditorComponent;
+  codeRecorder: MonacoRecorder;
   requestInfo: OnlineTransactionRequestInfo = {
     host: environment.apiHost,
     credentials: undefined,
     headers: {},
   };
 
+  constructor(private route: ActivatedRoute) {
+    this.projectId = this.route.snapshot.paramMap.get('projectId');
+  }
+
   ngOnInit(): void {
-
   }
 
-  public nodeSelected(event: any) {
-    const test = this.treeComp.getControllerByNodeId(event.node.id);
-    console.log(test.isCollapsed());
-    if (!test.isCollapsed()) {
-      test.collapse();
-    } else {
-      test.expand();
-    }
-    console.log(event);
+  onCodeInitialized(recordingEditor: RecordingEditorComponent) {
+    this.recordingEditor = recordingEditor;
+    const requestObj = new OnlineTransactionRequest(this.requestInfo);
+    this.codeRecorder = new MonacoRecorder(this.recordingEditor.codeEditor,
+      this.projectId,
+      new OnlineProjectLoader(requestObj),
+      new OnlineProjectWriter(requestObj),
+      new OnlineTransactionWriter(requestObj,
+        this.projectId));
+
+    this.codeRecorder.DeleteProject(this.projectId).then(() => {
+      this.codeRecorder.New().then(() => {
+        this.codeRecorder.StartRecording();
+      });
+    });
   }
+
+
 }
