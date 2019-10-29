@@ -4,18 +4,24 @@ import { TransactionRecorder } from 'shared/Tracer/lib/ts/TransactionRecorder';
 import { TransactionWriter } from 'shared/Tracer/lib/ts/TransactionWriter';
 import { ProjectLoader } from 'shared/Tracer/lib/ts/ProjectLoader';
 import { ProjectWriter } from 'shared/Tracer/lib/ts/ProjectWriter';
-import { TreeComponent, NodeSelectedEvent } from 'ng2-tree';
+import { TreeComponent, NodeSelectedEvent, NodeCreatedEvent, NodeRenamedEvent, NodeRemovedEvent } from 'ng2-tree';
 import { stringify } from 'querystring';
 import { Subscription } from 'rxjs';
 import { MonacoEditorComponent } from '../editor/monaco-editor.component';
 import { NG2FileTreeComponent } from '../file-tree/ng2-file-tree.component';
 
 export class MonacoRecorder extends TransactionRecorder {
+
     private fileChangeListener: IDisposable = null;
-    private fileSelectedListener: Subscription = null;
-    private fileCache: { [fileName: string]: string } = {};
+
+    private nodeSelectedListener: Subscription = null;
+    private nodeCreatedListener: Subscription = null;
+    private nodeRenameListener: Subscription = null;
+    private nodeDeletedListener: Subscription = null;
+
     private timeOffset: number;
     private start: number;
+
     constructor(
         protected codeComponent: MonacoEditorComponent,
         protected fileTreeComponent: NG2FileTreeComponent,
@@ -36,8 +42,20 @@ export class MonacoRecorder extends TransactionRecorder {
             this.OnFileModified(e);
         });
 
-        this.fileSelectedListener = this.fileTreeComponent.treeComponent.nodeSelected.subscribe((e: NodeSelectedEvent) => {
-            this.OnFileSelected(e);
+        this.nodeSelectedListener = this.fileTreeComponent.treeComponent.nodeSelected.subscribe((e: NodeSelectedEvent) => {
+            this.OnNodeSelected(e);
+        });
+
+        this.nodeCreatedListener = this.fileTreeComponent.treeComponent.nodeCreated.subscribe((e: NodeCreatedEvent) => {
+            this.OnNodeCreated(e);
+        });
+
+        this.nodeRenameListener = this.fileTreeComponent.treeComponent.nodeRenamed.subscribe((e: NodeRenamedEvent) => {
+            this.OnNodeRename(e);
+        });
+
+        this.nodeDeletedListener = this.fileTreeComponent.treeComponent.nodeRemoved.subscribe((e: NodeRemovedEvent) => {
+            this.OnNodeDeleted(e);
         });
     }
 
@@ -46,12 +64,16 @@ export class MonacoRecorder extends TransactionRecorder {
             this.fileChangeListener.dispose();
         }
 
-        if (this.fileSelectedListener) {
-            this.fileSelectedListener.unsubscribe();
+        if (this.nodeSelectedListener) {
+            this.nodeSelectedListener.unsubscribe();
         }
     }
 
     protected OnFileModified(e: editor.IModelContentChangedEvent): void {
+        if (this.codeComponent.ignoreNextEvent) { // Handles expected edits that shouldnt be tracked
+            console.log(`Ignoring edit ${JSON.stringify(e)}`);
+            return;
+        }
         console.log(`Change count: `, e.changes.length);
         for (const change of e.changes) {
             console.log(change);
@@ -69,15 +91,10 @@ export class MonacoRecorder extends TransactionRecorder {
         }
         this.codeComponent.UpdateCacheForCurrentFile();
 
-        // Try to delay saves by partition size to increase odds we save this partition
-        setTimeout(() => {
-            this.timeOffset = Date.now() - this.start;
-            this.GetTransactionLogByTimeOffset(this.timeOffset); // call this trigger new partition before save maybe
-            this.SaveTransactionLogs().then();
-        }, this.project.getPartitionSize());
+        this.TriggerDelayedSave();
     }
 
-    protected OnFileSelected(e: NodeSelectedEvent): void {
+    protected OnNodeSelected(e: NodeSelectedEvent): void {
         console.log(e);
         if (e.node.isBranch()) {
             return;
@@ -88,5 +105,57 @@ export class MonacoRecorder extends TransactionRecorder {
         this.timeOffset = Date.now() - this.start;
         this.SelectFile(this.timeOffset, oldFileName, newFileName);
         this.codeComponent.UpdateCacheForCurrentFile();
+
+        this.TriggerDelayedSave();
+    }
+
+    protected OnNodeCreated(e: NodeCreatedEvent) {
+        console.log(e);
+        const oldFileName = this.codeComponent.currentFilePath;
+        const newFileName = this.fileTreeComponent.getPathForNode(e.node);
+        this.codeComponent.currentFilePath = newFileName;
+        this.timeOffset = Date.now() - this.start;
+        this.fileTreeComponent.treeComponent.getControllerByNodeId(e.node.id).select();
+        this.CreateItem(this.timeOffset, oldFileName, newFileName, e.node.isBranch());
+
+        this.TriggerDelayedSave();
+    }
+
+    protected OnNodeRename(e: NodeRenamedEvent) {
+        console.log(e);
+        const oldFileName = this.codeComponent.currentFilePath;
+        const newFileName = this.fileTreeComponent.getPathForNode(e.node);
+        this.codeComponent.currentFilePath = newFileName;
+        this.timeOffset = Date.now() - this.start;
+        this.fileTreeComponent.treeComponent.getControllerByNodeId(e.node.id).select();
+        this.RenameFile(this.timeOffset, oldFileName, newFileName);
+
+        // TODO handle children if a folder
+
+        this.TriggerDelayedSave();
+    }
+
+    protected OnNodeDeleted(e: NodeRemovedEvent) {
+        console.log(e);
+
+        // TODO handle children if a folder (Delete children first)
+
+        const nodePath = this.fileTreeComponent.getPathForNode(e.node);
+        this.timeOffset = Date.now() - this.start;
+        this.fileTreeComponent.treeComponent.getControllerByNodeId(e.node.id).select();
+        this.DeleteFile(this.timeOffset, nodePath, this.codeComponent.GetCacheForFileName(nodePath));
+
+        // TODO select nothing for code editor
+
+        this.TriggerDelayedSave();
+    }
+
+    private TriggerDelayedSave(): void {
+        // Try to delay saves by partition size to increase odds we save this partition
+        setTimeout(() => {
+            this.timeOffset = Date.now() - this.start;
+            this.GetTransactionLogByTimeOffset(this.timeOffset); // call this trigger new partition before save maybe
+            this.SaveTransactionLogs().then();
+        }, this.project.getPartitionSize());
     }
 }

@@ -6,6 +6,15 @@ export abstract class MonacoEditorComponent {
   public startingCode = '';
   protected fileCache: { [fileName: string]: string } = {};
   private filePath: string;
+  private ignoreNext = false;
+
+  public get ignoreNextEvent(): boolean {
+    const res = this.ignoreNext;
+    if (res) {
+      this.ignoreNext = false;
+    }
+    return res;
+  }
 
   public codeEditor: editor.ICodeEditor;
 
@@ -28,9 +37,12 @@ export abstract class MonacoEditorComponent {
     // Switch contents based on file name
     const cache = this.GetCacheForCurrentFile();
     if (!cache) {
+      this.ignoreNext = true;
       this.codeEditor.setValue('');
       return;
     }
+
+    this.ignoreNext = true;
     this.codeEditor.setValue(cache);
   }
 
@@ -42,6 +54,10 @@ export abstract class MonacoEditorComponent {
 
   public GetCacheForCurrentFile(): string {
     console.log(`CacheVersion: ${this.fileCache[this.filePath]}`);
-    return this.fileCache[this.filePath];
+    return this.GetCacheForFileName(this.filePath);
+  }
+
+  public GetCacheForFileName(path: string) {
+    return this.fileCache[path];
   }
 }

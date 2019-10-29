@@ -27,7 +27,7 @@ export abstract class NG2FileTreeComponent {
     let path = '';
     const parents = [];
     while (e.parent) {
-      parents.push(e.parent);
+      parents.push(e);
       e = e.parent;
     }
 
