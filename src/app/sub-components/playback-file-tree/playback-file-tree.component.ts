@@ -25,19 +25,9 @@ export class PlaybackFileTreeComponent extends NG2FileTreeComponent implements O
       },
       keepNodesInDOM: true,
       static: true,
+      selectionAllowed: false,
     },
-    children: [
-      {
-        value: 'project',
-        id: 2,
-        children: [
-          // { value: 'helloworld.js', id: 3 },
-        ],
-        settings: {
-          isCollapsedOnInit: false
-        }
-      }
-    ]
+    children: []
   };
 
   ngOnInit() {
