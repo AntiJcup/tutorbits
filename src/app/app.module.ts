@@ -17,6 +17,7 @@ import { RecordComponent } from './components/record/record.component';
 import { PlaybackEditorComponent } from './sub-components/playback-editor/playback-editor.component';
 import { RecordingEditorComponent } from './sub-components/recording-editor/recording-editor.component';
 import { RecordingFileTreeComponent } from './sub-components/recording-file-tree/recording-file-tree.component';
+import { PlaybackFileTreeComponent } from './sub-components/playback-file-tree/playback-file-tree.component';
 
 const appRoutes: Routes = [
   {
@@ -51,7 +52,8 @@ const appRoutes: Routes = [
     RecordComponent,
     PlaybackEditorComponent,
     RecordingEditorComponent,
-    RecordingFileTreeComponent
+    RecordingFileTreeComponent,
+    PlaybackFileTreeComponent
   ],
   imports: [
     BrowserModule,

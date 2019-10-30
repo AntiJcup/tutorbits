@@ -5,15 +5,12 @@
         <source src="http://static.videogular.com/assets/videos/videogular.mp4" type="video/mp4">
       </video>
     </vg-player>
-    <div class="tutorialFileExplorerContainer">
-      <tree id="tutorialFileExplorer" class='tutorialFileExplorer' [tree]="tree" [settings]="settings"
-        (nodeSelected)="nodeSelected($event)">
-      </tree>
-    </div>
+    <app-playback-file-tree id="tutorialFileExplorer">
+    </app-playback-file-tree>
   </div>
   <div class="editorContainer">
     <div class="editorContainer" fxLayout fxLayoutGap="5px">
-      <app-playback-editor class="teacherEditor" [projectId]="projectId" [requestInfo]="requestInfo">
+      <app-playback-editor class="recordingEditor" (codeInitialized)="onCodeInitialized($event)">
       </app-playback-editor>
     </div>
   </div>

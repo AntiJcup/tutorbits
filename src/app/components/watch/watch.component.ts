@@ -1,8 +1,10 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { OnlineTransactionRequestInfo } from 'shared/Tracer/lib/ts/OnlineTransaction';
-import { TreeModel, Ng2TreeSettings, TreeComponent } from 'ng2-tree';
+import { OnlineTransactionRequestInfo, OnlineTransactionRequest, OnlineProjectLoader, OnlineTransactionLoader } from 'shared/Tracer/lib/ts/OnlineTransaction';
 import { environment } from 'src/environments/environment';
 import { ActivatedRoute } from '@angular/router';
+import { PlaybackEditorComponent } from 'src/app/sub-components/playback-editor/playback-editor.component';
+import { PlaybackFileTreeComponent } from 'src/app/sub-components/playback-file-tree/playback-file-tree.component';
+import { MonacoPlayer } from 'src/app/sub-components/player/monaco.player';
 
 @Component({
   templateUrl: './watch.component.html',
@@ -16,63 +18,31 @@ export class WatchComponent implements OnInit {
     credentials: undefined,
     headers: {},
   };
-  title = 'tutorbits';
-  public tree: TreeModel = {
-    value: '/',
-    id: 1,
-    settings: {
-      cssClasses: {
-        expanded: 'fa fa-caret-down',
-        collapsed: 'fa fa-caret-right',
-        empty: 'fa fa-caret-right disabled',
-        leaf: 'fa'
-      },
-      templates: {
-        node: '<i class="fa fa-folder-o"></i>',
-        leaf: '<i class="fa fa-file-o"></i>'
-      },
-      keepNodesInDOM: true,
-      static: true,
-      selectionAllowed: false,
-    },
-    children: [
-      {
-        value: 'project',
-        id: 2,
-        children: [
-          { value: 'helloworld.js', id: 3 },
-        ],
-        settings: {
-          isCollapsedOnInit: false
-        }
-      }
-    ]
-  };
 
-  public settings: Ng2TreeSettings = {
-    rootIsVisible: false,
-    showCheckboxes: false
-  };
+  @ViewChild(PlaybackFileTreeComponent, { static: true }) playbackTreeComponent: PlaybackFileTreeComponent;
+  @ViewChild(PlaybackEditorComponent, { static: true }) playbackEditor: PlaybackEditorComponent;
 
-  @ViewChild(TreeComponent, { static: true }) treeComp: TreeComponent;
+  codePlayer: MonacoPlayer;
 
   constructor(private route: ActivatedRoute) {
     this.projectId = this.route.snapshot.paramMap.get('projectId');
   }
 
-
   ngOnInit(): void {
 
   }
 
-  public nodeSelected(event: any) {
-    const test = this.treeComp.getControllerByNodeId(event.node.id);
-    console.log(test.isCollapsed());
-    if (!test.isCollapsed()) {
-      test.collapse();
-    } else {
-      test.expand();
-    }
-    console.log(event);
+  onCodeInitialized(playbackEditor: PlaybackEditorComponent) {
+    const requestObj = new OnlineTransactionRequest(this.requestInfo);
+    this.codePlayer = new MonacoPlayer(
+      this.playbackEditor,
+      this.playbackTreeComponent,
+      new OnlineProjectLoader(requestObj),
+      new OnlineTransactionLoader(requestObj),
+      this.projectId);
+
+    this.codePlayer.Load().then(() => {
+      this.codePlayer.Play();
+    });
   }
 }

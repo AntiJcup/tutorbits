@@ -3,10 +3,13 @@ import { TraceTransaction } from 'shared/Tracer/models/ts/Tracer_pb';
 import { editor } from 'monaco-editor';
 import { TransactionLoader } from 'shared/Tracer/lib/ts/TransactionLoader';
 import { ProjectLoader } from 'shared/Tracer/lib/ts/ProjectLoader';
+import { MonacoEditorComponent } from '../editor/monaco-editor.component';
+import { NG2FileTreeComponent } from '../file-tree/ng2-file-tree.component';
 
 export class MonacoPlayer extends TransactionPlayer {
     constructor(
-        protected codeEditor: editor.ICodeEditor,
+        protected codeComponent: MonacoEditorComponent,
+        protected fileTreeComponent: NG2FileTreeComponent,
         projectLoader: ProjectLoader,
         transactionLoader: TransactionLoader,
         projectId: string,
@@ -24,7 +27,7 @@ export class MonacoPlayer extends TransactionPlayer {
             transactionLoader,
             projectId);
 
-        this.codeEditor.updateOptions(MonacoPlayer.readOnlyOptions);
+        this.codeComponent.codeEditor.updateOptions(MonacoPlayer.readOnlyOptions);
     }
 
     private static editOptions: editor.IEditorOptions = {
@@ -40,7 +43,7 @@ export class MonacoPlayer extends TransactionPlayer {
             case TraceTransaction.TraceTransactionType.MODIFYFILE:
                 console.log(transaction.toObject());
 
-                const editorModel = this.codeEditor.getModel() as editor.ITextModel;
+                const editorModel = this.codeComponent.codeEditor.getModel() as editor.ITextModel;
                 const startPos = editorModel.getPositionAt(transaction.getModifyFile().getOffsetStart());
                 const endPos = editorModel.getPositionAt(transaction.getModifyFile().getOffsetEnd());
 
@@ -75,12 +78,12 @@ export class MonacoPlayer extends TransactionPlayer {
         }
 
         if (edits.length > 0) {
-            this.codeEditor.updateOptions(MonacoPlayer.editOptions);
-            if (this.codeEditor.hasTextFocus()) {
+            this.codeComponent.codeEditor.updateOptions(MonacoPlayer.editOptions);
+            if (this.codeComponent.codeEditor.hasTextFocus()) {
                 (document.activeElement as HTMLElement).blur();
             }
-            this.codeEditor.executeEdits('teacher', edits);
-            this.codeEditor.updateOptions(MonacoPlayer.readOnlyOptions);
+            this.codeComponent.codeEditor.executeEdits('teacher', edits);
+            this.codeComponent.codeEditor.updateOptions(MonacoPlayer.readOnlyOptions);
         }
     }
 

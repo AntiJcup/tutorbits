@@ -1,24 +1,18 @@
-import { Component, OnInit } from '@angular/core';
-import { TreeModel, NodeMenuItemAction } from 'ng2-tree';
+import { Component, OnInit, Input, ViewChild } from '@angular/core';
+import { TreeModel } from 'ng2-tree';
 import { NG2FileTreeComponent } from '../file-tree/ng2-file-tree.component';
 
 @Component({
-  selector: 'app-recording-file-tree',
-  templateUrl: './recording-file-tree.component.html',
-  styleUrls: ['./recording-file-tree.component.sass']
+  selector: 'app-playback-file-tree',
+  templateUrl: './playback-file-tree.component.html',
+  styleUrls: ['./playback-file-tree.component.sass']
 })
 
-export class RecordingFileTreeComponent extends NG2FileTreeComponent implements OnInit {
+export class PlaybackFileTreeComponent extends NG2FileTreeComponent implements OnInit {
   public tree: TreeModel = {
     value: '/',
     id: 1,
     settings: {
-      menuItems: [
-        { action: NodeMenuItemAction.NewFolder, name: 'Add folder', cssClass: '' },
-        { action: NodeMenuItemAction.NewTag, name: 'Add file', cssClass: '' },
-        { action: NodeMenuItemAction.Remove, name: 'Delete', cssClass: '' },
-        { action: NodeMenuItemAction.Rename, name: 'Rename', cssClass: '' }
-      ],
       cssClasses: {
         expanded: 'fa fa-caret-down',
         collapsed: 'fa fa-caret-right',
@@ -30,6 +24,7 @@ export class RecordingFileTreeComponent extends NG2FileTreeComponent implements 
         leaf: '<i class="fa fa-file-o"></i>'
       },
       keepNodesInDOM: true,
+      static: true,
     },
     children: [
       {

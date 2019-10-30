@@ -1,7 +1,5 @@
-import { Component, OnInit, Input } from '@angular/core';
-import { editor } from 'monaco-editor';
-import { MonacoPlayer } from '../player/monaco.player';
-import { OnlineTransactionLoader, OnlineTransactionRequest, OnlineTransactionRequestInfo, OnlineProjectLoader } from 'shared/Tracer/lib/ts/OnlineTransaction';
+import { Component, OnInit, Input, ElementRef, ViewChild } from '@angular/core';
+import { MonacoEditorComponent } from '../editor/monaco-editor.component';
 
 @Component({
   selector: 'app-playback-editor',
@@ -9,42 +7,22 @@ import { OnlineTransactionLoader, OnlineTransactionRequest, OnlineTransactionReq
   styleUrls: ['./playback-editor.component.sass']
 })
 
-export class PlaybackEditorComponent implements OnInit {
-  editorOptions = { theme: 'vs-dark', language: 'javascript' };
-  startingCode = '';
-
-  codeEditor: editor.ICodeEditor;
-  codePlayer: MonacoPlayer;
-
-  @Input() projectId: string;
-  @Input() requestInfo: OnlineTransactionRequestInfo;
-
-  constructor() { }
-
-  public get CodePlayer(): MonacoPlayer {
-    return this.codePlayer;
-  }
-
+export class PlaybackEditorComponent extends MonacoEditorComponent implements OnInit {
+  @ViewChild('codeeditorcontainer', { static: true }) componentContainer: ElementRef;
+  @ViewChild('codeeditortitle', { static: true }) editorTitle: ElementRef;
   ngOnInit() {
+    if (!this.currentFilePath || this.currentFilePath === '') {
+      this.Show(false);
+    }
   }
 
-  editorOnInit(codeEditor: editor.IEditor) {
-    this.codeEditor = codeEditor as editor.ICodeEditor;
-
-    const requestObj: OnlineTransactionRequest = new OnlineTransactionRequest(this.requestInfo);
-    this.codePlayer = new MonacoPlayer(
-      this.codeEditor,
-      new OnlineProjectLoader(requestObj),
-      new OnlineTransactionLoader(requestObj),
-      this.projectId);
-
-    this.codePlayer.Load().then(() => {
-      //this.codePlayer.position = 40000;
-      this.codePlayer.Play();
-      // setTimeout(() => {
-      //   this.codePlayer.position = 0;
-      // }, 7000);
-    });
+  public Show(show: boolean) {
+    if (show) {
+      this.componentContainer.nativeElement.style.visibility = 'visible';
+      this.editorTitle.nativeElement.innerText = this.currentFilePath;
+    } else {
+      this.componentContainer.nativeElement.style.visibility = 'hidden';
+    }
   }
 
 }
