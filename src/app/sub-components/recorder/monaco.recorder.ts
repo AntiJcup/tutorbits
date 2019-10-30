@@ -113,7 +113,6 @@ export class MonacoRecorder extends TransactionRecorder {
         console.log(e);
         const oldFileName = this.codeComponent.currentFilePath;
         const newFileName = this.fileTreeComponent.getPathForNode(e.node);
-        this.codeComponent.currentFilePath = newFileName;
         this.timeOffset = Date.now() - this.start;
         this.fileTreeComponent.treeComponent.getControllerByNodeId(e.node.id).select();
         this.CreateItem(this.timeOffset, oldFileName, newFileName, e.node.isBranch());

@@ -20,10 +20,14 @@ export abstract class MonacoEditorComponent {
 
   @Output() codeInitialized = new EventEmitter<MonacoEditorComponent>();
 
-  constructor() { }
+  constructor() {
+  }
 
   editorOnInit(codeEditor: editor.IEditor) {
     this.codeEditor = codeEditor as editor.ICodeEditor;
+    if (!this.filePath || this.filePath === '') {
+      this.Show(false);
+    }
     this.codeInitialized.emit(this);
   }
 
@@ -33,6 +37,12 @@ export abstract class MonacoEditorComponent {
 
   public set currentFilePath(path: string) {
     this.filePath = path;
+
+    if (!this.filePath || this.filePath === '') {
+      this.Show(false);
+    } else {
+      this.Show(true);
+    }
 
     // Switch contents based on file name
     const cache = this.GetCacheForCurrentFile();
@@ -60,4 +70,6 @@ export abstract class MonacoEditorComponent {
   public GetCacheForFileName(path: string) {
     return this.fileCache[path];
   }
+
+  public abstract Show(show: boolean);
 }
