@@ -36,6 +36,10 @@ export abstract class MonacoEditorComponent {
   }
 
   public set currentFilePath(path: string) {
+    if (this.filePath === path) {
+      return;
+    }
+    
     this.filePath = path;
 
     if (!this.filePath || this.filePath === '') {

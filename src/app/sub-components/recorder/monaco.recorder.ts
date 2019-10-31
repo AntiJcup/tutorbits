@@ -67,6 +67,18 @@ export class MonacoRecorder extends TransactionRecorder {
         if (this.nodeSelectedListener) {
             this.nodeSelectedListener.unsubscribe();
         }
+
+        if (this.nodeCreatedListener) {
+            this.nodeCreatedListener.unsubscribe();
+        }
+
+        if (this.nodeRenameListener) {
+            this.nodeRenameListener.unsubscribe();
+        }
+
+        if (this.nodeDeletedListener) {
+            this.nodeDeletedListener.unsubscribe();
+        }
     }
 
     protected OnFileModified(e: editor.IModelContentChangedEvent): void {
@@ -143,8 +155,7 @@ export class MonacoRecorder extends TransactionRecorder {
 
         const nodePath = this.fileTreeComponent.getPathForNode(e.node);
         this.timeOffset = Date.now() - this.start;
-        this.fileTreeComponent.treeComponent.getControllerByNodeId(e.node.id).select();
-        this.DeleteFile(this.timeOffset, nodePath, this.codeComponent.GetCacheForFileName(nodePath));
+        this.DeleteFile(this.timeOffset, nodePath, this.codeComponent.GetCacheForFileName(nodePath), e.node.isBranch());
 
         // TODO select nothing for code editor
 

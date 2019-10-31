@@ -6,8 +6,20 @@ import { ProjectLoader } from 'shared/Tracer/lib/ts/ProjectLoader';
 import { MonacoEditorComponent } from '../editor/monaco-editor.component';
 import { NG2FileTreeComponent } from '../file-tree/ng2-file-tree.component';
 import { connectableObservableDescriptor } from 'rxjs/internal/observable/ConnectableObservable';
+import { NodeSelectedEvent } from 'ng2-tree';
+import { Subscription } from 'rxjs';
+import { create } from 'domain';
 
 export class MonacoPlayer extends TransactionPlayer {
+    private static editOptions: editor.IEditorOptions = {
+        readOnly: false
+    };
+    private static readOnlyOptions: editor.IEditorOptions = {
+        readOnly: true
+    };
+
+    private nodeSelectedListener: Subscription = null;
+
     constructor(
         protected codeComponent: MonacoEditorComponent,
         protected fileTreeComponent: NG2FileTreeComponent,
@@ -29,14 +41,20 @@ export class MonacoPlayer extends TransactionPlayer {
             projectId);
 
         this.codeComponent.codeEditor.updateOptions(MonacoPlayer.readOnlyOptions);
+
+        this.nodeSelectedListener = this.fileTreeComponent.treeComponent.nodeSelected.subscribe((e: NodeSelectedEvent) => {
+            this.OnNodeSelected(e);
+        });
     }
 
-    private static editOptions: editor.IEditorOptions = {
-        readOnly: false
-    };
-    private static readOnlyOptions: editor.IEditorOptions = {
-        readOnly: true
-    };
+    protected OnNodeSelected(e: NodeSelectedEvent): void {
+        console.log(e);
+        if (e.node.isBranch()) {
+            return;
+        }
+        const newFileName = this.fileTreeComponent.getPathForNode(e.node);
+        this.codeComponent.currentFilePath = newFileName;
+    }
 
     protected HandleTransaction(transaction: TraceTransaction, undo?: boolean): void {
         try {
@@ -49,7 +67,8 @@ export class MonacoPlayer extends TransactionPlayer {
                     if (!undo) {
                         this.fileTreeComponent.addNodeByPath(createNewPath, transaction.getCreateFile().getIsFolder());
                     } else {
-
+                        this.fileTreeComponent.deleteNodeByPath(createNewPath);
+                        this.codeComponent.currentFilePath = createOldPath;
                     }
                     break;
                 case TraceTransaction.TraceTransactionType.SELECTFILE:
@@ -59,13 +78,25 @@ export class MonacoPlayer extends TransactionPlayer {
                         this.fileTreeComponent.selectNodeByPath(this.fileTreeComponent.treeComponent.tree, selectNewPath);
                         this.codeComponent.currentFilePath = selectNewPath;
                     } else {
-
+                        this.fileTreeComponent.selectNodeByPath(this.fileTreeComponent.treeComponent.tree, selectOldPath);
+                        this.codeComponent.currentFilePath = selectOldPath;
+                    }
+                    break;
+                case TraceTransaction.TraceTransactionType.DELETEFILE:
+                    const deletePreviousData = transaction.getDeleteFile().getPreviousData();
+                    const deletePath = transaction.getFilePath();
+                    if (!undo) {
+                        this.fileTreeComponent.deleteNodeByPath(deletePath);
+                        this.codeComponent.currentFilePath = '';
+                    } else {
+                        this.fileTreeComponent.addNodeByPath(deletePath, transaction.getDeleteFile().getIsFolder());
                     }
                     break;
                 case TraceTransaction.TraceTransactionType.MODIFYFILE:
                     const editorModel = this.codeComponent.codeEditor.getModel() as editor.ITextModel;
                     const startPos = editorModel.getPositionAt(transaction.getModifyFile().getOffsetStart());
                     const endPos = editorModel.getPositionAt(transaction.getModifyFile().getOffsetEnd());
+                    this.codeComponent.currentFilePath = transaction.getFilePath();
 
                     let newEdit: editor.IIdentifiedSingleEditOperation = null;
                     if (!undo) {
@@ -104,6 +135,7 @@ export class MonacoPlayer extends TransactionPlayer {
                 }
                 this.codeComponent.codeEditor.executeEdits('teacher', edits);
                 this.codeComponent.codeEditor.updateOptions(MonacoPlayer.readOnlyOptions);
+                this.codeComponent.UpdateCacheForCurrentFile();
             }
         } catch (e) {
             console.error(e);

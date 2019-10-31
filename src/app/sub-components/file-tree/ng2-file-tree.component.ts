@@ -114,8 +114,8 @@ export abstract class NG2FileTreeComponent {
           };
 
           nodeController.addChildAsync(newNodeModel).then((newNode) => {
-            const nodeController = this.treeComponent.getControllerByNodeId(newNode.id);
-            nodeController.rename(newNodeName);
+            const newNodeController = this.treeComponent.getControllerByNodeId(newNode.id);
+            newNodeController.rename(newNodeName);
             if (!isLast) {
               this.addNodeByPath(path, isBranch);
             }
@@ -123,6 +123,14 @@ export abstract class NG2FileTreeComponent {
           break;
         }
       }
+    });
+  }
+
+  public deleteNodeByPath(path: string): void {
+    this.zone.runTask(() => {
+      const nodeToDelete = this.findNodeByPath(this.treeComponent.tree, path);
+      const nodeToDeleteController = this.treeComponent.getControllerByNodeId(nodeToDelete.id);
+      nodeToDeleteController.remove();
     });
   }
 }
