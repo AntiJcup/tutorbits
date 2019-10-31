@@ -85,7 +85,6 @@ export abstract class NG2FileTreeComponent {
       // this.treeComponent.getControllerByNodeId(foundNode.id).expandToParent();
       this.treeComponent.getControllerByNodeId(foundNode.id).select();
     });
-
   }
 
   public addNodeByPath(path: string, isBranch: boolean): void {
@@ -98,7 +97,7 @@ export abstract class NG2FileTreeComponent {
         if (subPath === '') {
           subPath = '/';
         }
-        const matchingNode = this.findNodeByPath(node, subPath);
+        const matchingNode = this.findNodeByPath(this.treeComponent.tree, subPath);
         if (matchingNode) {
           node = matchingNode;
         } else {

@@ -88,8 +88,30 @@ export class MonacoPlayer extends TransactionPlayer {
                     if (!undo) {
                         this.fileTreeComponent.deleteNodeByPath(deletePath);
                         this.codeComponent.currentFilePath = '';
+                        this.codeComponent.ClearCacheForFile(deletePath);
                     } else {
                         this.fileTreeComponent.addNodeByPath(deletePath, transaction.getDeleteFile().getIsFolder());
+                        this.codeComponent.UpdateCacheForFile(deletePath, deletePreviousData);
+                    }
+                    break;
+                case TraceTransaction.TraceTransactionType.RENAMEFILE:
+                    const renamePreviousData = transaction.getRenameFile().getPreviousData();
+                    const renameNewPath = transaction.getRenameFile().getNewFilePath();
+                    const renameOldPath = transaction.getFilePath();
+                    if (!undo) {
+                        this.fileTreeComponent.deleteNodeByPath(renameOldPath);
+                        this.fileTreeComponent.addNodeByPath(renameNewPath, transaction.getRenameFile().getIsFolder());
+
+                        this.codeComponent.ClearCacheForFile(renameOldPath);
+                        this.codeComponent.UpdateCacheForFile(renameNewPath, renamePreviousData);
+                        this.codeComponent.currentFilePath = renameNewPath;
+                    } else {
+                        this.fileTreeComponent.deleteNodeByPath(renameNewPath);
+                        this.fileTreeComponent.addNodeByPath(renameOldPath, transaction.getRenameFile().getIsFolder());
+
+                        this.codeComponent.ClearCacheForFile(renameNewPath);
+                        this.codeComponent.UpdateCacheForFile(renameOldPath, renamePreviousData);
+                        this.codeComponent.currentFilePath = renameOldPath;
                     }
                     break;
                 case TraceTransaction.TraceTransactionType.MODIFYFILE:

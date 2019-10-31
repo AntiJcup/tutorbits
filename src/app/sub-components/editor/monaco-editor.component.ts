@@ -39,7 +39,7 @@ export abstract class MonacoEditorComponent {
     if (this.filePath === path) {
       return;
     }
-    
+
     this.filePath = path;
 
     if (!this.filePath || this.filePath === '') {
@@ -58,6 +58,14 @@ export abstract class MonacoEditorComponent {
 
     this.ignoreNext = true;
     this.codeEditor.setValue(cache);
+  }
+
+  public ClearCacheForFile(path: string) {
+    delete this.fileCache[path];
+  }
+
+  public UpdateCacheForFile(path: string, data: string) {
+    this.fileCache[path] = data;
   }
 
   public UpdateCacheForCurrentFile(): void {

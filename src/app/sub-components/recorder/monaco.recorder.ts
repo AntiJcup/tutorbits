@@ -4,7 +4,7 @@ import { TransactionRecorder } from 'shared/Tracer/lib/ts/TransactionRecorder';
 import { TransactionWriter } from 'shared/Tracer/lib/ts/TransactionWriter';
 import { ProjectLoader } from 'shared/Tracer/lib/ts/ProjectLoader';
 import { ProjectWriter } from 'shared/Tracer/lib/ts/ProjectWriter';
-import { TreeComponent, NodeSelectedEvent, NodeCreatedEvent, NodeRenamedEvent, NodeRemovedEvent } from 'ng2-tree';
+import { TreeComponent, NodeSelectedEvent, NodeCreatedEvent, NodeRenamedEvent, NodeRemovedEvent, NodeMovedEvent } from 'ng2-tree';
 import { stringify } from 'querystring';
 import { Subscription } from 'rxjs';
 import { MonacoEditorComponent } from '../editor/monaco-editor.component';
@@ -18,6 +18,7 @@ export class MonacoRecorder extends TransactionRecorder {
     private nodeCreatedListener: Subscription = null;
     private nodeRenameListener: Subscription = null;
     private nodeDeletedListener: Subscription = null;
+    private nodeMovedListener: Subscription = null;
 
     private timeOffset: number;
     private start: number;
@@ -56,6 +57,10 @@ export class MonacoRecorder extends TransactionRecorder {
 
         this.nodeDeletedListener = this.fileTreeComponent.treeComponent.nodeRemoved.subscribe((e: NodeRemovedEvent) => {
             this.OnNodeDeleted(e);
+        });
+
+        this.nodeMovedListener = this.fileTreeComponent.treeComponent.nodeMoved.subscribe((e: NodeMovedEvent) => {
+            this.OnNodeMoved(e);
         });
     }
 
@@ -136,13 +141,20 @@ export class MonacoRecorder extends TransactionRecorder {
 
     protected OnNodeRename(e: NodeRenamedEvent) {
         console.log(e);
-        const oldFileName = this.codeComponent.currentFilePath;
         const newFileName = this.fileTreeComponent.getPathForNode(e.node);
+        const newFileNameSplit = newFileName.split('/');
+        const parentPath = newFileNameSplit.slice(0, newFileNameSplit.length - 1).join('/');
+        const oldFileName = parentPath + '/' + e.oldValue;
+
+        const oldFileData = this.codeComponent.GetCacheForFileName(oldFileName);
         this.codeComponent.currentFilePath = newFileName;
         this.timeOffset = Date.now() - this.start;
         this.fileTreeComponent.treeComponent.getControllerByNodeId(e.node.id).select();
-        this.RenameFile(this.timeOffset, oldFileName, newFileName);
-
+        this.RenameFile(this.timeOffset, oldFileName, newFileName, oldFileData, e.node.isBranch());
+        this.codeComponent.ClearCacheForFile(oldFileName);
+        this.codeComponent.currentFilePath = '';
+        this.codeComponent.UpdateCacheForFile(newFileName, oldFileData);
+        this.codeComponent.currentFilePath = newFileName;
         // TODO handle children if a folder
 
         this.TriggerDelayedSave();
@@ -158,6 +170,26 @@ export class MonacoRecorder extends TransactionRecorder {
         this.DeleteFile(this.timeOffset, nodePath, this.codeComponent.GetCacheForFileName(nodePath), e.node.isBranch());
 
         // TODO select nothing for code editor
+
+        this.TriggerDelayedSave();
+    }
+
+    protected OnNodeMoved(e: NodeMovedEvent) {
+        console.log(e);
+        const newFileName = this.fileTreeComponent.getPathForNode(e.node);
+        const oldParentPath = this.fileTreeComponent.getPathForNode(e.previousParent);
+        const oldFileName = oldParentPath + '/' + e.node.value;
+
+        const oldFileData = this.codeComponent.GetCacheForFileName(oldFileName);
+        this.codeComponent.currentFilePath = newFileName;
+        this.timeOffset = Date.now() - this.start;
+        this.fileTreeComponent.treeComponent.getControllerByNodeId(e.node.id).select();
+        this.RenameFile(this.timeOffset, oldFileName, newFileName, oldFileData, e.node.isBranch());
+        this.codeComponent.ClearCacheForFile(oldFileName);
+        this.codeComponent.currentFilePath = '';
+        this.codeComponent.UpdateCacheForFile(newFileName, oldFileData);
+        this.codeComponent.currentFilePath = newFileName;
+        // TODO handle children if a folder
 
         this.TriggerDelayedSave();
     }
