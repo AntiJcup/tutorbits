@@ -64,6 +64,14 @@ export abstract class MonacoEditorComponent {
     delete this.fileCache[path];
   }
 
+  public ClearCacheForFolder(path: string) {
+    for (const key of Object.keys(this.fileCache)) {
+      if (key.startsWith(path)) {
+        delete this.fileCache[key];
+      }
+    }
+  }
+
   public UpdateCacheForFile(path: string, data: string) {
     this.fileCache[path] = data;
   }

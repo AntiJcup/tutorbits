@@ -4,7 +4,7 @@ import { TransactionRecorder } from 'shared/Tracer/lib/ts/TransactionRecorder';
 import { TransactionWriter } from 'shared/Tracer/lib/ts/TransactionWriter';
 import { ProjectLoader } from 'shared/Tracer/lib/ts/ProjectLoader';
 import { ProjectWriter } from 'shared/Tracer/lib/ts/ProjectWriter';
-import { TreeComponent, NodeSelectedEvent, NodeCreatedEvent, NodeRenamedEvent, NodeRemovedEvent, NodeMovedEvent } from 'ng2-tree';
+import { TreeComponent, NodeSelectedEvent, NodeCreatedEvent, NodeRenamedEvent, NodeRemovedEvent, NodeMovedEvent, Tree } from 'ng2-tree';
 import { stringify } from 'querystring';
 import { Subscription } from 'rxjs';
 import { MonacoEditorComponent } from '../editor/monaco-editor.component';
@@ -141,10 +141,17 @@ export class MonacoRecorder extends TransactionRecorder {
 
     protected OnNodeRename(e: NodeRenamedEvent) {
         console.log(e);
+
         const newFileName = this.fileTreeComponent.getPathForNode(e.node);
         const newFileNameSplit = newFileName.split('/');
-        const parentPath = newFileNameSplit.slice(0, newFileNameSplit.length - 1).join('/');
-        const oldFileName = parentPath + '/' + e.oldValue;
+        const oldParentPath = newFileNameSplit.slice(0, newFileNameSplit.length - 1).join('/');
+        const oldFileName = oldParentPath + '/' + e.oldValue;
+
+        if (e.node.isBranch()) {
+            for (const child of e.node.children) {
+                this.OnNodeChildRenamed(child, oldFileName);
+            }
+        }
 
         const oldFileData = this.codeComponent.GetCacheForFileName(oldFileName);
         this.codeComponent.currentFilePath = newFileName;
@@ -155,7 +162,29 @@ export class MonacoRecorder extends TransactionRecorder {
         this.codeComponent.currentFilePath = '';
         this.codeComponent.UpdateCacheForFile(newFileName, oldFileData);
         this.codeComponent.currentFilePath = newFileName;
-        // TODO handle children if a folder
+
+        this.TriggerDelayedSave();
+    }
+
+    protected OnNodeChildRenamed(node: Tree, oldParentName: string) {
+        const newFileName = this.fileTreeComponent.getPathForNode(node);
+        const oldFileName = oldParentName + '/' + node.value;
+
+        if (node.isBranch()) {
+            for (const child of node.children) {
+                this.OnNodeChildRenamed(child, oldFileName);
+            }
+        }
+
+        const oldFileData = this.codeComponent.GetCacheForFileName(oldFileName);
+        this.codeComponent.currentFilePath = newFileName;
+        this.timeOffset = Date.now() - this.start;
+        this.fileTreeComponent.treeComponent.getControllerByNodeId(node.id).select();
+        this.RenameFile(this.timeOffset, oldFileName, newFileName, oldFileData, node.isBranch());
+        this.codeComponent.ClearCacheForFile(oldFileName);
+        this.codeComponent.currentFilePath = '';
+        this.codeComponent.UpdateCacheForFile(newFileName, oldFileData);
+        this.codeComponent.currentFilePath = newFileName;
 
         this.TriggerDelayedSave();
     }
@@ -163,13 +192,19 @@ export class MonacoRecorder extends TransactionRecorder {
     protected OnNodeDeleted(e: NodeRemovedEvent) {
         console.log(e);
 
-        // TODO handle children if a folder (Delete children first)
+        if (e.node.isBranch()) {
+            for (const child of e.node.children) {
+                this.OnNodeDeleted(new NodeRemovedEvent(child, 0));
+            }
+        }
 
         const nodePath = this.fileTreeComponent.getPathForNode(e.node);
         this.timeOffset = Date.now() - this.start;
         this.DeleteFile(this.timeOffset, nodePath, this.codeComponent.GetCacheForFileName(nodePath), e.node.isBranch());
 
-        // TODO select nothing for code editor
+        if (nodePath === this.codeComponent.currentFilePath) {
+            this.codeComponent.currentFilePath = '';
+        }
 
         this.TriggerDelayedSave();
     }
@@ -180,6 +215,12 @@ export class MonacoRecorder extends TransactionRecorder {
         const oldParentPath = this.fileTreeComponent.getPathForNode(e.previousParent);
         const oldFileName = oldParentPath + '/' + e.node.value;
 
+        if (e.node.isBranch()) {
+            for (const child of e.node.children) {
+                this.OnNodeChildRenamed(child, oldFileName);
+            }
+        }
+
         const oldFileData = this.codeComponent.GetCacheForFileName(oldFileName);
         this.codeComponent.currentFilePath = newFileName;
         this.timeOffset = Date.now() - this.start;
@@ -189,7 +230,6 @@ export class MonacoRecorder extends TransactionRecorder {
         this.codeComponent.currentFilePath = '';
         this.codeComponent.UpdateCacheForFile(newFileName, oldFileData);
         this.codeComponent.currentFilePath = newFileName;
-        // TODO handle children if a folder
 
         this.TriggerDelayedSave();
     }

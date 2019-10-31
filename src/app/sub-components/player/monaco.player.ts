@@ -85,12 +85,13 @@ export class MonacoPlayer extends TransactionPlayer {
                 case TraceTransaction.TraceTransactionType.DELETEFILE:
                     const deletePreviousData = transaction.getDeleteFile().getPreviousData();
                     const deletePath = transaction.getFilePath();
+                    const deleteIsFolder = transaction.getDeleteFile().getIsFolder();
                     if (!undo) {
                         this.fileTreeComponent.deleteNodeByPath(deletePath);
                         this.codeComponent.currentFilePath = '';
                         this.codeComponent.ClearCacheForFile(deletePath);
                     } else {
-                        this.fileTreeComponent.addNodeByPath(deletePath, transaction.getDeleteFile().getIsFolder());
+                        this.fileTreeComponent.addNodeByPath(deletePath, deleteIsFolder);
                         this.codeComponent.UpdateCacheForFile(deletePath, deletePreviousData);
                     }
                     break;
