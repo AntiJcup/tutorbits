@@ -18,6 +18,8 @@ import { PlaybackEditorComponent } from './sub-components/playback-editor/playba
 import { RecordingEditorComponent } from './sub-components/recording-editor/recording-editor.component';
 import { RecordingFileTreeComponent } from './sub-components/recording-file-tree/recording-file-tree.component';
 import { PlaybackFileTreeComponent } from './sub-components/playback-file-tree/playback-file-tree.component';
+import {WebcamModule} from 'ngx-webcam';
+import { WebCamComponent } from './sub-components/web-cam/web-cam.component';
 
 const appRoutes: Routes = [
   {
@@ -53,7 +55,8 @@ const appRoutes: Routes = [
     PlaybackEditorComponent,
     RecordingEditorComponent,
     RecordingFileTreeComponent,
-    PlaybackFileTreeComponent
+    PlaybackFileTreeComponent,
+    WebCamComponent
   ],
   imports: [
     BrowserModule,
@@ -67,7 +70,8 @@ const appRoutes: Routes = [
     RouterModule.forRoot(
       appRoutes,
       { enableTracing: true }
-    )
+    ),
+    WebcamModule
   ],
   providers: [],
   bootstrap: [AppComponent]

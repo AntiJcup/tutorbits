@@ -5,10 +5,8 @@ import { TransactionLoader } from 'shared/Tracer/lib/ts/TransactionLoader';
 import { ProjectLoader } from 'shared/Tracer/lib/ts/ProjectLoader';
 import { MonacoEditorComponent } from '../editor/monaco-editor.component';
 import { NG2FileTreeComponent } from '../file-tree/ng2-file-tree.component';
-import { connectableObservableDescriptor } from 'rxjs/internal/observable/ConnectableObservable';
 import { NodeSelectedEvent } from 'ng2-tree';
 import { Subscription } from 'rxjs';
-import { create } from 'domain';
 
 export class MonacoPlayer extends TransactionPlayer {
     private static editOptions: editor.IEditorOptions = {

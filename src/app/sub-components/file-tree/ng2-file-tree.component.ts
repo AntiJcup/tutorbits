@@ -1,14 +1,9 @@
 import { ViewChild, NgZone, Injectable } from '@angular/core';
-import { editor } from 'monaco-editor';
 import { TreeComponent, Ng2TreeSettings, Tree, NodeSelectedEvent, TreeModel, TreeController } from 'ng2-tree';
-import { InvokeFunctionExpr } from '@angular/compiler';
-import { start } from 'repl';
-import { runInThisContext } from 'vm';
 import { TreeStatus } from 'ng2-tree/src/tree.types';
 
 @Injectable()
 export abstract class NG2FileTreeComponent {
-  private currentId = 100;
   public settings: Ng2TreeSettings = {
     rootIsVisible: false,
     showCheckboxes: false
@@ -82,7 +77,6 @@ export abstract class NG2FileTreeComponent {
         throw new Error('Node not found');
       }
 
-      // this.treeComponent.getControllerByNodeId(foundNode.id).expandToParent();
       this.treeComponent.getControllerByNodeId(foundNode.id).select();
     });
   }

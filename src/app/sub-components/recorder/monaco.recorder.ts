@@ -84,6 +84,12 @@ export class MonacoRecorder extends TransactionRecorder {
         if (this.nodeDeletedListener) {
             this.nodeDeletedListener.unsubscribe();
         }
+
+        if (this.nodeMovedListener) {
+            this.nodeMovedListener.unsubscribe();
+        }
+
+        this.SaveTransactionLogs().then();
     }
 
     protected OnFileModified(e: editor.IModelContentChangedEvent): void {
