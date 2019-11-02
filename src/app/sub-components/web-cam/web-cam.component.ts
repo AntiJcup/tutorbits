@@ -26,6 +26,7 @@ export class WebCamComponent implements OnInit {
       webCamVideo.srcObject = stream;
       webCamVideo.onloadedmetadata = (e) => {
         webCamVideo.play();
+        webCamVideo.muted = true;
       };
     });
   }
