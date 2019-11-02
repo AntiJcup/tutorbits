@@ -6,6 +6,7 @@ import { MonacoRecorder } from 'src/app/sub-components/recorder/monaco.recorder'
 import { RecordingEditorComponent } from 'src/app/sub-components/recording-editor/recording-editor.component';
 import { RecordingFileTreeComponent } from 'src/app/sub-components/recording-file-tree/recording-file-tree.component';
 import { ApiHttpRequestInfo, ApiHttpRequest } from 'shared/web/lib/ts/ApiHttpRequest';
+import { RecordingWebCamComponent } from 'src/app/sub-components/recording-web-cam/recording-web-cam.component';
 
 @Component({
   templateUrl: './record.component.html',
@@ -16,6 +17,7 @@ export class RecordComponent implements OnInit {
 
   @ViewChild(RecordingFileTreeComponent, { static: true }) recordingTreeComponent: RecordingFileTreeComponent;
   @ViewChild(RecordingEditorComponent, { static: true }) recordingEditor: RecordingEditorComponent;
+  @ViewChild(RecordingWebCamComponent, { static: true }) recordingWebCam: RecordingWebCamComponent;
 
   codeRecorder: MonacoRecorder;
   requestInfo: ApiHttpRequestInfo = {
@@ -29,6 +31,10 @@ export class RecordComponent implements OnInit {
   }
 
   ngOnInit(): void {
+  }
+
+  onStreamInitialized(webCam: RecordingWebCamComponent) {
+    console.log(webCam.stream);
   }
 
   onCodeInitialized(recordingEditor: RecordingEditorComponent) {

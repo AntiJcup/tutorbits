@@ -1,15 +1,19 @@
-import { Component, OnInit, Input, ElementRef, ViewChild } from '@angular/core';
+import { Component, OnInit, Input, ElementRef, ViewChild, Output, EventEmitter } from '@angular/core';
 
 @Component({
   selector: 'app-web-cam',
-  templateUrl: './web-cam.component.html',
-  styleUrls: ['./web-cam.component.sass']
+  templateUrl: './recording-web-cam.component.html',
+  styleUrls: ['./recording-web-cam.component.sass']
 })
 
-export class WebCamComponent implements OnInit {
+export class RecordingWebCamComponent implements OnInit {
   @ViewChild('webcamoutput', { static: true }) webCamTag: ElementRef;
   @Input() width: number;
   @Input() height: number;
+
+  @Output() streamInitialized = new EventEmitter<RecordingWebCamComponent>();
+
+  public stream: MediaStream;
 
   public videoOptions: MediaTrackConstraints = {
 
@@ -21,12 +25,13 @@ export class WebCamComponent implements OnInit {
       video: true,
       audio: true
     }).then((stream: MediaStream) => {
-      console.log(stream);
+      this.stream = stream;
       const webCamVideo: HTMLVideoElement = this.webCamTag.nativeElement;
       webCamVideo.srcObject = stream;
       webCamVideo.onloadedmetadata = (e) => {
         webCamVideo.play();
         webCamVideo.muted = true;
+        this.streamInitialized.next(this);
       };
     });
   }

@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { WebCamComponent } from './web-cam.component';
+import { RecordingWebCamComponent } from './recording-web-cam.component';
 
-describe('WebCamComponent', () => {
-  let component: WebCamComponent;
-  let fixture: ComponentFixture<WebCamComponent>;
+describe('RecordingWebCamComponent', () => {
+  let component: RecordingWebCamComponent;
+  let fixture: ComponentFixture<RecordingWebCamComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ WebCamComponent ]
+      declarations: [ RecordingWebCamComponent ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(WebCamComponent);
+    fixture = TestBed.createComponent(RecordingWebCamComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
