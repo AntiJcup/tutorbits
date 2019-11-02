@@ -44,7 +44,7 @@ export class StreamRecorder {
 
         this.recordingId = await this.writer.StartUpload();
 
-        this.mediaRecorder.start();
+        this.mediaRecorder.start(this.settings.minTimeBeforeUpload);
     }
 
     public async FinishRecording() {

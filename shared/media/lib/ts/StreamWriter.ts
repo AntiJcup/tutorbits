@@ -7,5 +7,5 @@ export abstract class StreamWriter {
 
     public abstract async StartUpload(): Promise<string>;
     public abstract async ContinueUpload(recordingId: string, data: Blob, part: number): Promise<boolean>;
-    public abstract async FinishUpload(): Promise<string>;
+    public abstract async FinishUpload(recordingId: string): Promise<string>;
 }

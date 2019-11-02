@@ -21,8 +21,9 @@ export class OnlineStreamWriter extends StreamWriter {
         return response.ok;
     }
 
-    public async FinishUpload(): Promise<string> {
-        const response = await this.requestor.Post(`api/project/video/recording/stop?projectId=${this.projectId}`);
+    public async FinishUpload(recordingId: string): Promise<string> {
+        const response = await this.requestor.Post(
+            `api/project/video/recording/stop?projectId=${this.projectId}&recordingId=${recordingId}`);
         if (!response.ok) {
             return null;
         }
