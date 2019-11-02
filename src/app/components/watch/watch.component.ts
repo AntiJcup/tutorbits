@@ -1,10 +1,11 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { OnlineTransactionRequestInfo, OnlineTransactionRequest, OnlineProjectLoader, OnlineTransactionLoader } from 'shared/Tracer/lib/ts/OnlineTransaction';
+import { OnlineProjectLoader, OnlineTransactionLoader } from 'shared/Tracer/lib/ts/OnlineTransaction';
 import { environment } from 'src/environments/environment';
 import { ActivatedRoute } from '@angular/router';
 import { PlaybackEditorComponent } from 'src/app/sub-components/playback-editor/playback-editor.component';
 import { PlaybackFileTreeComponent } from 'src/app/sub-components/playback-file-tree/playback-file-tree.component';
 import { MonacoPlayer } from 'src/app/sub-components/player/monaco.player';
+import { ApiHttpRequest, ApiHttpRequestInfo } from 'shared/web/lib/ts/ApiHttpRequest';
 
 @Component({
   templateUrl: './watch.component.html',
@@ -13,7 +14,7 @@ import { MonacoPlayer } from 'src/app/sub-components/player/monaco.player';
 
 export class WatchComponent implements OnInit {
   public projectId: string;
-  requestInfo: OnlineTransactionRequestInfo = {
+  requestInfo: ApiHttpRequestInfo = {
     host: environment.apiHost,
     credentials: undefined,
     headers: {},
@@ -33,7 +34,7 @@ export class WatchComponent implements OnInit {
   }
 
   onCodeInitialized(playbackEditor: PlaybackEditorComponent) {
-    const requestObj = new OnlineTransactionRequest(this.requestInfo);
+    const requestObj = new ApiHttpRequest(this.requestInfo);
     this.codePlayer = new MonacoPlayer(
       this.playbackEditor,
       this.playbackTreeComponent,
