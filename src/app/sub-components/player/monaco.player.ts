@@ -9,13 +9,6 @@ import { NodeSelectedEvent } from 'ng2-tree';
 import { Subscription } from 'rxjs';
 
 export class MonacoPlayer extends TransactionPlayer {
-    private static editOptions: editor.IEditorOptions = {
-        readOnly: false
-    };
-    private static readOnlyOptions: editor.IEditorOptions = {
-        readOnly: true
-    };
-
     private nodeSelectedListener: Subscription = null;
 
     constructor(
@@ -38,7 +31,7 @@ export class MonacoPlayer extends TransactionPlayer {
             transactionLoader,
             projectId);
 
-        this.codeComponent.codeEditor.updateOptions(MonacoPlayer.readOnlyOptions);
+        this.codeComponent.AllowEdits(false);
 
         this.nodeSelectedListener = this.fileTreeComponent.treeComponent.nodeSelected.subscribe((e: NodeSelectedEvent) => {
             this.OnNodeSelected(e);
@@ -150,12 +143,12 @@ export class MonacoPlayer extends TransactionPlayer {
             }
 
             if (edits.length > 0) {
-                this.codeComponent.codeEditor.updateOptions(MonacoPlayer.editOptions);
+                this.codeComponent.AllowEdits(true);
                 if (this.codeComponent.codeEditor.hasTextFocus()) {
                     (document.activeElement as HTMLElement).blur();
                 }
                 this.codeComponent.codeEditor.executeEdits('teacher', edits);
-                this.codeComponent.codeEditor.updateOptions(MonacoPlayer.readOnlyOptions);
+                this.codeComponent.AllowEdits(false);
                 this.codeComponent.UpdateCacheForCurrentFile();
             }
         } catch (e) {

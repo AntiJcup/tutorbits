@@ -1,5 +1,5 @@
-import { ViewChild, NgZone, Injectable } from '@angular/core';
-import { TreeComponent, Ng2TreeSettings, Tree, NodeSelectedEvent, TreeModel, TreeController } from 'ng2-tree';
+import { ViewChild, NgZone, Injectable, SimpleChange, SimpleChanges } from '@angular/core';
+import { TreeComponent, Ng2TreeSettings, Tree, NodeSelectedEvent, TreeModel, TreeController, NodeMenuItemAction } from 'ng2-tree';
 import { TreeStatus } from 'ng2-tree/src/tree.types';
 
 @Injectable()
@@ -125,5 +125,25 @@ export abstract class NG2FileTreeComponent {
       const nodeToDeleteController = this.treeComponent.getControllerByNodeId(nodeToDelete.id);
       nodeToDeleteController.remove();
     });
+  }
+
+  public allowEdit(edit: boolean) {
+    if (edit) {
+      this.treeComponent.treeModel.settings.menuItems = [
+        { action: NodeMenuItemAction.NewFolder, name: 'Add folder', cssClass: '' },
+        { action: NodeMenuItemAction.NewTag, name: 'Add file', cssClass: '' },
+        { action: NodeMenuItemAction.Remove, name: 'Delete', cssClass: '' },
+        { action: NodeMenuItemAction.Rename, name: 'Rename', cssClass: '' }
+      ];
+
+      this.treeComponent.treeModel.settings.static = false;
+
+    } else {
+      this.treeComponent.treeModel = this.treeComponent.tree.toTreeModel();
+      this.treeComponent.treeModel.settings.menuItems = [];
+      this.treeComponent.treeModel.settings.static = true;
+    }
+
+    this.treeComponent.ngOnChanges(null);
   }
 }

@@ -1,11 +1,10 @@
-import { TraceTransaction, TraceProject, TraceTransactionLog } from 'shared/Tracer/models/ts/Tracer_pb';
+import { TraceTransactionLog } from 'shared/Tracer/models/ts/Tracer_pb';
 import { editor, IDisposable } from 'monaco-editor';
 import { TransactionRecorder } from 'shared/Tracer/lib/ts/TransactionRecorder';
 import { TransactionWriter } from 'shared/Tracer/lib/ts/TransactionWriter';
 import { ProjectLoader } from 'shared/Tracer/lib/ts/ProjectLoader';
 import { ProjectWriter } from 'shared/Tracer/lib/ts/ProjectWriter';
-import { TreeComponent, NodeSelectedEvent, NodeCreatedEvent, NodeRenamedEvent, NodeRemovedEvent, NodeMovedEvent, Tree } from 'ng2-tree';
-import { stringify } from 'querystring';
+import { NodeSelectedEvent, NodeCreatedEvent, NodeRenamedEvent, NodeRemovedEvent, NodeMovedEvent, Tree } from 'ng2-tree';
 import { Subscription } from 'rxjs';
 import { MonacoEditorComponent } from '../editor/monaco-editor.component';
 import { NG2FileTreeComponent } from '../file-tree/ng2-file-tree.component';
@@ -22,6 +21,7 @@ export class MonacoRecorder extends TransactionRecorder {
 
     private timeOffset: number;
     private start: number;
+    private recording: boolean;
 
     constructor(
         protected codeComponent: MonacoEditorComponent,
@@ -32,19 +32,20 @@ export class MonacoRecorder extends TransactionRecorder {
         transactionWriter: TransactionWriter,
         transactionLogs?: TraceTransactionLog[]) {
         super(projectId, projectLoader, projectWriter, transactionWriter, transactionLogs);
+
+        this.nodeSelectedListener = this.fileTreeComponent.treeComponent.nodeSelected.subscribe((e: NodeSelectedEvent) => {
+            this.OnNodeSelected(e);
+        });
     }
 
     public StartRecording(): void {
+        this.recording = true;
         this.start = Date.now();
         this.timeOffset = Date.now() - this.start;
         const textEditorModel = this.codeComponent.codeEditor.getModel() as editor.ITextModel;
         this.codeComponent.UpdateCacheForCurrentFile();
         this.fileChangeListener = textEditorModel.onDidChangeContent((e: editor.IModelContentChangedEvent) => {
             this.OnFileModified(e);
-        });
-
-        this.nodeSelectedListener = this.fileTreeComponent.treeComponent.nodeSelected.subscribe((e: NodeSelectedEvent) => {
-            this.OnNodeSelected(e);
         });
 
         this.nodeCreatedListener = this.fileTreeComponent.treeComponent.nodeCreated.subscribe((e: NodeCreatedEvent) => {
@@ -65,12 +66,9 @@ export class MonacoRecorder extends TransactionRecorder {
     }
 
     public StopRecording(): void {
+        this.recording = false;
         if (this.fileChangeListener) {
             this.fileChangeListener.dispose();
-        }
-
-        if (this.nodeSelectedListener) {
-            this.nodeSelectedListener.unsubscribe();
         }
 
         if (this.nodeCreatedListener) {
@@ -125,11 +123,13 @@ export class MonacoRecorder extends TransactionRecorder {
         const oldFileName = this.codeComponent.currentFilePath;
         const newFileName = this.fileTreeComponent.getPathForNode(e.node);
         this.codeComponent.currentFilePath = newFileName;
-        this.timeOffset = Date.now() - this.start;
-        this.SelectFile(this.timeOffset, oldFileName, newFileName);
-        this.codeComponent.UpdateCacheForCurrentFile();
 
-        this.TriggerDelayedSave();
+        if (this.recording) {
+            this.timeOffset = Date.now() - this.start;
+            this.SelectFile(this.timeOffset, oldFileName, newFileName);
+            this.TriggerDelayedSave();
+        }
+        this.codeComponent.UpdateCacheForCurrentFile();
     }
 
     protected OnNodeCreated(e: NodeCreatedEvent) {

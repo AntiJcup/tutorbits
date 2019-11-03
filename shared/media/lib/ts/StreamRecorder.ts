@@ -51,7 +51,7 @@ export class StreamRecorder {
         clearInterval(this.writeLoopInterval);
         this.mediaRecorder.stop();
         this.WriteLoop(true);
-        await this.writer.FinishUpload();
+        await this.writer.FinishUpload(this.recordingId);
     }
 
     public WriteLoop(force: boolean = false) {
@@ -62,8 +62,9 @@ export class StreamRecorder {
         let combinedBlob = new Blob(this.pendingChunks, {
             type: this.settings.mimeType,
         });
+        this.pendingChunks = [];
 
-        while (force || this.pendingDataSize >= this.settings.minDataSize) {
+        while ((force && combinedBlob) || this.pendingDataSize >= this.settings.minDataSize) {
             const blobSize = Math.min(this.settings.maxDataize, combinedBlob.size);
             let uploadBlob = combinedBlob;
             if (blobSize !== combinedBlob.size) {

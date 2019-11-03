@@ -2,6 +2,13 @@ import { Output, EventEmitter } from '@angular/core';
 import { editor } from 'monaco-editor';
 
 export abstract class MonacoEditorComponent {
+  private static editOptions: editor.IEditorOptions = {
+    readOnly: false
+  };
+  private static readOnlyOptions: editor.IEditorOptions = {
+    readOnly: true
+  };
+
   public editorOptions = { theme: 'vs-dark', language: 'javascript' };
   public startingCode = '';
   protected fileCache: { [fileName: string]: string } = {};
@@ -92,4 +99,8 @@ export abstract class MonacoEditorComponent {
   }
 
   public abstract Show(show: boolean);
+
+  public AllowEdits(edit: boolean) {
+    this.codeEditor.updateOptions(edit ? MonacoEditorComponent.editOptions : MonacoEditorComponent.readOnlyOptions);
+  }
 }

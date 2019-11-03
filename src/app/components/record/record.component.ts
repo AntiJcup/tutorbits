@@ -16,6 +16,7 @@ import { OnlineStreamWriter } from 'shared/media/lib/ts/OnlineStreamWriter';
 })
 export class RecordComponent implements OnInit {
   public projectId: string;
+  public recording = false;
 
   @ViewChild(RecordingFileTreeComponent, { static: true }) recordingTreeComponent: RecordingFileTreeComponent;
   @ViewChild(RecordingEditorComponent, { static: true }) recordingEditor: RecordingEditorComponent;
@@ -41,7 +42,7 @@ export class RecordComponent implements OnInit {
     const requestObj = new ApiHttpRequest(this.requestInfo);
     this.webCamRecorder = new WebCamRecorder(this.recordingWebCam, new OnlineStreamWriter(this.projectId, requestObj));
     this.webCamRecorder.Initialize().then(() => {
-      this.webCamRecorder.StartRecording().then();
+      // this.webCamRecorder.StartRecording().then();
     });
   }
 
@@ -57,10 +58,22 @@ export class RecordComponent implements OnInit {
 
     this.codeRecorder.DeleteProject(this.projectId).then(() => {
       this.codeRecorder.New().then(() => {
-        this.codeRecorder.StartRecording();
+        // this.codeRecorder.StartRecording();
       });
     });
+    this.recordingEditor.AllowEdits(false);
   }
 
+  onRecordingStateChanged(recording: boolean) {
+    this.recordingTreeComponent.allowEdit(recording);
+    this.recordingEditor.AllowEdits(recording);
 
+    if (recording) {
+      this.codeRecorder.StartRecording();
+      this.webCamRecorder.StartRecording().then();
+    } else {
+      this.codeRecorder.StopRecording();
+      this.webCamRecorder.FinishRecording().then();
+    }
+  }
 }

@@ -14,10 +14,6 @@ export class RecordingFileTreeComponent extends NG2FileTreeComponent implements 
     id: 1,
     settings: {
       menuItems: [
-        { action: NodeMenuItemAction.NewFolder, name: 'Add folder', cssClass: '' },
-        { action: NodeMenuItemAction.NewTag, name: 'Add file', cssClass: '' },
-        { action: NodeMenuItemAction.Remove, name: 'Delete', cssClass: '' },
-        { action: NodeMenuItemAction.Rename, name: 'Rename', cssClass: '' }
       ],
       cssClasses: {
         expanded: 'fa fa-caret-down',
@@ -30,6 +26,7 @@ export class RecordingFileTreeComponent extends NG2FileTreeComponent implements 
         leaf: '<i class="fa fa-file-o"></i>'
       },
       keepNodesInDOM: true,
+      static: true
     },
     children: [
       {

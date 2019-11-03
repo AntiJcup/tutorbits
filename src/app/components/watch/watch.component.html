@@ -1,8 +1,8 @@
 <div fxLayout fxLayoutGap="5px" class="tutorialContainer">
   <div>
     <vg-player class="tutorialVideo">
-      <video class="tutorialVideo" [vgMedia]="media" #media id="singleVideo" preload="auto" controls>
-        <source src="http://static.videogular.com/assets/videos/videogular.mp4" type="video/mp4">
+      <video #video class="tutorialVideo" [vgMedia]="media" #media id="singleVideo" preload="auto" controls>
+        <source #videoSource type="video/webm">
       </video>
     </vg-player>
     <app-playback-file-tree id="tutorialFileExplorer">
