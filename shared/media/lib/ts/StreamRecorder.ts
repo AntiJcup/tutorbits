@@ -1,4 +1,5 @@
 import { StreamWriter } from './StreamWriter';
+import { EventEmitter } from 'events';
 
 
 export interface StreamRecorderSettings {
@@ -7,7 +8,6 @@ export interface StreamRecorderSettings {
     maxDataize: number;
     mimeType: string;
 }
-
 
 export class StreamRecorder {
     private writeLoopInterval: any = null;
@@ -18,6 +18,8 @@ export class StreamRecorder {
     protected recordingId: string;
     private recording = false;
     private finishCallback: () => void = null;
+    private finishWritingCallback: () => void = null;
+    private writingReferences = 0;
 
     constructor(
         protected stream: MediaStream,
@@ -35,6 +37,7 @@ export class StreamRecorder {
         this.pendingDataSize = 0;
         this.recordingPart = 0;
         this.recording = true;
+        this.writingReferences = 0;
 
         this.writeLoopInterval = setInterval(() => {
             this.WriteLoop();
@@ -45,8 +48,7 @@ export class StreamRecorder {
             this.pendingDataSize += e.data.size;
 
             if (!this.recording) {
-                this.WriteLoop(true);
-                this.finishCallback();
+                this.WriteLoop(true); // Force write remaining data and stop listening
                 this.mediaRecorder.ondataavailable = null;
             }
         };
@@ -87,7 +89,13 @@ export class StreamRecorder {
                 combinedBlob = null;
             }
             this.pendingDataSize -= blobSize;
-            this.writer.ContinueUpload(this.recordingId, uploadBlob, this.recordingPart++);
+            this.writingReferences++;
+            this.writer.ContinueUpload(this.recordingId, uploadBlob, this.recordingPart++).then(() => {
+                this.writingReferences--;
+                if (this.writingReferences <= 0 && this.finishCallback) { // when done call finish callback
+                    this.finishCallback();
+                }
+            });
         }
 
         if (combinedBlob && combinedBlob.size > 0) {
