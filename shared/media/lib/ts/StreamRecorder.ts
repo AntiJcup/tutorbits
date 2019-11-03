@@ -16,6 +16,8 @@ export class StreamRecorder {
     protected pendingDataSize = 0;
     protected recordingPart = 0;
     protected recordingId: string;
+    private recording = false;
+    private finishCallback: () => void = null;
 
     constructor(
         protected stream: MediaStream,
@@ -32,14 +34,22 @@ export class StreamRecorder {
         this.pendingChunks = [];
         this.pendingDataSize = 0;
         this.recordingPart = 0;
+        this.recording = true;
 
         this.writeLoopInterval = setInterval(() => {
             this.WriteLoop();
         }, this.settings.minTimeBeforeUpload);
 
         this.mediaRecorder.ondataavailable = (e: BlobEvent) => {
+            console.log('DATA AVAIL');
             this.pendingChunks.push(e.data);
             this.pendingDataSize += e.data.size;
+
+            if (!this.recording) {
+                this.WriteLoop(true);
+                this.finishCallback();
+                this.mediaRecorder.ondataavailable = null;
+            }
         };
 
         this.recordingId = await this.writer.StartUpload();
@@ -47,17 +57,25 @@ export class StreamRecorder {
         this.mediaRecorder.start(this.settings.minTimeBeforeUpload);
     }
 
-    public async FinishRecording() {
+    public async FinishRecording(): Promise<void> {
+        this.recording = false;
+        console.log('Finish recording');
         clearInterval(this.writeLoopInterval);
         this.mediaRecorder.stop();
-        this.WriteLoop(true);
+        await new Promise<void>((resolve, reject) => {
+            this.finishCallback = resolve;
+        });
+
+        console.log('Finished writing last data');
         await this.writer.FinishUpload(this.recordingId);
+        console.log('Finished uploading');
     }
 
     public WriteLoop(force: boolean = false) {
         if (!force && this.pendingDataSize < this.settings.minDataSize) {
             return;
         }
+        console.log('write loop hit');
 
         let combinedBlob = new Blob(this.pendingChunks, {
             type: this.settings.mimeType,
