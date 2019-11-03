@@ -42,7 +42,6 @@ export class RecordComponent implements OnInit {
     const requestObj = new ApiHttpRequest(this.requestInfo);
     this.webCamRecorder = new WebCamRecorder(this.recordingWebCam, new OnlineStreamWriter(this.projectId, requestObj));
     this.webCamRecorder.Initialize().then(() => {
-      // this.webCamRecorder.StartRecording().then();
     });
   }
 
@@ -58,7 +57,6 @@ export class RecordComponent implements OnInit {
 
     this.codeRecorder.DeleteProject(this.projectId).then(() => {
       this.codeRecorder.New().then(() => {
-        // this.codeRecorder.StartRecording();
       });
     });
     this.recordingEditor.AllowEdits(false);

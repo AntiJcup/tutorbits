@@ -41,7 +41,6 @@ export class StreamRecorder {
         }, this.settings.minTimeBeforeUpload);
 
         this.mediaRecorder.ondataavailable = (e: BlobEvent) => {
-            console.log('DATA AVAIL');
             this.pendingChunks.push(e.data);
             this.pendingDataSize += e.data.size;
 
@@ -59,23 +58,19 @@ export class StreamRecorder {
 
     public async FinishRecording(): Promise<void> {
         this.recording = false;
-        console.log('Finish recording');
         clearInterval(this.writeLoopInterval);
         this.mediaRecorder.stop();
         await new Promise<void>((resolve, reject) => {
             this.finishCallback = resolve;
         });
 
-        console.log('Finished writing last data');
         await this.writer.FinishUpload(this.recordingId);
-        console.log('Finished uploading');
     }
 
     public WriteLoop(force: boolean = false) {
         if (!force && this.pendingDataSize < this.settings.minDataSize) {
             return;
         }
-        console.log('write loop hit');
 
         let combinedBlob = new Blob(this.pendingChunks, {
             type: this.settings.mimeType,

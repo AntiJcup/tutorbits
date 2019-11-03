@@ -25,7 +25,8 @@ export class MonacoPlayer extends TransactionPlayer {
                 lookAheadSize: 1000 * 5,
                 loadChunkSize: 1000 * 10,
                 updateInterval: 10,
-                loadInterval: 1000 * 3
+                loadInterval: 1000 * 3,
+                customIncrementer: true
             } as TransactionPlayerSettings,
             projectLoader,
             transactionLoader,
