@@ -55,6 +55,8 @@ export abstract class MonacoEditorComponent {
       this.Show(true);
     }
 
+    monaco.editor.setModelLanguage(this.codeEditor.getModel(), this.GetLanguageByPath(this.filePath));
+
     // Switch contents based on file name
     const cache = this.GetCacheForCurrentFile();
     if (!cache) {
@@ -102,5 +104,15 @@ export abstract class MonacoEditorComponent {
 
   public AllowEdits(edit: boolean) {
     this.codeEditor.updateOptions(edit ? MonacoEditorComponent.editOptions : MonacoEditorComponent.readOnlyOptions);
+  }
+
+  public GetLanguageByPath(path: string) {
+    if (path.endsWith('.js')) {
+      return 'javascript';
+    } else if (path.endsWith('.html')) {
+      return 'html';
+    } else if (path.endsWith('.css')) {
+      return 'css';
+    }
   }
 }
