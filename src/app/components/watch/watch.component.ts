@@ -68,6 +68,9 @@ export class WatchComponent implements OnInit {
   }
 
   paceKeeperLoop() {
+    if (!this.codePlayer) {
+      return;
+    }
     const currentVideoTime = this.videoPlayer.player.currentTime * 1000;
     if (this.videoPlayer.IsBuffering()) {
       this.paceKeperPosition = this.codePlayer.position = currentVideoTime;
