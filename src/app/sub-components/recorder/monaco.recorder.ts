@@ -141,6 +141,8 @@ export class MonacoRecorder extends TransactionRecorder {
         setTimeout(() => {
             this.fileTreeComponent.treeComponent.getControllerByNodeId(e.node.id).select();
         }, 1);
+        this.codeComponent.currentFilePath = newFileName;
+        this.codeComponent.codeEditor.focus();
 
         this.TriggerDelayedSave();
     }

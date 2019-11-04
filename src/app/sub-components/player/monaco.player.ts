@@ -46,6 +46,7 @@ export class MonacoPlayer extends TransactionPlayer {
         }
         const newFileName = this.fileTreeComponent.getPathForNode(e.node);
         this.codeComponent.currentFilePath = newFileName;
+        this.codeComponent.codeEditor.focus();
     }
 
     protected HandleTransaction(transaction: TraceTransaction, undo?: boolean): void {
@@ -69,9 +70,11 @@ export class MonacoPlayer extends TransactionPlayer {
                     if (!undo) {
                         this.fileTreeComponent.selectNodeByPath(this.fileTreeComponent.treeComponent.tree, selectNewPath);
                         this.codeComponent.currentFilePath = selectNewPath;
+                        this.codeComponent.codeEditor.focus();
                     } else {
                         this.fileTreeComponent.selectNodeByPath(this.fileTreeComponent.treeComponent.tree, selectOldPath);
                         this.codeComponent.currentFilePath = selectOldPath;
+                        this.codeComponent.codeEditor.focus();
                     }
                     break;
                 case TraceTransaction.TraceTransactionType.DELETEFILE:
