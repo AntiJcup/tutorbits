@@ -22,10 +22,10 @@ export class MonacoPlayer extends TransactionPlayer {
             settings :
             {
                 speedMultiplier: 1,
-                lookAheadSize: 1000 * 5,
-                loadChunkSize: 1000 * 10,
+                lookAheadSize: 1000 * 15,
+                loadChunkSize: 1000 * 30,
                 updateInterval: 10,
-                loadInterval: 1000 * 3,
+                loadInterval: 1000 * 1,
                 customIncrementer: true
             } as TransactionPlayerSettings,
             projectLoader,
@@ -46,7 +46,6 @@ export class MonacoPlayer extends TransactionPlayer {
         }
         const newFileName = this.fileTreeComponent.getPathForNode(e.node);
         this.codeComponent.currentFilePath = newFileName;
-        this.codeComponent.codeEditor.focus();
     }
 
     protected HandleTransaction(transaction: TraceTransaction, undo?: boolean): void {
@@ -70,11 +69,9 @@ export class MonacoPlayer extends TransactionPlayer {
                     if (!undo) {
                         this.fileTreeComponent.selectNodeByPath(this.fileTreeComponent.treeComponent.tree, selectNewPath);
                         this.codeComponent.currentFilePath = selectNewPath;
-                        this.codeComponent.codeEditor.focus();
                     } else {
                         this.fileTreeComponent.selectNodeByPath(this.fileTreeComponent.treeComponent.tree, selectOldPath);
                         this.codeComponent.currentFilePath = selectOldPath;
-                        this.codeComponent.codeEditor.focus();
                     }
                     break;
                 case TraceTransaction.TraceTransactionType.DELETEFILE:
@@ -147,10 +144,10 @@ export class MonacoPlayer extends TransactionPlayer {
             }
 
             if (edits.length > 0) {
-                this.codeComponent.AllowEdits(true);
                 if (this.codeComponent.codeEditor.hasTextFocus()) {
                     (document.activeElement as HTMLElement).blur();
                 }
+                this.codeComponent.AllowEdits(true);
                 this.codeComponent.codeEditor.executeEdits('teacher', edits);
                 this.codeComponent.AllowEdits(false);
                 this.codeComponent.UpdateCacheForCurrentFile();
