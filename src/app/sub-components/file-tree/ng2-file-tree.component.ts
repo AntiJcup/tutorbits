@@ -71,7 +71,7 @@ export abstract class NG2FileTreeComponent {
   }
 
   public selectNodeByPath(node: Tree, path: string) {
-    this.zone.run(() => {
+    this.zone.runTask(() => {
       const foundNode = this.findNodeByPath(node, path);
       if (!foundNode) {
         throw new Error('Node not found');
@@ -119,10 +119,16 @@ export abstract class NG2FileTreeComponent {
     });
   }
 
-  public deleteNodeByPath(path: string): void {
+  public deleteNodeByPath(path: string, retry: boolean = true): void {
     this.zone.runTask(() => {
       const nodeToDelete = this.findNodeByPath(this.treeComponent.tree, path);
       const nodeToDeleteController = this.treeComponent.getControllerByNodeId(nodeToDelete.id);
+      if (!nodeToDeleteController && retry) { // THIS MAY BE BAD BUT THE TREE DOESNT UPDATE SO WE TRY AGAIN
+        setTimeout(() => {
+          this.deleteNodeByPath(path, false);
+        }, 0);
+        return;
+      }
       nodeToDeleteController.remove();
     });
   }

@@ -117,7 +117,7 @@ export class WatchComponent implements OnInit {
         console.error(`preview url failed to be retrieved`);
         return;
       }
-      this.zone.run(() => {
+      this.zone.runTask(() => {
         this.previewBaseUrl = url;
         this.previewPath = e;
       });
