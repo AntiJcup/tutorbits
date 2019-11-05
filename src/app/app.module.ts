@@ -21,6 +21,8 @@ import { PlaybackFileTreeComponent } from './sub-components/playback-file-tree/p
 import {WebcamModule} from 'ngx-webcam';
 import { RecordingWebCamComponent } from './sub-components/recording-web-cam/recording-web-cam.component';
 import { RecordingControlsComponent } from './sub-components/recording-controls/recording-controls.component';
+import { WatchControlsComponent } from './sub-components/watch-controls/watch-controls.component';
+import { PreviewComponent } from './sub-components/preview/preview.component';
 
 const appRoutes: Routes = [
   {
@@ -58,7 +60,9 @@ const appRoutes: Routes = [
     RecordingFileTreeComponent,
     PlaybackFileTreeComponent,
     RecordingWebCamComponent,
-    RecordingControlsComponent
+    RecordingControlsComponent,
+    WatchControlsComponent,
+    PreviewComponent
   ],
   imports: [
     BrowserModule,

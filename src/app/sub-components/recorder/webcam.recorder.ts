@@ -10,7 +10,8 @@ export class WebCamRecorder extends StreamRecorder {
         super(webCam.stream, writer, {
             minDataSize: 524288,
             maxDataize: 52428800,
-            minTimeBeforeUpload: 5000
+            minTimeBeforeUpload: 5000,
+            mimeType: 'video/webm'
         } as StreamRecorderSettings);
     }
 }

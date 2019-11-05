@@ -1,7 +1,8 @@
-import { Output, EventEmitter } from '@angular/core';
+import { Output, EventEmitter, OnDestroy } from '@angular/core';
 import { editor } from 'monaco-editor';
 
-export abstract class MonacoEditorComponent {
+export abstract class MonacoEditorComponent implements OnDestroy {
+
   private static editOptions: editor.IEditorOptions = {
     readOnly: false
   };
@@ -24,10 +25,23 @@ export abstract class MonacoEditorComponent {
   }
 
   public codeEditor: editor.ICodeEditor;
+  private windowCallback: (e: UIEvent) => any;
 
   @Output() codeInitialized = new EventEmitter<MonacoEditorComponent>();
 
   constructor() {
+    this.windowCallback = (e: UIEvent) => {
+      this.onWindowResize();
+    };
+    window.addEventListener('resize', this.windowCallback);
+  }
+
+  ngOnDestroy(): void {
+    window.removeEventListener('resize', this.windowCallback);
+  }
+
+  onWindowResize() {
+    this.codeEditor.layout({ width: window.innerWidth - 410, height: window.innerHeight });
   }
 
   editorOnInit(codeEditor: editor.IEditor) {

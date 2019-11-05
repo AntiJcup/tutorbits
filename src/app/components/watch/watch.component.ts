@@ -39,6 +39,8 @@ export class WatchComponent implements OnInit {
   pausedVideo = false;
   lastVideoTime = 0;
 
+  previewUrl: string = "win";
+
   constructor(private route: ActivatedRoute) {
     this.projectId = this.route.snapshot.paramMap.get('projectId');
   }
@@ -63,6 +65,7 @@ export class WatchComponent implements OnInit {
 
     this.codePlayer.Load().then(() => {
       this.codePlayer.Play();
+      this.codePlayer.position = 10000;
       this.playbackVideo.nativeElement.play();
     });
   }
@@ -100,5 +103,9 @@ export class WatchComponent implements OnInit {
     this.lastVideoTime = currentVideoTime;
     console.log(this.paceKeperPosition);
     console.log(this.lastVideoTime);
+  }
+
+  public onPreviewClicked() {
+
   }
 }

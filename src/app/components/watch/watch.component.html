@@ -1,3 +1,4 @@
+<app-watch-controls class="controls" (previewClicked)="onPreviewClicked()"></app-watch-controls>
 <div fxLayout fxLayoutGap="5px" class="tutorialContainer">
   <div class="sideBar">
     <vg-player class="tutorialVideo">
@@ -8,10 +9,9 @@
     <app-playback-file-tree id="tutorialFileExplorer">
     </app-playback-file-tree>
   </div>
-  <div class="editorContainer">
-    <div class="editorContainer" fxLayout fxLayoutGap="5px">
-      <app-playback-editor class="recordingEditor" (codeInitialized)="onCodeInitialized($event)">
-      </app-playback-editor>
-    </div>
+  <div class="editorContainer" fxLayout fxLayoutGap="5px">
+    <app-playback-editor class="recordingEditor" (codeInitialized)="onCodeInitialized($event)">
+    </app-playback-editor>
+    <!-- <app-preview *ngIf="previewUrl" class="preview"></app-preview> -->
   </div>
 </div>
