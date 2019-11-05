@@ -4,7 +4,8 @@
 
 export const environment = {
   production: false,
-  apiHost: 'http://api.tutorbits.com:5000'
+  apiHost: 'http://api.tutorbits.com:5000',
+  contentHost: 'http://content.tutorbits.com:9001'
 };
 
 /*

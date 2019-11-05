@@ -1,5 +1,5 @@
 import { ViewChild, NgZone, Injectable, SimpleChange, SimpleChanges } from '@angular/core';
-import { TreeComponent, Ng2TreeSettings, Tree, NodeSelectedEvent, TreeModel, TreeController, NodeMenuItemAction } from 'ng2-tree';
+import { TreeComponent, Ng2TreeSettings, Tree, NodeSelectedEvent, TreeModel, TreeController, NodeMenuItemAction, NodeMenuItem } from 'ng2-tree';
 import { TreeStatus } from 'ng2-tree/src/tree.types';
 
 @Injectable()
@@ -140,10 +140,14 @@ export abstract class NG2FileTreeComponent {
 
     } else {
       this.treeComponent.treeModel = this.treeComponent.tree.toTreeModel();
-      this.treeComponent.treeModel.settings.menuItems = [];
+      this.treeComponent.treeModel.settings.menuItems = this.GetReadonlyMenuItems();
       this.treeComponent.treeModel.settings.static = true;
     }
 
     this.treeComponent.ngOnChanges(null);
+  }
+
+  protected GetReadonlyMenuItems(): NodeMenuItem[] {
+    return [];
   }
 }

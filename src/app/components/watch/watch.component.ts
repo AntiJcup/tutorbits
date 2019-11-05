@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, NgZone } from '@angular/core';
 import { OnlineProjectLoader, OnlineTransactionLoader } from 'shared/Tracer/lib/ts/OnlineTransaction';
 import { environment } from 'src/environments/environment';
 import { ActivatedRoute } from '@angular/router';
@@ -9,6 +9,7 @@ import { ApiHttpRequest, ApiHttpRequestInfo } from 'shared/web/lib/ts/ApiHttpReq
 import { VidPlayer } from 'src/app/sub-components/player/vid.player';
 import { OnlineStreamLoader } from 'shared/media/lib/ts/OnlineStreamLoader';
 import { TransactionPlayerState } from 'shared/Tracer/lib/ts/TransactionPlayer';
+import { OnlinePreviewGenerator } from 'shared/Tracer/lib/ts/OnlinePreviewGenerator';
 
 @Component({
   templateUrl: './watch.component.html',
@@ -22,6 +23,7 @@ export class WatchComponent implements OnInit {
     credentials: undefined,
     headers: {},
   };
+  requestObj: ApiHttpRequest = new ApiHttpRequest(this.requestInfo);
 
   @ViewChild(PlaybackFileTreeComponent, { static: true }) playbackTreeComponent: PlaybackFileTreeComponent;
   @ViewChild(PlaybackEditorComponent, { static: true }) playbackEditor: PlaybackEditorComponent;
@@ -39,9 +41,10 @@ export class WatchComponent implements OnInit {
   pausedVideo = false;
   lastVideoTime = 0;
 
-  previewUrl: string = "win";
+  previewPath: string = null;
+  previewBaseUrl: string = null;
 
-  constructor(private route: ActivatedRoute) {
+  constructor(private route: ActivatedRoute, private zone: NgZone) {
     this.projectId = this.route.snapshot.paramMap.get('projectId');
   }
 
@@ -55,17 +58,16 @@ export class WatchComponent implements OnInit {
   }
 
   onCodeInitialized(playbackEditor: PlaybackEditorComponent) {
-    const requestObj = new ApiHttpRequest(this.requestInfo);
+
     this.codePlayer = new MonacoPlayer(
       this.playbackEditor,
       this.playbackTreeComponent,
-      new OnlineProjectLoader(requestObj),
-      new OnlineTransactionLoader(requestObj),
+      new OnlineProjectLoader(this.requestObj),
+      new OnlineTransactionLoader(this.requestObj),
       this.projectId);
 
     this.codePlayer.Load().then(() => {
       this.codePlayer.Play();
-      this.codePlayer.position = 10000;
       this.playbackVideo.nativeElement.play();
     });
   }
@@ -101,11 +103,28 @@ export class WatchComponent implements OnInit {
 
     this.codePlayer.position = this.paceKeperPosition;
     this.lastVideoTime = currentVideoTime;
-    console.log(this.paceKeperPosition);
-    console.log(this.lastVideoTime);
+    // console.log(this.paceKeperPosition);
+    // console.log(this.lastVideoTime);
   }
 
-  public onPreviewClicked() {
+  public onPreviewClicked(e: string) {
+    const newPath = e;
 
+    const previewGenerator = new OnlinePreviewGenerator(this.requestObj);
+    const previewPos = Math.round(this.codePlayer.position);
+    previewGenerator.GeneratePreview(this.projectId, previewPos).then((url) => {
+      if (!url) {
+        console.error(`preview url failed to be retrieved`);
+        return;
+      }
+      this.zone.run(() => {
+        this.previewBaseUrl = url;
+        this.previewPath = e;
+      });
+    });
+  }
+
+  public onCloseClicked(e: any) {
+    this.previewPath = null;
   }
 }

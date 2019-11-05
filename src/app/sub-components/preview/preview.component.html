@@ -1,6 +1,16 @@
 <div class="container">
-    <p>preview works!</p>
-    <button #close class="closeBtn" mat-raised-button>
+    <div class="previewControls">
+        <form>
+            <mat-form-field class="previewUrlField">
+                <input matInput #previewUrlInput type="url" placeholder="previewPath" [value]="previewPath" (keyup.enter)="navigate(previewUrlInput.value)"/>
+            </mat-form-field>
+            <button type="submit" mat-icon-button (click)="navigate(previewUrlInput.value)">
+                    <mat-icon>directions</mat-icon>
+            </button>
+        </form>
+    </div>
+    <iframe class="previewFrame" [src]="previewUrl"></iframe>
+    <button #close class="closeBtn" mat-raised-button (click)="onCloseClicked()">
         <mat-icon>close</mat-icon>
     </button>
 </div>
