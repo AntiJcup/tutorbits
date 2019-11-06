@@ -77,7 +77,7 @@ export class WatchComponent implements OnInit {
       return;
     }
     const currentVideoTime = this.videoPlayer.player.currentTime * 1000;
-    if (this.videoPlayer.IsBuffering()) {
+    if (this.videoPlayer.IsBuffering() && !this.pausedVideo) {
       this.paceKeperPosition = this.codePlayer.position = currentVideoTime;
       return;
     }
