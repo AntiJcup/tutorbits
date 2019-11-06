@@ -23,6 +23,10 @@ export class MonacoRecorder extends TransactionRecorder {
     private start: number;
     private recording: boolean;
 
+    public get position(): number {
+        return this.timeOffset;
+    }
+
     constructor(
         protected codeComponent: MonacoEditorComponent,
         protected fileTreeComponent: NG2FileTreeComponent,

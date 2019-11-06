@@ -58,7 +58,6 @@ export class WatchComponent implements OnInit {
   }
 
   onCodeInitialized(playbackEditor: PlaybackEditorComponent) {
-
     this.codePlayer = new MonacoPlayer(
       this.playbackEditor,
       this.playbackTreeComponent,
@@ -112,7 +111,7 @@ export class WatchComponent implements OnInit {
 
     const previewGenerator = new OnlinePreviewGenerator(this.requestObj);
     const previewPos = Math.round(this.codePlayer.position);
-    previewGenerator.GeneratePreview(this.projectId, previewPos).then((url) => {
+    previewGenerator.LoadPreview(this.projectId, previewPos).then((url) => {
       if (!url) {
         console.error(`preview url failed to be retrieved`);
         return;

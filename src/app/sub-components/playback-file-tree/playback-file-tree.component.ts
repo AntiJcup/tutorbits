@@ -10,8 +10,6 @@ import { NodeMenuItemSelectedEvent } from 'ng2-tree/src/menu/menu.events';
 })
 
 export class PlaybackFileTreeComponent extends NG2FileTreeComponent implements OnInit {
-  @Output() previewClicked = new EventEmitter<string>();
-
   public tree: TreeModel = {
     value: '/',
     id: 1,
@@ -43,11 +41,5 @@ export class PlaybackFileTreeComponent extends NG2FileTreeComponent implements O
     return [
       { action: NodeMenuItemAction.Custom, name: 'Preview', cssClass: '' }
     ];
-  }
-
-  public onMenuItemSelected(e: any) {
-    if (e.selectedItem === 'Preview') {
-      this.previewClicked.next(this.getPathForNode(e.node));
-    }
   }
 }

@@ -1,4 +1,4 @@
-import { ViewChild, NgZone, Injectable, SimpleChange, SimpleChanges } from '@angular/core';
+import { ViewChild, NgZone, Injectable, SimpleChange, SimpleChanges, Output, EventEmitter } from '@angular/core';
 import { TreeComponent, Ng2TreeSettings, Tree, NodeSelectedEvent, TreeModel, TreeController, NodeMenuItemAction, NodeMenuItem } from 'ng2-tree';
 import { TreeStatus } from 'ng2-tree/src/tree.types';
 
@@ -10,6 +10,8 @@ export abstract class NG2FileTreeComponent {
   };
 
   @ViewChild(TreeComponent, { static: true }) treeComponent: TreeComponent;
+
+  @Output() previewClicked = new EventEmitter<string>();
 
   constructor(private zone: NgZone) { }
 
@@ -139,7 +141,8 @@ export abstract class NG2FileTreeComponent {
         { action: NodeMenuItemAction.NewFolder, name: 'Add folder', cssClass: '' },
         { action: NodeMenuItemAction.NewTag, name: 'Add file', cssClass: '' },
         { action: NodeMenuItemAction.Remove, name: 'Delete', cssClass: '' },
-        { action: NodeMenuItemAction.Rename, name: 'Rename', cssClass: '' }
+        { action: NodeMenuItemAction.Rename, name: 'Rename', cssClass: '' },
+        { action: NodeMenuItemAction.Custom, name: 'Preview', cssClass: '' }
       ];
 
       this.treeComponent.treeModel.settings.static = false;
@@ -155,5 +158,11 @@ export abstract class NG2FileTreeComponent {
 
   protected GetReadonlyMenuItems(): NodeMenuItem[] {
     return [];
+  }
+
+  public onMenuItemSelected(e: any) {
+    if (e.selectedItem === 'Preview') {
+      this.previewClicked.next(this.getPathForNode(e.node));
+    }
   }
 }

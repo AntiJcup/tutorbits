@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, NgZone } from '@angular/core';
 import { OnlineProjectLoader, OnlineProjectWriter, OnlineTransactionWriter } from 'shared/Tracer/lib/ts/OnlineTransaction';
 import { ActivatedRoute } from '@angular/router';
 import { environment } from 'src/environments/environment';
@@ -9,6 +9,7 @@ import { ApiHttpRequestInfo, ApiHttpRequest } from 'shared/web/lib/ts/ApiHttpReq
 import { RecordingWebCamComponent } from 'src/app/sub-components/recording-web-cam/recording-web-cam.component';
 import { WebCamRecorder } from 'src/app/sub-components/recorder/webcam.recorder';
 import { OnlineStreamWriter } from 'shared/media/lib/ts/OnlineStreamWriter';
+import { OnlinePreviewGenerator } from 'shared/Tracer/lib/ts/OnlinePreviewGenerator';
 
 @Component({
   templateUrl: './record.component.html',
@@ -31,8 +32,10 @@ export class RecordComponent implements OnInit {
     headers: {},
   };
   requestObj = new ApiHttpRequest(this.requestInfo);
+  previewPath: string = null;
+  previewBaseUrl: string = null;
 
-  constructor(private route: ActivatedRoute) {
+  constructor(private route: ActivatedRoute, private zone: NgZone) {
     this.projectId = this.route.snapshot.paramMap.get('projectId');
   }
 
@@ -89,5 +92,26 @@ export class RecordComponent implements OnInit {
       this.codeRecorder.StopRecording();
       this.webCamRecorder.FinishRecording().then();
     }
+  }
+
+  public onCloseClicked(e: any) {
+    this.previewPath = null;
+  }
+
+  public onPreviewClicked(e: string) {
+    const newPath = e;
+
+    const previewGenerator = new OnlinePreviewGenerator(this.requestObj);
+    const previewPos = Math.round(this.codeRecorder.position);
+    previewGenerator.GeneratePreview(this.projectId, previewPos, this.codeRecorder.logs).then((url) => {
+      if (!url) {
+        console.error(`preview url failed to be retrieved`);
+        return;
+      }
+      this.zone.runTask(() => {
+        this.previewBaseUrl = url;
+        this.previewPath = e;
+      });
+    });
   }
 }
