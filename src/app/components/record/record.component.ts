@@ -17,6 +17,7 @@ import { OnlineStreamWriter } from 'shared/media/lib/ts/OnlineStreamWriter';
 export class RecordComponent implements OnInit {
   public projectId: string;
   public recording = false;
+  hasRecorded = false;
 
   @ViewChild(RecordingFileTreeComponent, { static: true }) recordingTreeComponent: RecordingFileTreeComponent;
   @ViewChild(RecordingEditorComponent, { static: true }) recordingEditor: RecordingEditorComponent;
@@ -29,6 +30,7 @@ export class RecordComponent implements OnInit {
     credentials: undefined,
     headers: {},
   };
+  requestObj = new ApiHttpRequest(this.requestInfo);
 
   constructor(private route: ActivatedRoute) {
     this.projectId = this.route.snapshot.paramMap.get('projectId');
@@ -39,26 +41,12 @@ export class RecordComponent implements OnInit {
 
   onStreamInitialized(webCam: RecordingWebCamComponent) {
     console.log(webCam.stream);
-    const requestObj = new ApiHttpRequest(this.requestInfo);
-    this.webCamRecorder = new WebCamRecorder(this.recordingWebCam, new OnlineStreamWriter(this.projectId, requestObj));
+    this.webCamRecorder = new WebCamRecorder(this.recordingWebCam, new OnlineStreamWriter(this.projectId, this.requestObj));
     this.webCamRecorder.Initialize().then(() => {
     });
   }
 
   onCodeInitialized(recordingEditor: RecordingEditorComponent) {
-    const requestObj = new ApiHttpRequest(this.requestInfo);
-    this.codeRecorder = new MonacoRecorder(
-      this.recordingEditor,
-      this.recordingTreeComponent,
-      this.projectId,
-      new OnlineProjectLoader(requestObj),
-      new OnlineProjectWriter(requestObj),
-      new OnlineTransactionWriter(requestObj, this.projectId));
-
-    this.codeRecorder.DeleteProject(this.projectId).then(() => {
-      this.codeRecorder.New().then(() => {
-      });
-    });
     this.recordingEditor.AllowEdits(false);
   }
 
@@ -67,8 +55,36 @@ export class RecordComponent implements OnInit {
     this.recordingEditor.AllowEdits(recording);
 
     if (recording) {
-      this.codeRecorder.StartRecording();
-      this.webCamRecorder.StartRecording().then();
+      if (this.hasRecorded) {
+        if (!confirm('Are you sure you want to start the recording over?')) {
+          return;
+        }
+
+        this.recordingTreeComponent.treeComponent.treeModel = this.recordingTreeComponent.tree;
+        this.recordingTreeComponent.treeComponent.ngOnChanges(null);
+        this.recordingEditor.ClearCacheForFolder('/');
+        this.recordingEditor.Show(false);
+      }
+
+      this.webCamRecorder = new WebCamRecorder(this.recordingWebCam, new OnlineStreamWriter(this.projectId, this.requestObj));
+      this.webCamRecorder.Initialize().then(() => {
+      });
+
+      this.codeRecorder = new MonacoRecorder(
+        this.recordingEditor,
+        this.recordingTreeComponent,
+        this.projectId,
+        new OnlineProjectLoader(this.requestObj),
+        new OnlineProjectWriter(this.requestObj),
+        new OnlineTransactionWriter(this.requestObj, this.projectId));
+
+      this.codeRecorder.DeleteProject(this.projectId).then(() => {
+        this.codeRecorder.New().then(() => {
+          this.hasRecorded = true;
+          this.codeRecorder.StartRecording();
+          this.webCamRecorder.StartRecording().then();
+        });
+      });
     } else {
       this.codeRecorder.StopRecording();
       this.webCamRecorder.FinishRecording().then();
