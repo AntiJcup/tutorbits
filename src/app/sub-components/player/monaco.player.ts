@@ -51,7 +51,7 @@ export class MonacoPlayer extends TransactionPlayer {
     protected HandleTransaction(transaction: TraceTransaction, undo?: boolean): void {
         try {
             const edits: editor.IIdentifiedSingleEditOperation[] = [];
-            console.log(transaction.toObject());
+            console.log(JSON.stringify(transaction.toObject()));
             switch (transaction.getType()) {
                 case TraceTransaction.TraceTransactionType.CREATEFILE:
                     const createNewPath = transaction.getCreateFile().getNewFilePath();
@@ -111,6 +111,7 @@ export class MonacoPlayer extends TransactionPlayer {
                     const editorModel = this.codeComponent.codeEditor.getModel() as editor.ITextModel;
                     const startPos = editorModel.getPositionAt(transaction.getModifyFile().getOffsetStart());
                     const endPos = editorModel.getPositionAt(transaction.getModifyFile().getOffsetEnd());
+                    const data = transaction.getModifyFile().getData();
                     this.codeComponent.currentFilePath = transaction.getFilePath();
 
                     let newEdit: editor.IIdentifiedSingleEditOperation = null;
@@ -121,12 +122,12 @@ export class MonacoPlayer extends TransactionPlayer {
                                 startPos.column,
                                 endPos.lineNumber,
                                 endPos.column),
-                            text: transaction.getModifyFile().getData(),
+                            text: data,
                             forceMoveMarkers: true
                         };
                     } else {
                         const previousData = transaction.getModifyFile().getPreviousData();
-                        const offset = transaction.getModifyFile().getData().length;
+                        const offset = data.length - previousData.length;
                         const undoEndPos = editorModel.getPositionAt(transaction.getModifyFile().getOffsetEnd() + offset);
                         newEdit = {
                             range: new monaco.Range(
