@@ -23,6 +23,10 @@ import { RecordingWebCamComponent } from './sub-components/recording-web-cam/rec
 import { RecordingControlsComponent } from './sub-components/recording-controls/recording-controls.component';
 import { PreviewComponent } from './sub-components/preview/preview.component';
 import { SandboxComponent } from './components/sandbox/sandbox.component';
+import { ReactiveFormsModule } from '@angular/forms';
+import { FormlyModule } from '@ngx-formly/core';
+import { FormlyMaterialModule } from '@ngx-formly/material';
+import { CreateTutorialComponent } from './components/tutorials/createtutorial/create-tutorial.component';
 
 const appRoutes: Routes = [
   {
@@ -46,6 +50,11 @@ const appRoutes: Routes = [
     data: { title: 'Sandbox' }
   },
   {
+    path: 'create/tutorial',
+    component: CreateTutorialComponent,
+    data: { title: 'Create Tutorial' }
+  },
+  {
     path: '',
     redirectTo: '/home',
     pathMatch: 'full'
@@ -67,7 +76,8 @@ const appRoutes: Routes = [
     PlaybackFileTreeComponent,
     RecordingWebCamComponent,
     RecordingControlsComponent,
-    PreviewComponent
+    PreviewComponent,
+    CreateTutorialComponent
   ],
   imports: [
     BrowserModule,
@@ -82,7 +92,10 @@ const appRoutes: Routes = [
       appRoutes,
       { enableTracing: true }
     ),
-    WebcamModule
+    WebcamModule,
+    ReactiveFormsModule,
+    FormlyModule.forRoot(),
+    FormlyMaterialModule
   ],
   providers: [],
   bootstrap: [AppComponent]

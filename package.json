@@ -23,6 +23,7 @@
     "@angular/platform-browser": "~8.2.8",
     "@angular/platform-browser-dynamic": "~8.2.8",
     "@angular/router": "~8.2.8",
+    "@ngx-formly/schematics": "^5.5.3",
     "@types/core-js": "^2.5.2",
     "@types/dom-mediacapture-record": "^1.0.2",
     "buffer": "^5.4.3",
@@ -38,7 +39,9 @@
     "rxjs-compat": "^6.5.3",
     "tslib": "^1.10.0",
     "videogular2": "^7.0.1",
-    "zone.js": "~0.9.1"
+    "zone.js": "~0.9.1",
+    "@ngx-formly/core": "^5.0.0",
+    "@ngx-formly/material": "^5.0.0"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "~0.803.6",
