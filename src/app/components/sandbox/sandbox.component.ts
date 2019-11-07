@@ -10,22 +10,20 @@ import { RecordingWebCamComponent } from 'src/app/sub-components/recording-web-c
 import { WebCamRecorder } from 'src/app/sub-components/recorder/webcam.recorder';
 import { OnlineStreamWriter } from 'shared/media/lib/ts/OnlineStreamWriter';
 import { OnlinePreviewGenerator } from 'shared/Tracer/lib/ts/OnlinePreviewGenerator';
+import { LocalTransactionWriter, LocalProjectWriter, LocalProjectLoader } from 'shared/Tracer/lib/ts/LocalTransaction';
+import { Guid } from 'guid-typescript';
 
 @Component({
-  templateUrl: './record.component.html',
-  styleUrls: ['./record.component.sass']
+  templateUrl: './sandbox.component.html',
+  styleUrls: ['./sandbox.component.sass']
 })
-export class RecordComponent implements OnInit {
-  public projectId: string;
-  public recording = false;
-  hasRecorded = false;
+export class SandboxComponent implements OnInit {
+  public projectId: string = Guid.create().toString();
 
   @ViewChild(RecordingFileTreeComponent, { static: true }) recordingTreeComponent: RecordingFileTreeComponent;
   @ViewChild(RecordingEditorComponent, { static: true }) recordingEditor: RecordingEditorComponent;
-  @ViewChild(RecordingWebCamComponent, { static: true }) recordingWebCam: RecordingWebCamComponent;
 
   codeRecorder: MonacoRecorder;
-  webCamRecorder: WebCamRecorder;
   requestInfo: ApiHttpRequestInfo = {
     host: environment.apiHost,
     credentials: undefined,
@@ -36,62 +34,28 @@ export class RecordComponent implements OnInit {
   previewBaseUrl: string = null;
 
   constructor(private route: ActivatedRoute, private zone: NgZone) {
-    this.projectId = this.route.snapshot.paramMap.get('projectId');
   }
 
   ngOnInit(): void {
   }
 
-  onStreamInitialized(webCam: RecordingWebCamComponent) {
-    console.log(webCam.stream);
-    this.webCamRecorder = new WebCamRecorder(this.recordingWebCam, new OnlineStreamWriter(this.projectId, this.requestObj));
-    this.webCamRecorder.Initialize().then(() => {
-    });
-  }
-
   onCodeInitialized(recordingEditor: RecordingEditorComponent) {
-    this.recordingEditor.AllowEdits(false);
-  }
+    this.recordingTreeComponent.allowEdit(true);
+    this.recordingEditor.AllowEdits(true);
 
-  onRecordingStateChanged(recording: boolean) {
-    this.recordingTreeComponent.allowEdit(recording);
-    this.recordingEditor.AllowEdits(recording);
+    this.codeRecorder = new MonacoRecorder(
+      this.recordingEditor,
+      this.recordingTreeComponent,
+      this.projectId,
+      new LocalProjectLoader(),
+      new LocalProjectWriter(),
+      new LocalTransactionWriter(this.projectId));
 
-    if (recording) {
-      if (this.hasRecorded) {
-        if (!confirm('Are you sure you want to start the recording over?')) {
-          return;
-        }
-
-        this.recordingTreeComponent.treeComponent.treeModel = this.recordingTreeComponent.tree;
-        this.recordingTreeComponent.treeComponent.ngOnChanges(null);
-        this.recordingEditor.ClearCacheForFolder('/');
-        this.recordingEditor.Show(false);
-      }
-
-      this.webCamRecorder = new WebCamRecorder(this.recordingWebCam, new OnlineStreamWriter(this.projectId, this.requestObj));
-      this.webCamRecorder.Initialize().then(() => {
+    this.codeRecorder.DeleteProject(this.projectId).then(() => {
+      this.codeRecorder.New().then(() => {
+        this.codeRecorder.StartRecording();
       });
-
-      this.codeRecorder = new MonacoRecorder(
-        this.recordingEditor,
-        this.recordingTreeComponent,
-        this.projectId,
-        new OnlineProjectLoader(this.requestObj),
-        new OnlineProjectWriter(this.requestObj),
-        new OnlineTransactionWriter(this.requestObj, this.projectId));
-
-      this.codeRecorder.DeleteProject(this.projectId).then(() => {
-        this.codeRecorder.New().then(() => {
-          this.hasRecorded = true;
-          this.codeRecorder.StartRecording();
-          this.webCamRecorder.StartRecording().then();
-        });
-      });
-    } else {
-      this.codeRecorder.StopRecording();
-      this.webCamRecorder.FinishRecording().then();
-    }
+    });
   }
 
   public onCloseClicked(e: any) {

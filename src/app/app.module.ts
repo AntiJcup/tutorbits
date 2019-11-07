@@ -22,6 +22,7 @@ import {WebcamModule} from 'ngx-webcam';
 import { RecordingWebCamComponent } from './sub-components/recording-web-cam/recording-web-cam.component';
 import { RecordingControlsComponent } from './sub-components/recording-controls/recording-controls.component';
 import { PreviewComponent } from './sub-components/preview/preview.component';
+import { SandboxComponent } from './components/sandbox/sandbox.component';
 
 const appRoutes: Routes = [
   {
@@ -40,6 +41,11 @@ const appRoutes: Routes = [
     data: { title: 'Record' }
   },
   {
+    path: 'sandbox',
+    component: SandboxComponent,
+    data: { title: 'Sandbox' }
+  },
+  {
     path: '',
     redirectTo: '/home',
     pathMatch: 'full'
@@ -54,6 +60,7 @@ const appRoutes: Routes = [
     WatchComponent,
     HomeComponent,
     RecordComponent,
+    SandboxComponent,
     PlaybackEditorComponent,
     RecordingEditorComponent,
     RecordingFileTreeComponent,

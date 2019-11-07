@@ -1,0 +1,13 @@
+<div fxLayout fxLayoutGap="5px" class="tutorialContainer">
+    <div class="sideBar">
+        <app-recording-file-tree id="tutorialFileExplorer" (previewClicked)="onPreviewClicked($event)">
+        </app-recording-file-tree>
+    </div>
+    <div class="editorContainer" fxLayout fxLayoutGap="5px">
+        <app-recording-editor class="recordingEditor" (codeInitialized)="onCodeInitialized($event)">
+        </app-recording-editor>
+        <app-preview *ngIf="previewPath" class="preview" (closeClicked)="onCloseClicked($event)"
+            [previewPath]="previewPath" [previewBaseUrl]="previewBaseUrl">
+        </app-preview>
+    </div>
+</div>
