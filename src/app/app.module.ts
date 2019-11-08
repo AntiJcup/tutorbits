@@ -27,6 +27,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { FormlyModule } from '@ngx-formly/core';
 import { FormlyMaterialModule } from '@ngx-formly/material';
 import { CreateTutorialComponent } from './components/tutorials/createtutorial/create-tutorial.component';
+import { SubmitButtonComponent } from './sub-components/submit-button/submit-button.component';
 
 const appRoutes: Routes = [
   {
@@ -77,7 +78,8 @@ const appRoutes: Routes = [
     RecordingWebCamComponent,
     RecordingControlsComponent,
     PreviewComponent,
-    CreateTutorialComponent
+    CreateTutorialComponent,
+    SubmitButtonComponent
   ],
   imports: [
     BrowserModule,

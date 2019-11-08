@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { FormlyFieldConfig } from '@ngx-formly/core';
 import { CreateTutorial } from 'src/app/models/tutorial/create-tutorial';
@@ -9,6 +9,7 @@ import { TutorBitsTutorialService } from 'src/app/services/tutor-bits-tutorial.s
   styleUrls: ['./create-tutorial.component.sass']
 })
 export class CreateTutorialComponent implements OnInit {
+  loading = false;
   form = new FormGroup({});
   model: CreateTutorial = { Title: '', Description: '', Language: 'javascript' };
   fields: FormlyFieldConfig[] = [{
@@ -47,8 +48,11 @@ export class CreateTutorialComponent implements OnInit {
 
   submit(model: CreateTutorial) {
     console.log(model);
+    this.loading = true;
     this.tutorialService.Create(model).then((e) => {
       console.log(e);
+    }).finally(() => {
+      this.loading = false;
     });
   }
 }
