@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { FormlyFieldConfig } from '@ngx-formly/core';
 import { CreateTutorial } from 'src/app/models/tutorial/create-tutorial';
+import { TutorBitsTutorialService } from 'src/app/services/tutor-bits-tutorial.service';
 
 @Component({
   templateUrl: './create-tutorial.component.html',
@@ -39,12 +40,15 @@ export class CreateTutorialComponent implements OnInit {
   },
   ];
 
-  constructor() { }
+  constructor(private tutorialService: TutorBitsTutorialService) { }
 
   ngOnInit() {
   }
 
   submit(model: CreateTutorial) {
     console.log(model);
+    this.tutorialService.Create(model).then((e) => {
+      console.log(e);
+    });
   }
 }
