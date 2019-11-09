@@ -1,1 +1,3 @@
-<p>view-tutorials works!</p>
+<div *ngFor="let tutorial of tutorials" class="tutorial-card-container">
+<app-tutorial-card [tutorial]="tutorial" (click)="onTutorialCardClick($event, tutorial)"></app-tutorial-card>
+</div>

@@ -29,6 +29,7 @@ import { FormlyMaterialModule } from '@ngx-formly/material';
 import { CreateTutorialComponent } from './components/tutorials/create-tutorial/create-tutorial.component';
 import { SubmitButtonComponent } from './sub-components/submit-button/submit-button.component';
 import { ViewTutorialsComponent } from './components/tutorials/view-tutorials/view-tutorials.component';
+import { TutorialCardComponent } from './sub-components/tutorial-card/tutorial-card.component';
 
 const appRoutes: Routes = [
   {
@@ -86,7 +87,8 @@ const appRoutes: Routes = [
     PreviewComponent,
     CreateTutorialComponent,
     SubmitButtonComponent,
-    ViewTutorialsComponent
+    ViewTutorialsComponent,
+    TutorialCardComponent
   ],
   imports: [
     BrowserModule,
