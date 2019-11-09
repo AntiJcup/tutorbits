@@ -23,4 +23,14 @@ export class TutorBitsTutorialService {
 
     return (await response.json()) as ViewTutorial;
   }
+
+  public async GetAll(): Promise<ViewTutorial[]> {
+    const response = await this.apiService.generateRequest().Get(`${this.basePath}/GetAll`);
+
+    if (!response.ok) {
+      return null;
+    }
+
+    return (await response.json()) as ViewTutorial[];
+  }
 }
