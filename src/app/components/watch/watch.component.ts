@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef, NgZone } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, NgZone, OnDestroy } from '@angular/core';
 import { OnlineProjectLoader, OnlineTransactionLoader } from 'shared/Tracer/lib/ts/OnlineTransaction';
 import { environment } from 'src/environments/environment';
 import { ActivatedRoute } from '@angular/router';
@@ -17,7 +17,7 @@ import { MatSnackBar } from '@angular/material';
   styleUrls: ['./watch.component.sass']
 })
 
-export class WatchComponent implements OnInit {
+export class WatchComponent implements OnInit, OnDestroy {
   public projectId: string;
   requestInfo: ApiHttpRequestInfo = {
     host: environment.apiHost,
@@ -54,9 +54,12 @@ export class WatchComponent implements OnInit {
     this.videoPlayer.Load().then().catch((e) => {
       this.snackBar.open(`VideoError - ${e}`, null);
     });
-    this.paceKeeperInterval = setInterval(() => {
-      this.paceKeeperLoop();
-    }, this.paceKeeperCheckSpeedMS);
+
+  }
+
+  ngOnDestroy(): void {
+    clearInterval(this.paceKeeperInterval);
+    this.snackBar.dismiss();
   }
 
   onCodeInitialized(playbackEditor: PlaybackEditorComponent) {
@@ -70,6 +73,9 @@ export class WatchComponent implements OnInit {
     this.codePlayer.Load().then(() => {
       this.codePlayer.Play();
       this.playbackVideo.nativeElement.play();
+      this.paceKeeperInterval = setInterval(() => {
+        this.paceKeeperLoop();
+      }, this.paceKeeperCheckSpeedMS);
     }).catch((e) => {
       this.snackBar.open(`CodeError - ${e}`, null);
     });
