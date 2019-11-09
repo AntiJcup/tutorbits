@@ -10,6 +10,7 @@ import { VidPlayer } from 'src/app/sub-components/player/vid.player';
 import { OnlineStreamLoader } from 'shared/media/lib/ts/OnlineStreamLoader';
 import { TransactionPlayerState } from 'shared/Tracer/lib/ts/TransactionPlayer';
 import { OnlinePreviewGenerator } from 'shared/Tracer/lib/ts/OnlinePreviewGenerator';
+import { MatSnackBar } from '@angular/material';
 
 @Component({
   templateUrl: './watch.component.html',
@@ -29,7 +30,6 @@ export class WatchComponent implements OnInit {
   @ViewChild(PlaybackEditorComponent, { static: true }) playbackEditor: PlaybackEditorComponent;
   @ViewChild('video', { static: true }) playbackVideo: ElementRef;
 
-
   codePlayer: MonacoPlayer;
   videoPlayer: VidPlayer;
 
@@ -44,14 +44,16 @@ export class WatchComponent implements OnInit {
   previewPath: string = null;
   previewBaseUrl: string = null;
 
-  constructor(private route: ActivatedRoute, private zone: NgZone) {
+  constructor(private route: ActivatedRoute, private zone: NgZone, private snackBar: MatSnackBar) {
     this.projectId = this.route.snapshot.paramMap.get('projectId');
   }
 
   ngOnInit(): void {
     const requestObj = new ApiHttpRequest(this.requestInfo);
     this.videoPlayer = new VidPlayer(new OnlineStreamLoader(this.projectId, requestObj), this.playbackVideo.nativeElement);
-    this.videoPlayer.Load().then();
+    this.videoPlayer.Load().then().catch((e) => {
+      this.snackBar.open(`VideoError - ${e}`, null);
+    });
     this.paceKeeperInterval = setInterval(() => {
       this.paceKeeperLoop();
     }, this.paceKeeperCheckSpeedMS);
@@ -68,6 +70,8 @@ export class WatchComponent implements OnInit {
     this.codePlayer.Load().then(() => {
       this.codePlayer.Play();
       this.playbackVideo.nativeElement.play();
+    }).catch((e) => {
+      this.snackBar.open(`CodeError - ${e}`, null);
     });
   }
 

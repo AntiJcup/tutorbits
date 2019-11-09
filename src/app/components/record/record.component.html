@@ -2,7 +2,7 @@
 </app-recording-controls>
 <div fxLayout fxLayoutGap="5px" class="tutorialContainer">
     <div class="sideBar">
-        <app-web-cam class="tutorialVideo" (streamInitialized)="onStreamInitialized($event)"></app-web-cam>
+        <app-web-cam class="tutorialVideo" (streamInitialized)="onStreamInitialized($event)" (streamError)="onStreamError($event)"></app-web-cam>
         <app-recording-file-tree id="tutorialFileExplorer" (previewClicked)="onPreviewClicked($event)">
         </app-recording-file-tree>
     </div>

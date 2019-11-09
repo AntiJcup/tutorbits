@@ -1,4 +1,5 @@
 import { Component, OnInit, Input, Output, EventEmitter, ViewChild, ElementRef, AfterViewInit, AfterViewChecked, SimpleChanges, DoCheck, AfterContentInit } from '@angular/core';
+import { MatSnackBar } from '@angular/material';
 
 @Component({
   selector: 'app-recording-controls',
@@ -9,6 +10,7 @@ export class RecordingControlsComponent implements OnInit {
   public recording = false;
   @Input() saving = false;
   @Input() canFinish = false;
+  @Input() canRecord = false;
 
   @ViewChild('start', { static: false, read: ElementRef }) set startRecordingBtn(element: ElementRef) {
     if (element) {

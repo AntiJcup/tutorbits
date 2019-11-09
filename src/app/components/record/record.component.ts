@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, NgZone } from '@angular/core';
+import { Component, OnInit, ViewChild, NgZone, OnDestroy } from '@angular/core';
 import { OnlineProjectLoader, OnlineProjectWriter, OnlineTransactionWriter } from 'shared/Tracer/lib/ts/OnlineTransaction';
 import { ActivatedRoute, Router } from '@angular/router';
 import { environment } from 'src/environments/environment';
@@ -10,16 +10,18 @@ import { RecordingWebCamComponent } from 'src/app/sub-components/recording-web-c
 import { WebCamRecorder } from 'src/app/sub-components/recorder/webcam.recorder';
 import { OnlineStreamWriter } from 'shared/media/lib/ts/OnlineStreamWriter';
 import { OnlinePreviewGenerator } from 'shared/Tracer/lib/ts/OnlinePreviewGenerator';
+import { MatSnackBar } from '@angular/material';
 
 @Component({
   templateUrl: './record.component.html',
   styleUrls: ['./record.component.sass']
 })
-export class RecordComponent implements OnInit {
+export class RecordComponent implements OnInit, OnDestroy {
   public projectId: string;
   public recording = false;
   hasRecorded = false;
   saving = false;
+  canRecord = false;
 
   @ViewChild(RecordingFileTreeComponent, { static: true }) recordingTreeComponent: RecordingFileTreeComponent;
   @ViewChild(RecordingEditorComponent, { static: true }) recordingEditor: RecordingEditorComponent;
@@ -36,11 +38,15 @@ export class RecordComponent implements OnInit {
   previewPath: string = null;
   previewBaseUrl: string = null;
 
-  constructor(private router: Router, private route: ActivatedRoute, private zone: NgZone) {
+  constructor(private router: Router, private route: ActivatedRoute, private zone: NgZone, private snackBar: MatSnackBar) {
     this.projectId = this.route.snapshot.paramMap.get('projectId');
   }
 
   ngOnInit(): void {
+  }
+
+  ngOnDestroy(): void {
+    this.snackBar.dismiss();
   }
 
   onStreamInitialized(webCam: RecordingWebCamComponent) {
@@ -48,6 +54,11 @@ export class RecordComponent implements OnInit {
     this.webCamRecorder = new WebCamRecorder(this.recordingWebCam, new OnlineStreamWriter(this.projectId, this.requestObj));
     this.webCamRecorder.Initialize().then(() => {
     });
+  }
+
+  onStreamError(e: any) {
+    console.error(`${e}`);
+    this.snackBar.open(`WebCamError - ${e}`, null);
   }
 
   onCodeInitialized(recordingEditor: RecordingEditorComponent) {

@@ -12,6 +12,7 @@ export class RecordingWebCamComponent implements OnInit {
   @Input() height: number;
 
   @Output() streamInitialized = new EventEmitter<RecordingWebCamComponent>();
+  @Output() streamError = new EventEmitter<any>();
 
   public stream: MediaStream;
 
@@ -33,6 +34,8 @@ export class RecordingWebCamComponent implements OnInit {
         webCamVideo.muted = true;
         this.streamInitialized.next(this);
       };
+    }).catch((e) => {
+      this.streamError.next(e);
     });
   }
 }

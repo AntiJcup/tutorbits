@@ -1,15 +1,17 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, OnDestroy } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { FormlyFieldConfig } from '@ngx-formly/core';
 import { CreateTutorial } from 'src/app/models/tutorial/create-tutorial';
 import { TutorBitsTutorialService } from 'src/app/services/tutor-bits-tutorial.service';
 import { Router } from '@angular/router';
+import { MatSnackBar } from '@angular/material';
+import { config } from 'rxjs';
 
 @Component({
   templateUrl: './create-tutorial.component.html',
   styleUrls: ['./create-tutorial.component.sass']
 })
-export class CreateTutorialComponent implements OnInit {
+export class CreateTutorialComponent implements OnInit, OnDestroy {
   loading = false;
   form = new FormGroup({});
   model: CreateTutorial = { Title: '', Description: '', Language: 'javascript' };
@@ -20,6 +22,8 @@ export class CreateTutorialComponent implements OnInit {
       label: 'Title',
       placeholder: 'Enter Tutorial Title',
       required: true,
+      minLength: 4,
+      maxLength: 64
     }
   },
   {
@@ -29,6 +33,8 @@ export class CreateTutorialComponent implements OnInit {
       label: 'Programming Language',
       placeholder: 'Enter Tutorial Programming Language',
       required: true,
+      minLength: 1,
+      maxLength: 64
     }
   },
   {
@@ -42,9 +48,13 @@ export class CreateTutorialComponent implements OnInit {
   },
   ];
 
-  constructor(private tutorialService: TutorBitsTutorialService, private router: Router) { }
+  constructor(private tutorialService: TutorBitsTutorialService, private router: Router, private snackBar: MatSnackBar) { }
 
   ngOnInit() {
+  }
+
+  ngOnDestroy(): void {
+    this.snackBar.dismiss();
   }
 
   submit(model: CreateTutorial) {
@@ -52,7 +62,13 @@ export class CreateTutorialComponent implements OnInit {
     this.loading = true;
     this.tutorialService.Create(model).then((e) => {
       console.log(e);
-      this.router.navigate([`record/${e.id}`]);
+      if (e.error != null) {
+        this.snackBar.open(`CreateError - ${JSON.stringify(e.error)}`);
+      } else {
+        this.router.navigate([`record/${e.data.id}`]);
+      }
+    }).catch((e) => {
+      this.snackBar.open(`CreateError: ${JSON.stringify(e)}`);
     }).finally(() => {
       this.loading = false;
     });

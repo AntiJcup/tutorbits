@@ -1,6 +1,6 @@
 <div class="container">
     <div class="relative">
-        <button #start mat-menu-item *ngIf="!recording && !saving">
+        <button #start mat-menu-item *ngIf="!recording && !saving" [disabled]="!canRecord">
             <mat-icon class="icon">videocam</mat-icon>
             <span class="label">Record</span>
         </button>
