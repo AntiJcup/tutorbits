@@ -43,7 +43,7 @@
               <span class="label">Tutorials</span>
             </button>
             <mat-menu #appTutorialMenu="matMenu">
-                <button mat-menu-item>All</button>
+              <a [routerLink]="[ '/tutorials' ]" mat-menu-item>All</a>
               <button mat-menu-item>Html</button>
               <button mat-menu-item>Js</button>
               <button mat-menu-item>Css</button>

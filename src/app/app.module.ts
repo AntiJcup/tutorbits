@@ -26,8 +26,9 @@ import { SandboxComponent } from './components/sandbox/sandbox.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { FormlyModule } from '@ngx-formly/core';
 import { FormlyMaterialModule } from '@ngx-formly/material';
-import { CreateTutorialComponent } from './components/tutorials/createtutorial/create-tutorial.component';
+import { CreateTutorialComponent } from './components/tutorials/create-tutorial/create-tutorial.component';
 import { SubmitButtonComponent } from './sub-components/submit-button/submit-button.component';
+import { ViewTutorialsComponent } from './components/tutorials/view-tutorials/view-tutorials.component';
 
 const appRoutes: Routes = [
   {
@@ -56,6 +57,11 @@ const appRoutes: Routes = [
     data: { title: 'Create Tutorial' }
   },
   {
+    path: 'tutorials',
+    component: ViewTutorialsComponent,
+    data: { title: 'Tutorials' }
+  },
+  {
     path: '',
     redirectTo: '/home',
     pathMatch: 'full'
@@ -79,7 +85,8 @@ const appRoutes: Routes = [
     RecordingControlsComponent,
     PreviewComponent,
     CreateTutorialComponent,
-    SubmitButtonComponent
+    SubmitButtonComponent,
+    ViewTutorialsComponent
   ],
   imports: [
     BrowserModule,
