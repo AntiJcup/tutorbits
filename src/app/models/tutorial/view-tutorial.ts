@@ -1,7 +1,8 @@
 export interface ViewTutorial {
-    Title: string;
-    Language: string;
-    Description: string;
-    UserName: string;
-    Status: string;
+    id: string;
+    title: string;
+    language: string;
+    description: string;
+    userName: string;
+    status: string;
 }

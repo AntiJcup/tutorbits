@@ -3,6 +3,7 @@ import { FormGroup } from '@angular/forms';
 import { FormlyFieldConfig } from '@ngx-formly/core';
 import { CreateTutorial } from 'src/app/models/tutorial/create-tutorial';
 import { TutorBitsTutorialService } from 'src/app/services/tutor-bits-tutorial.service';
+import { Router } from '@angular/router';
 
 @Component({
   templateUrl: './create-tutorial.component.html',
@@ -41,7 +42,7 @@ export class CreateTutorialComponent implements OnInit {
   },
   ];
 
-  constructor(private tutorialService: TutorBitsTutorialService) { }
+  constructor(private tutorialService: TutorBitsTutorialService, private router: Router) { }
 
   ngOnInit() {
   }
@@ -51,6 +52,7 @@ export class CreateTutorialComponent implements OnInit {
     this.loading = true;
     this.tutorialService.Create(model).then((e) => {
       console.log(e);
+      this.router.navigate([`record/${e.id}`]);
     }).finally(() => {
       this.loading = false;
     });
