@@ -8,6 +8,7 @@ import { Component, OnInit, Input, Output, EventEmitter, ViewChild, ElementRef, 
 export class RecordingControlsComponent implements OnInit {
   public recording = false;
   @Input() saving = false;
+  @Input() canFinish = false;
 
   @ViewChild('start', { static: false, read: ElementRef }) set startRecordingBtn(element: ElementRef) {
     if (element) {
@@ -32,10 +33,15 @@ export class RecordingControlsComponent implements OnInit {
   }
 
   @Output() recordingStateChanged = new EventEmitter<boolean>();
+  @Output() finishClicked = new EventEmitter();
 
   constructor() { }
 
   ngOnInit() {
 
+  }
+
+  onFinishClicked() {
+    this.finishClicked.next();
   }
 }

@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild, NgZone } from '@angular/core';
 import { OnlineProjectLoader, OnlineProjectWriter, OnlineTransactionWriter } from 'shared/Tracer/lib/ts/OnlineTransaction';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { environment } from 'src/environments/environment';
 import { MonacoRecorder } from 'src/app/sub-components/recorder/monaco.recorder';
 import { RecordingEditorComponent } from 'src/app/sub-components/recording-editor/recording-editor.component';
@@ -36,7 +36,7 @@ export class RecordComponent implements OnInit {
   previewPath: string = null;
   previewBaseUrl: string = null;
 
-  constructor(private route: ActivatedRoute, private zone: NgZone) {
+  constructor(private router: Router, private route: ActivatedRoute, private zone: NgZone) {
     this.projectId = this.route.snapshot.paramMap.get('projectId');
   }
 
@@ -117,5 +117,9 @@ export class RecordComponent implements OnInit {
         this.previewPath = e;
       });
     });
+  }
+
+  onFinishClicked() {
+    this.router.navigate([`watch/${this.projectId}`]);
   }
 }

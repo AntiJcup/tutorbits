@@ -13,5 +13,12 @@
             <span class="label" *ngIf="!saving">Recording</span>
             <span class="label" *ngIf="saving">Saving</span>
         </button>
+
+    </div>
+    <div class="relative">
+        <button #finish mat-menu-item *ngIf="canFinish && !recording" (click)="onFinishClicked($event)">
+            <mat-icon class="icon">save</mat-icon>
+            <span class="label">Finish</span>
+        </button>
     </div>
 </div>
