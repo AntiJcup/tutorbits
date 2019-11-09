@@ -1,12 +1,17 @@
 <div class="container">
     <div class="relative">
-        <button #start mat-menu-item *ngIf="!recording">
+        <button #start mat-menu-item *ngIf="!recording && !saving">
             <mat-icon class="icon">videocam</mat-icon>
             <span class="label">Record</span>
         </button>
-        <button #stop mat-menu-item *ngIf="recording" id="recordingBtn">
-            <mat-icon class="icon">stop</mat-icon>
-            <span class="label">Recording</span>
+        <button #stop mat-menu-item *ngIf="recording || saving" id="recordingBtn" [disabled]="saving">
+            <mat-icon class="icon" *ngIf="!saving">stop</mat-icon>
+            <mat-icon class="icon" *ngIf="saving">
+                <mat-spinner color="accent" [diameter]="24" class="loading-spinner">
+                </mat-spinner>
+            </mat-icon>
+            <span class="label" *ngIf="!saving">Recording</span>
+            <span class="label" *ngIf="saving">Saving</span>
         </button>
     </div>
 </div>

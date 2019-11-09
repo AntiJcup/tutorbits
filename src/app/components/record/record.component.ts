@@ -19,6 +19,7 @@ export class RecordComponent implements OnInit {
   public projectId: string;
   public recording = false;
   hasRecorded = false;
+  saving = false;
 
   @ViewChild(RecordingFileTreeComponent, { static: true }) recordingTreeComponent: RecordingFileTreeComponent;
   @ViewChild(RecordingEditorComponent, { static: true }) recordingEditor: RecordingEditorComponent;
@@ -89,8 +90,13 @@ export class RecordComponent implements OnInit {
         });
       });
     } else {
-      this.codeRecorder.StopRecording();
-      this.webCamRecorder.FinishRecording().then();
+      this.saving = true;
+      Promise.all([this.codeRecorder.StopRecording(),
+        this.webCamRecorder.FinishRecording()]).then(() => {
+          console.log('Finished');
+        }).finally(() => {
+          this.saving = false;
+        });
     }
   }
 

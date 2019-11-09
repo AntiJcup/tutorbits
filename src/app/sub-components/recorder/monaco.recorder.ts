@@ -23,6 +23,8 @@ export class MonacoRecorder extends TransactionRecorder {
     private start: number;
     private recording: boolean;
 
+    private delayTimer: any;
+
     public get position(): number {
         return this.timeOffset;
     }
@@ -69,7 +71,7 @@ export class MonacoRecorder extends TransactionRecorder {
         });
     }
 
-    public StopRecording(): void {
+    public StopRecording(): Promise<boolean> {
         this.recording = false;
         if (this.fileChangeListener) {
             this.fileChangeListener.dispose();
@@ -91,7 +93,7 @@ export class MonacoRecorder extends TransactionRecorder {
             this.nodeMovedListener.unsubscribe();
         }
 
-        this.SaveTransactionLogs().then();
+        return this.SaveTransactionLogs();
     }
 
     protected OnFileModified(e: editor.IModelContentChangedEvent): void {
@@ -248,7 +250,14 @@ export class MonacoRecorder extends TransactionRecorder {
 
     private TriggerDelayedSave(): void {
         // Try to delay saves by partition size to increase odds we save this partition
-        setTimeout(() => {
+        if (this.delayTimer) {
+            return;
+        }
+        this.delayTimer = setTimeout(() => {
+            this.delayTimer = null;
+            if (!this.recording) {
+                return;
+            }
             this.timeOffset = Date.now() - this.start;
             this.GetTransactionLogByTimeOffset(this.timeOffset); // call this trigger new partition before save maybe
             this.SaveTransactionLogs().then();
