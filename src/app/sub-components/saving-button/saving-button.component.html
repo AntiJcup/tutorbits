@@ -1,0 +1,9 @@
+<button mat-menu-item [disabled]="saving || disabled">
+    <mat-icon class="icon" *ngIf="!saving" >{{icon}}</mat-icon>
+    <mat-icon class="icon" *ngIf="saving">
+        <mat-spinner color="accent" [diameter]="24" class="loading-spinner">
+        </mat-spinner>
+    </mat-icon>
+    <span class="label" *ngIf="!saving">{{text}}</span>
+    <span class="label" *ngIf="saving">{{savingText}}</span>
+</button>

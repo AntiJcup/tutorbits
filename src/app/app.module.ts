@@ -30,6 +30,7 @@ import { CreateTutorialComponent } from './components/tutorials/create-tutorial/
 import { SubmitButtonComponent } from './sub-components/submit-button/submit-button.component';
 import { ViewTutorialsComponent } from './components/tutorials/view-tutorials/view-tutorials.component';
 import { TutorialCardComponent } from './sub-components/tutorial-card/tutorial-card.component';
+import { SavingButtonComponent } from './sub-components/saving-button/saving-button.component';
 
 const appRoutes: Routes = [
   {
@@ -88,7 +89,8 @@ const appRoutes: Routes = [
     CreateTutorialComponent,
     SubmitButtonComponent,
     ViewTutorialsComponent,
-    TutorialCardComponent
+    TutorialCardComponent,
+    SavingButtonComponent
   ],
   imports: [
     BrowserModule,

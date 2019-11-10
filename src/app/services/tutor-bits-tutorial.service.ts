@@ -8,6 +8,13 @@ export interface ResponseWrapper<T> {
   data: T;
 }
 
+export enum Status {
+  Undefined,
+  Active,
+  Inactive,
+  Deleted
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -32,8 +39,18 @@ export class TutorBitsTutorialService {
     return responseWrapper;
   }
 
-  public async GetAll(): Promise<ViewTutorial[]> {
-    const response = await this.apiService.generateRequest().Get(`${this.basePath}/GetAll`);
+  public async UpdateStatus(tutorialId: string, status: Status): Promise<boolean> {
+    const response =
+      await this.apiService.generateRequest().Post(
+        `${this.basePath}/UpdateStatusById?id=${tutorialId}&status=${Status[status]}`,
+        null,
+        this.baseHeaders);
+
+    return response.ok;
+  }
+
+  public async GetAll(status: Status = Status.Active): Promise<ViewTutorial[]> {
+    const response = await this.apiService.generateRequest().Get(`${this.basePath}/GetAll?state=${Status[status]}`);
 
     if (!response.ok) {
       return null;

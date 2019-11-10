@@ -11,28 +11,8 @@ export class RecordingControlsComponent implements OnInit {
   @Input() saving = false;
   @Input() canFinish = false;
   @Input() canRecord = false;
-
-  @ViewChild('start', { static: false, read: ElementRef }) set startRecordingBtn(element: ElementRef) {
-    if (element) {
-      const startRecordingBtnHtmlEle = element.nativeElement as HTMLElement;
-      startRecordingBtnHtmlEle.onclick = (e) => {
-        this.recordingStateChanged.next(true);
-        this.recording = true;
-      };
-    }
-  }
-  @ViewChild('stop', { static: false, read: ElementRef }) set stopRecordingBtn(element: ElementRef) {
-    if (element) {
-      const stopRecordingBtnHtmlEle = element.nativeElement as HTMLElement;
-      stopRecordingBtnHtmlEle.onclick = (e) => {
-        if (!confirm('Are you sure you want to stop recording?')) {
-          return;
-        }
-        this.recordingStateChanged.next(false);
-        this.recording = false;
-      };
-    }
-  }
+  @Input() finishSaving = false;
+  @Input() loadingRecording = false;
 
   @Output() recordingStateChanged = new EventEmitter<boolean>();
   @Output() finishClicked = new EventEmitter();
@@ -41,6 +21,20 @@ export class RecordingControlsComponent implements OnInit {
 
   ngOnInit() {
 
+  }
+
+  onRecordClicked(e: any) {
+    this.recordingStateChanged.next(true);
+    this.recording = true;
+  }
+
+  onStopRecordingClicked(e: any) {
+    if (!confirm('Are you sure you want to stop recording?')) {
+      return;
+    }
+
+    this.recordingStateChanged.next(false);
+    this.recording = false;
   }
 
   onFinishClicked() {

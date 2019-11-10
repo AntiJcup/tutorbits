@@ -1,24 +1,13 @@
 <div class="container">
     <div class="relative">
-        <button #start mat-menu-item *ngIf="!recording && !saving" [disabled]="!canRecord">
-            <mat-icon class="icon">videocam</mat-icon>
-            <span class="label">Record</span>
-        </button>
-        <button #stop mat-menu-item *ngIf="recording || saving" id="recordingBtn" [disabled]="saving">
-            <mat-icon class="icon" *ngIf="!saving">stop</mat-icon>
-            <mat-icon class="icon" *ngIf="saving">
-                <mat-spinner color="accent" [diameter]="24" class="loading-spinner">
-                </mat-spinner>
-            </mat-icon>
-            <span class="label" *ngIf="!saving">Recording</span>
-            <span class="label" *ngIf="saving">Saving</span>
-        </button>
-
+        <app-saving-button *ngIf="(!recording && !saving) || loadingRecording" [disabled]="!canRecord || finishSaving" (click)="onRecordClicked($event)" text="Record" icon="videocam" [saving]="loadingRecording" savingText="Loading">
+        </app-saving-button>
+        <app-saving-button *ngIf="(recording || saving) && !loadingRecording" id="recordingBtn" [saving]="saving" icon="stop"
+            text="Recording" (click)="onStopRecordingClicked($event)">
+        </app-saving-button>
     </div>
     <div class="relative">
-        <button #finish mat-menu-item *ngIf="canFinish && !recording" (click)="onFinishClicked($event)">
-            <mat-icon class="icon">save</mat-icon>
-            <span class="label">Finish</span>
-        </button>
+        <app-saving-button *ngIf="canFinish && !recording" (click)="onFinishClicked($event)" text="Finish" icon="save" [saving]="finishSaving">
+        </app-saving-button>
     </div>
 </div>

@@ -11,6 +11,7 @@ import { WebCamRecorder } from 'src/app/sub-components/recorder/webcam.recorder'
 import { OnlineStreamWriter } from 'shared/media/lib/ts/OnlineStreamWriter';
 import { OnlinePreviewGenerator } from 'shared/Tracer/lib/ts/OnlinePreviewGenerator';
 import { MatSnackBar } from '@angular/material';
+import { TutorBitsTutorialService, Status } from 'src/app/services/tutor-bits-tutorial.service';
 
 @Component({
   templateUrl: './record.component.html',
@@ -22,6 +23,8 @@ export class RecordComponent implements OnInit, OnDestroy {
   hasRecorded = false;
   saving = false;
   canRecord = false;
+  finishRecording = false;
+  loadingRecording = false;
 
   @ViewChild(RecordingFileTreeComponent, { static: true }) recordingTreeComponent: RecordingFileTreeComponent;
   @ViewChild(RecordingEditorComponent, { static: true }) recordingEditor: RecordingEditorComponent;
@@ -38,7 +41,12 @@ export class RecordComponent implements OnInit, OnDestroy {
   previewPath: string = null;
   previewBaseUrl: string = null;
 
-  constructor(private router: Router, private route: ActivatedRoute, private zone: NgZone, private snackBar: MatSnackBar) {
+  constructor(
+    private router: Router,
+    private route: ActivatedRoute,
+    private zone: NgZone,
+    private snackBar: MatSnackBar,
+    private tutorialService: TutorBitsTutorialService) {
     this.projectId = this.route.snapshot.paramMap.get('projectId');
   }
 
@@ -51,6 +59,7 @@ export class RecordComponent implements OnInit, OnDestroy {
 
   onStreamInitialized(webCam: RecordingWebCamComponent) {
     console.log(webCam.stream);
+    this.canRecord = true;
     this.webCamRecorder = new WebCamRecorder(this.recordingWebCam, new OnlineStreamWriter(this.projectId, this.requestObj));
     this.webCamRecorder.Initialize().then(() => {
     });
@@ -66,8 +75,7 @@ export class RecordComponent implements OnInit, OnDestroy {
   }
 
   onRecordingStateChanged(recording: boolean) {
-    this.recordingTreeComponent.allowEdit(recording);
-    this.recordingEditor.AllowEdits(recording);
+
 
     if (recording) {
       if (this.hasRecorded) {
@@ -85,6 +93,7 @@ export class RecordComponent implements OnInit, OnDestroy {
       this.webCamRecorder.Initialize().then(() => {
       });
 
+      this.loadingRecording = true;
       this.codeRecorder = new MonacoRecorder(
         this.recordingEditor,
         this.recordingTreeComponent,
@@ -95,19 +104,25 @@ export class RecordComponent implements OnInit, OnDestroy {
 
       this.codeRecorder.DeleteProject(this.projectId).then(() => {
         this.codeRecorder.New().then(() => {
-          this.hasRecorded = true;
-          this.codeRecorder.StartRecording();
-          this.webCamRecorder.StartRecording().then();
+          this.webCamRecorder.StartRecording().then(() => {
+            this.loadingRecording = false;
+            this.hasRecorded = true;
+            this.codeRecorder.StartRecording();
+            this.recordingTreeComponent.allowEdit(true);
+            this.recordingEditor.AllowEdits(true);
+          });
         });
       });
     } else {
+      this.recordingTreeComponent.allowEdit(false);
+      this.recordingEditor.AllowEdits(false);
       this.saving = true;
       Promise.all([this.codeRecorder.StopRecording(),
-        this.webCamRecorder.FinishRecording()]).then(() => {
-          console.log('Finished');
-        }).finally(() => {
-          this.saving = false;
-        });
+      this.webCamRecorder.FinishRecording()]).then(() => {
+        console.log('Finished');
+      }).finally(() => {
+        this.saving = false;
+      });
     }
   }
 
@@ -120,17 +135,30 @@ export class RecordComponent implements OnInit, OnDestroy {
     const previewPos = Math.round(this.codeRecorder.position);
     previewGenerator.GeneratePreview(previewPos, this.codeRecorder.logs).then((url) => {
       if (!url) {
-        console.error(`preview url failed to be retrieved`);
+        this.snackBar.open(`PreviewError - preview url failed to be retrieved`, null);
         return;
       }
       this.zone.runTask(() => {
         this.previewBaseUrl = url;
         this.previewPath = e;
       });
+    }).catch((err) => {
+      this.snackBar.open(`PreviewError - ${err}`, null);
     });
   }
 
   onFinishClicked() {
-    this.router.navigate([`watch/${this.projectId}`]);
+    this.finishRecording = true;
+    this.tutorialService.UpdateStatus(this.projectId, Status.Active).then((res) => {
+      if (!res) {
+        this.snackBar.open(`FinishError - Failed To Save Try Again`, null);
+      } else {
+        this.router.navigate([`watch/${this.projectId}`]);
+      }
+    }).catch((err) => {
+      this.snackBar.open(`FinishError - ${err}`, null);
+    }).finally(() => {
+      this.finishRecording = false;
+    });
   }
 }
