@@ -8,7 +8,7 @@ export class WebCamRecorder extends StreamRecorder {
         public webCam: RecordingWebCamComponent,
         writer: StreamWriter) {
         super(webCam.stream, writer, {
-            minDataSize: 524288,
+            minDataSize: 5242880,
             maxDataize: 52428800,
             minTimeBeforeUpload: 5000,
             mimeType: 'video/webm'
