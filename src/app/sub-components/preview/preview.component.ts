@@ -26,7 +26,7 @@ export class PreviewComponent implements OnInit {
   @Input()
   set previewPath(path: string) {
     this.internalPreviewPath = path;
-    this.internalPreviewUrl = this.sanitizer.bypassSecurityTrustResourceUrl(`${this.internalPreviewBaseUrl}/${path}`);
+    this.internalPreviewUrl = this.sanitizer.bypassSecurityTrustResourceUrl(`${this.internalPreviewBaseUrl}${path}`);
   }
 
   get previewPath(): string {
