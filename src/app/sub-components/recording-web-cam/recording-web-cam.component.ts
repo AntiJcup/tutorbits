@@ -23,7 +23,7 @@ export class RecordingWebCamComponent implements OnInit {
 
   ngOnInit(): void {
     navigator.mediaDevices.getUserMedia({
-      video: true,
+      video: { aspectRatio: 1620 / 1080 },
       audio: true
     }).then((stream: MediaStream) => {
       this.stream = stream;

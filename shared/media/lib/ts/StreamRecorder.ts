@@ -9,6 +9,11 @@ export interface StreamRecorderSettings {
     mimeType: string;
 }
 
+export interface Part {
+    index: number;
+    etag: string;
+}
+
 export class StreamRecorder {
     private writeLoopInterval: any = null;
     protected mediaRecorder: MediaRecorder;
@@ -20,6 +25,7 @@ export class StreamRecorder {
     private finishCallback: () => void = null;
     private finishWritingCallback: () => void = null;
     private writingReferences = 0;
+    private sentParts: Array<Part> = [];
 
     constructor(
         protected stream: MediaStream,
@@ -66,7 +72,7 @@ export class StreamRecorder {
             this.finishCallback = resolve;
         });
 
-        await this.writer.FinishUpload(this.recordingId);
+        await this.writer.FinishUpload(this.recordingId, this.sentParts);
     }
 
     public WriteLoop(force: boolean = false) {
@@ -90,7 +96,8 @@ export class StreamRecorder {
             }
             this.pendingDataSize -= blobSize;
             this.writingReferences++;
-            this.writer.ContinueUpload(this.recordingId, uploadBlob, this.recordingPart++).then(() => {
+            this.writer.ContinueUpload(this.recordingId, uploadBlob, this.recordingPart, force).then((e: string) => {
+                this.sentParts.push({ index: this.recordingPart++, etag: e });
                 this.writingReferences--;
                 if (this.writingReferences <= 0 && this.finishCallback) { // when done call finish callback
                     this.finishCallback();

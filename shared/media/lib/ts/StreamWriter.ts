@@ -1,4 +1,5 @@
 import { ApiHttpRequest } from 'shared/web/lib/ts/ApiHttpRequest';
+import { Part } from './StreamRecorder';
 
 export abstract class StreamWriter {
     constructor(protected projectId: string) {
@@ -6,6 +7,6 @@ export abstract class StreamWriter {
     }
 
     public abstract async StartUpload(): Promise<string>;
-    public abstract async ContinueUpload(recordingId: string, data: Blob, part: number): Promise<boolean>;
-    public abstract async FinishUpload(recordingId: string): Promise<string>;
+    public abstract async ContinueUpload(recordingId: string, data: Blob, part: number, last: boolean): Promise<string>;
+    public abstract async FinishUpload(recordingId: string, parts: Array<Part>): Promise<string>;
 }

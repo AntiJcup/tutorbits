@@ -110,8 +110,14 @@ export class RecordComponent implements OnInit, OnDestroy {
             this.codeRecorder.StartRecording();
             this.recordingTreeComponent.allowEdit(true);
             this.recordingEditor.AllowEdits(true);
+          }).catch((err) => {
+            this.snackBar.open(`LoadingError - ${err}`, null);
+            this.loadingRecording = false;
           });
-        });
+        }).catch((err) => {
+          this.snackBar.open(`LoadingError - ${err}`, null);
+          this.loadingRecording = false;
+        });;
       });
     } else {
       this.recordingTreeComponent.allowEdit(false);
