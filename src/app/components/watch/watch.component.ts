@@ -66,7 +66,7 @@ export class WatchComponent implements OnInit, OnDestroy {
     this.codePlayer = new MonacoPlayer(
       this.playbackEditor,
       this.playbackTreeComponent,
-      new OnlineProjectLoader(this.requestObj),
+      new OnlineProjectLoader(this.requestObj, 'play'),
       new OnlineTransactionLoader(this.requestObj),
       this.projectId);
 
