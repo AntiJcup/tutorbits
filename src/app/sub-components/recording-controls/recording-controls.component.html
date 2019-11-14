@@ -7,7 +7,7 @@
         </app-saving-button>
     </div>
     <div class="relative">
-        <app-saving-button *ngIf="canFinish && !recording" (click)="onFinishClicked($event)" text="Finish" icon="save" [saving]="finishSaving">
+        <app-saving-button *ngIf="canFinish && !recording" (click)="onFinishClicked()" text="Finish" icon="save" [saving]="finishSaving">
         </app-saving-button>
     </div>
 </div>

@@ -1,6 +1,6 @@
 <app-recording-controls class="controls" (recordingStateChanged)="onRecordingStateChanged($event)"
     [canRecord]="canRecord" [saving]="saving" [finishSaving]="finishRecording" [canFinish]="hasRecorded && !saving"
-    (finishClicked)="onFinishClicked($event)" [loadingRecording]="loadingRecording">
+    (finishClicked)="onFinishClicked()" [loadingRecording]="loadingRecording">
 </app-recording-controls>
 <div fxLayout fxLayoutGap="5px" class="tutorialContainer">
     <div class="sideBar">
