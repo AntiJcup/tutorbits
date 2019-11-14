@@ -6,6 +6,7 @@
     "start": "ng build --watch",
     "serve": "ng serve",
     "build": "ng build",
+    "buildProd": "ng build --prod",
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e"
