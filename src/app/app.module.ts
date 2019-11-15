@@ -31,6 +31,7 @@ import { SubmitButtonComponent } from './sub-components/submit-button/submit-but
 import { ViewTutorialsComponent } from './components/tutorials/view-tutorials/view-tutorials.component';
 import { TutorialCardComponent } from './sub-components/tutorial-card/tutorial-card.component';
 import { SavingButtonComponent } from './sub-components/saving-button/saving-button.component';
+import { EditorPlaceHolderComponent } from './sub-components/editor-place-holder/editor-place-holder.component';
 
 const appRoutes: Routes = [
   {
@@ -90,7 +91,8 @@ const appRoutes: Routes = [
     SubmitButtonComponent,
     ViewTutorialsComponent,
     TutorialCardComponent,
-    SavingButtonComponent
+    SavingButtonComponent,
+    EditorPlaceHolderComponent
   ],
   imports: [
     BrowserModule,

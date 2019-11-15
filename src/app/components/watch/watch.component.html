@@ -9,6 +9,8 @@
     </app-playback-file-tree>
   </div>
   <div class="editorContainer" fxLayout fxLayoutGap="5px">
+    <app-editor-place-holder class="placeHolder">
+    </app-editor-place-holder>
     <app-playback-editor class="recordingEditor" (codeInitialized)="onCodeInitialized($event)">
     </app-playback-editor>
     <app-preview *ngIf="previewPath" class="preview" (closeClicked)="onCloseClicked($event)" [previewPath]="previewPath" [previewBaseUrl]="previewBaseUrl">
