@@ -1,11 +1,10 @@
-import { Component, OnInit, ViewChild, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { FormlyFieldConfig } from '@ngx-formly/core';
 import { CreateTutorial } from 'src/app/models/tutorial/create-tutorial';
 import { TutorBitsTutorialService } from 'src/app/services/tutor-bits-tutorial.service';
 import { Router } from '@angular/router';
-import { MatSnackBar } from '@angular/material';
-import { config } from 'rxjs';
+import { IErrorService } from 'src/app/services/abstract/IErrorService';
 
 @Component({
   templateUrl: './create-tutorial.component.html',
@@ -48,13 +47,15 @@ export class CreateTutorialComponent implements OnInit, OnDestroy {
   },
   ];
 
-  constructor(private tutorialService: TutorBitsTutorialService, private router: Router, private snackBar: MatSnackBar) { }
+  constructor(
+    private tutorialService: TutorBitsTutorialService,
+    private router: Router,
+    private errorServer: IErrorService) { }
 
   ngOnInit() {
   }
 
   ngOnDestroy(): void {
-    this.snackBar.dismiss();
   }
 
   submit(model: CreateTutorial) {
@@ -63,12 +64,12 @@ export class CreateTutorialComponent implements OnInit, OnDestroy {
     this.tutorialService.Create(model).then((e) => {
       console.log(e);
       if (e.error != null) {
-        this.snackBar.open(`CreateError - ${JSON.stringify(e.error)}`);
+        this.errorServer.HandleError('CreateError', JSON.stringify(e.error));
       } else {
         this.router.navigate([`record/${e.data.id}`]);
       }
     }).catch((e) => {
-      this.snackBar.open(`CreateError: ${JSON.stringify(e)}`);
+      this.errorServer.HandleError('CreateError', JSON.stringify(e));
     }).finally(() => {
       this.loading = false;
     });

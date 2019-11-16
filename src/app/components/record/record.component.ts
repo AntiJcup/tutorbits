@@ -10,9 +10,9 @@ import { RecordingWebCamComponent } from 'src/app/sub-components/recording-web-c
 import { WebCamRecorder } from 'src/app/sub-components/recorder/webcam.recorder';
 import { OnlineStreamWriter } from 'shared/media/lib/ts/OnlineStreamWriter';
 import { OnlinePreviewGenerator } from 'shared/Tracer/lib/ts/OnlinePreviewGenerator';
-import { MatSnackBar } from '@angular/material';
 import { TutorBitsTutorialService } from 'src/app/services/tutor-bits-tutorial.service';
 import { Status } from 'src/app/services/abstract/IModelApiService';
+import { IErrorService } from 'src/app/services/abstract/IErrorService';
 
 @Component({
   templateUrl: './record.component.html',
@@ -46,7 +46,7 @@ export class RecordComponent implements OnInit, OnDestroy {
     private router: Router,
     private route: ActivatedRoute,
     private zone: NgZone,
-    private snackBar: MatSnackBar,
+    private errorServer: IErrorService,
     private tutorialService: TutorBitsTutorialService) {
     this.projectId = this.route.snapshot.paramMap.get('projectId');
   }
@@ -55,7 +55,7 @@ export class RecordComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.snackBar.dismiss();
+
   }
 
   onStreamInitialized(webCam: RecordingWebCamComponent) {
@@ -67,8 +67,7 @@ export class RecordComponent implements OnInit, OnDestroy {
   }
 
   onStreamError(e: any) {
-    console.error(`${e}`);
-    this.snackBar.open(`WebCamError - ${e}`, null);
+    this.errorServer.HandleError('WebCamError', e);
   }
 
   onCodeInitialized(recordingEditor: RecordingEditorComponent) {
@@ -112,11 +111,11 @@ export class RecordComponent implements OnInit, OnDestroy {
             this.recordingTreeComponent.allowEdit(true);
             this.recordingEditor.AllowEdits(true);
           }).catch((err) => {
-            this.snackBar.open(`LoadingError - ${err}`, null);
+            this.errorServer.HandleError('LoadingError', err);
             this.loadingRecording = false;
           });
         }).catch((err) => {
-          this.snackBar.open(`LoadingError - ${err}`, null);
+          this.errorServer.HandleError('LoadingError', err);
           this.loadingRecording = false;
         });;
       });
@@ -142,7 +141,7 @@ export class RecordComponent implements OnInit, OnDestroy {
     const previewPos = Math.round(this.codeRecorder.position);
     previewGenerator.GeneratePreview(previewPos, this.codeRecorder.logs).then((url) => {
       if (!url) {
-        this.snackBar.open(`PreviewError - preview url failed to be retrieved`, null);
+        this.errorServer.HandleError('PreviewError', ' preview url failed to be retrieved');
         return;
       }
       this.zone.runTask(() => {
@@ -150,7 +149,7 @@ export class RecordComponent implements OnInit, OnDestroy {
         this.previewPath = e;
       });
     }).catch((err) => {
-      this.snackBar.open(`PreviewError - ${err}`, null);
+      this.errorServer.HandleError('PreviewError', err);
     });
   }
 
@@ -158,12 +157,12 @@ export class RecordComponent implements OnInit, OnDestroy {
     this.finishRecording = true;
     this.tutorialService.UpdateStatus(this.projectId, Status.Active).then((res) => {
       if (!res) {
-        this.snackBar.open(`FinishError - Failed To Save Try Again`, null);
+        this.errorServer.HandleError('FinishError', 'Failed To Save Try Again');
       } else {
         this.router.navigate([`watch/${this.projectId}`]);
       }
     }).catch((err) => {
-      this.snackBar.open(`FinishError - ${err}`, null);
+      this.errorServer.HandleError('FinishError', err);
     }).finally(() => {
       this.finishRecording = false;
     });

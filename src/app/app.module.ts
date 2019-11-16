@@ -45,6 +45,8 @@ import { ViewTutorial } from './models/tutorial/view-tutorial';
 import { CreateTutorial } from './models/tutorial/create-tutorial';
 import { IStorageService } from './services/abstract/IStorageService';
 import { TutorBitsStorageService } from './services/tutor-bits-storage.service';
+import { TutorBitsErrorService } from './services/tutor-bits-error.service';
+import { IErrorService } from './services/abstract/IErrorService';
 
 const appRoutes: Routes = [
   {
@@ -131,10 +133,11 @@ const appRoutes: Routes = [
     FormlyMaterialModule
   ],
   providers: [
-    { provide: IAPIService, useClass: TutorBitsApiService},
-    { provide: IStorageService, useClass: TutorBitsStorageService},
+    { provide: IAPIService, useClass: TutorBitsApiService },
+    { provide: IStorageService, useClass: TutorBitsStorageService },
     { provide: IAuthService, useClass: TutorBitsAuthService },
     { provide: ILogService, useClass: TutorBitsLoggingService },
+    { provide: IErrorService, useClass: TutorBitsErrorService },
     { provide: TutorBitsTutorialService, useClass: TutorBitsConcreteTutorialService }
   ],
   bootstrap: [AppComponent]

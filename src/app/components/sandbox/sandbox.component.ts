@@ -12,6 +12,7 @@ import { OnlineStreamWriter } from 'shared/media/lib/ts/OnlineStreamWriter';
 import { OnlinePreviewGenerator } from 'shared/Tracer/lib/ts/OnlinePreviewGenerator';
 import { LocalTransactionWriter, LocalProjectWriter, LocalProjectLoader } from 'shared/Tracer/lib/ts/LocalTransaction';
 import { Guid } from 'guid-typescript';
+import { IErrorService } from 'src/app/services/abstract/IErrorService';
 
 @Component({
   templateUrl: './sandbox.component.html',
@@ -33,7 +34,9 @@ export class SandboxComponent implements OnInit {
   previewPath: string = null;
   previewBaseUrl: string = null;
 
-  constructor(private zone: NgZone) {
+  constructor(
+    private zone: NgZone,
+    private errorServer: IErrorService) {
   }
 
   ngOnInit(): void {
@@ -67,13 +70,15 @@ export class SandboxComponent implements OnInit {
     const previewPos = Math.round(this.codeRecorder.position);
     previewGenerator.GeneratePreview(previewPos, this.codeRecorder.logs).then((url) => {
       if (!url) {
-        console.error(`preview url failed to be retrieved`);
+        this.errorServer.HandleError(`PreviewError`, 'failed to be retrieved');
         return;
       }
       this.zone.runTask(() => {
         this.previewBaseUrl = url;
         this.previewPath = e;
       });
+    }).catch((err) => {
+      this.errorServer.HandleError(`PreviewError`, err);
     });
   }
 }

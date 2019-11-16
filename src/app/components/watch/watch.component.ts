@@ -10,7 +10,7 @@ import { VidPlayer } from 'src/app/sub-components/player/vid.player';
 import { OnlineStreamLoader } from 'shared/media/lib/ts/OnlineStreamLoader';
 import { TransactionPlayerState } from 'shared/Tracer/lib/ts/TransactionPlayer';
 import { OnlinePreviewGenerator } from 'shared/Tracer/lib/ts/OnlinePreviewGenerator';
-import { MatSnackBar } from '@angular/material';
+import { IErrorService } from 'src/app/services/abstract/IErrorService';
 
 @Component({
   templateUrl: './watch.component.html',
@@ -44,7 +44,10 @@ export class WatchComponent implements OnInit, OnDestroy {
   previewPath: string = null;
   previewBaseUrl: string = null;
 
-  constructor(private route: ActivatedRoute, private zone: NgZone, private snackBar: MatSnackBar) {
+  constructor(
+    private route: ActivatedRoute,
+    private zone: NgZone,
+    private errorServer: IErrorService) {
     this.projectId = this.route.snapshot.paramMap.get('projectId');
   }
 
@@ -52,14 +55,13 @@ export class WatchComponent implements OnInit, OnDestroy {
     const requestObj = new ApiHttpRequest(this.requestInfo);
     this.videoPlayer = new VidPlayer(new OnlineStreamLoader(this.projectId, requestObj), this.playbackVideo.nativeElement);
     this.videoPlayer.Load().then().catch((e) => {
-      this.snackBar.open(`VideoError - ${e}`, null);
+      this.errorServer.HandleError(`VideoError`, e);
     });
 
   }
 
   ngOnDestroy(): void {
     clearInterval(this.paceKeeperInterval);
-    this.snackBar.dismiss();
   }
 
   onCodeInitialized(playbackEditor: PlaybackEditorComponent) {
@@ -77,7 +79,7 @@ export class WatchComponent implements OnInit, OnDestroy {
         this.paceKeeperLoop();
       }, this.paceKeeperCheckSpeedMS);
     }).catch((e) => {
-      this.snackBar.open(`CodeError - ${e}`, null);
+      this.errorServer.HandleError(`CodeError`, e);
     });
   }
 
@@ -112,8 +114,6 @@ export class WatchComponent implements OnInit, OnDestroy {
 
     this.codePlayer.position = this.paceKeperPosition;
     this.lastVideoTime = currentVideoTime;
-    // console.log(this.paceKeperPosition);
-    // console.log(this.lastVideoTime);
   }
 
   public onPreviewClicked(e: string) {
@@ -123,13 +123,15 @@ export class WatchComponent implements OnInit, OnDestroy {
     const previewPos = Math.round(this.codePlayer.position);
     previewGenerator.LoadPreview(this.projectId, previewPos).then((url) => {
       if (!url) {
-        console.error(`preview url failed to be retrieved`);
+        this.errorServer.HandleError(`PreviewError`, 'failed to be retrieved');
         return;
       }
       this.zone.runTask(() => {
         this.previewBaseUrl = url;
         this.previewPath = e;
       });
+    }).catch((err) => {
+      this.errorServer.HandleError(`PreviewError`, err);
     });
   }
 
