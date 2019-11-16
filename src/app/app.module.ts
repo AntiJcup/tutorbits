@@ -18,7 +18,7 @@ import { PlaybackEditorComponent } from './sub-components/playback-editor/playba
 import { RecordingEditorComponent } from './sub-components/recording-editor/recording-editor.component';
 import { RecordingFileTreeComponent } from './sub-components/recording-file-tree/recording-file-tree.component';
 import { PlaybackFileTreeComponent } from './sub-components/playback-file-tree/playback-file-tree.component';
-import {WebcamModule} from 'ngx-webcam';
+import { WebcamModule } from 'ngx-webcam';
 import { RecordingWebCamComponent } from './sub-components/recording-web-cam/recording-web-cam.component';
 import { RecordingControlsComponent } from './sub-components/recording-controls/recording-controls.component';
 import { PreviewComponent } from './sub-components/preview/preview.component';
@@ -33,6 +33,18 @@ import { TutorialCardComponent } from './sub-components/tutorial-card/tutorial-c
 import { SavingButtonComponent } from './sub-components/saving-button/saving-button.component';
 import { EditorPlaceHolderComponent } from './sub-components/editor-place-holder/editor-place-holder.component';
 import { LoginComponent } from './components/login/login.component';
+import { IAPIService } from './services/abstract/IAPIService';
+import { TutorBitsApiService } from './services/tutor-bits-api.service';
+import { IAuthService } from './services/abstract/IAuthService';
+import { TutorBitsAuthService } from './services/tutor-bits-auth.service';
+import { ILogService } from './services/abstract/ILogService';
+import { TutorBitsLoggingService } from './services/tutor-bits-logging.service';
+import { TutorBitsBaseModelApiService } from './services/abstract/tutor-bits-base-model-api.service';
+import { TutorBitsTutorialService, TutorBitsConcreteTutorialService } from './services/tutor-bits-tutorial.service';
+import { ViewTutorial } from './models/tutorial/view-tutorial';
+import { CreateTutorial } from './models/tutorial/create-tutorial';
+import { IStorageService } from './services/abstract/IStorageService';
+import { TutorBitsStorageService } from './services/tutor-bits-storage.service';
 
 const appRoutes: Routes = [
   {
@@ -78,7 +90,6 @@ const appRoutes: Routes = [
   { path: '**', component: HomeComponent }
 ];
 
-
 @NgModule({
   declarations: [
     AppComponent,
@@ -119,7 +130,13 @@ const appRoutes: Routes = [
     FormlyModule.forRoot(),
     FormlyMaterialModule
   ],
-  providers: [],
+  providers: [
+    { provide: IAPIService, useClass: TutorBitsApiService},
+    { provide: IStorageService, useClass: TutorBitsStorageService},
+    { provide: IAuthService, useClass: TutorBitsAuthService },
+    { provide: ILogService, useClass: TutorBitsLoggingService },
+    { provide: TutorBitsTutorialService, useClass: TutorBitsConcreteTutorialService }
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

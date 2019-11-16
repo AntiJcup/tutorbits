@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
 import { environment } from 'src/environments/environment';
-import { ILogService } from './interfaces/ILogService';
+import { ILogService } from './abstract/ILogService';
 
-export class TutorBitsLoggingService implements ILogService {
+@Injectable()
+export class TutorBitsLoggingService extends ILogService {
 
-  constructor() { }
+  constructor() { super(); }
 
   public LogToConsole(...args: any[]): void {
     if (!environment.loggingEnabled) {

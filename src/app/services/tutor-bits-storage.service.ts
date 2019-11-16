@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
-import { IStorageService } from './interfaces/IStorageService';
+import { IStorageService } from './abstract/IStorageService';
 
-export class TutorBitsStorageService implements IStorageService {
-  constructor() { }
+@Injectable()
+export class TutorBitsStorageService extends IStorageService {
+  constructor() { super(); }
 
   public GetItem(key: string): any {
     return JSON.parse(localStorage[key]);

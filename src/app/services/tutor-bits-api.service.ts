@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
 import { ApiHttpRequestInfo, ApiHttpRequest } from 'shared/web/lib/ts/ApiHttpRequest';
 import { environment } from 'src/environments/environment';
-import { IAPIService } from './interfaces/IAPIService';
+import { IAPIService } from './abstract/IAPIService';
 
-export class TutorBitsApiService implements IAPIService {
+@Injectable()
+export class TutorBitsApiService extends IAPIService {
   private baseRequestInfo: ApiHttpRequestInfo = {
     host: environment.apiHost,
     credentials: undefined,
@@ -14,7 +15,7 @@ export class TutorBitsApiService implements IAPIService {
     return this.baseRequestInfo;
   }
 
-  constructor() { }
+  constructor() { super(); }
 
   public generateRequest(): ApiHttpRequest {
     return new ApiHttpRequest(this.baseRequestInfo);

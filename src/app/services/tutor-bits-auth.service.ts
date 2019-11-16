@@ -2,7 +2,9 @@ import { Injectable } from '@angular/core';
 import { TutorBitsApiService } from './tutor-bits-api.service';
 import { environment } from 'src/environments/environment';
 import { TutorBitsStorageService } from './tutor-bits-storage.service';
-import { IAuthService, JWT } from './interfaces/IAuthService';
+import { IAuthService, JWT } from './abstract/IAuthService';
+import { IAPIService } from './abstract/IAPIService';
+import { IStorageService } from './abstract/IStorageService';
 
 interface JWTRequest {
   grant_type: string;
@@ -11,10 +13,8 @@ interface JWTRequest {
   redirect_uri: string;
 }
 
-@Injectable({
-  providedIn: 'root'
-})
-export class TutorBitsAuthService implements IAuthService {
+@Injectable()
+export class TutorBitsAuthService extends IAuthService {
   private baseHeaders = {
     'Content-Type': 'application/json'
   };
@@ -34,7 +34,7 @@ export class TutorBitsAuthService implements IAuthService {
     return { ...this.baseHeaders, ...this.getAuthHeader() };
   }
 
-  constructor(protected apiService: TutorBitsApiService, protected storageService: TutorBitsStorageService) { }
+  constructor(protected apiService: IAPIService, protected storageService: IStorageService) { super(); }
 
   public async Login(code: string): Promise<void> {
     const requestBody: JWTRequest = {

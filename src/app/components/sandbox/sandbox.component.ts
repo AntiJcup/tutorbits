@@ -33,7 +33,7 @@ export class SandboxComponent implements OnInit {
   previewPath: string = null;
   previewBaseUrl: string = null;
 
-  constructor(private route: ActivatedRoute, private zone: NgZone) {
+  constructor(private zone: NgZone) {
   }
 
   ngOnInit(): void {

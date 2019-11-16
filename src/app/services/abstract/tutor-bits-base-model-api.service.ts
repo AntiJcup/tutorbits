@@ -1,5 +1,6 @@
 import { TutorBitsApiService } from '../tutor-bits-api.service';
-import { IModelApiService, ResponseWrapper, Status } from '../interfaces/IModelApiService';
+import { IModelApiService, ResponseWrapper, Status } from './IModelApiService';
+import { IAPIService } from './IAPIService';
 
 export abstract class TutorBitsBaseModelApiService<CreateModelT, ViewModelT> implements IModelApiService<CreateModelT, ViewModelT> {
   protected abstract readonly basePath: string;
@@ -7,7 +8,7 @@ export abstract class TutorBitsBaseModelApiService<CreateModelT, ViewModelT> imp
     'Content-Type': 'application/json'
   };
 
-  constructor(protected apiService: TutorBitsApiService) { }
+  constructor(protected apiService: IAPIService) { }
 
   public async Create(tutorial: CreateModelT): Promise<ResponseWrapper<ViewModelT>> {
     const responseWrapper = { error: null, data: null } as ResponseWrapper<ViewModelT>;

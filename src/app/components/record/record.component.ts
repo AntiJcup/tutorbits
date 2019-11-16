@@ -12,7 +12,7 @@ import { OnlineStreamWriter } from 'shared/media/lib/ts/OnlineStreamWriter';
 import { OnlinePreviewGenerator } from 'shared/Tracer/lib/ts/OnlinePreviewGenerator';
 import { MatSnackBar } from '@angular/material';
 import { TutorBitsTutorialService } from 'src/app/services/tutor-bits-tutorial.service';
-import { Status } from 'src/app/services/interfaces/IModelApiService';
+import { Status } from 'src/app/services/abstract/IModelApiService';
 
 @Component({
   templateUrl: './record.component.html',
