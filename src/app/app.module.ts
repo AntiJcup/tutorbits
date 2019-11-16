@@ -32,6 +32,7 @@ import { ViewTutorialsComponent } from './components/tutorials/view-tutorials/vi
 import { TutorialCardComponent } from './sub-components/tutorial-card/tutorial-card.component';
 import { SavingButtonComponent } from './sub-components/saving-button/saving-button.component';
 import { EditorPlaceHolderComponent } from './sub-components/editor-place-holder/editor-place-holder.component';
+import { LoginComponent } from './components/login/login.component';
 
 const appRoutes: Routes = [
   {
@@ -65,6 +66,11 @@ const appRoutes: Routes = [
     data: { title: 'Tutorials' }
   },
   {
+    path: 'login',
+    component: LoginComponent,
+    data: { title: 'LoggedIn' }
+  },
+  {
     path: '',
     redirectTo: '/home',
     pathMatch: 'full'
@@ -92,7 +98,8 @@ const appRoutes: Routes = [
     ViewTutorialsComponent,
     TutorialCardComponent,
     SavingButtonComponent,
-    EditorPlaceHolderComponent
+    EditorPlaceHolderComponent,
+    LoginComponent
   ],
   imports: [
     BrowserModule,

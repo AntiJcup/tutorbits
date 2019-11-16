@@ -11,7 +11,8 @@ import { WebCamRecorder } from 'src/app/sub-components/recorder/webcam.recorder'
 import { OnlineStreamWriter } from 'shared/media/lib/ts/OnlineStreamWriter';
 import { OnlinePreviewGenerator } from 'shared/Tracer/lib/ts/OnlinePreviewGenerator';
 import { MatSnackBar } from '@angular/material';
-import { TutorBitsTutorialService, Status } from 'src/app/services/tutor-bits-tutorial.service';
+import { TutorBitsTutorialService } from 'src/app/services/tutor-bits-tutorial.service';
+import { Status } from 'src/app/services/interfaces/IModelApiService';
 
 @Component({
   templateUrl: './record.component.html',
