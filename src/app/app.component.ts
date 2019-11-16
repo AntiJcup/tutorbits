@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-root',
@@ -8,6 +8,8 @@ import { HttpClient } from '@angular/common/http';
 })
 
 export class AppComponent implements OnInit {
+  public loginUrl: string;
+
   ngOnInit(): void {
     document.addEventListener('keydown', (e) => {
       if (e.keyCode === 83 && (navigator.platform.match('Mac') ? e.metaKey : e.ctrlKey)) {
@@ -16,7 +18,7 @@ export class AppComponent implements OnInit {
     }, false);
   }
 
-  constructor(private http: HttpClient) {
-
+  constructor() {
+    this.loginUrl = environment.loginUrl;
   }
 }
