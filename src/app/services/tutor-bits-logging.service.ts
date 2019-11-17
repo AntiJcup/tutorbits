@@ -7,17 +7,21 @@ export class TutorBitsLoggingService extends ILogService {
 
   constructor() { super(); }
 
-  public LogToConsole(...args: any[]): void {
+  public LogToConsole(component: string, ...args: any[]): void {
     if (!environment.loggingEnabled) {
       return;
     }
 
-    console.log.apply(console, [`LS: `].concat(args));
+    console.log.apply(console, [`LS: ${component} - `].concat(args));
 
     if (!environment.loggingTraceEnabled) {
       return;
     }
     // tslint:disable-next-line: no-console
     console.trace();
+  }
+
+  public LogErrorToConsole(component: string, ...args: any[]): void {
+    console.error.apply(console, [`LSError: ${component} - `].concat(args));
   }
 }

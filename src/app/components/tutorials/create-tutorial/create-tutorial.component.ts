@@ -5,6 +5,7 @@ import { CreateTutorial } from 'src/app/models/tutorial/create-tutorial';
 import { TutorBitsTutorialService } from 'src/app/services/tutor-bits-tutorial.service';
 import { Router } from '@angular/router';
 import { IErrorService } from 'src/app/services/abstract/IErrorService';
+import { ILogService } from 'src/app/services/abstract/ILogService';
 
 @Component({
   templateUrl: './create-tutorial.component.html',
@@ -50,7 +51,8 @@ export class CreateTutorialComponent implements OnInit, OnDestroy {
   constructor(
     private tutorialService: TutorBitsTutorialService,
     private router: Router,
-    private errorServer: IErrorService) { }
+    private errorServer: IErrorService,
+    private logServer: ILogService) { }
 
   ngOnInit() {
   }
@@ -59,10 +61,10 @@ export class CreateTutorialComponent implements OnInit, OnDestroy {
   }
 
   submit(model: CreateTutorial) {
-    console.log(model);
+    this.logServer.LogToConsole('CreateTutorial', model);
     this.loading = true;
     this.tutorialService.Create(model).then((e) => {
-      console.log(e);
+      this.logServer.LogToConsole('CreateTutorial', e);
       if (e.error != null) {
         this.errorServer.HandleError('CreateError', JSON.stringify(e.error));
       } else {

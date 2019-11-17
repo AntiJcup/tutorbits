@@ -11,6 +11,7 @@ import { OnlineStreamLoader } from 'shared/media/lib/ts/OnlineStreamLoader';
 import { TransactionPlayerState } from 'shared/Tracer/lib/ts/TransactionPlayer';
 import { OnlinePreviewGenerator } from 'shared/Tracer/lib/ts/OnlinePreviewGenerator';
 import { IErrorService } from 'src/app/services/abstract/IErrorService';
+import { ILogService } from 'src/app/services/abstract/ILogService';
 
 @Component({
   templateUrl: './watch.component.html',
@@ -47,7 +48,8 @@ export class WatchComponent implements OnInit, OnDestroy {
   constructor(
     private route: ActivatedRoute,
     private zone: NgZone,
-    private errorServer: IErrorService) {
+    private errorServer: IErrorService,
+    private logServer: ILogService) {
     this.projectId = this.route.snapshot.paramMap.get('projectId');
   }
 
@@ -68,6 +70,7 @@ export class WatchComponent implements OnInit, OnDestroy {
     this.codePlayer = new MonacoPlayer(
       this.playbackEditor,
       this.playbackTreeComponent,
+      this.logServer,
       new OnlineProjectLoader(this.requestObj, 'play'),
       new OnlineTransactionLoader(this.requestObj),
       this.projectId);

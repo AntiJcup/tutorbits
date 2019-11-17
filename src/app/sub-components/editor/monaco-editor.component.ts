@@ -1,5 +1,6 @@
 import { Output, EventEmitter, OnDestroy } from '@angular/core';
 import { editor } from 'monaco-editor';
+import { ILogService } from 'src/app/services/abstract/ILogService';
 
 export abstract class MonacoEditorComponent implements OnDestroy {
 
@@ -29,7 +30,7 @@ export abstract class MonacoEditorComponent implements OnDestroy {
 
   @Output() codeInitialized = new EventEmitter<MonacoEditorComponent>();
 
-  constructor() {
+  constructor(protected logServer: ILogService) {
     this.windowCallback = (e: UIEvent) => {
       this.onWindowResize();
     };
@@ -106,7 +107,8 @@ export abstract class MonacoEditorComponent implements OnDestroy {
   }
 
   public GetCacheForCurrentFile(): string {
-    console.log(`CacheVersion: ${this.fileCache[this.filePath]}`);
+    this.logServer.LogToConsole('MonacoEditor', `CacheVersion: ${this.fileCache[this.filePath]}`);
+
     return this.GetCacheForFileName(this.filePath);
   }
 

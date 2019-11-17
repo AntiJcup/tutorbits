@@ -7,6 +7,7 @@ import { MonacoEditorComponent } from '../editor/monaco-editor.component';
 import { NG2FileTreeComponent } from '../file-tree/ng2-file-tree.component';
 import { NodeSelectedEvent } from 'ng2-tree';
 import { Subscription } from 'rxjs';
+import { ILogService } from 'src/app/services/abstract/ILogService';
 
 export class MonacoPlayer extends TransactionPlayer {
     private nodeSelectedListener: Subscription = null;
@@ -14,6 +15,7 @@ export class MonacoPlayer extends TransactionPlayer {
     constructor(
         protected codeComponent: MonacoEditorComponent,
         protected fileTreeComponent: NG2FileTreeComponent,
+        protected logServer: ILogService,
         projectLoader: ProjectLoader,
         transactionLoader: TransactionLoader,
         projectId: string,
@@ -40,7 +42,7 @@ export class MonacoPlayer extends TransactionPlayer {
     }
 
     protected OnNodeSelected(e: NodeSelectedEvent): void {
-        console.log(e);
+        this.logServer.LogToConsole('MonacoPlayer', e);
         if (e.node.isBranch()) {
             return;
         }
@@ -51,7 +53,7 @@ export class MonacoPlayer extends TransactionPlayer {
     protected HandleTransaction(transaction: TraceTransaction, undo?: boolean): void {
         try {
             const edits: editor.IIdentifiedSingleEditOperation[] = [];
-            console.log(JSON.stringify(transaction.toObject()));
+            this.logServer.LogToConsole('MonacoPlayer', JSON.stringify(transaction.toObject()));
             switch (transaction.getType()) {
                 case TraceTransaction.TraceTransactionType.CREATEFILE:
                     const createNewPath = transaction.getCreateFile().getNewFilePath();
@@ -139,7 +141,7 @@ export class MonacoPlayer extends TransactionPlayer {
                             forceMoveMarkers: true
                         };
                     }
-                    console.log(`Edit: ${JSON.stringify(newEdit)} Undo: ${undo}`);
+                    this.logServer.LogToConsole('MonacoPlayer', `Edit: ${JSON.stringify(newEdit)} Undo: ${undo}`);
                     edits.push(newEdit);
                     break;
             }
@@ -154,7 +156,7 @@ export class MonacoPlayer extends TransactionPlayer {
                 this.codeComponent.UpdateCacheForCurrentFile();
             }
         } catch (e) {
-            console.error(e);
+            this.logServer.LogErrorToConsole('MonacoPlayer', e);
         }
     }
 

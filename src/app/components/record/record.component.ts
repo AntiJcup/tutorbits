@@ -13,6 +13,7 @@ import { OnlinePreviewGenerator } from 'shared/Tracer/lib/ts/OnlinePreviewGenera
 import { TutorBitsTutorialService } from 'src/app/services/tutor-bits-tutorial.service';
 import { Status } from 'src/app/services/abstract/IModelApiService';
 import { IErrorService } from 'src/app/services/abstract/IErrorService';
+import { ILogService } from 'src/app/services/abstract/ILogService';
 
 @Component({
   templateUrl: './record.component.html',
@@ -47,6 +48,7 @@ export class RecordComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private zone: NgZone,
     private errorServer: IErrorService,
+    private logServer: ILogService,
     private tutorialService: TutorBitsTutorialService) {
     this.projectId = this.route.snapshot.paramMap.get('projectId');
   }
@@ -59,7 +61,7 @@ export class RecordComponent implements OnInit, OnDestroy {
   }
 
   onStreamInitialized(webCam: RecordingWebCamComponent) {
-    console.log(webCam.stream);
+    this.logServer.LogToConsole('Record', webCam.stream);
     this.canRecord = true;
     this.webCamRecorder = new WebCamRecorder(this.recordingWebCam, new OnlineStreamWriter(this.projectId, this.requestObj));
     this.webCamRecorder.Initialize().then(() => {
@@ -125,7 +127,7 @@ export class RecordComponent implements OnInit, OnDestroy {
       this.saving = true;
       Promise.all([this.codeRecorder.StopRecording(),
       this.webCamRecorder.FinishRecording()]).then(() => {
-        console.log('Finished');
+        this.logServer.LogToConsole('Record', 'Finished recording');
       }).finally(() => {
         this.saving = false;
       });

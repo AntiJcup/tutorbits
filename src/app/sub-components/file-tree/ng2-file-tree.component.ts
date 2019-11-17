@@ -1,6 +1,7 @@
 import { ViewChild, NgZone, Injectable, SimpleChange, SimpleChanges, Output, EventEmitter } from '@angular/core';
 import { TreeComponent, Ng2TreeSettings, Tree, NodeSelectedEvent, TreeModel, TreeController, NodeMenuItemAction, NodeMenuItem } from 'ng2-tree';
 import { TreeStatus } from 'ng2-tree/src/tree.types';
+import { ILogService } from 'src/app/services/abstract/ILogService';
 
 @Injectable()
 export abstract class NG2FileTreeComponent {
@@ -13,20 +14,19 @@ export abstract class NG2FileTreeComponent {
 
   @Output() previewClicked = new EventEmitter<string>();
 
-  constructor(private zone: NgZone) { }
+  constructor(private zone: NgZone, private logServer: ILogService) { }
 
   public nodeSelected(event: NodeSelectedEvent) {
     const test = this.treeComponent.getControllerByNodeId(event.node.id);
     if (!event.node.isBranch()) {
       return;
     }
-    console.log(test.isCollapsed());
     if (!test.isCollapsed()) {
       test.collapse();
     } else {
       test.expand();
     }
-    console.log(event);
+    this.logServer.LogToConsole('FileTree', event);
   }
 
   public getPathForNode(e: Tree) {
