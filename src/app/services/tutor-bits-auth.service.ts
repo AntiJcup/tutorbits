@@ -4,6 +4,7 @@ import { IAuthService } from './abstract/IAuthService';
 import { IAPIService } from './abstract/IAPIService';
 import { JWT } from '../models/auth/JWT';
 import { IDataService } from './abstract/IDataService';
+import { BehaviorSubject } from 'rxjs';
 
 interface JWTRequest {
   grant_type: string;
@@ -24,10 +25,21 @@ export class TutorBitsAuthService extends IAuthService {
     'Content-Type': 'application/x-www-form-urlencoded'
   };
   private token: JWT;
+  private tokenObs: BehaviorSubject<JWT> = new BehaviorSubject(this.token);
 
   public async getToken(): Promise<JWT> {
     await this.RefreshToken();
     return this.token;
+  }
+
+  private updateToken(token: JWT): void {
+    this.token = token;
+    this.dataService.SetAuthToken(this.token);
+    this.tokenObs.next(this.token);
+  }
+
+  public getTokenObserver(): BehaviorSubject<JWT> {
+    return this.tokenObs;
   }
 
   public async getAuthHeader(): Promise<{ [name: string]: string }> {
@@ -59,12 +71,12 @@ export class TutorBitsAuthService extends IAuthService {
     }
 
     const responseToken: JWT = await response.json();
-    this.token = responseToken;
-    this.dataService.SetAuthToken(this.token);
+    this.updateToken(responseToken);
   }
 
   public Logout(): void {
-
+    this.token = null;
+    this.dataService.SetAuthToken(this.token);
   }
 
   public async RefreshToken(): Promise<void> {
@@ -86,8 +98,7 @@ export class TutorBitsAuthService extends IAuthService {
     }
 
     const responseToken: JWT = await response.json();
-    this.token = responseToken;
-    this.dataService.SetAuthToken(this.token);
+    this.updateToken(responseToken);
   }
 
   public async LoadCachedToken(): Promise<void> {

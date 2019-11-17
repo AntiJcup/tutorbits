@@ -50,10 +50,14 @@
             </mat-menu>
           </li>
           <li>
-              <a [href]="loginUrl" mat-menu-item>
+            <a *ngIf="!loggedIn" [href]="loginUrl" mat-menu-item>
               <mat-icon class="icon">input</mat-icon>
               <span class="label">Login</span>
-              </a>
+            </a>
+            <a *ngIf="loggedIn" [href]="logoutUrl" mat-menu-item>
+              <mat-icon class="icon">input</mat-icon>
+              <span class="label">Logout</span>
+            </a>
           </li>
         </ul>
       </div>
