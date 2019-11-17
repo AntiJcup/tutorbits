@@ -8,12 +8,12 @@ export class ApiHttpRequest {
     constructor(public requestInfo: ApiHttpRequestInfo) {
 
     }
-    public async GetFullUrl(url: string): Promise<Response> {
-        return await fetch(url, this.generateRequestInfo('GET'));
+    public async GetFullUrl(url: string, requestHeaders?: { [headerName: string]: string }): Promise<Response> {
+        return await fetch(url, this.generateRequestInfo('GET', null, requestHeaders));
     }
 
-    public async Get(path: string): Promise<Response> {
-        return await fetch(`${this.requestInfo.host}/${path}`, this.generateRequestInfo('GET'));
+    public async Get(path: string, requestHeaders?: { [headerName: string]: string }): Promise<Response> {
+        return await fetch(`${this.requestInfo.host}/${path}`, this.generateRequestInfo('GET', null, requestHeaders));
     }
 
     public async Post(path: string, body?: any, requestHeaders?: { [headerName: string]: string }): Promise<Response> {

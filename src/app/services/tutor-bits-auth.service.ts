@@ -34,11 +34,15 @@ export class TutorBitsAuthService extends IAuthService {
 
   private updateToken(token: JWT): void {
     this.token = token;
+    if (this.token && !this.token.expire_date) {
+      this.token.expire_date = (new Date()).valueOf() + this.token.expires_in;
+    }
     this.dataService.SetAuthToken(this.token);
     this.tokenObs.next(this.token);
   }
 
   public getTokenObserver(): BehaviorSubject<JWT> {
+    this.getToken().then();
     return this.tokenObs;
   }
 
@@ -53,7 +57,10 @@ export class TutorBitsAuthService extends IAuthService {
     return { ...this.baseHeaders };
   }
 
-  constructor(protected apiService: IAPIService, protected dataService: IDataService) { super(); }
+  constructor(protected apiService: IAPIService, protected dataService: IDataService) {
+    super();
+    this.updateToken(this.dataService.GetAuthToken());
+  }
 
   public async Login(code: string): Promise<void> {
     const requestBody: JWTRequest = {
@@ -76,7 +83,7 @@ export class TutorBitsAuthService extends IAuthService {
 
   public Logout(): void {
     this.token = null;
-    this.dataService.SetAuthToken(this.token);
+    this.updateToken(this.token);
   }
 
   public async RefreshToken(): Promise<void> {
@@ -113,6 +120,6 @@ export class TutorBitsAuthService extends IAuthService {
   }
 
   private IsTokenValid(token: JWT): boolean {
-    return token.expire_date <= (new Date()).valueOf();
+    return token && token.expire_date <= (new Date()).valueOf();
   }
 }

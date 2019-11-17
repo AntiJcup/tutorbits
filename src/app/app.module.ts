@@ -46,6 +46,7 @@ import { TutorBitsErrorService } from './services/tutor-bits-error.service';
 import { IErrorService } from './services/abstract/IErrorService';
 import { IDataService } from './services/abstract/IDataService';
 import { TutorBitsDataService } from './services/tutor-bits-persist.service';
+import { LogoutComponent } from './components/logout/logout.component';
 
 const appRoutes: Routes = [
   {
@@ -84,6 +85,11 @@ const appRoutes: Routes = [
     data: { title: 'LoggedIn' }
   },
   {
+    path: 'logout',
+    component: LogoutComponent,
+    data: { title: 'LoggedOut' }
+  },
+  {
     path: '',
     redirectTo: '/home',
     pathMatch: 'full'
@@ -111,7 +117,8 @@ const appRoutes: Routes = [
     TutorialCardComponent,
     SavingButtonComponent,
     EditorPlaceHolderComponent,
-    LoginComponent
+    LoginComponent,
+    LogoutComponent
   ],
   imports: [
     BrowserModule,

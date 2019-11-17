@@ -10,7 +10,7 @@ import { IErrorService } from 'src/app/services/abstract/IErrorService';
 export class LoginComponent implements OnInit {
 
   constructor(
-    private authService: IAuthService, 
+    private authService: IAuthService,
     private route: ActivatedRoute,
     private errorServer: IErrorService) { }
 

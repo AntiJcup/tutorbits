@@ -71,7 +71,7 @@ export class CreateTutorialComponent implements OnInit, OnDestroy {
         this.router.navigate([`record/${e.data.id}`]);
       }
     }).catch((e) => {
-      this.errorServer.HandleError('CreateError', JSON.stringify(e));
+      this.errorServer.HandleError('CreateError', e);
     }).finally(() => {
       this.loading = false;
     });
