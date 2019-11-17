@@ -39,14 +39,13 @@ import { IAuthService } from './services/abstract/IAuthService';
 import { TutorBitsAuthService } from './services/tutor-bits-auth.service';
 import { ILogService } from './services/abstract/ILogService';
 import { TutorBitsLoggingService } from './services/tutor-bits-logging.service';
-import { TutorBitsBaseModelApiService } from './services/abstract/tutor-bits-base-model-api.service';
 import { TutorBitsTutorialService, TutorBitsConcreteTutorialService } from './services/tutor-bits-tutorial.service';
-import { ViewTutorial } from './models/tutorial/view-tutorial';
-import { CreateTutorial } from './models/tutorial/create-tutorial';
 import { IStorageService } from './services/abstract/IStorageService';
 import { TutorBitsStorageService } from './services/tutor-bits-storage.service';
 import { TutorBitsErrorService } from './services/tutor-bits-error.service';
 import { IErrorService } from './services/abstract/IErrorService';
+import { IDataService } from './services/abstract/IDataService';
+import { TutorBitsDataService } from './services/tutor-bits-persist.service';
 
 const appRoutes: Routes = [
   {
@@ -135,6 +134,7 @@ const appRoutes: Routes = [
   providers: [
     { provide: IAPIService, useClass: TutorBitsApiService },
     { provide: IStorageService, useClass: TutorBitsStorageService },
+    { provide: IDataService, useClass: TutorBitsDataService },
     { provide: IAuthService, useClass: TutorBitsAuthService },
     { provide: ILogService, useClass: TutorBitsLoggingService },
     { provide: IErrorService, useClass: TutorBitsErrorService },

@@ -20,6 +20,18 @@ export class ApiHttpRequest {
         return await fetch(`${this.requestInfo.host}/${path}`, this.generateRequestInfo('POST', body, requestHeaders));
     }
 
+    public async PostForm(
+        path: string,
+        body: { [key: string]: any },
+        requestHeaders?: { [headerName: string]: string }): Promise<Response> {
+
+        const searchParams = Object.keys(body).map((key) => {
+            return encodeURIComponent(key) + '=' + encodeURIComponent(body[key]);
+        }).join('&');
+
+        return await fetch(`${this.requestInfo.host}/${path}`, this.generateRequestInfo('POST', searchParams, requestHeaders));
+    }
+
     protected generateRequestInfo(requestMethod: string, requestBody?: any, requestHeaders?: { [headerName: string]: string }): any {
         return {
             method: requestMethod,

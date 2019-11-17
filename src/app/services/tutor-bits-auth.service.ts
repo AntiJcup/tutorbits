@@ -1,10 +1,9 @@
 import { Injectable } from '@angular/core';
-import { TutorBitsApiService } from './tutor-bits-api.service';
 import { environment } from 'src/environments/environment';
-import { TutorBitsStorageService } from './tutor-bits-storage.service';
-import { IAuthService, JWT } from './abstract/IAuthService';
+import { IAuthService } from './abstract/IAuthService';
 import { IAPIService } from './abstract/IAPIService';
-import { IStorageService } from './abstract/IStorageService';
+import { JWT } from '../models/auth/JWT';
+import { IDataService } from './abstract/IDataService';
 
 interface JWTRequest {
   grant_type: string;
@@ -13,28 +12,36 @@ interface JWTRequest {
   redirect_uri: string;
 }
 
+interface JWTRefreshRequest {
+  grant_type: string;
+  client_id: string;
+  refresh_token: string;
+}
+
 @Injectable()
 export class TutorBitsAuthService extends IAuthService {
   private baseHeaders = {
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/x-www-form-urlencoded'
   };
   private token: JWT;
 
-  public getToken() {
+  public async getToken(): Promise<JWT> {
+    await this.RefreshToken();
     return this.token;
   }
 
-  public getAuthHeader(): { [name: string]: string } {
+  public async getAuthHeader(): Promise<{ [name: string]: string }> {
+    await this.getToken();
     return {
       Authorization: this.token.token_type + ' ' + this.token.access_token
     };
   }
 
   private getHeaders(): { [name: string]: string } {
-    return { ...this.baseHeaders, ...this.getAuthHeader() };
+    return { ...this.baseHeaders };
   }
 
-  constructor(protected apiService: IAPIService, protected storageService: IStorageService) { super(); }
+  constructor(protected apiService: IAPIService, protected dataService: IDataService) { super(); }
 
   public async Login(code: string): Promise<void> {
     const requestBody: JWTRequest = {
@@ -44,8 +51,8 @@ export class TutorBitsAuthService extends IAuthService {
       redirect_uri: environment.loginRedirectUri
     };
 
-    const response = await this.apiService.generateRequest().Post(`${environment.loginTokenUrl}`,
-      JSON.stringify(requestBody), this.getHeaders());
+    const response = await this.apiService.generateRequest().PostForm(`${environment.loginTokenUrl}`,
+      requestBody, this.getHeaders());
 
     if (!response.ok) {
       return;
@@ -53,6 +60,7 @@ export class TutorBitsAuthService extends IAuthService {
 
     const responseToken: JWT = await response.json();
     this.token = responseToken;
+    this.dataService.SetAuthToken(this.token);
   }
 
   public Logout(): void {
@@ -60,10 +68,40 @@ export class TutorBitsAuthService extends IAuthService {
   }
 
   public async RefreshToken(): Promise<void> {
+    if (this.IsTokenValid(this.token)) {
+      return;
+    }
 
+    const requestBody: JWTRefreshRequest = {
+      grant_type: 'refresh_token',
+      refresh_token: this.token.refresh_token,
+      client_id: environment.loginClientId
+    };
+
+    const response = await this.apiService.generateRequest().PostForm(`${environment.loginTokenUrl}`,
+      requestBody, this.getHeaders());
+
+    if (!response.ok) {
+      return;
+    }
+
+    const responseToken: JWT = await response.json();
+    this.token = responseToken;
+    this.dataService.SetAuthToken(this.token);
   }
 
-  public LoadCachedToken(): JWT {
-    return null;
+  public async LoadCachedToken(): Promise<void> {
+    const cachedToken = this.dataService.GetAuthToken();
+    if (!cachedToken) {
+      return;
+    }
+
+    if (cachedToken.expire_date <= (new Date()).valueOf()) {
+      await this.RefreshToken();
+    }
+  }
+
+  private IsTokenValid(token: JWT): boolean {
+    return token.expire_date <= (new Date()).valueOf();
   }
 }
