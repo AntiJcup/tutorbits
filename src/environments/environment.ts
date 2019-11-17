@@ -7,9 +7,9 @@ export const environment = {
   apiHost: 'http://api.local.tutorbits.com:5000',
   contentHost: 'http://content.tutorbits.com:9001',
   // tslint:disable-next-line: max-line-length
-  loginUrl: 'https://login.tutorbits.com/login?client_id=kich757hvogtmieu3rltc7qpu&response_type=code&scope=email+openid&redirect_uri=https://local.tutorbits.com/login',
-  loginTokenUrl: 'https://login.tutorbits.com/oauth2/token?client_id=kich757hvogtmieu3rltc7qpu',
-  loginClientId: 'kich757hvogtmieu3rltc7qpu',
+  loginUrl: 'https://login.tutorbits.com/oauth2/authorize?client_id=60bttusi8qioo53pfnqtgqcn4s&response_type=code&scope=email+openid&redirect_uri=https://local.tutorbits.com/login',
+  loginTokenUrl: 'https://login.tutorbits.com/oauth2/token',
+  loginClientId: '60bttusi8qioo53pfnqtgqcn4s',
   loginRedirectUri: 'https://local.tutorbits.com/login',
   loggingEnabled: true,
   loggingTraceEnabled: true

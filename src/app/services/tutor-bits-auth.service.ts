@@ -51,7 +51,7 @@ export class TutorBitsAuthService extends IAuthService {
       redirect_uri: environment.loginRedirectUri
     };
 
-    const response = await this.apiService.generateRequest().PostForm(`${environment.loginTokenUrl}`,
+    const response = await this.apiService.generateRequest().PostFormFullUrl(`${environment.loginTokenUrl}`,
       requestBody, this.getHeaders());
 
     if (!response.ok) {
@@ -78,7 +78,7 @@ export class TutorBitsAuthService extends IAuthService {
       client_id: environment.loginClientId
     };
 
-    const response = await this.apiService.generateRequest().PostForm(`${environment.loginTokenUrl}`,
+    const response = await this.apiService.generateRequest().PostFormFullUrl(`${environment.loginTokenUrl}`,
       requestBody, this.getHeaders());
 
     if (!response.ok) {

@@ -20,8 +20,8 @@ export class ApiHttpRequest {
         return await fetch(`${this.requestInfo.host}/${path}`, this.generateRequestInfo('POST', body, requestHeaders));
     }
 
-    public async PostForm(
-        path: string,
+    public async PostFormFullUrl(
+        url: string,
         body: { [key: string]: any },
         requestHeaders?: { [headerName: string]: string }): Promise<Response> {
 
@@ -29,7 +29,7 @@ export class ApiHttpRequest {
             return encodeURIComponent(key) + '=' + encodeURIComponent(body[key]);
         }).join('&');
 
-        return await fetch(`${this.requestInfo.host}/${path}`, this.generateRequestInfo('POST', searchParams, requestHeaders));
+        return await fetch(`${url}`, this.generateRequestInfo('POST', searchParams, requestHeaders));
     }
 
     protected generateRequestInfo(requestMethod: string, requestBody?: any, requestHeaders?: { [headerName: string]: string }): any {
