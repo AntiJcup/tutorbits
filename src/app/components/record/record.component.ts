@@ -14,6 +14,8 @@ import { TutorBitsTutorialService } from 'src/app/services/tutor-bits-tutorial.s
 import { Status } from 'src/app/services/abstract/IModelApiService';
 import { IErrorService } from 'src/app/services/abstract/IErrorService';
 import { ILogService } from 'src/app/services/abstract/ILogService';
+import { ITracerProjectService } from 'src/app/services/abstract/ITracerProjectService';
+import { ITracerTransactionService } from 'src/app/services/abstract/ITracerTransactionService';
 
 @Component({
   templateUrl: './record.component.html',
@@ -49,7 +51,9 @@ export class RecordComponent implements OnInit, OnDestroy {
     private zone: NgZone,
     private errorServer: IErrorService,
     private logServer: ILogService,
-    private tutorialService: TutorBitsTutorialService) {
+    private tutorialService: TutorBitsTutorialService,
+    private tracerProjectService: ITracerProjectService,
+    private tracerTransactionService: ITracerTransactionService) {
     this.projectId = this.route.snapshot.paramMap.get('projectId');
   }
 
@@ -100,8 +104,8 @@ export class RecordComponent implements OnInit, OnDestroy {
         this.recordingTreeComponent,
         this.projectId,
         new OnlineProjectLoader(this.requestObj),
-        new OnlineProjectWriter(this.requestObj),
-        new OnlineTransactionWriter(this.requestObj, this.projectId));
+        this.tracerProjectService,
+        this.tracerTransactionService);
 
       this.codeRecorder.DeleteProject(this.projectId).then(() => {
         this.codeRecorder.New().then(() => {

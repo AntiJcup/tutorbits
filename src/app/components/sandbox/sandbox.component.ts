@@ -52,7 +52,7 @@ export class SandboxComponent implements OnInit {
       this.projectId,
       new LocalProjectLoader(),
       new LocalProjectWriter(),
-      new LocalTransactionWriter(this.projectId));
+      new LocalTransactionWriter());
 
     this.codeRecorder.DeleteProject(this.projectId).then(() => {
       this.codeRecorder.New().then(() => {

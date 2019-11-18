@@ -47,6 +47,10 @@ import { IErrorService } from './services/abstract/IErrorService';
 import { IDataService } from './services/abstract/IDataService';
 import { TutorBitsDataService } from './services/tutor-bits-persist.service';
 import { LogoutComponent } from './components/logout/logout.component';
+import { TutorBitsTracerProjectService } from './services/tutor-bits-tracer-project.service';
+import { ITracerProjectService } from './services/abstract/ITracerProjectService';
+import { ITracerTransactionService } from './services/abstract/ITracerTransactionService';
+import { TutorBitsTracerTransactionService } from './services/tutor-bits-tracer-transaction.service';
 
 const appRoutes: Routes = [
   {
@@ -145,7 +149,9 @@ const appRoutes: Routes = [
     { provide: IAuthService, useClass: TutorBitsAuthService },
     { provide: ILogService, useClass: TutorBitsLoggingService },
     { provide: IErrorService, useClass: TutorBitsErrorService },
-    { provide: TutorBitsTutorialService, useClass: TutorBitsConcreteTutorialService }
+    { provide: TutorBitsTutorialService, useClass: TutorBitsConcreteTutorialService },
+    { provide: ITracerProjectService, useClass: TutorBitsTracerProjectService },
+    { provide: ITracerTransactionService, useClass: TutorBitsTracerTransactionService }
   ],
   bootstrap: [AppComponent]
 })

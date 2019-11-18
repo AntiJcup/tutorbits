@@ -28,6 +28,7 @@ export class TutorBitsAuthService extends IAuthService {
   };
   private token: JWT;
   private tokenObs: BehaviorSubject<JWT> = new BehaviorSubject(this.token);
+  private refreshLookAheadSeconds = 60 * 5;
 
   public async getToken(): Promise<JWT> {
     await this.RefreshToken();
@@ -142,6 +143,6 @@ export class TutorBitsAuthService extends IAuthService {
   }
 
   private IsTokenValid(token: JWT): boolean {
-    return token && token.expire_date <= (new Date()).valueOf();
+    return token && token.expire_date <= ((new Date()).valueOf() + this.refreshLookAheadSeconds);
   }
 }
