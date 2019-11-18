@@ -23,14 +23,14 @@ export class StreamRecorder {
     protected recordingId: string;
     private recording = false;
     private finishCallback: () => void = null;
-    private finishWritingCallback: () => void = null;
     private writingReferences = 0;
     private sentParts: Array<Part> = [];
 
     constructor(
         protected stream: MediaStream,
         protected writer: StreamWriter,
-        protected settings: StreamRecorderSettings) {
+        protected settings: StreamRecorderSettings,
+        protected projectId: string) {
         this.mediaRecorder = new MediaRecorder(stream);
     }
 
@@ -59,7 +59,7 @@ export class StreamRecorder {
             }
         };
 
-        this.recordingId = await this.writer.StartUpload();
+        this.recordingId = await this.writer.StartUpload(this.projectId);
 
         this.mediaRecorder.start(this.settings.minTimeBeforeUpload);
     }
@@ -72,7 +72,7 @@ export class StreamRecorder {
             this.finishCallback = resolve;
         });
 
-        await this.writer.FinishUpload(this.recordingId, this.sentParts);
+        await this.writer.FinishUpload(this.projectId, this.recordingId, this.sentParts);
     }
 
     public WriteLoop(force: boolean = false) {
@@ -96,7 +96,7 @@ export class StreamRecorder {
             }
             this.pendingDataSize -= blobSize;
             this.writingReferences++;
-            this.writer.ContinueUpload(this.recordingId, uploadBlob, this.recordingPart, force).then((e: string) => {
+            this.writer.ContinueUpload(this.projectId, this.recordingId, uploadBlob, this.recordingPart, force).then((e: string) => {
                 this.sentParts.push({ index: this.recordingPart++, etag: e });
                 this.writingReferences--;
                 if (this.writingReferences <= 0 && this.finishCallback) { // when done call finish callback

@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild, NgZone, OnDestroy } from '@angular/core';
-import { OnlineProjectLoader, OnlineProjectWriter, OnlineTransactionWriter } from 'shared/Tracer/lib/ts/OnlineTransaction';
+import { OnlineProjectLoader } from 'shared/Tracer/lib/ts/OnlineTransaction';
 import { ActivatedRoute, Router } from '@angular/router';
 import { environment } from 'src/environments/environment';
 import { MonacoRecorder } from 'src/app/sub-components/recorder/monaco.recorder';
@@ -16,6 +16,7 @@ import { IErrorService } from 'src/app/services/abstract/IErrorService';
 import { ILogService } from 'src/app/services/abstract/ILogService';
 import { ITracerProjectService } from 'src/app/services/abstract/ITracerProjectService';
 import { ITracerTransactionService } from 'src/app/services/abstract/ITracerTransactionService';
+import { IVideoRecordingService } from 'src/app/services/abstract/IVideoRecordingService';
 
 @Component({
   templateUrl: './record.component.html',
@@ -53,7 +54,8 @@ export class RecordComponent implements OnInit, OnDestroy {
     private logServer: ILogService,
     private tutorialService: TutorBitsTutorialService,
     private tracerProjectService: ITracerProjectService,
-    private tracerTransactionService: ITracerTransactionService) {
+    private tracerTransactionService: ITracerTransactionService,
+    private videoRecordingService: IVideoRecordingService) {
     this.projectId = this.route.snapshot.paramMap.get('projectId');
   }
 
@@ -67,7 +69,7 @@ export class RecordComponent implements OnInit, OnDestroy {
   onStreamInitialized(webCam: RecordingWebCamComponent) {
     this.logServer.LogToConsole('Record', webCam.stream);
     this.canRecord = true;
-    this.webCamRecorder = new WebCamRecorder(this.recordingWebCam, new OnlineStreamWriter(this.projectId, this.requestObj));
+    this.webCamRecorder = new WebCamRecorder(this.recordingWebCam, this.videoRecordingService, this.projectId);
     this.webCamRecorder.Initialize().then(() => {
     });
   }
@@ -94,7 +96,7 @@ export class RecordComponent implements OnInit, OnDestroy {
       }
 
 
-      this.webCamRecorder = new WebCamRecorder(this.recordingWebCam, new OnlineStreamWriter(this.projectId, this.requestObj));
+      this.webCamRecorder = new WebCamRecorder(this.recordingWebCam, this.videoRecordingService, this.projectId);
       this.webCamRecorder.Initialize().then(() => {
       });
 

@@ -51,6 +51,8 @@ import { TutorBitsTracerProjectService } from './services/tutor-bits-tracer-proj
 import { ITracerProjectService } from './services/abstract/ITracerProjectService';
 import { ITracerTransactionService } from './services/abstract/ITracerTransactionService';
 import { TutorBitsTracerTransactionService } from './services/tutor-bits-tracer-transaction.service';
+import { IVideoRecordingService } from './services/abstract/IVideoRecordingService';
+import { TutorBitsVideoRecordingService } from './services/tutor-bits-video-recording.service';
 
 const appRoutes: Routes = [
   {
@@ -151,7 +153,8 @@ const appRoutes: Routes = [
     { provide: IErrorService, useClass: TutorBitsErrorService },
     { provide: TutorBitsTutorialService, useClass: TutorBitsConcreteTutorialService },
     { provide: ITracerProjectService, useClass: TutorBitsTracerProjectService },
-    { provide: ITracerTransactionService, useClass: TutorBitsTracerTransactionService }
+    { provide: ITracerTransactionService, useClass: TutorBitsTracerTransactionService },
+    { provide: IVideoRecordingService, useClass: TutorBitsVideoRecordingService }
   ],
   bootstrap: [AppComponent]
 })

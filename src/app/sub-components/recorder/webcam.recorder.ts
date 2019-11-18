@@ -6,12 +6,14 @@ import { RecordingWebCamComponent } from '../recording-web-cam/recording-web-cam
 export class WebCamRecorder extends StreamRecorder {
     constructor(
         public webCam: RecordingWebCamComponent,
-        writer: StreamWriter) {
+        writer: StreamWriter,
+        projectId: string) {
         super(webCam.stream, writer, {
             minDataSize: 5242880,
             maxDataize: 52428800,
             minTimeBeforeUpload: 5000,
             mimeType: 'video/webm'
-        } as StreamRecorderSettings);
+        } as StreamRecorderSettings,
+            projectId);
     }
 }
