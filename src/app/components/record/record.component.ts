@@ -77,8 +77,6 @@ export class RecordComponent implements OnInit, OnDestroy {
   }
 
   onRecordingStateChanged(recording: boolean) {
-
-
     if (recording) {
       if (this.hasRecorded) {
         if (!confirm('Are you sure you want to start the recording over?')) {
@@ -90,6 +88,7 @@ export class RecordComponent implements OnInit, OnDestroy {
         this.recordingEditor.ClearCacheForFolder('/');
         this.recordingEditor.Show(false);
       }
+
 
       this.webCamRecorder = new WebCamRecorder(this.recordingWebCam, new OnlineStreamWriter(this.projectId, this.requestObj));
       this.webCamRecorder.Initialize().then(() => {
@@ -112,16 +111,20 @@ export class RecordComponent implements OnInit, OnDestroy {
             this.codeRecorder.StartRecording();
             this.recordingTreeComponent.allowEdit(true);
             this.recordingEditor.AllowEdits(true);
+            this.recording = true;
           }).catch((err) => {
             this.errorServer.HandleError('LoadingError', err);
             this.loadingRecording = false;
+            this.recording = false;
           });
         }).catch((err) => {
           this.errorServer.HandleError('LoadingError', err);
           this.loadingRecording = false;
-        });;
+          this.recording = false;
+        });
       });
     } else {
+      this.recording = false;
       this.recordingTreeComponent.allowEdit(false);
       this.recordingEditor.AllowEdits(false);
       this.saving = true;

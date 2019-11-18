@@ -1,4 +1,4 @@
-import { Component, OnInit, NgZone } from '@angular/core';
+import { Component, OnInit, NgZone, ChangeDetectorRef } from '@angular/core';
 import { environment } from 'src/environments/environment';
 import { IAuthService } from './services/abstract/IAuthService';
 
@@ -13,7 +13,7 @@ export class AppComponent implements OnInit {
   public logoutUrl: string;
   public loggedIn = false;
 
-  constructor(private auth: IAuthService, private zone: NgZone) {
+  constructor(private auth: IAuthService, private zone: NgZone, private cdr: ChangeDetectorRef) {
     this.loginUrl = environment.loginUrl;
     this.logoutUrl = environment.logoutUrl;
   }
@@ -28,6 +28,7 @@ export class AppComponent implements OnInit {
     this.auth.getTokenObserver().subscribe((token) => {
       this.zone.runTask(() => {
         this.loggedIn = !!token;
+        this.cdr.detectChanges();
       });
     });
   }

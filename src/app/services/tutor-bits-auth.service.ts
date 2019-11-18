@@ -5,6 +5,8 @@ import { IAPIService } from './abstract/IAPIService';
 import { JWT } from '../models/auth/JWT';
 import { IDataService } from './abstract/IDataService';
 import { BehaviorSubject } from 'rxjs';
+import { ILogService } from './abstract/ILogService';
+import { IErrorService } from './abstract/IErrorService';
 
 interface JWTRequest {
   grant_type: string;
@@ -57,66 +59,86 @@ export class TutorBitsAuthService extends IAuthService {
     return { ...this.baseHeaders };
   }
 
-  constructor(protected apiService: IAPIService, protected dataService: IDataService) {
+  constructor(
+    protected apiService: IAPIService,
+    protected dataService: IDataService,
+    protected logServer: ILogService,
+    protected errorServer: IErrorService) {
     super();
     this.updateToken(this.dataService.GetAuthToken());
   }
 
   public async Login(code: string): Promise<void> {
-    const requestBody: JWTRequest = {
-      grant_type: 'authorization_code',
-      code,
-      client_id: environment.loginClientId,
-      redirect_uri: environment.loginRedirectUri
-    };
+    try {
+      this.logServer.LogToConsole('AuthService', `Logging in with ${code}`);
+      const requestBody: JWTRequest = {
+        grant_type: 'authorization_code',
+        code,
+        client_id: environment.loginClientId,
+        redirect_uri: environment.loginRedirectUri
+      };
 
-    const response = await this.apiService.generateRequest().PostFormFullUrl(`${environment.loginTokenUrl}`,
-      requestBody, this.getHeaders());
+      const response = await this.apiService.generateRequest().PostFormFullUrl(`${environment.loginTokenUrl}`,
+        requestBody, this.getHeaders());
 
-    if (!response.ok) {
-      return;
+      if (!response.ok) {
+        this.errorServer.HandleError('AuthService', `Login Error: ${response.status}: ${response.statusText}`);
+        return;
+      }
+
+      const responseToken: JWT = await response.json();
+      this.updateToken(responseToken);
+    } catch (err) {
+      this.errorServer.HandleError('AuthService', `Login Exception: ${err}`);
     }
-
-    const responseToken: JWT = await response.json();
-    this.updateToken(responseToken);
   }
 
   public Logout(): void {
+    this.logServer.LogToConsole('AuthService', `Logging out`);
     this.token = null;
     this.updateToken(this.token);
   }
 
   public async RefreshToken(): Promise<void> {
-    if (this.IsTokenValid(this.token)) {
-      return;
+    try {
+      if (!this.token || this.IsTokenValid(this.token)) {
+        return;
+      }
+      this.logServer.LogToConsole('AuthService', `Refreshing token`, this.token);
+
+      const requestBody: JWTRefreshRequest = {
+        grant_type: 'refresh_token',
+        refresh_token: this.token.refresh_token,
+        client_id: environment.loginClientId
+      };
+
+      const response = await this.apiService.generateRequest().PostFormFullUrl(`${environment.loginTokenUrl}`,
+        requestBody, this.getHeaders());
+
+      if (!response.ok) {
+        this.errorServer.HandleError('AuthService', `Refresh Token Error: ${response.status}: ${response.statusText}`);
+        return;
+      }
+
+      const responseToken: JWT = await response.json();
+      this.updateToken(responseToken);
+    } catch (err) {
+      this.errorServer.HandleError('AuthService', `Refresh Token Exception: ${err}`);
     }
-
-    const requestBody: JWTRefreshRequest = {
-      grant_type: 'refresh_token',
-      refresh_token: this.token.refresh_token,
-      client_id: environment.loginClientId
-    };
-
-    const response = await this.apiService.generateRequest().PostFormFullUrl(`${environment.loginTokenUrl}`,
-      requestBody, this.getHeaders());
-
-    if (!response.ok) {
-      return;
-    }
-
-    const responseToken: JWT = await response.json();
-    this.updateToken(responseToken);
   }
 
   public async LoadCachedToken(): Promise<void> {
+    this.logServer.LogToConsole('AuthService', `Loading cached token`);
     const cachedToken = this.dataService.GetAuthToken();
     if (!cachedToken) {
       return;
     }
 
-    if (cachedToken.expire_date <= (new Date()).valueOf()) {
+    if (cachedToken && !this.IsTokenValid(cachedToken)) {
       await this.RefreshToken();
     }
+
+    this.logServer.LogToConsole('AuthService', `Loaded cached token`, this.token);
   }
 
   private IsTokenValid(token: JWT): boolean {

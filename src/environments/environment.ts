@@ -14,7 +14,7 @@ export const environment = {
   loginRedirectUri: 'https://local.tutorbits.com/login',
   logoutRedirectUri: 'https://local.tutorbits.com/logout',
   loggingEnabled: true,
-  loggingTraceEnabled: true
+  loggingTraceEnabled: false
 };
 
 /*

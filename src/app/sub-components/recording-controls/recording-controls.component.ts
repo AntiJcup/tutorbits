@@ -7,7 +7,7 @@ import { MatSnackBar } from '@angular/material';
   styleUrls: ['./recording-controls.component.sass']
 })
 export class RecordingControlsComponent implements OnInit {
-  public recording = false;
+  @Input() recording = false;
   @Input() saving = false;
   @Input() canFinish = false;
   @Input() canRecord = false;
@@ -25,7 +25,6 @@ export class RecordingControlsComponent implements OnInit {
 
   onRecordClicked(e: any) {
     this.recordingStateChanged.next(true);
-    this.recording = true;
   }
 
   onStopRecordingClicked(e: any) {
@@ -34,7 +33,6 @@ export class RecordingControlsComponent implements OnInit {
     }
 
     this.recordingStateChanged.next(false);
-    this.recording = false;
   }
 
   onFinishClicked() {
