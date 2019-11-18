@@ -66,7 +66,11 @@ export class TutorBitsAuthService extends IAuthService {
     protected logServer: ILogService,
     protected errorServer: IErrorService) {
     super();
-    this.updateToken(this.dataService.GetAuthToken());
+    try {
+      this.updateToken(this.dataService.GetAuthToken());
+    } catch (err) {
+      // Try to load if it isnt there it blows up
+    }
   }
 
   public async Login(code: string): Promise<void> {
