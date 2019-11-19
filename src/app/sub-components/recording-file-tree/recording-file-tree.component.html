@@ -1,6 +1,6 @@
 <div class="tutorialFileTreeContainer">
         <div class="treeHeader">Files</div>
     <tree id="tutorialFileTree" class='tutorialFileTree' [tree]="tree" [settings]="settings"
-        (nodeSelected)="nodeSelected($event)" (menuItemSelected)="onMenuItemSelected($event)">
+        (nodeSelected)="nodeSelected($event)" (menuItemSelected)="onMenuItemSelected($event)" (nodeCreated)="onNodeCreated($event)">
     </tree>
 </div>

@@ -1,10 +1,11 @@
 import { ViewChild, NgZone, Injectable, SimpleChange, SimpleChanges, Output, EventEmitter } from '@angular/core';
-import { TreeComponent, Ng2TreeSettings, Tree, NodeSelectedEvent, TreeModel, TreeController, NodeMenuItemAction, NodeMenuItem } from 'ng2-tree';
+import { TreeComponent, Ng2TreeSettings, Tree, NodeSelectedEvent, TreeModel, TreeController, NodeMenuItemAction, NodeMenuItem, NodeCreatedEvent, MenuItemSelectedEvent } from 'ng2-tree';
 import { TreeStatus } from 'ng2-tree/src/tree.types';
 import { ILogService } from 'src/app/services/abstract/ILogService';
 
 @Injectable()
 export abstract class NG2FileTreeComponent {
+  editable = false;
   public settings: Ng2TreeSettings = {
     rootIsVisible: false,
     showCheckboxes: false
@@ -102,10 +103,17 @@ export abstract class NG2FileTreeComponent {
           const nodeController = this.treeComponent.getControllerByNodeId(node.id);
 
           const newNodeName = subSplitPath[subSplitPath.length - 1];
+
+          const settings = {
+            menuItems: this.editable ? undefined : (subNodeIsBranch ? [] : [
+              { action: NodeMenuItemAction.Custom, name: 'Preview', cssClass: '' }
+            ])
+          };
           const newNodeModel: TreeModel = {
             value: newNodeName,
             children: subNodeIsBranch ? [] : undefined,
-            _status: TreeStatus.New
+            _status: TreeStatus.New,
+            settings
           };
 
           nodeController.addChildAsync(newNodeModel).then((newNode) => {
@@ -136,6 +144,7 @@ export abstract class NG2FileTreeComponent {
   }
 
   public allowEdit(edit: boolean) {
+    this.editable = edit;
     if (edit) {
       this.treeComponent.treeModel.settings.menuItems = [
         { action: NodeMenuItemAction.NewFolder, name: 'Add folder', cssClass: '' },
@@ -146,7 +155,8 @@ export abstract class NG2FileTreeComponent {
       ];
 
       this.treeComponent.treeModel.settings.static = false;
-
+      const projectNode = this.findNodeByPath(this.treeComponent.tree, '/project');
+      projectNode.node.settings.menuItems = this.treeComponent.treeModel.settings.menuItems;
     } else {
       this.treeComponent.treeModel = this.treeComponent.tree.toTreeModel();
       this.treeComponent.treeModel.settings.menuItems = this.GetReadonlyMenuItems();
@@ -160,9 +170,26 @@ export abstract class NG2FileTreeComponent {
     return [];
   }
 
-  public onMenuItemSelected(e: any) {
+  public onMenuItemSelected(e: MenuItemSelectedEvent) {
     if (e.selectedItem === 'Preview') {
       this.previewClicked.next(this.getPathForNode(e.node));
     }
+  }
+
+  public onNodeCreated(e: NodeCreatedEvent) {
+    if (!this.editable) {
+      return;
+    }
+
+    e.node.node.settings.menuItems = e.node.isBranch() ? [
+      { action: NodeMenuItemAction.NewFolder, name: 'Add folder', cssClass: '' },
+      { action: NodeMenuItemAction.NewTag, name: 'Add file', cssClass: '' },
+      { action: NodeMenuItemAction.Remove, name: 'Delete', cssClass: '' },
+      { action: NodeMenuItemAction.Rename, name: 'Rename', cssClass: '' }
+    ] : [
+        { action: NodeMenuItemAction.Remove, name: 'Delete', cssClass: '' },
+        { action: NodeMenuItemAction.Rename, name: 'Rename', cssClass: '' },
+        { action: NodeMenuItemAction.Custom, name: 'Preview', cssClass: '' }
+      ];
   }
 }

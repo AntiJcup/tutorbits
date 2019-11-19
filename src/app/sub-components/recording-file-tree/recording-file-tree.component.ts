@@ -36,7 +36,11 @@ export class RecordingFileTreeComponent extends NG2FileTreeComponent implements 
           // { value: 'helloworld.js', id: 3 },
         ],
         settings: {
-          isCollapsedOnInit: false
+          isCollapsedOnInit: false,
+          menuItems: [
+            { action: NodeMenuItemAction.NewFolder, name: 'Add folder', cssClass: '' },
+            { action: NodeMenuItemAction.NewTag, name: 'Add file', cssClass: '' },
+          ]
         }
       }
     ]
