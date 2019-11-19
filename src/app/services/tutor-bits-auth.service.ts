@@ -112,6 +112,12 @@ export class TutorBitsAuthService extends IAuthService {
       if (!this.token || this.IsTokenValid(this.token)) {
         return;
       }
+
+      if (!this.token.refresh_token) {
+        this.updateToken(null);
+        throw new Error('Missing refresh token');
+      }
+
       this.logServer.LogToConsole('AuthService', `Refreshing token`, this.token);
 
       const requestBody: JWTRefreshRequest = {
