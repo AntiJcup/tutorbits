@@ -1,13 +1,22 @@
 <div class="container">
     <div class="relative">
-        <app-saving-button *ngIf="(!recording && !saving) || loadingRecording" [disabled]="!canRecord || finishSaving" (click)="onRecordClicked($event)" text="Record" icon="videocam" [saving]="loadingRecording" savingText="Loading">
+        <app-saving-button *ngIf="(!recording && !saving) || loadingRecording" [disabled]="!canRecord || finishSaving"
+            (click)="onRecordClicked($event)" text="Record" icon="videocam" [saving]="loadingRecording"
+            savingText="Loading">
         </app-saving-button>
-        <app-saving-button *ngIf="(recording || saving) && !loadingRecording" id="recordingBtn" [saving]="saving" icon="stop"
-            text="Recording" (click)="onStopRecordingClicked($event)">
+        <app-saving-button *ngIf="(recording || saving) && !loadingRecording" id="recordingBtn" [saving]="saving"
+            icon="stop" text="Recording" (click)="onStopRecordingClicked($event)">
+        </app-saving-button>
+
+    </div>
+    <div class="relative">
+        <app-saving-button *ngIf="canFinish && !recording" (click)="onFinishClicked()" text="Save" icon="save"
+            [saving]="finishSaving">
         </app-saving-button>
     </div>
     <div class="relative">
-        <app-saving-button *ngIf="canFinish && !recording" (click)="onFinishClicked()" text="Finish" icon="save" [saving]="finishSaving">
-        </app-saving-button>
+        <app-timer *ngIf="((recording || saving) && !loadingRecording) || canFinish" id="recordingTimer"
+            [running]="recording">
+        </app-timer>
     </div>
 </div>

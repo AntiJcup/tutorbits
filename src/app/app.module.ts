@@ -53,6 +53,7 @@ import { ITracerTransactionService } from './services/abstract/ITracerTransactio
 import { TutorBitsTracerTransactionService } from './services/tutor-bits-tracer-transaction.service';
 import { IVideoRecordingService } from './services/abstract/IVideoRecordingService';
 import { TutorBitsVideoRecordingService } from './services/tutor-bits-video-recording.service';
+import { TimerComponent } from './sub-components/timer/timer.component';
 
 const appRoutes: Routes = [
   {
@@ -124,7 +125,8 @@ const appRoutes: Routes = [
     SavingButtonComponent,
     EditorPlaceHolderComponent,
     LoginComponent,
-    LogoutComponent
+    LogoutComponent,
+    TimerComponent
   ],
   imports: [
     BrowserModule,
