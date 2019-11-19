@@ -15,7 +15,6 @@ export class PlaybackFileTreeComponent extends NG2FileTreeComponent implements O
     id: 1,
     settings: {
       menuItems: [
-        { action: NodeMenuItemAction.Custom, name: 'Preview', cssClass: '' }
       ],
       cssClasses: {
         expanded: 'fa fa-caret-down',
