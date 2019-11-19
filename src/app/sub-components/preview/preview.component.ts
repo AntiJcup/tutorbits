@@ -33,6 +33,9 @@ export class PreviewComponent implements OnInit {
     return this.internalPreviewPath;
   }
 
+  @Input()
+  loading = false;
+
   constructor(private sanitizer: DomSanitizer) { }
 
   ngOnInit() {

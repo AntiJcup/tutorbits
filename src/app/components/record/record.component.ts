@@ -30,6 +30,7 @@ export class RecordComponent implements OnInit, OnDestroy {
   canRecord = false;
   finishRecording = false;
   loadingRecording = false;
+  
 
   @ViewChild(RecordingFileTreeComponent, { static: true }) recordingTreeComponent: RecordingFileTreeComponent;
   @ViewChild(RecordingEditorComponent, { static: true }) recordingEditor: RecordingEditorComponent;
@@ -45,6 +46,7 @@ export class RecordComponent implements OnInit, OnDestroy {
   requestObj = new ApiHttpRequest(this.requestInfo);
   previewPath: string = null;
   previewBaseUrl: string = null;
+  loadingPreview = false;
 
   constructor(
     private router: Router,
@@ -145,11 +147,13 @@ export class RecordComponent implements OnInit, OnDestroy {
 
   public onCloseClicked(e: any) {
     this.previewPath = null;
+    this.loadingPreview = false;
   }
 
   public onPreviewClicked(e: string) {
     const previewGenerator = new OnlinePreviewGenerator(this.requestObj);
     const previewPos = Math.round(this.codeRecorder.position);
+    this.loadingPreview = true;
     previewGenerator.GeneratePreview(previewPos, this.codeRecorder.logs).then((url) => {
       if (!url) {
         this.errorServer.HandleError('PreviewError', ' preview url failed to be retrieved');
@@ -161,6 +165,8 @@ export class RecordComponent implements OnInit, OnDestroy {
       });
     }).catch((err) => {
       this.errorServer.HandleError('PreviewError', err);
+    }).finally(() => {
+      this.loadingPreview = false;
     });
   }
 

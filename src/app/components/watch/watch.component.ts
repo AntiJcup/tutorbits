@@ -44,6 +44,7 @@ export class WatchComponent implements OnInit, OnDestroy {
 
   previewPath: string = null;
   previewBaseUrl: string = null;
+  loadingPreview = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -120,8 +121,7 @@ export class WatchComponent implements OnInit, OnDestroy {
   }
 
   public onPreviewClicked(e: string) {
-    const newPath = e;
-
+    this.loadingPreview = true;
     const previewGenerator = new OnlinePreviewGenerator(this.requestObj);
     const previewPos = Math.round(this.codePlayer.position);
     previewGenerator.LoadPreview(this.projectId, previewPos).then((url) => {
@@ -135,10 +135,13 @@ export class WatchComponent implements OnInit, OnDestroy {
       });
     }).catch((err) => {
       this.errorServer.HandleError(`PreviewError`, err);
+    }).finally(() => {
+      this.loadingPreview = false;
     });
   }
 
   public onCloseClicked(e: any) {
     this.previewPath = null;
+    this.loadingPreview = false;
   }
 }

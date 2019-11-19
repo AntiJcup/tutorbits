@@ -122,7 +122,6 @@ export abstract class MonacoEditorComponent implements OnDestroy {
     this.codeEditor.updateOptions(edit ? MonacoEditorComponent.editOptions : MonacoEditorComponent.readOnlyOptions);
     const editorModel = this.codeEditor.getModel() as editor.ITextModel;
     editorModel.pushEOL(monaco.editor.EndOfLineSequence.CRLF);
-    console.log(JSON.stringify(editorModel.getEOL()));
   }
 
   public GetLanguageByPath(path: string) {

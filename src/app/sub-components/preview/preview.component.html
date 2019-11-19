@@ -1,16 +1,21 @@
 <div class="container">
-    <div class="previewControls">
+    <div *ngIf="loading" class="loadingContainer">
+        <mat-spinner [diameter]="64" class="loading-spinner">
+        </mat-spinner>
+    </div>
+    <div *ngIf="!loading" class="previewControls">
         <form>
             <mat-form-field class="previewUrlField">
-                <input matInput #previewUrlInput type="url" placeholder="previewPath" [value]="previewPath" (keyup.enter)="navigate(previewUrlInput.value)"/>
+                <input matInput #previewUrlInput type="url" placeholder="previewPath" [value]="previewPath"
+                    (keyup.enter)="navigate(previewUrlInput.value)" />
             </mat-form-field>
-            <button type="submit" mat-icon-button (click)="navigate(previewUrlInput.value)">
-                    <mat-icon>directions</mat-icon>
+            <button type="submit" mat-icon-button mat-prim (click)="navigate(previewUrlInput.value)">
+                <mat-icon>directions</mat-icon>
             </button>
         </form>
     </div>
-    <iframe class="previewFrame" [src]="previewUrl"></iframe>
-    <button #close class="closeBtn" mat-raised-button (click)="onCloseClicked()">
+    <iframe *ngIf="!loading" class="previewFrame" [src]="previewUrl"></iframe>
+    <button #close class="closeBtn" color="primary" mat-raised-button (click)="onCloseClicked()">
         <mat-icon>close</mat-icon>
     </button>
 </div>

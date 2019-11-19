@@ -33,6 +33,7 @@ export class SandboxComponent implements OnInit {
   requestObj = new ApiHttpRequest(this.requestInfo);
   previewPath: string = null;
   previewBaseUrl: string = null;
+  loadingPreview = false;
 
   constructor(
     private zone: NgZone,
@@ -63,9 +64,11 @@ export class SandboxComponent implements OnInit {
 
   public onCloseClicked(e: any) {
     this.previewPath = null;
+    this.loadingPreview = false;
   }
 
   public onPreviewClicked(e: string) {
+    this.loadingPreview = true;
     const previewGenerator = new OnlinePreviewGenerator(this.requestObj);
     const previewPos = Math.round(this.codeRecorder.position);
     previewGenerator.GeneratePreview(previewPos, this.codeRecorder.logs).then((url) => {
@@ -79,6 +82,8 @@ export class SandboxComponent implements OnInit {
       });
     }).catch((err) => {
       this.errorServer.HandleError(`PreviewError`, err);
+    }).finally(() => {
+      this.loadingPreview = false;
     });
   }
 }
