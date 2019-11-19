@@ -11,6 +11,7 @@ import { ILogService } from 'src/app/services/abstract/ILogService';
 })
 export class ViewTutorialsComponent implements OnInit {
   tutorials: Array<ViewTutorial> = [];
+  loading = true;
 
   constructor(
     private router: Router,
@@ -24,6 +25,8 @@ export class ViewTutorialsComponent implements OnInit {
       this.logServer.LogToConsole('ViewTutorials', tutorials.length);
     }).catch((e) => {
       this.errorServer.HandleError('GetError', e);
+    }).finally(() => {
+      this.loading = false;
     });
   }
 
