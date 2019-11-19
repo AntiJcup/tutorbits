@@ -51,6 +51,7 @@ export abstract class MonacoEditorComponent implements OnDestroy {
       this.Show(false);
     }
     this.codeInitialized.emit(this);
+    this.codeEditor.getModel().setEOL(monaco.editor.EndOfLineSequence.CRLF);
   }
 
   public get currentFilePath() {

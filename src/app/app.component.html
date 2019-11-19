@@ -26,6 +26,7 @@
       </div>
       <div fxFlex fxLayout fxLayoutAlign="flex-end" fxHide.xs>
         <ul fxLayout fxLayoutGap="5px" class="navigation-items">
+
           <li>
             <button mat-menu-item [matMenuTriggerFor]="appCreateMenu">
               <mat-icon class="icon">create</mat-icon>
@@ -58,6 +59,19 @@
               <mat-icon class="icon">input</mat-icon>
               <span class="label">Logout</span>
             </a>
+          </li>
+          <li>
+            <button mat-icon-button [matMenuTriggerFor]="appExtraMenu">
+              <mat-icon class="icon">reorder</mat-icon>
+            </button>
+            <mat-menu #appExtraMenu="matMenu">
+              <a href="https://www.termsfeed.com/privacy-policy/a1ea4e4cb7810ee36c0fe0ceced7d8be" target="blank_" mat-menu-item>Privacy
+                Policy</a>
+              <a href="https://www.termsfeed.com/terms-conditions/ca8ffb23d4787fe9929dd7ba6f0fd778" target="blank_" mat-menu-item>Terms
+                and Conditions</a>
+              <a href="https://www.termsfeed.com/cookies-policy/0863b492327e119e4d30afcc752af8ed" target="blank_" mat-menu-item>Cookie
+                Policy</a>
+            </mat-menu>
           </li>
         </ul>
       </div>
