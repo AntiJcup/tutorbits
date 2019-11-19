@@ -51,6 +51,9 @@ export class TutorBitsAuthService extends IAuthService {
 
   public async getAuthHeader(): Promise<{ [name: string]: string }> {
     await this.getToken();
+    if (!this.token) {
+      throw new Error('Not logged in');
+    }
     return {
       Authorization: this.token.token_type + ' ' + this.token.access_token
     };
