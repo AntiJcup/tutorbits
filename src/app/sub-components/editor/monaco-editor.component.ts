@@ -51,7 +51,6 @@ export abstract class MonacoEditorComponent implements OnDestroy {
       this.Show(false);
     }
     this.codeInitialized.emit(this);
-    this.codeEditor.getModel().setEOL(monaco.editor.EndOfLineSequence.CRLF);
   }
 
   public get currentFilePath() {
@@ -121,6 +120,9 @@ export abstract class MonacoEditorComponent implements OnDestroy {
 
   public AllowEdits(edit: boolean) {
     this.codeEditor.updateOptions(edit ? MonacoEditorComponent.editOptions : MonacoEditorComponent.readOnlyOptions);
+    const editorModel = this.codeEditor.getModel() as editor.ITextModel;
+    editorModel.pushEOL(monaco.editor.EndOfLineSequence.CRLF);
+    console.log(JSON.stringify(editorModel.getEOL()));
   }
 
   public GetLanguageByPath(path: string) {
