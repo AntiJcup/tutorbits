@@ -1,3 +1,15 @@
+<div class="controls" *ngIf="publishMode">
+  <div class="controlsContainer">
+    <app-saving-button (click)="onBackClicked($event)" text="Record Again" icon="keyboard_backspace"
+      [saving]="loadingRecording" savingText="Loading">
+    </app-saving-button>
+  </div>
+  <div class="controlsContainer">
+    <app-saving-button (click)="onPublishClicked($event)" text="Publish" icon="publish" [saving]="publishing"
+      savingText="publishing">
+    </app-saving-button>
+  </div>
+</div>
 <div fxLayout fxLayoutGap="5px" class="tutorialContainer">
   <div class="sideBar">
     <vg-player class="tutorialVideo">
@@ -13,8 +25,8 @@
     </app-editor-place-holder>
     <app-playback-editor class="recordingEditor" (codeInitialized)="onCodeInitialized($event)">
     </app-playback-editor>
-    <app-preview *ngIf="previewPath || loadingPreview" class="preview" (closeClicked)="onCloseClicked($event)" [loading]="loadingPreview"
-      [previewPath]="previewPath" [previewBaseUrl]="previewBaseUrl">
+    <app-preview *ngIf="previewPath || loadingPreview" class="preview" (closeClicked)="onCloseClicked($event)"
+      [loading]="loadingPreview" [previewPath]="previewPath" [previewBaseUrl]="previewBaseUrl">
     </app-preview>
   </div>
 </div>

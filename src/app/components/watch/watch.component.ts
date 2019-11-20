@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild, ElementRef, NgZone, OnDestroy } from '@angular/core';
 import { OnlineProjectLoader, OnlineTransactionLoader } from 'shared/Tracer/lib/ts/OnlineTransaction';
 import { environment } from 'src/environments/environment';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { PlaybackEditorComponent } from 'src/app/sub-components/playback-editor/playback-editor.component';
 import { PlaybackFileTreeComponent } from 'src/app/sub-components/playback-file-tree/playback-file-tree.component';
 import { MonacoPlayer } from 'src/app/sub-components/player/monaco.player';
@@ -12,6 +12,8 @@ import { TransactionPlayerState } from 'shared/Tracer/lib/ts/TransactionPlayer';
 import { OnlinePreviewGenerator } from 'shared/Tracer/lib/ts/OnlinePreviewGenerator';
 import { IErrorService } from 'src/app/services/abstract/IErrorService';
 import { ILogService } from 'src/app/services/abstract/ILogService';
+import { Status } from 'src/app/services/abstract/IModelApiService';
+import { TutorBitsTutorialService } from 'src/app/services/tutor-bits-tutorial.service';
 
 @Component({
   templateUrl: './watch.component.html',
@@ -46,12 +48,18 @@ export class WatchComponent implements OnInit, OnDestroy {
   previewBaseUrl: string = null;
   loadingPreview = false;
 
+  publishing = false;
+  publishMode = false;
+
   constructor(
+    private router: Router,
     private route: ActivatedRoute,
     private zone: NgZone,
+    private tutorialService: TutorBitsTutorialService,
     private errorServer: IErrorService,
     private logServer: ILogService) {
     this.projectId = this.route.snapshot.paramMap.get('projectId');
+    this.publishMode = this.route.snapshot.queryParamMap.get('publish') === 'true';
   }
 
   ngOnInit(): void {
@@ -143,5 +151,30 @@ export class WatchComponent implements OnInit, OnDestroy {
   public onCloseClicked(e: any) {
     this.previewPath = null;
     this.loadingPreview = false;
+  }
+
+  public onPublishClicked(e: any) {
+    this.publishing = true;
+    this.tutorialService.UpdateStatus(this.projectId, Status.Active).then((res) => {
+      if (!res) {
+        this.errorServer.HandleError('FinishError', 'Failed To Save Try Again');
+      } else {
+        this.zone.runTask(() => {
+          this.publishMode = false;
+        });
+      }
+    }).catch((err) => {
+      this.errorServer.HandleError('FinishError', err);
+    }).finally(() => {
+      this.publishing = false;
+    });
+  }
+
+  public onBackClicked(e: any) {
+    if (!confirm('Are you sure you want to start over?')) {
+      return;
+    }
+
+    this.router.navigate([`record/${this.projectId}`], { queryParams: { back: 'true' } });
   }
 }

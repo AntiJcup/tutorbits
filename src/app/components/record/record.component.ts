@@ -178,16 +178,6 @@ export class RecordComponent implements OnInit, OnDestroy {
 
   onFinishClicked() {
     this.finishRecording = true;
-    this.tutorialService.UpdateStatus(this.projectId, Status.Active).then((res) => {
-      if (!res) {
-        this.errorServer.HandleError('FinishError', 'Failed To Save Try Again');
-      } else {
-        this.router.navigate([`watch/${this.projectId}`]);
-      }
-    }).catch((err) => {
-      this.errorServer.HandleError('FinishError', err);
-    }).finally(() => {
-      this.finishRecording = false;
-    });
+    this.router.navigate([`watch/${this.projectId}`], { queryParams: { publish: 'true' } });
   }
 }
