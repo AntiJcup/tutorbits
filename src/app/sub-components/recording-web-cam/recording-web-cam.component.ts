@@ -56,6 +56,9 @@ export class RecordingWebCamComponent implements OnInit, OnDestroy {
         webCamVideo.muted = true;
         this.streamInitialized.next(this);
       };
+      this.stream.getTracks()[0].onended = (ev: MediaStreamTrackEvent) => {
+        this.onWebCamEnded(ev);
+      };
     }).catch((e) => {
       this.streamError.next(e);
       if (!this.intervalHandle) {
@@ -64,5 +67,9 @@ export class RecordingWebCamComponent implements OnInit, OnDestroy {
         }, 3000);
       }
     });
+  }
+
+  onWebCamEnded(e: MediaStreamTrackEvent) {
+    this.streamError.next('Webcam disconnected please reload');
   }
 }
