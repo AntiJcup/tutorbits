@@ -29,6 +29,14 @@ export class RecordingWebCamComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     clearInterval(this.intervalHandle);
     this.intervalHandle = null;
+    if (this.stream) {
+      const webCamVideo: HTMLVideoElement = this.webCamTag.nativeElement;
+      webCamVideo.pause();
+      webCamVideo.src = '';
+
+      this.stream.removeTrack(this.stream.getTracks()[0]);
+      this.stream.getTracks()[0].stop();
+    }
   }
 
   getUserMedia() {
