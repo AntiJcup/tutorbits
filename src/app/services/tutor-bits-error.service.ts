@@ -28,4 +28,10 @@ export class TutorBitsErrorService extends IErrorService {
 
     this.lastSnackbar = this.snackBar.open(`${component} - ${error}`, null);
   }
+
+  public ClearError(): void {
+    if (this.lastSnackbar) {
+      this.lastSnackbar.dismiss();
+    }
+  }
 }

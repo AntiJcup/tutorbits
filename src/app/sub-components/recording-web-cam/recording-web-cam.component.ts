@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, ElementRef, ViewChild, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Input, ElementRef, ViewChild, Output, EventEmitter, OnDestroy } from '@angular/core';
 
 @Component({
   selector: 'app-web-cam',
@@ -6,7 +6,7 @@ import { Component, OnInit, Input, ElementRef, ViewChild, Output, EventEmitter }
   styleUrls: ['./recording-web-cam.component.sass']
 })
 
-export class RecordingWebCamComponent implements OnInit {
+export class RecordingWebCamComponent implements OnInit, OnDestroy {
   @ViewChild('webcamoutput', { static: true }) webCamTag: ElementRef;
   @Input() width: number;
   @Input() height: number;
@@ -15,6 +15,7 @@ export class RecordingWebCamComponent implements OnInit {
   @Output() streamError = new EventEmitter<any>();
 
   public stream: MediaStream;
+  private intervalHandle: any;
 
   public videoOptions: MediaTrackConstraints = {
 
@@ -22,10 +23,23 @@ export class RecordingWebCamComponent implements OnInit {
   constructor() { }
 
   ngOnInit(): void {
+    this.getUserMedia();
+  }
+
+  ngOnDestroy(): void {
+    clearInterval(this.intervalHandle);
+    this.intervalHandle = null;
+  }
+
+  getUserMedia() {
     navigator.mediaDevices.getUserMedia({
       video: { aspectRatio: 1620 / 1080 },
       audio: true
     }).then((stream: MediaStream) => {
+      if (this.intervalHandle) {
+        clearInterval(this.intervalHandle);
+        this.intervalHandle = null;
+      }
       this.stream = stream;
       const webCamVideo: HTMLVideoElement = this.webCamTag.nativeElement;
       webCamVideo.srcObject = stream;
@@ -36,6 +50,11 @@ export class RecordingWebCamComponent implements OnInit {
       };
     }).catch((e) => {
       this.streamError.next(e);
+      if (!this.intervalHandle) {
+        this.intervalHandle = setInterval(() => {
+          this.getUserMedia();
+        }, 3000);
+      }
     });
   }
 }

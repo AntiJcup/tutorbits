@@ -30,7 +30,7 @@ export class RecordComponent implements OnInit, OnDestroy {
   canRecord = false;
   finishRecording = false;
   loadingRecording = false;
-  
+
 
   @ViewChild(RecordingFileTreeComponent, { static: true }) recordingTreeComponent: RecordingFileTreeComponent;
   @ViewChild(RecordingEditorComponent, { static: true }) recordingEditor: RecordingEditorComponent;
@@ -47,6 +47,7 @@ export class RecordComponent implements OnInit, OnDestroy {
   previewPath: string = null;
   previewBaseUrl: string = null;
   loadingPreview = false;
+  streamErrored = false;
 
   constructor(
     private router: Router,
@@ -69,6 +70,10 @@ export class RecordComponent implements OnInit, OnDestroy {
   }
 
   onStreamInitialized(webCam: RecordingWebCamComponent) {
+    if (this.streamErrored) {
+      this.streamErrored = false;
+      this.errorServer.ClearError();
+    }
     this.logServer.LogToConsole('Record', webCam.stream);
     this.canRecord = true;
     this.webCamRecorder = new WebCamRecorder(this.recordingWebCam, this.videoRecordingService, this.projectId);
@@ -77,6 +82,7 @@ export class RecordComponent implements OnInit, OnDestroy {
   }
 
   onStreamError(e: any) {
+    this.streamErrored = true;
     this.errorServer.HandleError('WebCamError', e);
   }
 
