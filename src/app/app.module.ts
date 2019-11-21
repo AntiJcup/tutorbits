@@ -54,6 +54,8 @@ import { TutorBitsTracerTransactionService } from './services/tutor-bits-tracer-
 import { IVideoRecordingService } from './services/abstract/IVideoRecordingService';
 import { TutorBitsVideoRecordingService } from './services/tutor-bits-video-recording.service';
 import { TimerComponent } from './sub-components/timer/timer.component';
+import { FormlyFieldFileComponent } from './sub-components/formly/formly-field-file/formly-field-file.component';
+import { FileValueAccessorDirective } from './sub-components/formly/file-value-accessor.directive';
 
 const appRoutes: Routes = [
   {
@@ -126,7 +128,9 @@ const appRoutes: Routes = [
     EditorPlaceHolderComponent,
     LoginComponent,
     LogoutComponent,
-    TimerComponent
+    TimerComponent,
+    FormlyFieldFileComponent,
+    FileValueAccessorDirective
   ],
   imports: [
     BrowserModule,
@@ -143,7 +147,11 @@ const appRoutes: Routes = [
     ),
     WebcamModule,
     ReactiveFormsModule,
-    FormlyModule.forRoot(),
+    FormlyModule.forRoot({
+      types: [
+        { name: 'file', component: FormlyFieldFileComponent, wrappers: ['form-field'] },
+      ],
+    }),
     FormlyMaterialModule
   ],
   providers: [

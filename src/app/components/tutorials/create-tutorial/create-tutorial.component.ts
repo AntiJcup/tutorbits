@@ -14,7 +14,7 @@ import { ILogService } from 'src/app/services/abstract/ILogService';
 export class CreateTutorialComponent implements OnInit, OnDestroy {
   loading = false;
   form = new FormGroup({});
-  model: CreateTutorial = { Title: '', Description: '', Language: 'javascript' };
+  model: CreateTutorial = { Title: '', Description: '', Language: 'javascript', ThumbnailData: null };
   fields: FormlyFieldConfig[] = [{
     key: 'Title',
     type: 'input',
@@ -46,6 +46,14 @@ export class CreateTutorialComponent implements OnInit, OnDestroy {
       required: false,
     }
   },
+  {
+    key: 'ThumbnailData',
+    type: 'file',
+    templateOptions: {
+      required: true,
+      description: 'Upload Thumbnail'
+    }
+  },
   ];
 
   constructor(
@@ -63,12 +71,27 @@ export class CreateTutorialComponent implements OnInit, OnDestroy {
   submit(model: CreateTutorial) {
     this.logServer.LogToConsole('CreateTutorial', model);
     this.loading = true;
-    this.tutorialService.Create(model).then((e) => {
+
+    if (model.ThumbnailData[0].type !== 'image/png' && model.ThumbnailData[0].type !== 'image/x-png') {
+      this.errorServer.HandleError('ThumbnailError', `Unsupported image type ${model.ThumbnailData[0].type}`);
+      this.loading = false;
+      return;
+    }
+
+    const createModel = JSON.parse(JSON.stringify(model)) as CreateTutorial;
+    createModel.ThumbnailData = null;
+    this.tutorialService.Create(createModel).then((e) => {
       this.logServer.LogToConsole('CreateTutorial', e);
       if (e.error != null) {
         this.errorServer.HandleError('CreateError', JSON.stringify(e.error));
       } else {
-        this.router.navigate([`record/${e.data.id}`]);
+        this.tutorialService.UploadThumbnail(model.ThumbnailData[0], e.data.id).then(() => {
+          this.router.navigate([`record/${e.data.id}`]);
+        }).catch((err) => {
+          this.errorServer.HandleError('ThumbnailError', err);
+        }).finally(() => {
+          this.loading = false;
+        });
       }
     }).catch((e) => {
       this.errorServer.HandleError('CreateError', e);

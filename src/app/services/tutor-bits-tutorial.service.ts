@@ -5,12 +5,16 @@ import { TutorBitsBaseModelApiService } from './abstract/tutor-bits-base-model-a
 import { IAPIService } from './abstract/IAPIService';
 import { Injectable } from '@angular/core';
 import { IAuthService } from './abstract/IAuthService';
+import { ResponseWrapper } from './abstract/IModelApiService';
+import { FileUtils } from 'shared/web/lib/ts/FileUtils';
 
 // Import this as your service so tests can override it
 export abstract class TutorBitsTutorialService extends TutorBitsBaseModelApiService<CreateTutorial, ViewTutorial> {
   constructor(apiService: IAPIService, auth: IAuthService) {
     super(apiService, auth);
   }
+
+  public abstract async UploadThumbnail(thumbnail: File, tutorialId: string): Promise<void>;
 }
 
 @Injectable()
@@ -19,5 +23,14 @@ export class TutorBitsConcreteTutorialService extends TutorBitsTutorialService {
 
   constructor(apiService: IAPIService, auth: IAuthService) {
     super(apiService, auth);
+  }
+
+  public async UploadThumbnail(thumbnail: File, tutorialId: string): Promise<void> {
+    const response = await this.apiService.generateRequest()
+      .Post(`api/Thumbnail/Upload?tutorialId=${tutorialId}`, await FileUtils.FileToBlob(thumbnail), await this.GetAuthHeaders());
+
+    if (!response.ok) {
+      throw new Error('Failed uploading thumbnail');
+    }
   }
 }
