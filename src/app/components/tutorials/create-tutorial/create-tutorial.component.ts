@@ -83,19 +83,19 @@ export class CreateTutorialComponent implements OnInit, OnDestroy {
     this.tutorialService.Create(createModel).then((e) => {
       this.logServer.LogToConsole('CreateTutorial', e);
       if (e.error != null) {
+        this.loading = false;
         this.errorServer.HandleError('CreateError', JSON.stringify(e.error));
       } else {
         this.tutorialService.UploadThumbnail(model.ThumbnailData[0], e.data.id).then(() => {
+          this.loading = false;
           this.router.navigate([`record/${e.data.id}`]);
         }).catch((err) => {
           this.errorServer.HandleError('ThumbnailError', err);
-        }).finally(() => {
           this.loading = false;
         });
       }
     }).catch((e) => {
       this.errorServer.HandleError('CreateError', e);
-    }).finally(() => {
       this.loading = false;
     });
   }
