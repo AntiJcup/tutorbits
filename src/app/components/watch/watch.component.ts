@@ -155,7 +155,7 @@ export class WatchComponent implements OnInit, OnDestroy {
 
   public onPublishClicked(e: any) {
     this.publishing = true;
-    this.tutorialService.UpdateStatus(this.projectId, Status.Active).then((res) => {
+    this.tutorialService.Publish(this.projectId).then((res) => {
       if (!res) {
         this.errorServer.HandleError('FinishError', 'Failed To Save Try Again');
       } else {

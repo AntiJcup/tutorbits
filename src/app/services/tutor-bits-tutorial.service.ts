@@ -15,6 +15,7 @@ export abstract class TutorBitsTutorialService extends TutorBitsBaseModelApiServ
   }
 
   public abstract async UploadThumbnail(thumbnail: File, tutorialId: string): Promise<void>;
+  public abstract async Publish(tutorialId: string): Promise<boolean>;
 }
 
 @Injectable()
@@ -32,5 +33,12 @@ export class TutorBitsConcreteTutorialService extends TutorBitsTutorialService {
     if (!response.ok) {
       throw new Error('Failed uploading thumbnail');
     }
+  }
+
+  public async Publish(tutorialId: string): Promise<boolean> {
+    const response = await this.apiService.generateRequest()
+      .Post(`${this.basePath}/Publish?tutorialId=${tutorialId}`, null, await this.GetAuthHeaders());
+
+    return response.ok;
   }
 }
