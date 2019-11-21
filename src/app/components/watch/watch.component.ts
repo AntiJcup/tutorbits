@@ -14,6 +14,7 @@ import { IErrorService } from 'src/app/services/abstract/IErrorService';
 import { ILogService } from 'src/app/services/abstract/ILogService';
 import { Status } from 'src/app/services/abstract/IModelApiService';
 import { TutorBitsTutorialService } from 'src/app/services/tutor-bits-tutorial.service';
+import { Guid } from 'guid-typescript';
 
 @Component({
   templateUrl: './watch.component.html',
@@ -76,11 +77,12 @@ export class WatchComponent implements OnInit, OnDestroy {
   }
 
   onCodeInitialized(playbackEditor: PlaybackEditorComponent) {
+    // If publish mode make sure not to cache!
     this.codePlayer = new MonacoPlayer(
       this.playbackEditor,
       this.playbackTreeComponent,
       this.logServer,
-      new OnlineProjectLoader(this.requestObj, 'play'),
+      new OnlineProjectLoader(this.requestObj, this.publishMode ? Guid.create().toString() : 'play'),
       new OnlineTransactionLoader(this.requestObj),
       this.projectId);
 
