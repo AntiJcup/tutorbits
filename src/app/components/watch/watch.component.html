@@ -1,7 +1,7 @@
 <div class="controls" *ngIf="publishMode">
   <div class="controlsContainer">
     <app-saving-button (click)="onBackClicked($event)" text="Record Again" icon="keyboard_backspace"
-      [saving]="loadingRecording" savingText="Loading">
+      [saving]="false" savingText="Loading">
     </app-saving-button>
   </div>
   <div class="controlsContainer">

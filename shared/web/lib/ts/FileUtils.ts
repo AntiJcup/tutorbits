@@ -4,7 +4,7 @@ export class FileUtils {
         let finishCallback: (b: Blob) => void = null;
 
         fileReader.onloadend = (e) => {
-            const arrayBuffer = e.target.result;
+            const arrayBuffer: ArrayBuffer = fileReader.result as ArrayBuffer;
             finishCallback(new Blob([arrayBuffer]));
         };
 
