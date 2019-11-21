@@ -6,4 +6,5 @@ export interface ViewTutorial {
     userName: string;
     status: string;
     thumbnailUrl: string;
+    durationMS: number;
 }
