@@ -1,6 +1,13 @@
 <div class="tutorialFileTreeContainer">
-        <div class="treeHeader">Files</div>
+    <div class="treeHeader">
+        <span>Files</span>
+        <button mat-icon-button class="headerBtn" [disabled]="fileSelected == null"
+            (click)="onPreviewHeaderButtonClicked($event)">
+            <mat-icon class="icon">visibility</mat-icon>
+        </button>
+    </div>
     <tree id="tutorialFileTree" class='tutorialFileTree' [tree]="tree" [settings]="settings"
-        (nodeSelected)="nodeSelected($event)" (menuItemSelected)="onMenuItemSelected($event)" (nodeCreated)="onNodeCreated($event)">
+        (nodeSelected)="nodeSelected($event)" (menuItemSelected)="onMenuItemSelected($event)"
+        (nodeCreated)="onNodeCreated($event)">
     </tree>
 </div>

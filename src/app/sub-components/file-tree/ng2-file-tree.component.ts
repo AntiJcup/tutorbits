@@ -6,6 +6,7 @@ import { ILogService } from 'src/app/services/abstract/ILogService';
 @Injectable()
 export abstract class NG2FileTreeComponent {
   editable = false;
+  fileSelected = null;
   public settings: Ng2TreeSettings = {
     rootIsVisible: false,
     showCheckboxes: false
@@ -19,9 +20,12 @@ export abstract class NG2FileTreeComponent {
 
   public nodeSelected(event: NodeSelectedEvent) {
     const test = this.treeComponent.getControllerByNodeId(event.node.id);
+    this.fileSelected = null;
     if (!event.node.isBranch()) {
+      this.fileSelected = this.getPathForNode(event.node);
       return;
     }
+
     if (!test.isCollapsed()) {
       test.collapse();
     } else {
@@ -174,6 +178,10 @@ export abstract class NG2FileTreeComponent {
     if (e.selectedItem === 'Preview') {
       this.previewClicked.next(this.getPathForNode(e.node));
     }
+  }
+
+  public onPreviewHeaderButtonClicked(e: MouseEvent) {
+    this.previewClicked.next(this.fileSelected);
   }
 
   public onNodeCreated(e: NodeCreatedEvent) {
