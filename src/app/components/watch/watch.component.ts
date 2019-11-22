@@ -133,7 +133,7 @@ export class WatchComponent implements OnInit, OnDestroy {
   public onPreviewClicked(e: string) {
     this.loadingPreview = true;
     const previewGenerator = new OnlinePreviewGenerator(this.requestObj);
-    const previewPos = Math.round(this.codePlayer.position);
+    const previewPos = Math.min(Math.round(this.codePlayer.position), this.codePlayer.duration);
     previewGenerator.LoadPreview(this.projectId, previewPos).then((url) => {
       if (!url) {
         this.errorServer.HandleError(`PreviewError`, 'failed to be retrieved');
