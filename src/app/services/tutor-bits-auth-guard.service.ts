@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { IAuthService } from './abstract/IAuthService';
-import { Router, CanActivate } from '@angular/router';
+import { Router, CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { environment } from 'src/environments/environment';
 
 @Injectable({
@@ -9,9 +9,9 @@ import { environment } from 'src/environments/environment';
 export class TutorBitsAuthGuardService implements CanActivate {
   constructor(public auth: IAuthService, public router: Router) { }
 
-  canActivate(): boolean {
+  canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
     if (!this.auth.IsLoggedIn()) {
-      window.location.href = environment.loginUrl;
+      this.auth.RequestLogin(state.url);
       return false;
     }
     return true;

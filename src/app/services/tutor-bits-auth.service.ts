@@ -7,6 +7,7 @@ import { IDataService } from './abstract/IDataService';
 import { BehaviorSubject } from 'rxjs';
 import { ILogService } from './abstract/ILogService';
 import { IErrorService } from './abstract/IErrorService';
+import { Router } from '@angular/router';
 
 interface JWTRequest {
   grant_type: string;
@@ -67,7 +68,8 @@ export class TutorBitsAuthService extends IAuthService {
     protected apiService: IAPIService,
     protected dataService: IDataService,
     protected logServer: ILogService,
-    protected errorServer: IErrorService) {
+    protected errorServer: IErrorService,
+    protected router: Router) {
     super();
     try {
       this.updateToken(this.dataService.GetAuthToken());
@@ -96,6 +98,11 @@ export class TutorBitsAuthService extends IAuthService {
 
       const responseToken: JWT = await response.json();
       this.updateToken(responseToken);
+      const newRoute = this.dataService.GetCurrentRoute();
+      this.dataService.SetCurrentRoute(null);
+      if (newRoute) {
+        this.router.navigate([newRoute]);
+      }
     } catch (err) {
       this.errorServer.HandleError('AuthService', `Login Exception: ${err}`);
     }
@@ -161,5 +168,11 @@ export class TutorBitsAuthService extends IAuthService {
 
   public IsLoggedIn(): boolean {
     return this.IsTokenValid(this.token);
+  }
+
+  public RequestLogin(returnRoute: string = null): void {
+    returnRoute = returnRoute || this.router.url;
+    this.dataService.SetCurrentRoute(returnRoute);
+    window.location.href = environment.loginUrl;
   }
 }

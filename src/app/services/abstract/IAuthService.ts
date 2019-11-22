@@ -10,4 +10,5 @@ export abstract class IAuthService {
     public abstract Login(code: string): Promise<void>;
     public abstract Logout(): void;
     public abstract IsLoggedIn(): boolean;
+    public abstract RequestLogin(returnRoute?: string): void;
 }
