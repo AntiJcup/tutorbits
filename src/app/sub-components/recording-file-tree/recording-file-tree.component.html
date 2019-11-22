@@ -1,13 +1,23 @@
 <div class="tutorialFileTreeContainer">
     <div class="treeHeader">
         <span>Files</span>
-        <button mat-icon-button class="headerBtn" [disabled]="fileSelected == null"
-            (click)="onPreviewHeaderButtonClicked($event)">
-            <mat-icon class="icon">visibility</mat-icon>
-        </button>
+        <div class="headerBtnContainer">
+            <button mat-icon-button class="headerBtn" [disabled]="fileSelected == null"
+                (click)="onPreviewHeaderButtonClicked($event)">
+                <mat-icon class="icon">visibility</mat-icon>
+            </button>
+            <button mat-icon-button class="headerBtn" [disabled]="fileSelected == null && folderSelected == null"
+                (click)="onNewFolderClicked($event)">
+                <mat-icon class="icon">create_new_folder</mat-icon>
+            </button>
+            <button mat-icon-button class="headerBtn" [disabled]="fileSelected == null && folderSelected == null"
+                (click)="onNewFileClicked($event)">
+                <mat-icon class="icon">file_copy</mat-icon>
+            </button>
+        </div>
     </div>
     <tree id="tutorialFileTree" class='tutorialFileTree' [tree]="tree" [settings]="settings"
         (nodeSelected)="nodeSelected($event)" (menuItemSelected)="onMenuItemSelected($event)"
-        (nodeCreated)="onNodeCreated($event)">
+        (nodeCreated)="onNodeCreated($event)" (nodeRenamed)="onNodeRenamed($event)">
     </tree>
 </div>

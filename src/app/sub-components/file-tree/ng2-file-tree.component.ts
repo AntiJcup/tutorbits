@@ -1,12 +1,13 @@
 import { ViewChild, NgZone, Injectable, SimpleChange, SimpleChanges, Output, EventEmitter } from '@angular/core';
-import { TreeComponent, Ng2TreeSettings, Tree, NodeSelectedEvent, TreeModel, TreeController, NodeMenuItemAction, NodeMenuItem, NodeCreatedEvent, MenuItemSelectedEvent } from 'ng2-tree';
+import { TreeComponent, Ng2TreeSettings, Tree, NodeSelectedEvent, TreeController, NodeMenuItemAction, NodeMenuItem, NodeCreatedEvent, MenuItemSelectedEvent, TreeModel, NodeRenamedEvent } from 'ng2-tree';
 import { TreeStatus } from 'ng2-tree/src/tree.types';
 import { ILogService } from 'src/app/services/abstract/ILogService';
 
 @Injectable()
 export abstract class NG2FileTreeComponent {
   editable = false;
-  fileSelected = null;
+  fileSelected: string = null;
+  folderSelected: string = null;
   public settings: Ng2TreeSettings = {
     rootIsVisible: false,
     showCheckboxes: false
@@ -21,10 +22,12 @@ export abstract class NG2FileTreeComponent {
   public nodeSelected(event: NodeSelectedEvent) {
     const test = this.treeComponent.getControllerByNodeId(event.node.id);
     this.fileSelected = null;
+    this.folderSelected = null;
     if (!event.node.isBranch()) {
       this.fileSelected = this.getPathForNode(event.node);
       return;
     }
+    this.folderSelected = this.getPathForNode(event.node);
 
     if (!test.isCollapsed()) {
       test.collapse();
@@ -195,6 +198,15 @@ export abstract class NG2FileTreeComponent {
       return;
     }
 
+    this.fileSelected = null;
+    this.folderSelected = null;
+
+    if (e.node.isBranch()) {
+      this.folderSelected = this.getPathForNode(e.node);
+    } else {
+      this.fileSelected = this.getPathForNode(e.node);
+    }
+
     e.node.node.settings.menuItems = e.node.isBranch() ? [
       { action: NodeMenuItemAction.NewFolder, name: 'Add folder', cssClass: '' },
       { action: NodeMenuItemAction.NewTag, name: 'Add file', cssClass: '' },
@@ -205,5 +217,48 @@ export abstract class NG2FileTreeComponent {
         { action: NodeMenuItemAction.Rename, name: 'Rename', cssClass: '' },
         { action: NodeMenuItemAction.Custom, name: 'Preview', cssClass: '' }
       ];
+  }
+
+  private GetSelectedBranch(): Tree {
+    const path = this.fileSelected || this.folderSelected;
+    let selectedNode = this.findNodeByPath(this.treeComponent.tree, path);
+
+    if (this.fileSelected) {
+      selectedNode = selectedNode.parent;
+    }
+
+    return selectedNode;
+  }
+
+  public onNewFolderClicked(e: MouseEvent) {
+    const selectedNode = this.GetSelectedBranch();
+    const selectedNodeController = this.treeComponent.getControllerByNodeId(selectedNode.id);
+
+    selectedNodeController.addChild({
+      value: 'Untitled Folder',
+      _status: TreeStatus.New,
+      children: []
+    } as TreeModel);
+  }
+
+  public onNewFileClicked(e: MouseEvent) {
+    const selectedNode = this.GetSelectedBranch();
+    const selectedNodeController = this.treeComponent.getControllerByNodeId(selectedNode.id);
+
+    selectedNodeController.addChild({
+      value: 'Untitled File',
+      _status: TreeStatus.New
+    } as TreeModel);
+  }
+
+  public onNodeRenamed(e: NodeRenamedEvent) {
+    this.fileSelected = null;
+    this.folderSelected = null;
+
+    if (e.node.isBranch()) {
+      this.folderSelected = this.getPathForNode(e.node);
+    } else {
+      this.fileSelected = this.getPathForNode(e.node);
+    }
   }
 }
