@@ -56,6 +56,10 @@ import { TutorBitsVideoRecordingService } from './services/tutor-bits-video-reco
 import { TimerComponent } from './sub-components/timer/timer.component';
 import { FormlyFieldFileComponent } from './sub-components/formly/formly-field-file/formly-field-file.component';
 import { FileValueAccessorDirective } from './sub-components/formly/file-value-accessor.directive';
+import { TutorBitsAuthGuardService } from './services/tutor-bits-auth-guard.service';
+import { environment } from 'src/environments/environment';
+import { PrivacyComponent } from './components/privacy/privacy.component';
+import { TermsComponent } from './components/terms/terms.component';
 
 const appRoutes: Routes = [
   {
@@ -71,7 +75,8 @@ const appRoutes: Routes = [
   {
     path: 'record/:projectId',
     component: RecordComponent,
-    data: { title: 'Record' }
+    data: { title: 'Record' },
+    canActivate: [TutorBitsAuthGuardService]
   },
   {
     path: 'sandbox',
@@ -81,7 +86,8 @@ const appRoutes: Routes = [
   {
     path: 'create/tutorial',
     component: CreateTutorialComponent,
-    data: { title: 'Create Tutorial' }
+    data: { title: 'Create Tutorial' },
+    canActivate: [TutorBitsAuthGuardService]
   },
   {
     path: 'tutorials',
@@ -96,13 +102,16 @@ const appRoutes: Routes = [
   {
     path: 'logout',
     component: LogoutComponent,
-    data: { title: 'LoggedOut' }
+    data: { title: 'LoggedOut' },
+    canActivate: [TutorBitsAuthGuardService]
   },
   {
     path: '',
     redirectTo: '/home',
     pathMatch: 'full'
   },
+  { path: 'privacy', component: PrivacyComponent },
+  { path: 'terms', component: TermsComponent },
   { path: '**', component: HomeComponent }
 ];
 
@@ -130,7 +139,9 @@ const appRoutes: Routes = [
     LogoutComponent,
     TimerComponent,
     FormlyFieldFileComponent,
-    FileValueAccessorDirective
+    FileValueAccessorDirective,
+    PrivacyComponent,
+    TermsComponent
   ],
   imports: [
     BrowserModule,

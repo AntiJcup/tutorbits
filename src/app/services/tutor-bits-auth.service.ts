@@ -158,4 +158,8 @@ export class TutorBitsAuthService extends IAuthService {
   private IsTokenValid(token: JWT): boolean {
     return token && token.expire_date >= ((new Date()).valueOf() + this.refreshLookAheadMilliseconds);
   }
+
+  public IsLoggedIn(): boolean {
+    return this.IsTokenValid(this.token);
+  }
 }
