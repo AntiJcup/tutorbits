@@ -77,11 +77,17 @@ export abstract class NG2FileTreeComponent {
     return null;
   }
 
-  public selectNodeByPath(node: Tree, path: string) {
+  public selectNodeByPath(node: Tree, path: string, retry: boolean = true) {
     this.zone.runTask(() => {
       const foundNode = this.findNodeByPath(node, path);
       if (!foundNode) {
-        throw new Error('Node not found');
+        if (retry) {
+          setTimeout(() => {
+            this.selectNodeByPath(node, path, false);
+          }, 1);
+        } else {
+          throw new Error('Node not found');
+        }
       }
 
       this.treeComponent.getControllerByNodeId(foundNode.id).select();
