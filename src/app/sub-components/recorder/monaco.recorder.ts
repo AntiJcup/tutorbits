@@ -71,7 +71,7 @@ export class MonacoRecorder extends TransactionRecorder {
         });
     }
 
-    public StopRecording(): Promise<boolean> {
+    public async StopRecording(): Promise<boolean> {
         this.recording = false;
         if (this.fileChangeListener) {
             this.fileChangeListener.dispose();
@@ -93,7 +93,7 @@ export class MonacoRecorder extends TransactionRecorder {
             this.nodeMovedListener.unsubscribe();
         }
 
-        return this.SaveTransactionLogs(true);
+        return await this.SaveTransactionLogs(true);
     }
 
     protected OnFileModified(e: editor.IModelContentChangedEvent): void {
