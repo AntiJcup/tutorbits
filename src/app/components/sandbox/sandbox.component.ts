@@ -13,6 +13,7 @@ import { OnlinePreviewGenerator } from 'shared/Tracer/lib/ts/OnlinePreviewGenera
 import { LocalTransactionWriter, LocalProjectWriter, LocalProjectLoader } from 'shared/Tracer/lib/ts/LocalTransaction';
 import { Guid } from 'guid-typescript';
 import { IErrorService } from 'src/app/services/abstract/IErrorService';
+import { ILogService } from 'src/app/services/abstract/ILogService';
 
 @Component({
   templateUrl: './sandbox.component.html',
@@ -37,6 +38,7 @@ export class SandboxComponent implements OnInit {
 
   constructor(
     private zone: NgZone,
+    private logServer: ILogService,
     private errorServer: IErrorService) {
   }
 
@@ -50,6 +52,7 @@ export class SandboxComponent implements OnInit {
     this.codeRecorder = new MonacoRecorder(
       this.recordingEditor,
       this.recordingTreeComponent,
+      this.logServer,
       this.projectId,
       new LocalProjectLoader(),
       new LocalProjectWriter(),

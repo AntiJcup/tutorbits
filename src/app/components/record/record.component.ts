@@ -112,6 +112,7 @@ export class RecordComponent implements OnInit, OnDestroy {
       this.codeRecorder = new MonacoRecorder(
         this.recordingEditor,
         this.recordingTreeComponent,
+        this.logServer,
         this.projectId,
         new OnlineProjectLoader(this.requestObj),
         this.tracerProjectService,

@@ -8,6 +8,7 @@ import { NodeSelectedEvent, NodeCreatedEvent, NodeRenamedEvent, NodeRemovedEvent
 import { Subscription } from 'rxjs';
 import { MonacoEditorComponent } from '../editor/monaco-editor.component';
 import { NG2FileTreeComponent } from '../file-tree/ng2-file-tree.component';
+import { ILogService } from 'src/app/services/abstract/ILogService';
 
 export class MonacoRecorder extends TransactionRecorder {
 
@@ -32,6 +33,7 @@ export class MonacoRecorder extends TransactionRecorder {
     constructor(
         protected codeComponent: MonacoEditorComponent,
         protected fileTreeComponent: NG2FileTreeComponent,
+        protected logging: ILogService,
         projectId: string,
         projectLoader: ProjectLoader,
         projectWriter: ProjectWriter,
@@ -45,6 +47,7 @@ export class MonacoRecorder extends TransactionRecorder {
     }
 
     public StartRecording(): void {
+        this.logging.LogToConsole('MonacoRecorder', `Started Recording`);
         this.recording = true;
         this.start = Date.now();
         this.timeOffset = Date.now() - this.start;
@@ -72,6 +75,7 @@ export class MonacoRecorder extends TransactionRecorder {
     }
 
     public async StopRecording(): Promise<boolean> {
+        this.logging.LogToConsole('MonacoRecorder', `Stopped Recording`);
         this.recording = false;
         if (this.fileChangeListener) {
             this.fileChangeListener.dispose();
