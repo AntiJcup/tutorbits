@@ -1,19 +1,16 @@
 import { Component, OnInit, ViewChild, NgZone } from '@angular/core';
-import { OnlineProjectLoader, OnlineProjectWriter, OnlineTransactionWriter } from 'shared/Tracer/lib/ts/OnlineTransaction';
 import { ActivatedRoute } from '@angular/router';
 import { environment } from 'src/environments/environment';
 import { MonacoRecorder } from 'src/app/sub-components/recorder/monaco.recorder';
 import { RecordingEditorComponent } from 'src/app/sub-components/recording-editor/recording-editor.component';
 import { RecordingFileTreeComponent } from 'src/app/sub-components/recording-file-tree/recording-file-tree.component';
 import { ApiHttpRequestInfo, ApiHttpRequest } from 'shared/web/lib/ts/ApiHttpRequest';
-import { RecordingWebCamComponent } from 'src/app/sub-components/recording-web-cam/recording-web-cam.component';
-import { WebCamRecorder } from 'src/app/sub-components/recorder/webcam.recorder';
-import { OnlineStreamWriter } from 'shared/media/lib/ts/OnlineStreamWriter';
 import { OnlinePreviewGenerator } from 'shared/Tracer/lib/ts/OnlinePreviewGenerator';
 import { LocalTransactionWriter, LocalProjectWriter, LocalProjectLoader } from 'shared/Tracer/lib/ts/LocalTransaction';
 import { Guid } from 'guid-typescript';
 import { IErrorService } from 'src/app/services/abstract/IErrorService';
 import { ILogService } from 'src/app/services/abstract/ILogService';
+import { ITracerProjectService } from 'src/app/services/abstract/ITracerProjectService';
 
 @Component({
   templateUrl: './sandbox.component.html',
@@ -35,18 +32,37 @@ export class SandboxComponent implements OnInit {
   previewPath: string = null;
   previewBaseUrl: string = null;
   loadingPreview = false;
+  loadProjectId: string;
+  loadingProject = false;
 
   constructor(
     private zone: NgZone,
+    private route: ActivatedRoute,
     private logServer: ILogService,
+    private projectService: ITracerProjectService,
     private errorServer: IErrorService) {
+    this.projectId = this.route.snapshot.paramMap.get('projectId');
   }
 
   ngOnInit(): void {
   }
 
   onCodeInitialized(recordingEditor: RecordingEditorComponent) {
-    this.recordingTreeComponent.allowEdit(true);
+    if (this.projectId) {
+      this.Load().then(() => {
+        this.startEditing();
+      }).catch((err) => {
+        this.errorServer.HandleError('SandboxComponent', `${err}`);
+      }).finally(() => {
+        this.loadingProject = false;
+      });
+    } else {
+      this.recordingTreeComponent.allowEdit(true);
+      this.startEditing();
+    }
+  }
+
+  startEditing(): void {
     this.recordingEditor.AllowEdits(true);
 
     this.codeRecorder = new MonacoRecorder(
@@ -87,6 +103,22 @@ export class SandboxComponent implements OnInit {
       this.errorServer.HandleError(`PreviewError`, err);
     }).finally(() => {
       this.loadingPreview = false;
+    });
+  }
+
+  public async Load(): Promise<void> {
+    this.loadingProject = true;
+    const projectJson = await this.projectService.GetProjectJson(this.projectId);
+    if (!projectJson) {
+      throw new Error('Project Json Load Failed');
+    }
+
+    const paths = Object.keys(projectJson);
+
+    
+    setTimeout(() => {
+      this.recordingEditor.PropogateEditor(projectJson);
+      this.recordingTreeComponent.PropogateTree(paths);
     });
   }
 }

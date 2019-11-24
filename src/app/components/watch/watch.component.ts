@@ -198,6 +198,6 @@ export class WatchComponent implements OnInit, OnDestroy {
   }
 
   public onCopyToSandboxClicked(e: any) {
-
+    this.router.navigate([`sandbox/${this.projectId}`]);
   }
 }

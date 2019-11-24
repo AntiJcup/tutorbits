@@ -57,7 +57,6 @@ import { TimerComponent } from './sub-components/timer/timer.component';
 import { FormlyFieldFileComponent } from './sub-components/formly/formly-field-file/formly-field-file.component';
 import { FileValueAccessorDirective } from './sub-components/formly/file-value-accessor.directive';
 import { TutorBitsAuthGuardService } from './services/tutor-bits-auth-guard.service';
-import { environment } from 'src/environments/environment';
 import { PrivacyComponent } from './components/privacy/privacy.component';
 import { TermsComponent } from './components/terms/terms.component';
 
@@ -80,6 +79,11 @@ const appRoutes: Routes = [
   },
   {
     path: 'sandbox',
+    component: SandboxComponent,
+    data: { title: 'New Sandbox' }
+  },
+  {
+    path: 'sandbox/:projectId',
     component: SandboxComponent,
     data: { title: 'Sandbox' }
   },

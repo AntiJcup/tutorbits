@@ -56,4 +56,26 @@ export class TutorBitsTracerProjectService extends ITracerProjectService {
 
     return true;
   }
+
+  public async GetProjectJson(id: string): Promise<{ [key: string]: string }> {
+    const getResponse = await this.apiService.generateRequest()
+      .Get(`api/project/streaming/json?projectId=${id}`);
+
+    if (!getResponse.ok) {
+      throw new Error(`Failed retrieving json url`);
+    }
+
+    const jsonUrl = await getResponse.json();
+    if (!jsonUrl) {
+      throw new Error(`Failed converting json url`);
+    }
+
+    const getJsonResponse = await this.apiService.generateRequest().GetFullUrl(jsonUrl);
+
+    if (!getJsonResponse) {
+      throw new Error(`Failed downloading json`);
+    }
+
+    return await getJsonResponse.json();
+  }
 }

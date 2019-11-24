@@ -1,7 +1,8 @@
 import { ViewChild, NgZone, Injectable, SimpleChange, SimpleChanges, Output, EventEmitter } from '@angular/core';
 import { TreeComponent, Ng2TreeSettings, Tree, NodeSelectedEvent, TreeController, NodeMenuItemAction, NodeMenuItem, NodeCreatedEvent, MenuItemSelectedEvent, TreeModel, NodeRenamedEvent } from 'ng2-tree';
-import { TreeStatus } from 'ng2-tree/src/tree.types';
+import { TreeStatus, TreeModelSettings } from 'ng2-tree/src/tree.types';
 import { ILogService } from 'src/app/services/abstract/ILogService';
+import { getMatFormFieldMissingControlError } from '@angular/material';
 
 @Injectable()
 export abstract class NG2FileTreeComponent {
@@ -260,5 +261,98 @@ export abstract class NG2FileTreeComponent {
     } else {
       this.fileSelected = this.getPathForNode(e.node);
     }
+  }
+
+  private CreateChildTree(path: string, cache?: { [path: string]: TreeModel }, parentPath?: string): TreeModel {
+
+    const splitPath = path.replace('/project/', '').split('/');
+
+    parentPath = parentPath || '/project';
+
+    let model: TreeModel = null;
+    const nodeName = splitPath[0];
+    if (nodeName === '') {
+      return null;
+    }
+    const cacheName = parentPath + '/' + splitPath[0];
+
+    cache = cache || {};
+
+    if (cache && cache[cacheName]) {
+      model = cache[cacheName];
+    } else {
+      model = {
+        value: nodeName
+      } as TreeModel;
+      cache[cacheName] = model;
+    }
+
+    if (splitPath.length === 1) {
+      return model;
+    }
+
+    const childTree = this.CreateChildTree(splitPath.slice(1).join('/'), cache, cacheName);
+    if (childTree !== null) {
+      if (model.children) {
+        model.children.push(childTree);
+      } else {
+        model.children = [childTree];
+      }
+    }
+
+    return model;
+  }
+
+  public PropogateTree(paths: string[]): void {
+    const stagingChildren: Array<TreeModel> = []; // TODO edit tree
+    const cache = {};
+    for (const path of paths) {
+      const child = this.CreateChildTree(path, cache);
+      if (child) {
+        const exists = stagingChildren.find((c) => {
+          return c.value === child.value;
+        });
+        if (exists) {
+          continue;
+        }
+        stagingChildren.push(child);
+      }
+    }
+
+    this.treeComponent.treeModel = {
+      value: '/',
+      id: 1,
+      settings: {
+        menuItems: [
+        ],
+        cssClasses: {
+          expanded: 'fa fa-caret-down',
+          collapsed: 'fa fa-caret-right',
+          empty: 'fa fa-caret-right disabled',
+          leaf: 'fa'
+        },
+        templates: {
+          node: '<i class="fa fa-folder-o"></i>',
+          leaf: '<i class="fa fa-file-o"></i>'
+        },
+        keepNodesInDOM: true,
+        static: false
+      },
+      children: [
+        {
+          value: 'project',
+          id: 2,
+          children: stagingChildren,
+          settings: {
+            isCollapsedOnInit: false,
+            menuItems: [
+              { action: NodeMenuItemAction.NewFolder, name: 'Add folder', cssClass: '' },
+              { action: NodeMenuItemAction.NewTag, name: 'Add file', cssClass: '' },
+            ]
+          }
+        }
+      ]
+    };
+    this.treeComponent.ngOnChanges(null);
   }
 }

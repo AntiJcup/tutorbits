@@ -112,19 +112,19 @@ export abstract class MonacoEditorComponent implements OnDestroy {
     return this.GetCacheForFileName(this.filePath);
   }
 
-  public GetCacheForFileName(path: string) {
+  public GetCacheForFileName(path: string): string {
     return this.fileCache[path];
   }
 
   public abstract Show(show: boolean);
 
-  public AllowEdits(edit: boolean) {
+  public AllowEdits(edit: boolean): void {
     this.codeEditor.updateOptions(edit ? MonacoEditorComponent.editOptions : MonacoEditorComponent.readOnlyOptions);
     const editorModel = this.codeEditor.getModel() as editor.ITextModel;
     editorModel.pushEOL(monaco.editor.EndOfLineSequence.CRLF);
   }
 
-  public GetLanguageByPath(path: string) {
+  public GetLanguageByPath(path: string): string {
     if (path.endsWith('.js')) {
       return 'javascript';
     } else if (path.endsWith('.html')) {
@@ -132,5 +132,9 @@ export abstract class MonacoEditorComponent implements OnDestroy {
     } else if (path.endsWith('.css')) {
       return 'css';
     }
+  }
+
+  public PropogateEditor(files: { [path: string]: string }): void {
+    this.fileCache = files;
   }
 }

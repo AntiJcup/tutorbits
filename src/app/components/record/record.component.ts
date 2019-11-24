@@ -8,10 +8,8 @@ import { RecordingFileTreeComponent } from 'src/app/sub-components/recording-fil
 import { ApiHttpRequestInfo, ApiHttpRequest } from 'shared/web/lib/ts/ApiHttpRequest';
 import { RecordingWebCamComponent } from 'src/app/sub-components/recording-web-cam/recording-web-cam.component';
 import { WebCamRecorder } from 'src/app/sub-components/recorder/webcam.recorder';
-import { OnlineStreamWriter } from 'shared/media/lib/ts/OnlineStreamWriter';
 import { OnlinePreviewGenerator } from 'shared/Tracer/lib/ts/OnlinePreviewGenerator';
 import { TutorBitsTutorialService } from 'src/app/services/tutor-bits-tutorial.service';
-import { Status } from 'src/app/services/abstract/IModelApiService';
 import { IErrorService } from 'src/app/services/abstract/IErrorService';
 import { ILogService } from 'src/app/services/abstract/ILogService';
 import { ITracerProjectService } from 'src/app/services/abstract/ITracerProjectService';
