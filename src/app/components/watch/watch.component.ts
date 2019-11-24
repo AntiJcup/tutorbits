@@ -12,9 +12,9 @@ import { TransactionPlayerState } from 'shared/Tracer/lib/ts/TransactionPlayer';
 import { OnlinePreviewGenerator } from 'shared/Tracer/lib/ts/OnlinePreviewGenerator';
 import { IErrorService } from 'src/app/services/abstract/IErrorService';
 import { ILogService } from 'src/app/services/abstract/ILogService';
-import { Status } from 'src/app/services/abstract/IModelApiService';
 import { TutorBitsTutorialService } from 'src/app/services/tutor-bits-tutorial.service';
 import { Guid } from 'guid-typescript';
+import { ITracerProjectService } from 'src/app/services/abstract/ITracerProjectService';
 
 @Component({
   templateUrl: './watch.component.html',
@@ -52,11 +52,14 @@ export class WatchComponent implements OnInit, OnDestroy {
   publishing = false;
   publishMode = false;
 
+  downloading = false;
+
   constructor(
     private router: Router,
     private route: ActivatedRoute,
     private zone: NgZone,
     private tutorialService: TutorBitsTutorialService,
+    private projectService: ITracerProjectService,
     private errorServer: IErrorService,
     private logServer: ILogService) {
     this.projectId = this.route.snapshot.paramMap.get('projectId');
@@ -178,5 +181,23 @@ export class WatchComponent implements OnInit, OnDestroy {
     }
 
     this.router.navigate([`record/${this.projectId}`], { queryParams: { back: 'true' } });
+  }
+
+  public onDownloadClicked(e: any) {
+    this.downloading = true;
+    this.projectService.DownloadProject(this.projectId).then((res) => {
+      if (!res) {
+        this.errorServer.HandleError('DownloadProject', `Error downloading project`);
+        return;
+      }
+    }).catch((err) => {
+      this.errorServer.HandleError('DownloadProject', `${err}`);
+    }).finally(() => {
+      this.downloading = false;
+    });
+  }
+
+  public onCopyToSandboxClicked(e: any) {
+
   }
 }

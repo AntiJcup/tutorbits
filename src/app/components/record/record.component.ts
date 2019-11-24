@@ -31,7 +31,6 @@ export class RecordComponent implements OnInit, OnDestroy {
   finishRecording = false;
   loadingRecording = false;
 
-
   @ViewChild(RecordingFileTreeComponent, { static: true }) recordingTreeComponent: RecordingFileTreeComponent;
   @ViewChild(RecordingEditorComponent, { static: true }) recordingEditor: RecordingEditorComponent;
   @ViewChild(RecordingWebCamComponent, { static: true }) recordingWebCam: RecordingWebCamComponent;

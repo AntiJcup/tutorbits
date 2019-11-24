@@ -38,4 +38,22 @@ export class TutorBitsTracerProjectService extends ITracerProjectService {
 
     return true;
   }
+
+  public async DownloadProject(id: string): Promise<boolean> {
+    const getResponse = await this.apiService.generateRequest()
+      .Get(`api/project/streaming/download?projectId=${id}`);
+
+    if (!getResponse.ok) {
+      return false;
+    }
+
+    const downloadUrl = await getResponse.json();
+    if (!downloadUrl) {
+      return false;
+    }
+
+    window.location.href = downloadUrl;
+
+    return true;
+  }
 }
