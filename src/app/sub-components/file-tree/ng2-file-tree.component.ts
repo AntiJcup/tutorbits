@@ -282,7 +282,14 @@ export abstract class NG2FileTreeComponent {
       model = cache[cacheName];
     } else {
       model = {
-        value: nodeName
+        value: nodeName,
+        settings: {
+          menuItems: [
+            { action: NodeMenuItemAction.Remove, name: 'Delete', cssClass: '' },
+            { action: NodeMenuItemAction.Rename, name: 'Rename', cssClass: '' },
+            { action: NodeMenuItemAction.Custom, name: 'Preview', cssClass: '' }
+          ]
+        }
       } as TreeModel;
       cache[cacheName] = model;
     }
@@ -298,6 +305,14 @@ export abstract class NG2FileTreeComponent {
       } else {
         model.children = [childTree];
       }
+    } else { // This implies there was a trailing slash implying a folder
+      model.children = [];
+      model.settings.menuItems = [
+        { action: NodeMenuItemAction.NewFolder, name: 'Add folder', cssClass: '' },
+        { action: NodeMenuItemAction.NewTag, name: 'Add file', cssClass: '' },
+        { action: NodeMenuItemAction.Remove, name: 'Delete', cssClass: '' },
+        { action: NodeMenuItemAction.Rename, name: 'Rename', cssClass: '' }
+      ];
     }
 
     return model;
