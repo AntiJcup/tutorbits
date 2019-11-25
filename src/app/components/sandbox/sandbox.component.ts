@@ -41,7 +41,7 @@ export class SandboxComponent implements OnInit {
     private logServer: ILogService,
     private projectService: ITracerProjectService,
     private errorServer: IErrorService) {
-    this.projectId = this.route.snapshot.paramMap.get('projectId');
+    this.loadProjectId = this.route.snapshot.paramMap.get('projectId');
   }
 
   ngOnInit(): void {
@@ -90,7 +90,7 @@ export class SandboxComponent implements OnInit {
     this.loadingPreview = true;
     const previewGenerator = new OnlinePreviewGenerator(this.requestObj);
     const previewPos = Math.round(this.codeRecorder.position);
-    previewGenerator.GeneratePreview(previewPos, this.codeRecorder.logs).then((url) => {
+    previewGenerator.GeneratePreview(previewPos, this.codeRecorder.logs, this.loadProjectId).then((url) => {
       if (!url) {
         this.errorServer.HandleError(`PreviewError`, 'failed to be retrieved');
         return;
@@ -108,7 +108,7 @@ export class SandboxComponent implements OnInit {
 
   public async Load(): Promise<void> {
     this.loadingProject = true;
-    const projectJson = await this.projectService.GetProjectJson(this.projectId);
+    const projectJson = await this.projectService.GetProjectJson(this.loadProjectId);
     if (!projectJson) {
       throw new Error('Project Json Load Failed');
     }
