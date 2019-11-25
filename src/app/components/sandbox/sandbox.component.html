@@ -1,3 +1,15 @@
+<div class="controls">
+    <div class="controlsContainer">
+      <app-saving-button (click)="onDownloadClicked($event)" text="Download Project" icon="cloud_download"
+        [saving]="downloading" savingText="Downloading...">
+      </app-saving-button>
+    </div>
+    <div class="controlsContainer">
+      <app-saving-button (click)="onPublishToExampleClicked($event)" text="Publish as Example" icon="open_in_browser"
+        [saving]="false" savingText="">
+      </app-saving-button>
+    </div>
+  </div>
 <div fxLayout fxLayoutGap="5px" class="tutorialContainer">
     <div class="sideBar">
         <app-recording-file-tree id="tutorialFileExplorer" (previewClicked)="onPreviewClicked($event)">

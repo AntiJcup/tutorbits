@@ -72,7 +72,7 @@ export class TutorBitsTracerProjectService extends ITracerProjectService {
 
     const getJsonResponse = await this.apiService.generateRequest().GetFullUrl(jsonUrl);
 
-    if (!getJsonResponse) {
+    if (!getJsonResponse.ok) {
       throw new Error(`Failed downloading json`);
     }
 

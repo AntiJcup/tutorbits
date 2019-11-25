@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild, NgZone } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { environment } from 'src/environments/environment';
 import { MonacoRecorder } from 'src/app/sub-components/recorder/monaco.recorder';
 import { RecordingEditorComponent } from 'src/app/sub-components/recording-editor/recording-editor.component';
@@ -34,9 +34,11 @@ export class SandboxComponent implements OnInit {
   loadingPreview = false;
   loadProjectId: string;
   loadingProject = false;
+  downloading = false;
 
   constructor(
     private zone: NgZone,
+    private router: Router,
     private route: ActivatedRoute,
     private logServer: ILogService,
     private projectService: ITracerProjectService,
@@ -118,5 +120,21 @@ export class SandboxComponent implements OnInit {
       this.recordingEditor.PropogateEditor(projectJson);
       this.recordingTreeComponent.PropogateTree(paths);
     });
+  }
+
+  public onDownloadClicked(e: any) {
+    this.downloading = true;
+    const previewGenerator = new OnlinePreviewGenerator(this.requestObj);
+    const previewPos = Math.round(this.codeRecorder.position);
+    previewGenerator.DownloadPreview(previewPos, this.codeRecorder.logs, this.loadProjectId).then()
+      .catch((err) => {
+        this.errorServer.HandleError(`DownloadError`, err);
+      }).finally(() => {
+        this.downloading = false;
+      });
+  }
+
+  public onPublishToExampleClicked(e: any) {
+    // this.router.navigate([`sandbox/${this.projectId}`]);
   }
 }
