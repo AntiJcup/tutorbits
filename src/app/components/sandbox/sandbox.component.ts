@@ -113,10 +113,8 @@ export class SandboxComponent implements OnInit {
       throw new Error('Project Json Load Failed');
     }
 
-    const paths = Object.keys(projectJson);
-
-    
-    setTimeout(() => {
+    this.zone.runTask(() => {
+      const paths = Object.keys(projectJson);
       this.recordingEditor.PropogateEditor(projectJson);
       this.recordingTreeComponent.PropogateTree(paths);
     });
