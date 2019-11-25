@@ -1,14 +1,16 @@
 <div class="controls">
     <div class="controlsContainer">
-      <app-saving-button (click)="onDownloadClicked($event)" text="Download Project" icon="cloud_download"
+      <app-saving-button *ngIf="!loading" (click)="onDownloadClicked($event)" text="Download Project" icon="cloud_download"
         [saving]="downloading" savingText="Downloading...">
       </app-saving-button>
     </div>
     <div class="controlsContainer">
-      <app-saving-button (click)="onPublishToExampleClicked($event)" text="Publish as Example" icon="open_in_browser"
+      <app-saving-button *ngIf="!loading" (click)="onPublishToExampleClicked($event)" text="Publish as Example" icon="open_in_browser"
         [saving]="false" savingText="">
       </app-saving-button>
     </div>
+    <mat-spinner color="accent" [diameter]="44" class="loading-spinner" *ngIf="loading">
+    </mat-spinner>
   </div>
 <div fxLayout fxLayoutGap="5px" class="tutorialContainer">
     <div class="sideBar">

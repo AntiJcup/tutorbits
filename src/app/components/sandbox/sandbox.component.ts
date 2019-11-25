@@ -35,6 +35,7 @@ export class SandboxComponent implements OnInit {
   loadProjectId: string;
   loadingProject = false;
   downloading = false;
+  loading = true;
 
   constructor(
     private zone: NgZone,
@@ -50,7 +51,7 @@ export class SandboxComponent implements OnInit {
   }
 
   onCodeInitialized(recordingEditor: RecordingEditorComponent) {
-    if (this.projectId) {
+    if (this.loadProjectId) {
       this.Load().then(() => {
         this.startEditing();
       }).catch((err) => {
@@ -79,6 +80,10 @@ export class SandboxComponent implements OnInit {
     this.codeRecorder.DeleteProject(this.projectId).then(() => {
       this.codeRecorder.New().then(() => {
         this.codeRecorder.StartRecording();
+        this.logServer.LogToConsole('SandboxComponent', 'Ready to edit');
+        this.zone.runTask(() => {
+          this.loading = false;
+        });
       });
     });
   }
