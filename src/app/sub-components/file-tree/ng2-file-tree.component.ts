@@ -5,6 +5,11 @@ import { ILogService } from 'src/app/services/abstract/ILogService';
 import { getMatFormFieldMissingControlError } from '@angular/material';
 import { FileUtils, FileData } from 'shared/web/lib/ts/FileUtils';
 
+export class FileUploadData {
+  fileData: FileData;
+  target: Tree;
+}
+
 @Injectable()
 export abstract class NG2FileTreeComponent {
   editable = false;
@@ -18,7 +23,7 @@ export abstract class NG2FileTreeComponent {
   @ViewChild(TreeComponent, { static: true }) treeComponent: TreeComponent;
 
   @Output() previewClicked = new EventEmitter<string>();
-  @Output() fileUploaded = new EventEmitter<FileData>();
+  @Output() fileUploaded = new EventEmitter<FileUploadData>();
 
   constructor(private zone: NgZone, private logServer: ILogService) { }
 
@@ -255,10 +260,11 @@ export abstract class NG2FileTreeComponent {
   }
 
   public onUploadFileClicked(e: MouseEvent) {
-    const selectedNode = this.GetSelectedBranch();
-    const selectedNodeController = this.treeComponent.getControllerByNodeId(selectedNode.id);
     FileUtils.SelectFile().then((fileData: FileData) => {
-      this.fileUploaded.next(fileData);
+      this.fileUploaded.next({
+        fileData,
+        target: this.GetSelectedBranch()
+      } as FileUploadData);
     });
   }
 
