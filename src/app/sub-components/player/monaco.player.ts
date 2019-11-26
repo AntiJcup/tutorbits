@@ -4,7 +4,7 @@ import { editor } from 'monaco-editor';
 import { TransactionLoader } from 'shared/Tracer/lib/ts/TransactionLoader';
 import { ProjectLoader } from 'shared/Tracer/lib/ts/ProjectLoader';
 import { MonacoEditorComponent } from '../editor/monaco-editor.component';
-import { NG2FileTreeComponent } from '../file-tree/ng2-file-tree.component';
+import { NG2FileTreeComponent, ResourceType } from '../file-tree/ng2-file-tree.component';
 import { NodeSelectedEvent } from 'ng2-tree';
 import { Subscription } from 'rxjs';
 import { ILogService } from 'src/app/services/abstract/ILogService';
@@ -47,7 +47,13 @@ export class MonacoPlayer extends TransactionPlayer {
             return;
         }
         const newFileName = this.fileTreeComponent.getPathForNode(e.node);
-        this.codeComponent.currentFilePath = newFileName;
+        switch (this.fileTreeComponent.GetNodeType(e.node)) {
+            case ResourceType.code:
+                this.codeComponent.currentFilePath = newFileName;
+                break;
+            case ResourceType.asset:
+                break;
+        }
     }
 
     protected HandleTransaction(transaction: TraceTransaction, undo?: boolean): void {

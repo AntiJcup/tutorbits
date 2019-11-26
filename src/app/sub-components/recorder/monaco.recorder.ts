@@ -7,7 +7,7 @@ import { ProjectWriter } from 'shared/Tracer/lib/ts/ProjectWriter';
 import { NodeSelectedEvent, NodeCreatedEvent, NodeRenamedEvent, NodeRemovedEvent, NodeMovedEvent, Tree } from 'ng2-tree';
 import { Subscription } from 'rxjs';
 import { MonacoEditorComponent } from '../editor/monaco-editor.component';
-import { NG2FileTreeComponent } from '../file-tree/ng2-file-tree.component';
+import { NG2FileTreeComponent, ResourceType } from '../file-tree/ng2-file-tree.component';
 import { ILogService } from 'src/app/services/abstract/ILogService';
 
 export class MonacoRecorder extends TransactionRecorder {
@@ -130,30 +130,46 @@ export class MonacoRecorder extends TransactionRecorder {
         if (e.node.isBranch()) {
             return;
         }
+
         const oldFileName = this.codeComponent.currentFilePath;
         const newFileName = this.fileTreeComponent.getPathForNode(e.node);
-        this.codeComponent.currentFilePath = newFileName;
+
+        switch (this.fileTreeComponent.GetNodeType(e.node)) {
+            case ResourceType.code:
+                this.codeComponent.currentFilePath = newFileName;
+                this.codeComponent.UpdateCacheForCurrentFile();
+                break;
+            case ResourceType.asset:
+                break;
+        }
 
         if (this.recording) {
             this.timeOffset = Date.now() - this.start;
             this.SelectFile(this.timeOffset, oldFileName, newFileName);
             this.TriggerDelayedSave();
         }
-        this.codeComponent.UpdateCacheForCurrentFile();
     }
 
     protected OnNodeCreated(e: NodeCreatedEvent) {
         console.log(e);
         const oldFileName = this.codeComponent.currentFilePath;
         const newFileName = this.fileTreeComponent.getPathForNode(e.node);
+
+
+        switch (this.fileTreeComponent.GetNodeType(e.node)) {
+            case ResourceType.code:
+                this.codeComponent.currentFilePath = newFileName;
+                this.codeComponent.codeEditor.focus();
+                break;
+            case ResourceType.asset:
+                break;
+        }
+
         this.timeOffset = Date.now() - this.start;
         this.CreateItem(this.timeOffset, oldFileName, newFileName, e.node.isBranch());
         setTimeout(() => {
             this.fileTreeComponent.treeComponent.getControllerByNodeId(e.node.id).select();
         }, 1);
-        this.codeComponent.currentFilePath = newFileName;
-        this.codeComponent.codeEditor.focus();
-
         this.TriggerDelayedSave();
     }
 
@@ -171,15 +187,22 @@ export class MonacoRecorder extends TransactionRecorder {
             }
         }
 
-        const oldFileData = this.codeComponent.GetCacheForFileName(oldFileName);
-        this.codeComponent.currentFilePath = newFileName;
+        let oldFileData = null;
+        switch (this.fileTreeComponent.GetNodeType(e.node)) {
+            case ResourceType.code:
+                oldFileData = this.codeComponent.GetCacheForFileName(oldFileName);
+                this.codeComponent.ClearCacheForFile(oldFileName);
+                this.codeComponent.currentFilePath = '';
+                this.codeComponent.UpdateCacheForFile(newFileName, oldFileData);
+                this.codeComponent.currentFilePath = newFileName;
+                break;
+            case ResourceType.asset:
+                break;
+        }
+
         this.timeOffset = Date.now() - this.start;
         this.fileTreeComponent.treeComponent.getControllerByNodeId(e.node.id).select();
         this.RenameFile(this.timeOffset, oldFileName, newFileName, oldFileData, e.node.isBranch());
-        this.codeComponent.ClearCacheForFile(oldFileName);
-        this.codeComponent.currentFilePath = '';
-        this.codeComponent.UpdateCacheForFile(newFileName, oldFileData);
-        this.codeComponent.currentFilePath = newFileName;
 
         this.TriggerDelayedSave();
     }
@@ -194,16 +217,23 @@ export class MonacoRecorder extends TransactionRecorder {
             }
         }
 
-        const oldFileData = this.codeComponent.GetCacheForFileName(oldFileName);
-        this.codeComponent.currentFilePath = newFileName;
+        let oldFileData = null;
+
+        switch (this.fileTreeComponent.GetNodeType(node)) {
+            case ResourceType.code:
+                oldFileData = this.codeComponent.GetCacheForFileName(oldFileName);
+                this.codeComponent.ClearCacheForFile(oldFileName);
+                this.codeComponent.currentFilePath = '';
+                this.codeComponent.UpdateCacheForFile(newFileName, oldFileData);
+                this.codeComponent.currentFilePath = newFileName;
+                break;
+            case ResourceType.asset:
+                break;
+        }
+
         this.timeOffset = Date.now() - this.start;
         this.fileTreeComponent.treeComponent.getControllerByNodeId(node.id).select();
         this.RenameFile(this.timeOffset, oldFileName, newFileName, oldFileData, node.isBranch());
-        this.codeComponent.ClearCacheForFile(oldFileName);
-        this.codeComponent.currentFilePath = '';
-        this.codeComponent.UpdateCacheForFile(newFileName, oldFileData);
-        this.codeComponent.currentFilePath = newFileName;
-
         this.TriggerDelayedSave();
     }
 
@@ -220,8 +250,14 @@ export class MonacoRecorder extends TransactionRecorder {
         this.timeOffset = Date.now() - this.start;
         this.DeleteFile(this.timeOffset, nodePath, this.codeComponent.GetCacheForFileName(nodePath), e.node.isBranch());
 
-        if (nodePath === this.codeComponent.currentFilePath) {
-            this.codeComponent.currentFilePath = '';
+        switch (this.fileTreeComponent.GetNodeType(e.node)) {
+            case ResourceType.code:
+                if (nodePath === this.codeComponent.currentFilePath) {
+                    this.codeComponent.currentFilePath = '';
+                }
+                break;
+            case ResourceType.asset:
+                break;
         }
 
         this.TriggerDelayedSave();
@@ -239,16 +275,23 @@ export class MonacoRecorder extends TransactionRecorder {
             }
         }
 
-        const oldFileData = this.codeComponent.GetCacheForFileName(oldFileName);
-        this.codeComponent.currentFilePath = newFileName;
+        let oldFileData = null;
+
+        switch (this.fileTreeComponent.GetNodeType(e.node)) {
+            case ResourceType.code:
+                oldFileData = this.codeComponent.GetCacheForFileName(oldFileName);
+                this.codeComponent.ClearCacheForFile(oldFileName);
+                this.codeComponent.currentFilePath = '';
+                this.codeComponent.UpdateCacheForFile(newFileName, oldFileData);
+                this.codeComponent.currentFilePath = newFileName;
+                break;
+            case ResourceType.asset:
+                break;
+        }
+
         this.timeOffset = Date.now() - this.start;
         this.fileTreeComponent.treeComponent.getControllerByNodeId(e.node.id).select();
         this.RenameFile(this.timeOffset, oldFileName, newFileName, oldFileData, e.node.isBranch());
-        this.codeComponent.ClearCacheForFile(oldFileName);
-        this.codeComponent.currentFilePath = '';
-        this.codeComponent.UpdateCacheForFile(newFileName, oldFileData);
-        this.codeComponent.currentFilePath = newFileName;
-
         this.TriggerDelayedSave();
     }
 

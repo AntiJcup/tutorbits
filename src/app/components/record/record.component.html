@@ -6,7 +6,7 @@
     <div class="sideBar">
         <app-web-cam class="tutorialVideo" (streamInitialized)="onStreamInitialized($event)"
             (streamError)="onStreamError($event)"></app-web-cam>
-        <app-recording-file-tree id="tutorialFileExplorer" (previewClicked)="onPreviewClicked($event)">
+        <app-recording-file-tree id="tutorialFileExplorer" (previewClicked)="onPreviewClicked($event)" (fileUploaded)="onFileUploaded($event)">
         </app-recording-file-tree>
     </div>
     <div class="editorContainer" fxLayout fxLayoutGap="5px">

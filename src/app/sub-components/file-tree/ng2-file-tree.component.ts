@@ -15,9 +15,19 @@ import { TreeStatus } from 'ng2-tree/src/tree.types';
 import { ILogService } from 'src/app/services/abstract/ILogService';
 import { FileUtils, FileData } from 'shared/web/lib/ts/FileUtils';
 
-export class FileUploadData {
+export interface FileUploadData {
   fileData: FileData;
   target: Tree;
+}
+
+export enum ResourceType {
+  code,
+  asset
+}
+
+export interface TutorBitsTreeModel extends TreeModel {
+  resourceId: string;
+  type: ResourceType;
 }
 
 @Injectable()
@@ -265,8 +275,9 @@ export abstract class NG2FileTreeComponent {
 
     selectedNodeController.addChild({
       value: 'Untitled File',
-      _status: TreeStatus.New
-    } as TreeModel);
+      _status: TreeStatus.New,
+      type: ResourceType.code
+    } as TutorBitsTreeModel);
   }
 
   public onUploadFileClicked(e: MouseEvent) {
@@ -289,8 +300,9 @@ export abstract class NG2FileTreeComponent {
     selectedNodeController.addChild({
       value: nodeName,
       _status: TreeStatus.New,
-      resourceId
-    } as TreeModel);
+      resourceId,
+      type: ResourceType.asset
+    } as TutorBitsTreeModel);
   }
 
   public onNodeRenamed(e: NodeRenamedEvent) {
@@ -330,8 +342,9 @@ export abstract class NG2FileTreeComponent {
             { action: NodeMenuItemAction.Rename, name: 'Rename', cssClass: '' },
             { action: NodeMenuItemAction.Custom, name: 'Preview', cssClass: '' }
           ]
-        }
-      } as TreeModel;
+        },
+        type: ResourceType.code
+      } as TutorBitsTreeModel;
       cache[cacheName] = model;
     }
 
@@ -410,5 +423,9 @@ export abstract class NG2FileTreeComponent {
       ]
     };
     this.treeComponent.ngOnChanges(null);
+  }
+
+  public GetNodeType(node: Tree): ResourceType {
+    return (node.node as TutorBitsTreeModel).type || ResourceType.code;
   }
 }
