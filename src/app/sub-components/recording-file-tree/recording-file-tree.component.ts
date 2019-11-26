@@ -33,7 +33,6 @@ export class RecordingFileTreeComponent extends NG2FileTreeComponent implements 
         value: 'project',
         id: 2,
         children: [
-          // { value: 'helloworld.js', id: 3 },
         ],
         settings: {
           isCollapsedOnInit: false,

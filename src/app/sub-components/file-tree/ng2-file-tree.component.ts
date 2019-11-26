@@ -1,8 +1,9 @@
 import { ViewChild, NgZone, Injectable, SimpleChange, SimpleChanges, Output, EventEmitter } from '@angular/core';
-import { TreeComponent, Ng2TreeSettings, Tree, NodeSelectedEvent, TreeController, NodeMenuItemAction, NodeMenuItem, NodeCreatedEvent, MenuItemSelectedEvent, TreeModel, NodeRenamedEvent } from 'ng2-tree';
+import { TreeComponent, Ng2TreeSettings, Tree, NodeSelectedEvent, NodeMenuItemAction, NodeMenuItem, NodeCreatedEvent, MenuItemSelectedEvent, TreeModel, NodeRenamedEvent } from 'ng2-tree';
 import { TreeStatus, TreeModelSettings } from 'ng2-tree/src/tree.types';
 import { ILogService } from 'src/app/services/abstract/ILogService';
 import { getMatFormFieldMissingControlError } from '@angular/material';
+import { FileUtils, FileData } from 'shared/web/lib/ts/FileUtils';
 
 @Injectable()
 export abstract class NG2FileTreeComponent {
@@ -17,6 +18,7 @@ export abstract class NG2FileTreeComponent {
   @ViewChild(TreeComponent, { static: true }) treeComponent: TreeComponent;
 
   @Output() previewClicked = new EventEmitter<string>();
+  @Output() fileUploaded = new EventEmitter<FileData>();
 
   constructor(private zone: NgZone, private logServer: ILogService) { }
 
@@ -250,6 +252,14 @@ export abstract class NG2FileTreeComponent {
       value: 'Untitled File',
       _status: TreeStatus.New
     } as TreeModel);
+  }
+
+  public onUploadFileClicked(e: MouseEvent) {
+    const selectedNode = this.GetSelectedBranch();
+    const selectedNodeController = this.treeComponent.getControllerByNodeId(selectedNode.id);
+    FileUtils.SelectFile().then((fileData: FileData) => {
+      this.fileUploaded.next(fileData);
+    });
   }
 
   public onNodeRenamed(e: NodeRenamedEvent) {

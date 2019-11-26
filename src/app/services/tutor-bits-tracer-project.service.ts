@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { IAPIService } from './abstract/IAPIService';
 import { ITracerProjectService } from './abstract/ITracerProjectService';
 import { IAuthService } from './abstract/IAuthService';
+import { ILogService } from './abstract/ILogService';
 
 @Injectable()
 export class TutorBitsTracerProjectService extends ITracerProjectService {
@@ -9,7 +10,7 @@ export class TutorBitsTracerProjectService extends ITracerProjectService {
     'Content-Type': 'application/json'
   };
 
-  constructor(protected apiService: IAPIService, protected auth: IAuthService) {
+  constructor(protected apiService: IAPIService, protected auth: IAuthService, protected logging: ILogService) {
     super();
   }
 
@@ -77,5 +78,13 @@ export class TutorBitsTracerProjectService extends ITracerProjectService {
     }
 
     return await getJsonResponse.json();
+  }
+
+  public async UploadResource(id: string, resourceName: string, resourceData: Blob): Promise<boolean> {
+    this.logging.LogToConsole('TutorBitsTracerProjectService', `Uploading resource ${resourceName}`);
+    const response = await this.apiService.generateRequest().Post(`api/project/recording/add?projectId=${id}`,
+      resourceData, (await this.GetAuthHeaders()));
+
+    return response.ok;
   }
 }

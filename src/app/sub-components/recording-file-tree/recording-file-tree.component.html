@@ -14,6 +14,10 @@
                 (click)="onNewFileClicked($event)">
                 <mat-icon class="icon">file_copy</mat-icon>
             </button>
+            <button mat-icon-button class="headerBtn" [disabled]="fileSelected == null && folderSelected == null"
+                (click)="onUploadFileClicked($event)">
+                <mat-icon class="icon">cloud_upload</mat-icon>
+            </button>
         </div>
     </div>
     <tree id="tutorialFileTree" class='tutorialFileTree' [tree]="tree" [settings]="settings"
