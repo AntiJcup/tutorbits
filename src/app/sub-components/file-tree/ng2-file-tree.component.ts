@@ -1,8 +1,18 @@
 import { ViewChild, NgZone, Injectable, SimpleChange, SimpleChanges, Output, EventEmitter } from '@angular/core';
-import { TreeComponent, Ng2TreeSettings, Tree, NodeSelectedEvent, NodeMenuItemAction, NodeMenuItem, NodeCreatedEvent, MenuItemSelectedEvent, TreeModel, NodeRenamedEvent } from 'ng2-tree';
-import { TreeStatus, TreeModelSettings } from 'ng2-tree/src/tree.types';
+import {
+  TreeComponent,
+  Ng2TreeSettings,
+  Tree,
+  NodeSelectedEvent,
+  NodeMenuItemAction,
+  NodeMenuItem,
+  NodeCreatedEvent,
+  MenuItemSelectedEvent,
+  TreeModel,
+  NodeRenamedEvent
+} from 'ng2-tree';
+import { TreeStatus } from 'ng2-tree/src/tree.types';
 import { ILogService } from 'src/app/services/abstract/ILogService';
-import { getMatFormFieldMissingControlError } from '@angular/material';
 import { FileUtils, FileData } from 'shared/web/lib/ts/FileUtils';
 
 export class FileUploadData {
@@ -261,11 +271,26 @@ export abstract class NG2FileTreeComponent {
 
   public onUploadFileClicked(e: MouseEvent) {
     FileUtils.SelectFile().then((fileData: FileData) => {
+      // Update path to be relative to selected branch
+      // const selectedBranch = this.GetSelectedBranch();
+      // const selectedBranchPath = this.getPathForNode(selectedBranch);
+      // fileData.name = selectedBranchPath + '/' + fileData.name;
+
       this.fileUploaded.next({
         fileData,
         target: this.GetSelectedBranch()
       } as FileUploadData);
     });
+  }
+
+  public addResourceNode(nodePath: string, resourceId: string, nodeName: string) {
+    const selectedNode = this.findNodeByPath(this.treeComponent.tree, nodePath);
+    const selectedNodeController = this.treeComponent.getControllerByNodeId(selectedNode.id);
+    selectedNodeController.addChild({
+      value: nodeName,
+      _status: TreeStatus.New,
+      resourceId
+    } as TreeModel);
   }
 
   public onNodeRenamed(e: NodeRenamedEvent) {

@@ -158,7 +158,7 @@ export class RecordComponent implements OnInit, OnDestroy {
     const previewGenerator = new OnlinePreviewGenerator(this.requestObj);
     const previewPos = Math.round(this.codeRecorder.position);
     this.loadingPreview = true;
-    previewGenerator.GeneratePreview(previewPos, this.codeRecorder.logs).then((url) => {
+    previewGenerator.GeneratePreview(this.projectId, previewPos, this.codeRecorder.logs).then((url) => {
       if (!url) {
         this.errorServer.HandleError('PreviewError', ' preview url failed to be retrieved');
         return;

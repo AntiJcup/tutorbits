@@ -11,6 +11,7 @@ import { Guid } from 'guid-typescript';
 import { IErrorService } from 'src/app/services/abstract/IErrorService';
 import { ILogService } from 'src/app/services/abstract/ILogService';
 import { ITracerProjectService } from 'src/app/services/abstract/ITracerProjectService';
+import { FileUploadData } from 'src/app/sub-components/file-tree/ng2-file-tree.component';
 
 @Component({
   templateUrl: './sandbox.component.html',
@@ -97,7 +98,7 @@ export class SandboxComponent implements OnInit {
     this.loadingPreview = true;
     const previewGenerator = new OnlinePreviewGenerator(this.requestObj);
     const previewPos = Math.round(this.codeRecorder.position);
-    previewGenerator.GeneratePreview(previewPos, this.codeRecorder.logs, this.loadProjectId).then((url) => {
+    previewGenerator.GeneratePreview(this.projectId, previewPos, this.codeRecorder.logs, this.loadProjectId).then((url) => {
       if (!url) {
         this.errorServer.HandleError(`PreviewError`, 'failed to be retrieved');
         return;
@@ -131,7 +132,7 @@ export class SandboxComponent implements OnInit {
     this.downloading = true;
     const previewGenerator = new OnlinePreviewGenerator(this.requestObj);
     const previewPos = Math.round(this.codeRecorder.position);
-    previewGenerator.DownloadPreview(previewPos, this.codeRecorder.logs, this.loadProjectId).then()
+    previewGenerator.DownloadPreview(this.projectId, previewPos, this.codeRecorder.logs, this.loadProjectId).then()
       .catch((err) => {
         this.errorServer.HandleError(`DownloadError`, err);
       }).finally(() => {
@@ -141,5 +142,20 @@ export class SandboxComponent implements OnInit {
 
   public onPublishToExampleClicked(e: any) {
     // this.router.navigate([`sandbox/${this.projectId}`]);
+  }
+
+  public onFileUploaded(e: FileUploadData) {
+    this.logServer.LogToConsole('SandboxComponent', 'onFileUploaded');
+
+    this.projectService.UploadResource(this.projectId, e.fileData.name, e.fileData.data).then((resourceId: string) => {
+      if (!resourceId) {
+        this.errorServer.HandleError(`UploadResourceError`, `resourceId is null`);
+        return;
+      }
+
+      this.recordingTreeComponent.addResourceNode(this.recordingTreeComponent.getPathForNode(e.target), resourceId, e.fileData.name);
+    }).catch((err) => {
+      this.errorServer.HandleError(`UploadResourceError`, `${err}`);
+    });
   }
 }
