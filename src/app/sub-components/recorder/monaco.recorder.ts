@@ -7,8 +7,10 @@ import { ProjectWriter } from 'shared/Tracer/lib/ts/ProjectWriter';
 import { NodeSelectedEvent, NodeCreatedEvent, NodeRenamedEvent, NodeRemovedEvent, NodeMovedEvent, Tree } from 'ng2-tree';
 import { Subscription } from 'rxjs';
 import { MonacoEditorComponent } from '../editor/monaco-editor.component';
-import { NG2FileTreeComponent, ResourceType } from '../file-tree/ng2-file-tree.component';
+import { NG2FileTreeComponent, ResourceType, FileUploadData } from '../file-tree/ng2-file-tree.component';
 import { ILogService } from 'src/app/services/abstract/ILogService';
+import { IErrorService } from 'src/app/services/abstract/IErrorService';
+import { ITracerProjectService } from 'src/app/services/abstract/ITracerProjectService';
 
 export class MonacoRecorder extends TransactionRecorder {
 
@@ -19,6 +21,7 @@ export class MonacoRecorder extends TransactionRecorder {
     private nodeRenameListener: Subscription = null;
     private nodeDeletedListener: Subscription = null;
     private nodeMovedListener: Subscription = null;
+    private fileUploadedListener: Subscription = null;
 
     private timeOffset: number;
     private start: number;
@@ -34,10 +37,12 @@ export class MonacoRecorder extends TransactionRecorder {
         protected codeComponent: MonacoEditorComponent,
         protected fileTreeComponent: NG2FileTreeComponent,
         protected logging: ILogService,
+        protected errorServer: IErrorService,
         projectId: string,
         projectLoader: ProjectLoader,
         projectWriter: ProjectWriter,
         transactionWriter: TransactionWriter,
+        protected projectService: ITracerProjectService,
         transactionLogs?: TraceTransactionLog[]) {
         super(projectId, projectLoader, projectWriter, transactionWriter, transactionLogs);
 
@@ -72,6 +77,10 @@ export class MonacoRecorder extends TransactionRecorder {
         this.nodeMovedListener = this.fileTreeComponent.treeComponent.nodeMoved.subscribe((e: NodeMovedEvent) => {
             this.OnNodeMoved(e);
         });
+
+        this.fileUploadedListener = this.fileTreeComponent.fileUploaded.subscribe((e: FileUploadData) => {
+            this.onFileUploaded(e);
+        });
     }
 
     public async StopRecording(): Promise<boolean> {
@@ -97,28 +106,30 @@ export class MonacoRecorder extends TransactionRecorder {
             this.nodeMovedListener.unsubscribe();
         }
 
+        if (this.fileUploadedListener) {
+            this.fileUploadedListener.unsubscribe();
+        }
+
         return await this.SaveTransactionLogs(true);
     }
 
     protected OnFileModified(e: editor.IModelContentChangedEvent): void {
+        this.logging.LogToConsole('MonacoRecorder', `OnFileModified ${e}`);
         if (this.codeComponent.ignoreNextEvent) { // Handles expected edits that shouldnt be tracked
-            console.log(`Ignoring edit ${JSON.stringify(e)}`);
+            this.logging.LogToConsole('MonacoRecorder', `OnFileModified Ignoring ${e}`);
             return;
         }
-        console.log(`Change count: `, e.changes.length);
+        this.logging.LogToConsole('MonacoRecorder', `OnFileModified change count: ${e.changes.length}`);
         for (const change of e.changes) {
-            console.log(change);
+            this.logging.LogToConsole('MonacoRecorder', `OnFileModified change count: ${change}`);
             const previousData = change.rangeLength <= 0 ?
                 undefined :
                 this.codeComponent.GetCacheForCurrentFile().substring(change.rangeOffset, change.rangeOffset + change.rangeLength);
-            console.log(`Previous File Data : ${previousData}`);
+            this.logging.LogToConsole('MonacoRecorder', `OnFileModified Previous File Data: ${previousData}`);
             this.timeOffset = Date.now() - this.start;
             const transaction = this.ModifyFile(this.timeOffset, this.codeComponent.currentFilePath, change.rangeOffset,
                 change.rangeOffset + change.rangeLength, change.text, previousData);
-            console.log(`File Modified: ${JSON.stringify(transaction.toObject())}`);
-            console.log(change.rangeOffset);
-            console.log(change.rangeLength);
-            console.log(change.text);
+            this.logging.LogToConsole('MonacoRecorder', `OnFileModified File Modified: ${JSON.stringify(transaction.toObject())}`);
         }
         this.codeComponent.UpdateCacheForCurrentFile();
 
@@ -126,7 +137,7 @@ export class MonacoRecorder extends TransactionRecorder {
     }
 
     protected OnNodeSelected(e: NodeSelectedEvent): void {
-        console.log(e);
+        this.logging.LogToConsole('MonacoRecorder', `OnNodeSelected ${e}`);
         if (e.node.isBranch()) {
             return;
         }
@@ -151,7 +162,7 @@ export class MonacoRecorder extends TransactionRecorder {
     }
 
     protected OnNodeCreated(e: NodeCreatedEvent) {
-        console.log(e);
+        this.logging.LogToConsole('MonacoRecorder', `OnNodeCreated ${e}`);
         const oldFileName = this.codeComponent.currentFilePath;
         const newFileName = this.fileTreeComponent.getPathForNode(e.node);
 
@@ -162,6 +173,7 @@ export class MonacoRecorder extends TransactionRecorder {
                 this.codeComponent.codeEditor.focus();
                 break;
             case ResourceType.asset:
+                return;
                 break;
         }
 
@@ -174,7 +186,7 @@ export class MonacoRecorder extends TransactionRecorder {
     }
 
     protected OnNodeRename(e: NodeRenamedEvent) {
-        console.log(e);
+        this.logging.LogToConsole('MonacoRecorder', `OnNodeRename ${e}`);
 
         const newFileName = this.fileTreeComponent.getPathForNode(e.node);
         const newFileNameSplit = newFileName.split('/');
@@ -238,7 +250,7 @@ export class MonacoRecorder extends TransactionRecorder {
     }
 
     protected OnNodeDeleted(e: NodeRemovedEvent) {
-        console.log(e);
+        this.logging.LogToConsole('MonacoRecorder', `OnNodeDeleted ${e}`);
 
         if (e.node.isBranch()) {
             for (const child of e.node.children) {
@@ -264,7 +276,7 @@ export class MonacoRecorder extends TransactionRecorder {
     }
 
     protected OnNodeMoved(e: NodeMovedEvent) {
-        console.log(e);
+        this.logging.LogToConsole('MonacoRecorder', `OnNodeMoved ${e}`);
         const newFileName = this.fileTreeComponent.getPathForNode(e.node);
         const oldParentPath = this.fileTreeComponent.getPathForNode(e.previousParent);
         const oldFileName = oldParentPath + '/' + e.node.value;
@@ -293,6 +305,26 @@ export class MonacoRecorder extends TransactionRecorder {
         this.fileTreeComponent.treeComponent.getControllerByNodeId(e.node.id).select();
         this.RenameFile(this.timeOffset, oldFileName, newFileName, oldFileData, e.node.isBranch());
         this.TriggerDelayedSave();
+    }
+
+    public onFileUploaded(e: FileUploadData) {
+        this.logging.LogToConsole('MonacoRecorder', `onFileUploaded ${e}`);
+
+        this.projectService.UploadResource(this.id, e.fileData.name, e.fileData.data).then((resourceId: string) => {
+            if (!resourceId) {
+                this.errorServer.HandleError(`UploadResourceError`, `resourceId is null`);
+                return;
+            }
+
+            const targetBranchPath = this.fileTreeComponent.getPathForNode(e.target);
+            const newFilePath = `${targetBranchPath}/${e.fileData.name}`;
+            this.fileTreeComponent.addResourceNode(targetBranchPath, resourceId, e.fileData.name);
+            this.timeOffset = Date.now() - this.start;
+            this.UploadFile(this.timeOffset, targetBranchPath, newFilePath, resourceId);
+            this.TriggerDelayedSave();
+        }).catch((err) => {
+            this.errorServer.HandleError(`UploadResourceError`, `${err}`);
+        });
     }
 
     private TriggerDelayedSave(): void {

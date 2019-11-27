@@ -18,7 +18,11 @@ export class TutorBitsDataService extends IDataService {
   }
 
   public GetCurrentRoute(): string {
-    return this.storage.GetItem(this.CurrentRouteKey) as string;
+    const currentRoute = this.storage.GetItem(this.CurrentRouteKey);
+    if (!currentRoute) {
+      return null;
+    }
+    return decodeURIComponent(currentRoute as string);
   }
 
   public SetCurrentRoute(route: string): void {

@@ -43,7 +43,7 @@ export class SandboxComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private logServer: ILogService,
-    private projectService: ITracerProjectService,
+    private tracerProjectService: ITracerProjectService,
     private errorServer: IErrorService) {
     this.loadProjectId = this.route.snapshot.paramMap.get('projectId');
   }
@@ -73,10 +73,12 @@ export class SandboxComponent implements OnInit {
       this.recordingEditor,
       this.recordingTreeComponent,
       this.logServer,
+      this.errorServer,
       this.projectId,
       new LocalProjectLoader(),
       new LocalProjectWriter(),
-      new LocalTransactionWriter());
+      new LocalTransactionWriter(),
+      this.tracerProjectService);
 
     this.codeRecorder.DeleteProject(this.projectId).then(() => {
       this.codeRecorder.New().then(() => {
@@ -116,7 +118,7 @@ export class SandboxComponent implements OnInit {
 
   public async Load(): Promise<void> {
     this.loadingProject = true;
-    const projectJson = await this.projectService.GetProjectJson(this.loadProjectId);
+    const projectJson = await this.tracerProjectService.GetProjectJson(this.loadProjectId);
     if (!projectJson) {
       throw new Error('Project Json Load Failed');
     }
@@ -124,7 +126,7 @@ export class SandboxComponent implements OnInit {
     this.zone.runTask(() => {
       const paths = Object.keys(projectJson);
       this.recordingEditor.PropogateEditor(projectJson);
-      this.recordingTreeComponent.PropogateTree(paths);
+      this.recordingTreeComponent.PropogateTree(projectJson);
     });
   }
 
@@ -142,20 +144,5 @@ export class SandboxComponent implements OnInit {
 
   public onPublishToExampleClicked(e: any) {
     // this.router.navigate([`sandbox/${this.projectId}`]);
-  }
-
-  public onFileUploaded(e: FileUploadData) {
-    this.logServer.LogToConsole('SandboxComponent', 'onFileUploaded');
-
-    this.projectService.UploadResource(this.projectId, e.fileData.name, e.fileData.data).then((resourceId: string) => {
-      if (!resourceId) {
-        this.errorServer.HandleError(`UploadResourceError`, `resourceId is null`);
-        return;
-      }
-
-      this.recordingTreeComponent.addResourceNode(this.recordingTreeComponent.getPathForNode(e.target), resourceId, e.fileData.name);
-    }).catch((err) => {
-      this.errorServer.HandleError(`UploadResourceError`, `${err}`);
-    });
   }
 }

@@ -111,10 +111,12 @@ export class RecordComponent implements OnInit, OnDestroy {
         this.recordingEditor,
         this.recordingTreeComponent,
         this.logServer,
+        this.errorServer,
         this.projectId,
         new OnlineProjectLoader(this.requestObj),
         this.tracerProjectService,
-        this.tracerTransactionService);
+        this.tracerTransactionService,
+        this.tracerProjectService);
 
       this.codeRecorder.DeleteProject(this.projectId).then(() => {
         this.codeRecorder.New().then(() => {
@@ -178,20 +180,5 @@ export class RecordComponent implements OnInit, OnDestroy {
   onFinishClicked() {
     this.finishRecording = true;
     this.router.navigate([`watch/${this.projectId}`], { queryParams: { publish: 'true' } });
-  }
-
-  public onFileUploaded(e: FileUploadData) {
-    this.logServer.LogToConsole('RecordComponent', 'onFileUploaded');
-
-    this.tracerProjectService.UploadResource(this.projectId, e.fileData.name, e.fileData.data).then((resourceId: string) => {
-      if (!resourceId) {
-        this.errorServer.HandleError(`UploadResourceError`, `resourceId is null`);
-        return;
-      }
-
-      this.recordingTreeComponent.addResourceNode(this.recordingTreeComponent.getPathForNode(e.target), resourceId, e.fileData.name);
-    }).catch((err) => {
-      this.errorServer.HandleError(`UploadResourceError`, `${err}`);
-    });
   }
 }

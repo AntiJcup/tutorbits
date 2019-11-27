@@ -125,7 +125,7 @@ export abstract class NG2FileTreeComponent {
     });
   }
 
-  public addNodeByPath(path: string, isBranch: boolean): void {
+  public addNodeByPath(path: string, isBranch: boolean, childModel?: TutorBitsTreeModel): void {
     const splitPath = path.split('/');
     let node: Tree = this.treeComponent.tree;
     this.zone.runTask(() => {
@@ -150,18 +150,20 @@ export abstract class NG2FileTreeComponent {
               { action: NodeMenuItemAction.Custom, name: 'Preview', cssClass: '' }
             ])
           };
-          const newNodeModel: TreeModel = {
-            value: newNodeName,
-            children: subNodeIsBranch ? [] : undefined,
-            _status: TreeStatus.New,
-            settings
-          };
+
+          const defaultModel = {
+          } as TutorBitsTreeModel;
+          const newNodeModel: TutorBitsTreeModel = isLast ? (childModel || defaultModel) : defaultModel;
+          newNodeModel.value = newNodeName;
+          newNodeModel.children = subNodeIsBranch ? [] : undefined;
+          newNodeModel._status = TreeStatus.New;
+          newNodeModel.settings = settings;
 
           nodeController.addChildAsync(newNodeModel).then((newNode) => {
             const newNodeController = this.treeComponent.getControllerByNodeId(newNode.id);
             newNodeController.rename(newNodeName);
             if (!isLast) {
-              this.addNodeByPath(path, isBranch);
+              this.addNodeByPath(path, isBranch, childModel);
             }
           });
           break;
@@ -316,16 +318,23 @@ export abstract class NG2FileTreeComponent {
     }
   }
 
-  private CreateChildTree(path: string, cache?: { [path: string]: TreeModel }, parentPath?: string): TreeModel {
+  private CreateChildTree(path: string, fileData: string, cache?: { [path: string]: TreeModel }, parentPath?: string): TreeModel {
 
     const splitPath = path.replace('/project/', '').split('/');
 
     parentPath = parentPath || '/project';
 
     let model: TreeModel = null;
-    const nodeName = splitPath[0];
+    let type: ResourceType = ResourceType.code;
+    let nodeName = splitPath[0];
+    let resourceId: string;
     if (nodeName === '') {
       return null;
+    }
+    if (nodeName.startsWith('res:')) {
+      nodeName = nodeName.replace('res:', '');
+      type = ResourceType.asset;
+      resourceId = fileData;
     }
     const cacheName = parentPath + '/' + splitPath[0];
 
@@ -343,7 +352,8 @@ export abstract class NG2FileTreeComponent {
             { action: NodeMenuItemAction.Custom, name: 'Preview', cssClass: '' }
           ]
         },
-        type: ResourceType.code
+        type,
+        resourceId
       } as TutorBitsTreeModel;
       cache[cacheName] = model;
     }
@@ -352,7 +362,7 @@ export abstract class NG2FileTreeComponent {
       return model;
     }
 
-    const childTree = this.CreateChildTree(splitPath.slice(1).join('/'), cache, cacheName);
+    const childTree = this.CreateChildTree(splitPath.slice(1).join('/'), fileData, cache, cacheName);
     if (childTree !== null) {
       if (model.children) {
         model.children.push(childTree);
@@ -372,11 +382,11 @@ export abstract class NG2FileTreeComponent {
     return model;
   }
 
-  public PropogateTree(paths: string[]): void {
+  public PropogateTree(files: { [path: string]: string }): void {
     const stagingChildren: Array<TreeModel> = []; // TODO edit tree
     const cache = {};
-    for (const path of paths) {
-      const child = this.CreateChildTree(path, cache);
+    for (const path of Object.keys(files)) {
+      const child = this.CreateChildTree(path, files[path], cache);
       if (child) {
         const exists = stagingChildren.find((c) => {
           return c.value === child.value;

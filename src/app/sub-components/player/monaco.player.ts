@@ -4,7 +4,7 @@ import { editor } from 'monaco-editor';
 import { TransactionLoader } from 'shared/Tracer/lib/ts/TransactionLoader';
 import { ProjectLoader } from 'shared/Tracer/lib/ts/ProjectLoader';
 import { MonacoEditorComponent } from '../editor/monaco-editor.component';
-import { NG2FileTreeComponent, ResourceType } from '../file-tree/ng2-file-tree.component';
+import { NG2FileTreeComponent, ResourceType, TutorBitsTreeModel } from '../file-tree/ng2-file-tree.component';
 import { NodeSelectedEvent } from 'ng2-tree';
 import { Subscription } from 'rxjs';
 import { ILogService } from 'src/app/services/abstract/ILogService';
@@ -61,6 +61,20 @@ export class MonacoPlayer extends TransactionPlayer {
             const edits: editor.IIdentifiedSingleEditOperation[] = [];
             this.logServer.LogToConsole('MonacoPlayer', JSON.stringify(transaction.toObject()));
             switch (transaction.getType()) {
+                case TraceTransaction.TraceTransactionType.UPLOADFILE:
+                    const uploadResourceId = transaction.getUploadFile().getResourceId();
+                    const uploadNewPath = transaction.getUploadFile().getNewFilePath();
+                    const uploadOldPath = transaction.getFilePath();
+                    if (!undo) {
+                        this.fileTreeComponent.addNodeByPath(uploadNewPath, false, {
+                            resourceId: uploadResourceId,
+                            type: ResourceType.asset
+                        } as TutorBitsTreeModel);
+                    } else {
+                        this.fileTreeComponent.deleteNodeByPath(uploadNewPath);
+                        this.codeComponent.currentFilePath = uploadOldPath;
+                    }
+                    break;
                 case TraceTransaction.TraceTransactionType.CREATEFILE:
                     const createNewPath = transaction.getCreateFile().getNewFilePath();
                     const createOldPath = transaction.getFilePath();
