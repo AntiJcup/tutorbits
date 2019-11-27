@@ -310,11 +310,17 @@ export abstract class NG2FileTreeComponent {
   public addResourceNode(nodePath: string, resourceId: string, nodeName: string) {
     const selectedNode = this.findNodeByPath(this.treeComponent.tree, nodePath);
     const selectedNodeController = this.treeComponent.getControllerByNodeId(selectedNode.id);
-    selectedNodeController.addChild({
+
+    const newNodeModel = {
       value: nodeName,
       resourceId,
       type: ResourceType.asset
-    } as TutorBitsTreeModel);
+    } as TutorBitsTreeModel;
+
+    selectedNodeController.addChildAsync(newNodeModel).then((newNode) => {
+      const newNodeController = this.treeComponent.getControllerByNodeId(newNode.id);
+      newNodeController.rename(nodeName);
+    });
   }
 
   public onNodeRenamed(e: NodeRenamedEvent) {
