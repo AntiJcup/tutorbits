@@ -12,6 +12,7 @@ import { IErrorService } from 'src/app/services/abstract/IErrorService';
 import { ILogService } from 'src/app/services/abstract/ILogService';
 import { ITracerProjectService } from 'src/app/services/abstract/ITracerProjectService';
 import { FileUploadData } from 'src/app/sub-components/file-tree/ng2-file-tree.component';
+import { ResourceViewerComponent } from 'src/app/sub-components/resource-viewer/resource-viewer.component';
 
 @Component({
   templateUrl: './sandbox.component.html',
@@ -22,6 +23,7 @@ export class SandboxComponent implements OnInit {
 
   @ViewChild(RecordingFileTreeComponent, { static: true }) recordingTreeComponent: RecordingFileTreeComponent;
   @ViewChild(RecordingEditorComponent, { static: true }) recordingEditor: RecordingEditorComponent;
+  @ViewChild(ResourceViewerComponent, { static: true }) resourceViewerComponent: ResourceViewerComponent;
 
   codeRecorder: MonacoRecorder;
   requestInfo: ApiHttpRequestInfo = {
@@ -72,6 +74,7 @@ export class SandboxComponent implements OnInit {
     this.codeRecorder = new MonacoRecorder(
       this.recordingEditor,
       this.recordingTreeComponent,
+      this.resourceViewerComponent,
       this.logServer,
       this.errorServer,
       this.projectId,
@@ -124,9 +127,8 @@ export class SandboxComponent implements OnInit {
     }
 
     this.zone.runTask(() => {
-      const paths = Object.keys(projectJson);
       this.recordingEditor.PropogateEditor(projectJson);
-      this.recordingTreeComponent.PropogateTree(projectJson);
+      this.recordingTreeComponent.PropogateTree(projectJson, this.loadProjectId);
     });
   }
 
@@ -143,6 +145,5 @@ export class SandboxComponent implements OnInit {
   }
 
   public onPublishToExampleClicked(e: any) {
-    // this.router.navigate([`sandbox/${this.projectId}`]);
   }
 }

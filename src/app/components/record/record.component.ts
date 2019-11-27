@@ -16,6 +16,7 @@ import { ITracerProjectService } from 'src/app/services/abstract/ITracerProjectS
 import { ITracerTransactionService } from 'src/app/services/abstract/ITracerTransactionService';
 import { IVideoRecordingService } from 'src/app/services/abstract/IVideoRecordingService';
 import { FileUploadData } from 'src/app/sub-components/file-tree/ng2-file-tree.component';
+import { ResourceViewerComponent } from 'src/app/sub-components/resource-viewer/resource-viewer.component';
 
 @Component({
   templateUrl: './record.component.html',
@@ -33,6 +34,7 @@ export class RecordComponent implements OnInit, OnDestroy {
   @ViewChild(RecordingFileTreeComponent, { static: true }) recordingTreeComponent: RecordingFileTreeComponent;
   @ViewChild(RecordingEditorComponent, { static: true }) recordingEditor: RecordingEditorComponent;
   @ViewChild(RecordingWebCamComponent, { static: true }) recordingWebCam: RecordingWebCamComponent;
+  @ViewChild(ResourceViewerComponent, { static: true }) resourceViewerComponent: ResourceViewerComponent;
 
   codeRecorder: MonacoRecorder;
   webCamRecorder: WebCamRecorder;
@@ -110,6 +112,7 @@ export class RecordComponent implements OnInit, OnDestroy {
       this.codeRecorder = new MonacoRecorder(
         this.recordingEditor,
         this.recordingTreeComponent,
+        this.resourceViewerComponent,
         this.logServer,
         this.errorServer,
         this.projectId,
@@ -143,8 +146,9 @@ export class RecordComponent implements OnInit, OnDestroy {
       this.recordingTreeComponent.allowEdit(false);
       this.recordingEditor.AllowEdits(false);
       this.saving = true;
-      Promise.all([this.codeRecorder.StopRecording(),
-      this.webCamRecorder.FinishRecording()]).then(() => {
+      Promise.all([this.webCamRecorder.FinishRecording(),
+      this.codeRecorder.StopRecording()
+      ]).then(() => {
         this.logServer.LogToConsole('Record', 'Finished recording');
       }).finally(() => {
         this.saving = false;

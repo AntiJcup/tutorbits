@@ -23,5 +23,7 @@
     <app-preview *ngIf="previewPath || loadingPreview" class="preview" (closeClicked)="onCloseClicked($event)"
       [loading]="loadingPreview" [previewPath]="previewPath" [previewBaseUrl]="previewBaseUrl">
     </app-preview>
+    <app-resource-viewer class="resourceViewer">
+    </app-resource-viewer>
   </div>
 </div>

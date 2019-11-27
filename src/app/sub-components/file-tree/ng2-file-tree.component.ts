@@ -28,6 +28,7 @@ export enum ResourceType {
 export interface TutorBitsTreeModel extends TreeModel {
   resourceId: string;
   type: ResourceType;
+  overrideProjectId?: string;
 }
 
 @Injectable()
@@ -318,7 +319,9 @@ export abstract class NG2FileTreeComponent {
     }
   }
 
-  private CreateChildTree(path: string, fileData: string, cache?: { [path: string]: TreeModel }, parentPath?: string): TreeModel {
+  private CreateChildTree(
+    path: string, fileData: string, overrideProjectId?: string,
+    cache?: { [path: string]: TreeModel }, parentPath?: string): TreeModel {
 
     const splitPath = path.replace('/project/', '').split('/');
 
@@ -353,7 +356,8 @@ export abstract class NG2FileTreeComponent {
           ]
         },
         type,
-        resourceId
+        resourceId,
+        overrideProjectId
       } as TutorBitsTreeModel;
       cache[cacheName] = model;
     }
@@ -362,7 +366,7 @@ export abstract class NG2FileTreeComponent {
       return model;
     }
 
-    const childTree = this.CreateChildTree(splitPath.slice(1).join('/'), fileData, cache, cacheName);
+    const childTree = this.CreateChildTree(splitPath.slice(1).join('/'), fileData, overrideProjectId, cache, cacheName);
     if (childTree !== null) {
       if (model.children) {
         model.children.push(childTree);
@@ -382,11 +386,11 @@ export abstract class NG2FileTreeComponent {
     return model;
   }
 
-  public PropogateTree(files: { [path: string]: string }): void {
+  public PropogateTree(files: { [path: string]: string }, overrideProjectId?: string): void {
     const stagingChildren: Array<TreeModel> = []; // TODO edit tree
     const cache = {};
     for (const path of Object.keys(files)) {
-      const child = this.CreateChildTree(path, files[path], cache);
+      const child = this.CreateChildTree(path, files[path], overrideProjectId, cache);
       if (child) {
         const exists = stagingChildren.find((c) => {
           return c.value === child.value;

@@ -92,4 +92,16 @@ export class TutorBitsTracerProjectService extends ITracerProjectService {
 
     return await response.json();
   }
+
+  public async GetResource(id: string, resourceId: string): Promise<string> {
+    this.logging.LogToConsole('TutorBitsTracerProjectService', `Getting resource ${resourceId}`);
+    const response = await this.apiService.generateRequest()
+      .Get(`api/project/streaming/resource?projectId=${id}&resourceId=${resourceId}`);
+
+    if (!response.ok) {
+      throw new Error(`Failed getting resource ${response.status}`);
+    }
+
+    return await response.json();
+  }
 }

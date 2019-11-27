@@ -7,10 +7,11 @@ import { ProjectWriter } from 'shared/Tracer/lib/ts/ProjectWriter';
 import { NodeSelectedEvent, NodeCreatedEvent, NodeRenamedEvent, NodeRemovedEvent, NodeMovedEvent, Tree } from 'ng2-tree';
 import { Subscription } from 'rxjs';
 import { MonacoEditorComponent } from '../editor/monaco-editor.component';
-import { NG2FileTreeComponent, ResourceType, FileUploadData } from '../file-tree/ng2-file-tree.component';
+import { NG2FileTreeComponent, ResourceType, FileUploadData, TutorBitsTreeModel } from '../file-tree/ng2-file-tree.component';
 import { ILogService } from 'src/app/services/abstract/ILogService';
 import { IErrorService } from 'src/app/services/abstract/IErrorService';
 import { ITracerProjectService } from 'src/app/services/abstract/ITracerProjectService';
+import { ResourceViewerComponent, ResourceData } from '../resource-viewer/resource-viewer.component';
 
 export class MonacoRecorder extends TransactionRecorder {
 
@@ -36,6 +37,7 @@ export class MonacoRecorder extends TransactionRecorder {
     constructor(
         protected codeComponent: MonacoEditorComponent,
         protected fileTreeComponent: NG2FileTreeComponent,
+        protected resourceViewerComponent: ResourceViewerComponent,
         protected logging: ILogService,
         protected errorServer: IErrorService,
         projectId: string,
@@ -149,10 +151,17 @@ export class MonacoRecorder extends TransactionRecorder {
             case ResourceType.code:
                 this.codeComponent.currentFilePath = newFileName;
                 this.codeComponent.UpdateCacheForCurrentFile();
+                this.resourceViewerComponent.Resource = null;
                 break;
             case ResourceType.asset:
                 this.codeComponent.currentFilePath = '';
                 this.codeComponent.UpdateCacheForCurrentFile();
+                const model = e.node.node as TutorBitsTreeModel;
+                this.resourceViewerComponent.Resource = {
+                    projectId: model.overrideProjectId || this.id,
+                    fileName: model.value,
+                    resourceId: model.resourceId
+                } as ResourceData;
                 break;
         }
 

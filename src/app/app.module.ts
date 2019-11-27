@@ -59,6 +59,7 @@ import { FileValueAccessorDirective } from './sub-components/formly/file-value-a
 import { TutorBitsAuthGuardService } from './services/tutor-bits-auth-guard.service';
 import { PrivacyComponent } from './components/privacy/privacy.component';
 import { TermsComponent } from './components/terms/terms.component';
+import { ResourceViewerComponent } from './sub-components/resource-viewer/resource-viewer.component';
 
 const appRoutes: Routes = [
   {
@@ -145,7 +146,8 @@ const appRoutes: Routes = [
     FormlyFieldFileComponent,
     FileValueAccessorDirective,
     PrivacyComponent,
-    TermsComponent
+    TermsComponent,
+    ResourceViewerComponent
   ],
   imports: [
     BrowserModule,

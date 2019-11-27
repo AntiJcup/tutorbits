@@ -8,6 +8,7 @@ import { NG2FileTreeComponent, ResourceType, TutorBitsTreeModel } from '../file-
 import { NodeSelectedEvent } from 'ng2-tree';
 import { Subscription } from 'rxjs';
 import { ILogService } from 'src/app/services/abstract/ILogService';
+import { ResourceViewerComponent, ResourceData } from '../resource-viewer/resource-viewer.component';
 
 export class MonacoPlayer extends TransactionPlayer {
     private nodeSelectedListener: Subscription = null;
@@ -15,6 +16,7 @@ export class MonacoPlayer extends TransactionPlayer {
     constructor(
         protected codeComponent: MonacoEditorComponent,
         protected fileTreeComponent: NG2FileTreeComponent,
+        protected resourceViewerComponent: ResourceViewerComponent,
         protected logServer: ILogService,
         projectLoader: ProjectLoader,
         transactionLoader: TransactionLoader,
@@ -50,9 +52,17 @@ export class MonacoPlayer extends TransactionPlayer {
         switch (this.fileTreeComponent.GetNodeType(e.node)) {
             case ResourceType.code:
                 this.codeComponent.currentFilePath = newFileName;
+                this.resourceViewerComponent.Resource = null;
                 break;
             case ResourceType.asset:
                 this.codeComponent.currentFilePath = '';
+                this.codeComponent.UpdateCacheForCurrentFile();
+                const model = e.node.node as TutorBitsTreeModel;
+                this.resourceViewerComponent.Resource = {
+                    projectId: model.overrideProjectId || this.projectId,
+                    fileName: model.value,
+                    resourceId: model.resourceId
+                } as ResourceData;
                 break;
         }
     }
