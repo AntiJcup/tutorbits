@@ -47,6 +47,10 @@ export class ResourceViewerComponent implements OnInit {
           return;
         }
 
+        if (!this.internalResource) {
+          return;
+        }
+
         this.resourceName = this.Resource.fileName;
         this.imageUrl = url;
       });

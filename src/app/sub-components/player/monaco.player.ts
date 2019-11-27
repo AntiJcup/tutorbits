@@ -44,7 +44,7 @@ export class MonacoPlayer extends TransactionPlayer {
     }
 
     protected OnNodeSelected(e: NodeSelectedEvent): void {
-        this.logServer.LogToConsole('MonacoPlayer', `OnNodeSelected: ${JSON.stringify(e)}`);
+        this.logServer.LogToConsole('MonacoPlayer', `OnNodeSelected: ${JSON.stringify(e.node.node)}`);
         if (e.node.isBranch()) {
             return;
         }
@@ -83,7 +83,7 @@ export class MonacoPlayer extends TransactionPlayer {
                         } as TutorBitsTreeModel);
                     } else {
                         this.fileTreeComponent.deleteNodeByPath(uploadNewPath);
-                        this.codeComponent.currentFilePath = uploadOldPath;
+                        this.fileTreeComponent.selectNodeByPath(this.fileTreeComponent.treeComponent.tree, uploadOldPath);
                     }
                     break;
                 case TraceTransaction.TraceTransactionType.CREATEFILE:
@@ -93,7 +93,7 @@ export class MonacoPlayer extends TransactionPlayer {
                         this.fileTreeComponent.addNodeByPath(createNewPath, transaction.getCreateFile().getIsFolder());
                     } else {
                         this.fileTreeComponent.deleteNodeByPath(createNewPath);
-                        this.codeComponent.currentFilePath = createOldPath;
+                        this.fileTreeComponent.selectNodeByPath(this.fileTreeComponent.treeComponent.tree, createOldPath);
                     }
                     break;
                 case TraceTransaction.TraceTransactionType.SELECTFILE:
@@ -101,10 +101,8 @@ export class MonacoPlayer extends TransactionPlayer {
                     const selectOldPath = transaction.getFilePath();
                     if (!undo) {
                         this.fileTreeComponent.selectNodeByPath(this.fileTreeComponent.treeComponent.tree, selectNewPath);
-                        this.codeComponent.currentFilePath = selectNewPath;
                     } else {
                         this.fileTreeComponent.selectNodeByPath(this.fileTreeComponent.treeComponent.tree, selectOldPath);
-                        this.codeComponent.currentFilePath = selectOldPath;
                     }
                     break;
                 case TraceTransaction.TraceTransactionType.DELETEFILE:
@@ -125,19 +123,17 @@ export class MonacoPlayer extends TransactionPlayer {
                     const renameNewPath = transaction.getRenameFile().getNewFilePath();
                     const renameOldPath = transaction.getFilePath();
                     if (!undo) {
-                        this.fileTreeComponent.deleteNodeByPath(renameOldPath);
-                        this.fileTreeComponent.addNodeByPath(renameNewPath, transaction.getRenameFile().getIsFolder());
+                        this.fileTreeComponent.renameNodeByPath(renameOldPath, renameNewPath, transaction.getRenameFile().getIsFolder());
 
                         this.codeComponent.ClearCacheForFile(renameOldPath);
                         this.codeComponent.UpdateCacheForFile(renameNewPath, renamePreviousData);
-                        this.codeComponent.currentFilePath = renameNewPath;
+                        this.fileTreeComponent.selectNodeByPath(this.fileTreeComponent.treeComponent.tree, renameNewPath);
                     } else {
-                        this.fileTreeComponent.deleteNodeByPath(renameNewPath);
-                        this.fileTreeComponent.addNodeByPath(renameOldPath, transaction.getRenameFile().getIsFolder());
+                        this.fileTreeComponent.renameNodeByPath(renameNewPath, renameOldPath, transaction.getRenameFile().getIsFolder());
 
                         this.codeComponent.ClearCacheForFile(renameNewPath);
                         this.codeComponent.UpdateCacheForFile(renameOldPath, renamePreviousData);
-                        this.codeComponent.currentFilePath = renameOldPath;
+                        this.fileTreeComponent.selectNodeByPath(this.fileTreeComponent.treeComponent.tree, renameOldPath);
                     }
                     break;
                 case TraceTransaction.TraceTransactionType.MODIFYFILE:

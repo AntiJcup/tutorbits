@@ -331,7 +331,7 @@ export class MonacoRecorder extends TransactionRecorder {
             const newFilePath = `${targetBranchPath}/${e.fileData.name}`;
             this.fileTreeComponent.addResourceNode(targetBranchPath, resourceId, e.fileData.name);
             this.timeOffset = Date.now() - this.start;
-            this.UploadFile(this.timeOffset, targetBranchPath, newFilePath, resourceId);
+            this.UploadFile(this.timeOffset, this.fileTreeComponent.fileSelected, newFilePath, resourceId);
             this.TriggerDelayedSave();
         }).catch((err) => {
             this.errorServer.HandleError(`UploadResourceError`, `${err}`);

@@ -11,7 +11,7 @@ import { Guid } from 'guid-typescript';
 import { IErrorService } from 'src/app/services/abstract/IErrorService';
 import { ILogService } from 'src/app/services/abstract/ILogService';
 import { ITracerProjectService } from 'src/app/services/abstract/ITracerProjectService';
-import { FileUploadData } from 'src/app/sub-components/file-tree/ng2-file-tree.component';
+import { FileUploadData, PropogateTreeOptions } from 'src/app/sub-components/file-tree/ng2-file-tree.component';
 import { ResourceViewerComponent } from 'src/app/sub-components/resource-viewer/resource-viewer.component';
 
 @Component({
@@ -128,7 +128,9 @@ export class SandboxComponent implements OnInit {
 
     this.zone.runTask(() => {
       this.recordingEditor.PropogateEditor(projectJson);
-      this.recordingTreeComponent.PropogateTree(projectJson, this.loadProjectId);
+      this.recordingTreeComponent.PropogateTreeJson(projectJson, {
+        overrideProjectId: this.loadProjectId
+      } as PropogateTreeOptions);
     });
   }
 
