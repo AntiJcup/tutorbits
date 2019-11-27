@@ -265,22 +265,32 @@ export abstract class NG2FileTreeComponent {
     const selectedNode = this.GetSelectedBranch();
     const selectedNodeController = this.treeComponent.getControllerByNodeId(selectedNode.id);
 
-    selectedNodeController.addChild({
+    const newNodeModel = {
       value: 'Untitled Folder',
-      _status: TreeStatus.New,
       children: []
-    } as TreeModel);
+    } as TreeModel;
+
+    selectedNodeController.addChildAsync(newNodeModel).then((newNode) => {
+      const newNodeController = this.treeComponent.getControllerByNodeId(newNode.id);
+      newNodeController.rename('Untitled Folder');
+      newNodeController.startRenaming();
+    });
   }
 
   public onNewFileClicked(e: MouseEvent) {
     const selectedNode = this.GetSelectedBranch();
     const selectedNodeController = this.treeComponent.getControllerByNodeId(selectedNode.id);
 
-    selectedNodeController.addChild({
+    const newNodeModel = {
       value: 'Untitled File',
-      _status: TreeStatus.New,
       type: ResourceType.code
-    } as TutorBitsTreeModel);
+    } as TutorBitsTreeModel;
+
+    selectedNodeController.addChildAsync(newNodeModel).then((newNode) => {
+      const newNodeController = this.treeComponent.getControllerByNodeId(newNode.id);
+      newNodeController.rename('Untitled File');
+      newNodeController.startRenaming();
+    });
   }
 
   public onUploadFileClicked(e: MouseEvent) {
@@ -302,7 +312,6 @@ export abstract class NG2FileTreeComponent {
     const selectedNodeController = this.treeComponent.getControllerByNodeId(selectedNode.id);
     selectedNodeController.addChild({
       value: nodeName,
-      _status: TreeStatus.New,
       resourceId,
       type: ResourceType.asset
     } as TutorBitsTreeModel);
