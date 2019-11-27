@@ -52,6 +52,7 @@ export class MonacoPlayer extends TransactionPlayer {
                 this.codeComponent.currentFilePath = newFileName;
                 break;
             case ResourceType.asset:
+                this.codeComponent.currentFilePath = '';
                 break;
         }
     }

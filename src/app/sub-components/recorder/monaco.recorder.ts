@@ -151,6 +151,8 @@ export class MonacoRecorder extends TransactionRecorder {
                 this.codeComponent.UpdateCacheForCurrentFile();
                 break;
             case ResourceType.asset:
+                this.codeComponent.currentFilePath = '';
+                this.codeComponent.UpdateCacheForCurrentFile();
                 break;
         }
 
