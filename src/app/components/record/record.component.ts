@@ -100,7 +100,7 @@ export class RecordComponent implements OnInit, OnDestroy {
         this.recordingTreeComponent.treeComponent.treeModel = this.recordingTreeComponent.tree;
         this.recordingTreeComponent.treeComponent.ngOnChanges(null);
         this.recordingEditor.ClearCacheForFolder('/');
-        this.recordingEditor.Show(false);
+        this.recordingEditor.currentFilePath = '';
       }
 
 

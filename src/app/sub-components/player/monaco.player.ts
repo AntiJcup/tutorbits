@@ -44,7 +44,7 @@ export class MonacoPlayer extends TransactionPlayer {
     }
 
     protected OnNodeSelected(e: NodeSelectedEvent): void {
-        this.logServer.LogToConsole('MonacoPlayer', e);
+        this.logServer.LogToConsole('MonacoPlayer', `OnNodeSelected: ${JSON.stringify(e)}`);
         if (e.node.isBranch()) {
             return;
         }

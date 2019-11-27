@@ -18,12 +18,12 @@
     </app-recording-file-tree>
   </div>
   <div class="editorContainer" fxLayout fxLayoutGap="5px">
+    <app-resource-viewer class="resourceViewer">
+    </app-resource-viewer>
     <app-recording-editor class="recordingEditor" (codeInitialized)="onCodeInitialized($event)">
     </app-recording-editor>
     <app-preview *ngIf="previewPath || loadingPreview" class="preview" (closeClicked)="onCloseClicked($event)"
       [loading]="loadingPreview" [previewPath]="previewPath" [previewBaseUrl]="previewBaseUrl">
     </app-preview>
-    <app-resource-viewer class="resourceViewer">
-    </app-resource-viewer>
   </div>
 </div>
