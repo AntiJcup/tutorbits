@@ -62,6 +62,7 @@ export abstract class MonacoEditorComponent implements OnDestroy {
       return;
     }
 
+    this.logServer.LogToConsole('MonacoEditor', `currentFilePath update: ${path}`);
     this.filePath = path;
 
     if (!this.filePath || this.filePath === '') {
@@ -75,6 +76,7 @@ export abstract class MonacoEditorComponent implements OnDestroy {
     // Switch contents based on file name
     const cache = this.GetCacheForCurrentFile();
     if (!cache) {
+      this.logServer.LogToConsole('MonacoEditor', `failed to find cache for: ${path}`);
       this.ignoreNext = true;
       this.codeEditor.setValue('');
       return;
@@ -85,10 +87,12 @@ export abstract class MonacoEditorComponent implements OnDestroy {
   }
 
   public ClearCacheForFile(path: string) {
+    this.logServer.LogToConsole('MonacoEditor', `ClearCacheForFile: ${path}`);
     delete this.fileCache[path];
   }
 
   public ClearCacheForFolder(path: string) {
+    this.logServer.LogToConsole('MonacoEditor', `ClearCacheForFolder: ${path}`);
     for (const key of Object.keys(this.fileCache)) {
       if (key.startsWith(path)) {
         delete this.fileCache[key];
@@ -97,10 +101,12 @@ export abstract class MonacoEditorComponent implements OnDestroy {
   }
 
   public UpdateCacheForFile(path: string, data: string) {
+    this.logServer.LogToConsole('MonacoEditor', `UpdateCacheForCurrentFile: ${path}`);
     this.fileCache[path] = data;
   }
 
   public UpdateCacheForCurrentFile(): void {
+    this.logServer.LogToConsole('MonacoEditor', `UpdateCacheForCurrentFile: ${this.filePath}`);
     const textModel = this.codeEditor.getModel() as editor.ITextModel;
     const clone = textModel.getValue();
     this.fileCache[this.filePath] = clone;

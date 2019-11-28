@@ -91,6 +91,7 @@ export class MonacoPlayer extends TransactionPlayer {
                     const createOldPath = transaction.getFilePath();
                     if (!undo) {
                         this.fileTreeComponent.addNodeByPath(createNewPath, transaction.getCreateFile().getIsFolder());
+                        this.fileTreeComponent.selectNodeByPath(this.fileTreeComponent.treeComponent.tree, createNewPath);
                     } else {
                         this.fileTreeComponent.deleteNodeByPath(createNewPath);
                         this.fileTreeComponent.selectNodeByPath(this.fileTreeComponent.treeComponent.tree, createOldPath);
@@ -137,11 +138,11 @@ export class MonacoPlayer extends TransactionPlayer {
                     }
                     break;
                 case TraceTransaction.TraceTransactionType.MODIFYFILE:
+                    this.codeComponent.currentFilePath = transaction.getFilePath();
                     const editorModel = this.codeComponent.codeEditor.getModel() as editor.ITextModel;
                     const startPos = editorModel.getPositionAt(transaction.getModifyFile().getOffsetStart());
                     const endPos = editorModel.getPositionAt(transaction.getModifyFile().getOffsetEnd());
                     const data = transaction.getModifyFile().getData();
-                    this.codeComponent.currentFilePath = transaction.getFilePath();
 
                     let newEdit: editor.IIdentifiedSingleEditOperation = null;
                     if (!undo) {
@@ -157,7 +158,8 @@ export class MonacoPlayer extends TransactionPlayer {
                     } else {
                         const previousData = transaction.getModifyFile().getPreviousData();
                         const offset = data.length - previousData.length;
-                        const undoEndPos = editorModel.getPositionAt(transaction.getModifyFile().getOffsetEnd() + offset);
+                        const undoOffset = transaction.getModifyFile().getOffsetEnd() + offset;
+                        const undoEndPos = editorModel.getPositionAt(undoOffset);
                         newEdit = {
                             range: new monaco.Range(
                                 startPos.lineNumber,
@@ -167,6 +169,7 @@ export class MonacoPlayer extends TransactionPlayer {
                             text: previousData,
                             forceMoveMarkers: true
                         };
+                        this.logServer.LogToConsole('MonacoPlayer', `Undo Details: ${previousData} undoOffset: ${undoOffset} undoEndPos: ${undoEndPos} endPos: ${endPos} editorLength: ${editorModel.getFullModelRange()} endoffset: ${transaction.getModifyFile().getOffsetEnd()} startOffset: ${transaction.getModifyFile().getOffsetStart()}`);
                     }
                     this.logServer.LogToConsole('MonacoPlayer', `Edit: ${JSON.stringify(newEdit)} Undo: ${undo}`);
                     edits.push(newEdit);
