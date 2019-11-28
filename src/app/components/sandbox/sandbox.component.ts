@@ -77,6 +77,7 @@ export class SandboxComponent implements OnInit {
       this.resourceViewerComponent,
       this.logServer,
       this.errorServer,
+      false, /* resourceAuth */
       this.projectId,
       new LocalProjectLoader(),
       new LocalProjectWriter(),

@@ -80,11 +80,11 @@ export class TutorBitsTracerProjectService extends ITracerProjectService {
     return await getJsonResponse.json();
   }
 
-  public async UploadResource(id: string, resourceName: string, resourceData: Blob): Promise<string> {
+  public async UploadResource(id: string, resourceName: string, resourceData: Blob, authorize: boolean): Promise<string> {
     this.logging.LogToConsole('TutorBitsTracerProjectService', `Uploading resource ${resourceName}`);
     const response = await this.apiService.generateRequest()
-      .Post(`api/project/recording/addResource?projectId=${id}&resourceFileName=${resourceName}`,
-        resourceData);
+      .Post(`api/project/recording/${authorize ? 'addResource' : 'addResourceAnon'}?projectId=${id}&resourceFileName=${resourceName}`,
+        resourceData, authorize ? (await this.GetAuthHeaders()) : null);
 
     if (!response.ok) {
       throw new Error(`Failed uploading resource ${response.status}`);

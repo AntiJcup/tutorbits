@@ -115,6 +115,7 @@ export class RecordComponent implements OnInit, OnDestroy {
         this.resourceViewerComponent,
         this.logServer,
         this.errorServer,
+        true, /* resourceAuth */
         this.projectId,
         new OnlineProjectLoader(this.requestObj),
         this.tracerProjectService,

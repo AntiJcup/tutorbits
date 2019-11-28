@@ -40,6 +40,7 @@ export class MonacoRecorder extends TransactionRecorder {
         protected resourceViewerComponent: ResourceViewerComponent,
         protected logging: ILogService,
         protected errorServer: IErrorService,
+        protected resourceAuth: boolean,
         projectId: string,
         projectLoader: ProjectLoader,
         projectWriter: ProjectWriter,
@@ -356,7 +357,7 @@ export class MonacoRecorder extends TransactionRecorder {
     public onFileUploaded(e: FileUploadData) {
         this.logging.LogToConsole('MonacoRecorder', `onFileUploaded ${JSON.stringify(e.fileData)}`);
 
-        this.projectService.UploadResource(this.id, e.fileData.name, e.fileData.data).then((resourceId: string) => {
+        this.projectService.UploadResource(this.id, e.fileData.name, e.fileData.data, this.resourceAuth).then((resourceId: string) => {
             if (!resourceId) {
                 this.errorServer.HandleError(`UploadResourceError`, `resourceId is null`);
                 return;
