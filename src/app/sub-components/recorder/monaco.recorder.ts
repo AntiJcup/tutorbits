@@ -180,7 +180,14 @@ export class MonacoRecorder extends TransactionRecorder {
         if (nodeName !== sanitizedNodeName) {
             this.fileTreeComponent.treeComponent.getControllerByNodeId(e.node.id).rename(sanitizedNodeName);
         }
-        const newFileName = this.fileTreeComponent.getPathForNode(e.node);
+        let newFileName = this.fileTreeComponent.getPathForNode(e.node);
+
+        const modifiedNewFileName = this.fileTreeComponent.AddModifiersToFilePath(newFileName, e.node);
+        if (modifiedNewFileName !== nodeName) {
+            e.node.value = modifiedNewFileName;
+            this.fileTreeComponent.treeComponent.getControllerByNodeId(e.node.id).rename(modifiedNewFileName);
+            newFileName = this.fileTreeComponent.getPathForNode(e.node);
+        }
 
         switch (this.fileTreeComponent.GetNodeType(e.node)) {
             case ResourceType.code:
@@ -213,10 +220,17 @@ export class MonacoRecorder extends TransactionRecorder {
         if (sanitizedOldNodeName === sanitizedNodeName) {
             return;
         }
-        const newFileName = this.fileTreeComponent.getPathForNode(e.node);
+        let newFileName = this.fileTreeComponent.getPathForNode(e.node);
         const newFileNameSplit = newFileName.split('/');
         const oldParentPath = newFileNameSplit.slice(0, newFileNameSplit.length - 1).join('/');
         const oldFileName = oldParentPath + '/' + e.oldValue;
+
+        const modifiedNewFileName = this.fileTreeComponent.AddModifiersToFilePath(newFileName, e.node);
+        if (modifiedNewFileName !== nodeName) {
+            e.node.value = modifiedNewFileName;
+            this.fileTreeComponent.treeComponent.getControllerByNodeId(e.node.id).rename(modifiedNewFileName);
+            newFileName = this.fileTreeComponent.getPathForNode(e.node);
+        }
 
         if (e.node.isBranch()) {
             for (const child of e.node.children) {

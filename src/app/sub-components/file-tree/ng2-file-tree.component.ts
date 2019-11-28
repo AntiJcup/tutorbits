@@ -12,10 +12,8 @@ import {
   NodeRenamedEvent,
   TreeController
 } from 'ng2-tree';
-import { TreeStatus } from 'ng2-tree/src/tree.types';
 import { ILogService } from 'src/app/services/abstract/ILogService';
 import { FileUtils, FileData } from 'shared/web/lib/ts/FileUtils';
-import { TutorBitsTracerProjectService } from 'src/app/services/tutor-bits-tracer-project.service';
 import { TreeService } from 'ng2-tree/src/tree.service';
 
 export interface FileUploadData {
@@ -142,7 +140,13 @@ export abstract class NG2FileTreeComponent {
       }
       const controller = this.treeComponent.getControllerByNodeId(foundNode.id);
       if (controller == null) {
-        throw new Error('Node missing controller');
+        if (retry) {
+          setTimeout(() => {
+            this.selectNodeByPath(node, path, false);
+          }, 1);
+        } else {
+          throw new Error('Node missing controller');
+        }
       }
       controller.select();
     });
@@ -480,5 +484,26 @@ export abstract class NG2FileTreeComponent {
 
   public SantizeFileName(name: string): string {
     return name.replace(/[^a-z0-9._-]+/ig, '_');
+  }
+
+  public AddModifiersToFilePath(path: string, node: Tree): string {
+    let newPath = path;
+    let index = 1;
+    const splitPath = path.split('.');
+    const indexToModify = Math.max(0, splitPath.length - 2);
+    while (this.DoesPathExist(newPath, node)) {
+      newPath = path;
+      const newSplitPath = splitPath.concat([]);
+      newSplitPath[indexToModify] = `${splitPath[indexToModify]}_${index++}`;
+      newPath = newSplitPath.join('.');
+    }
+
+    const newPathSplit = newPath.split('/');
+    return newPathSplit[newPathSplit.length - 1];
+  }
+
+  public DoesPathExist(path: string, node?: Tree): boolean {
+    const foundNode = this.findNodeByPath(this.treeComponent.tree, path);
+    return !!foundNode && (!node || foundNode.id !== node.id);
   }
 }
