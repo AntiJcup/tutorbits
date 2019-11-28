@@ -120,6 +120,33 @@ export abstract class NG2FileTreeComponent {
     return null;
   }
 
+  public listNodesByPath(node: Tree, path: string): Tree[] {
+    const splitPath = path.split('/');
+    if (path === '/') {
+      splitPath.pop();
+    }
+    let subPath = splitPath[0];
+    if (subPath === '') {
+      subPath = '/';
+    }
+    let matches: Tree[] = [];
+    if (node.value === subPath) {
+      if (splitPath.length > 1) {
+        if (!node.children) {
+          return matches;
+        }
+        for (const childNode of node.children) {
+          const matchingChildNodes = this.listNodesByPath(childNode, splitPath.slice(1).join('/'));
+          matches = matches.concat(matchingChildNodes);
+        }
+      } else {
+        matches.push(node);
+      }
+    }
+
+    return matches;
+  }
+
   public selectNodeByPath(node: Tree, path: string, retry: boolean = true) {
     if (path === '/project') {
       return;
@@ -502,8 +529,17 @@ export abstract class NG2FileTreeComponent {
     return newPathSplit[newPathSplit.length - 1];
   }
 
-  public DoesPathExist(path: string, node?: Tree): boolean {
-    const foundNode = this.findNodeByPath(this.treeComponent.tree, path);
-    return !!foundNode && (!node || foundNode.id !== node.id);
+  public DoesPathExist(path: string, node?: Tree, parent?: Tree): boolean {
+    const matchingNodes = this.listNodesByPath(parent || this.treeComponent.tree, path);
+
+    for (const matchingNode of matchingNodes) {
+      if (node && matchingNode.id === node.id) {
+        continue;
+      }
+
+      return true;
+    }
+
+    return false;
   }
 }

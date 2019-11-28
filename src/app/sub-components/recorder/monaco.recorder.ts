@@ -316,9 +316,16 @@ export class MonacoRecorder extends TransactionRecorder {
 
     protected OnNodeMoved(e: NodeMovedEvent) {
         this.logging.LogToConsole('MonacoRecorder', `OnNodeMoved ${JSON.stringify(e.node.node)}`);
-        const newFileName = this.fileTreeComponent.getPathForNode(e.node);
+        const nodeName = e.node.value;
+        let newFileName = this.fileTreeComponent.getPathForNode(e.node);
         const oldParentPath = this.fileTreeComponent.getPathForNode(e.previousParent);
         const oldFileName = oldParentPath + '/' + e.node.value;
+
+        const modifiedNewFileName = this.fileTreeComponent.AddModifiersToFilePath(newFileName, e.node);
+        if (modifiedNewFileName !== nodeName) {
+            e.node.value = modifiedNewFileName;
+            newFileName = this.fileTreeComponent.getPathForNode(e.node);
+        }
 
         if (e.node.isBranch()) {
             for (const child of e.node.children) {
