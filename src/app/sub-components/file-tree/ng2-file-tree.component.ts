@@ -264,13 +264,13 @@ export abstract class NG2FileTreeComponent {
     const selectedNodeController = this.treeComponent.getControllerByNodeId(selectedNode.id);
 
     const newNodeModel = {
-      value: 'Untitled Folder',
+      value: 'Untitled_Folder',
       children: []
     } as TreeModel;
 
     selectedNodeController.addChildAsync(newNodeModel).then((newNode) => {
       const newNodeController = this.treeComponent.getControllerByNodeId(newNode.id);
-      newNodeController.rename('Untitled Folder');
+      newNodeController.rename('Untitled_Folder');
       newNodeController.startRenaming();
     });
   }
@@ -280,13 +280,13 @@ export abstract class NG2FileTreeComponent {
     const selectedNodeController = this.treeComponent.getControllerByNodeId(selectedNode.id);
 
     const newNodeModel = {
-      value: 'Untitled File',
+      value: 'Untitled_File',
       type: ResourceType.code
     } as TutorBitsTreeModel;
 
     selectedNodeController.addChildAsync(newNodeModel).then((newNode) => {
       const newNodeController = this.treeComponent.getControllerByNodeId(newNode.id);
-      newNodeController.rename('Untitled File');
+      newNodeController.rename('Untitled_File');
       newNodeController.startRenaming();
     });
   }
@@ -476,5 +476,9 @@ export abstract class NG2FileTreeComponent {
 
   public GetNodeType(node: Tree): ResourceType {
     return (node.node as TutorBitsTreeModel).type || ResourceType.code;
+  }
+
+  public SantizeFileName(name: string): string {
+    return name.replace(/[^a-z0-9._-]+/ig, '_');
   }
 }
