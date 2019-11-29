@@ -41,7 +41,8 @@ export class EditTutorialCardComponent implements OnInit {
   ngOnInit() {
   }
 
-  public onDeleteClicked(e: DeleteTutorialEvent) {
+  public onDeleteClicked(e: MouseEvent) {
+    e.stopImmediatePropagation();
     this.DeleteClick.next({
       tutorial: this.tutorial
     } as DeleteTutorialEvent);

@@ -37,7 +37,12 @@ export class MyTutorialsComponent implements OnInit {
   }
 
   onDeleteClicked(e: DeleteTutorialEvent) {
-    this.tutorialsService.Delete(e.tutorial.id).then().catch((err) => {
+    if (!confirm('Are you sure you want to delete this tutorial?')) {
+      return;
+    }
+    this.tutorialsService.Delete(e.tutorial.id).then(() => {
+
+    }).catch((err) => {
       this.errorServer.HandleError('MyTutorialsComponent', `Failed deleting tutorial: ${err}`);
     });
 
