@@ -53,4 +53,26 @@ export abstract class TutorBitsBaseModelApiService<CreateModelT, ViewModelT> imp
 
     return (await response.json()) as ViewModelT[];
   }
+
+  public async GetAllByOwner(): Promise<ViewModelT[]> {
+    const response = await this.apiService.generateRequest()
+      .Get(`${this.basePath}/GetAllByOwner?state=${Status[status]}`,
+        await this.GetAuthHeaders());
+
+    if (!response.ok) {
+      return null;
+    }
+
+    return (await response.json()) as ViewModelT[];
+  }
+
+  public async Delete(id: string): Promise<boolean> {
+    const response =
+      await this.apiService.generateRequest().Post(
+        `${this.basePath}/DeleteById?id=${id}`,
+        null,
+        await this.GetAuthHeaders());
+
+    return response.ok;
+  }
 }

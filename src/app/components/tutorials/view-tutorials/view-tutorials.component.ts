@@ -24,7 +24,7 @@ export class ViewTutorialsComponent implements OnInit {
       this.tutorials = tutorials;
       this.logServer.LogToConsole('ViewTutorials', tutorials.length);
     }).catch((e) => {
-      this.errorServer.HandleError('GetError', e);
+      this.errorServer.HandleError('ViewTutorials', e);
     }).finally(() => {
       this.loading = false;
     });

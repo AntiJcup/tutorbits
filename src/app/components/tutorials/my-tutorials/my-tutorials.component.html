@@ -1,0 +1,6 @@
+<div class="tutorial-card-container" fxLayout fxLayoutGap="5px">
+    <app-edit-tutorial-card *ngFor="let tutorial of tutorials" [tutorial]="tutorial"
+        (click)="onTutorialCardClick($event, tutorial)" (DeleteClick)="onDeleteClicked($event)"></app-edit-tutorial-card>
+    <mat-spinner [diameter]="64" class="loading-spinner" *ngIf="loading">
+    </mat-spinner>
+</div>

@@ -62,6 +62,8 @@ import { TermsComponent } from './components/terms/terms.component';
 import { ResourceViewerComponent } from './sub-components/resource-viewer/resource-viewer.component';
 import { IPreviewService } from './services/abstract/IPreviewService';
 import { TutorBitsPreviewService } from './services/tutor-bits-preview.service';
+import { MyTutorialsComponent } from './components/tutorials/my-tutorials/my-tutorials.component';
+import { EditTutorialCardComponent } from './sub-components/edit-tutorial-card/edit-tutorial-card.component';
 
 const appRoutes: Routes = [
   {
@@ -100,6 +102,12 @@ const appRoutes: Routes = [
     path: 'tutorials',
     component: ViewTutorialsComponent,
     data: { title: 'Tutorials' }
+  },
+  {
+    path: 'mytutorials',
+    component: MyTutorialsComponent,
+    data: { title: 'My Tutorials' },
+    canActivate: [TutorBitsAuthGuardService]
   },
   {
     path: 'login',
@@ -149,7 +157,9 @@ const appRoutes: Routes = [
     FileValueAccessorDirective,
     PrivacyComponent,
     TermsComponent,
-    ResourceViewerComponent
+    ResourceViewerComponent,
+    MyTutorialsComponent,
+    EditTutorialCardComponent
   ],
   imports: [
     BrowserModule,
