@@ -60,6 +60,8 @@ import { TutorBitsAuthGuardService } from './services/tutor-bits-auth-guard.serv
 import { PrivacyComponent } from './components/privacy/privacy.component';
 import { TermsComponent } from './components/terms/terms.component';
 import { ResourceViewerComponent } from './sub-components/resource-viewer/resource-viewer.component';
+import { IPreviewService } from './services/abstract/IPreviewService';
+import { TutorBitsPreviewService } from './services/tutor-bits-preview.service';
 
 const appRoutes: Routes = [
   {
@@ -181,7 +183,8 @@ const appRoutes: Routes = [
     { provide: TutorBitsTutorialService, useClass: TutorBitsConcreteTutorialService },
     { provide: ITracerProjectService, useClass: TutorBitsTracerProjectService },
     { provide: ITracerTransactionService, useClass: TutorBitsTracerTransactionService },
-    { provide: IVideoRecordingService, useClass: TutorBitsVideoRecordingService }
+    { provide: IVideoRecordingService, useClass: TutorBitsVideoRecordingService },
+    { provide: IPreviewService, useClass: TutorBitsPreviewService }
   ],
   bootstrap: [AppComponent]
 })

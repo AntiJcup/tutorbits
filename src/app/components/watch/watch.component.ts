@@ -16,6 +16,7 @@ import { TutorBitsTutorialService } from 'src/app/services/tutor-bits-tutorial.s
 import { Guid } from 'guid-typescript';
 import { ITracerProjectService } from 'src/app/services/abstract/ITracerProjectService';
 import { ResourceViewerComponent } from 'src/app/sub-components/resource-viewer/resource-viewer.component';
+import { IPreviewService } from 'src/app/services/abstract/IPreviewService';
 
 @Component({
   templateUrl: './watch.component.html',
@@ -62,6 +63,7 @@ export class WatchComponent implements OnInit, OnDestroy {
     private zone: NgZone,
     private tutorialService: TutorBitsTutorialService,
     private projectService: ITracerProjectService,
+    private previewService: IPreviewService,
     private errorServer: IErrorService,
     private logServer: ILogService) {
     this.projectId = this.route.snapshot.paramMap.get('projectId');
@@ -138,9 +140,8 @@ export class WatchComponent implements OnInit, OnDestroy {
 
   public onPreviewClicked(e: string) {
     this.loadingPreview = true;
-    const previewGenerator = new OnlinePreviewGenerator(this.requestObj);
     const previewPos = Math.min(Math.round(this.codePlayer.position), this.codePlayer.duration);
-    previewGenerator.LoadPreview(this.projectId, previewPos).then((url) => {
+    this.previewService.LoadPreview(this.projectId, previewPos).then((url) => {
       if (!url) {
         this.errorServer.HandleError(`PreviewError`, 'failed to be retrieved');
         return;

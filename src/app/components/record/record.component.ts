@@ -17,6 +17,7 @@ import { ITracerTransactionService } from 'src/app/services/abstract/ITracerTran
 import { IVideoRecordingService } from 'src/app/services/abstract/IVideoRecordingService';
 import { FileUploadData } from 'src/app/sub-components/file-tree/ng2-file-tree.component';
 import { ResourceViewerComponent } from 'src/app/sub-components/resource-viewer/resource-viewer.component';
+import { IPreviewService } from 'src/app/services/abstract/IPreviewService';
 
 @Component({
   templateUrl: './record.component.html',
@@ -57,6 +58,7 @@ export class RecordComponent implements OnInit, OnDestroy {
     private logServer: ILogService,
     private tutorialService: TutorBitsTutorialService,
     private tracerProjectService: ITracerProjectService,
+    private previewService: IPreviewService,
     private tracerTransactionService: ITracerTransactionService,
     private videoRecordingService: IVideoRecordingService) {
     this.projectId = this.route.snapshot.paramMap.get('projectId');
@@ -163,11 +165,10 @@ export class RecordComponent implements OnInit, OnDestroy {
   }
 
   public onPreviewClicked(e: string) {
-    const previewGenerator = new OnlinePreviewGenerator(this.requestObj);
     const previewPos = Math.round(this.codeRecorder.position);
     this.loadingPreview = true;
     this.previewPath = null;
-    previewGenerator.GeneratePreview(this.projectId, previewPos, this.codeRecorder.logs).then((url) => {
+    this.previewService.GeneratePreview(this.projectId, previewPos, this.codeRecorder.logs).then((url) => {
       if (!url) {
         this.errorServer.HandleError('PreviewError', ' preview url failed to be retrieved');
         return;

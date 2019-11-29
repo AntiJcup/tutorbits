@@ -13,6 +13,7 @@ import { ILogService } from 'src/app/services/abstract/ILogService';
 import { ITracerProjectService } from 'src/app/services/abstract/ITracerProjectService';
 import { FileUploadData, PropogateTreeOptions } from 'src/app/sub-components/file-tree/ng2-file-tree.component';
 import { ResourceViewerComponent } from 'src/app/sub-components/resource-viewer/resource-viewer.component';
+import { IPreviewService } from 'src/app/services/abstract/IPreviewService';
 
 @Component({
   templateUrl: './sandbox.component.html',
@@ -46,6 +47,7 @@ export class SandboxComponent implements OnInit {
     private route: ActivatedRoute,
     private logServer: ILogService,
     private tracerProjectService: ITracerProjectService,
+    private previewService: IPreviewService,
     private errorServer: IErrorService) {
     this.loadProjectId = this.route.snapshot.paramMap.get('projectId');
   }
@@ -102,9 +104,8 @@ export class SandboxComponent implements OnInit {
 
   public onPreviewClicked(e: string) {
     this.loadingPreview = true;
-    const previewGenerator = new OnlinePreviewGenerator(this.requestObj);
     const previewPos = Math.round(this.codeRecorder.position);
-    previewGenerator.GeneratePreview(this.projectId, previewPos, this.codeRecorder.logs, this.loadProjectId).then((url) => {
+    this.previewService.GeneratePreview(this.projectId, previewPos, this.codeRecorder.logs, this.loadProjectId).then((url) => {
       if (!url) {
         this.errorServer.HandleError(`PreviewError`, 'failed to be retrieved');
         return;
