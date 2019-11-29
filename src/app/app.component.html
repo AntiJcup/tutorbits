@@ -50,15 +50,19 @@
               <button mat-menu-item>Css</button>
             </mat-menu>
           </li>
-          <li>
-            <a *ngIf="!loggedIn" [href]="loginUrl" mat-menu-item>
-              <mat-icon class="icon">input</mat-icon>
-              <span class="label">Login</span>
-            </a>
-            <a *ngIf="loggedIn" [href]="logoutUrl" mat-menu-item>
-              <mat-icon class="icon">input</mat-icon>
-              <span class="label">Logout</span>
-            </a>
+          <a *ngIf="!loggedIn" [href]="loginUrl" mat-menu-item>
+            <mat-icon class="icon">input</mat-icon>
+            <span class="label">Login</span>
+          </a>
+          <li *ngIf="loggedIn">
+            <button mat-menu-item [matMenuTriggerFor]="accountMenu">
+              <mat-icon class="icon">account_box</mat-icon>
+              <span class="label">Account</span>
+            </button>
+            <mat-menu #accountMenu="matMenu">
+                <a mat-menu-item [routerLink]="[ '/mytutorials' ]">My Tutorials</a>
+              <a mat-menu-item [href]="logoutUrl">Logout</a>
+            </mat-menu>
           </li>
           <li>
             <button mat-icon-button [matMenuTriggerFor]="appExtraMenu">
@@ -69,7 +73,8 @@
                 Policy</a>
               <a [routerLink]="[ '/terms' ]" target="blank_" mat-menu-item>Terms
                 and Conditions</a>
-              <a href="https://www.termsfeed.com/cookies-policy/0863b492327e119e4d30afcc752af8ed" target="blank_" mat-menu-item>Cookie
+              <a href="https://www.termsfeed.com/cookies-policy/0863b492327e119e4d30afcc752af8ed" target="blank_"
+                mat-menu-item>Cookie
                 Policy</a>
             </mat-menu>
           </li>
