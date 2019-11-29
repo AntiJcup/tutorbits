@@ -169,7 +169,7 @@ export class MonacoPlayer extends TransactionPlayer {
                             text: previousData,
                             forceMoveMarkers: true
                         };
-                        this.logServer.LogToConsole('MonacoPlayer', `Undo Details: ${previousData} undoOffset: ${undoOffset} undoEndPos: ${undoEndPos} endPos: ${endPos} editorLength: ${editorModel.getFullModelRange()} endoffset: ${transaction.getModifyFile().getOffsetEnd()} startOffset: ${transaction.getModifyFile().getOffsetStart()}`);
+                        this.logServer.LogToConsole('MonacoPlayer', `Undo Details: ${previousData} offset: ${offset} undoOffset: ${undoOffset} undoEndPos: ${undoEndPos} endPos: ${endPos} editorLength: ${editorModel.getFullModelRange()} endoffset: ${transaction.getModifyFile().getOffsetEnd()} startOffset: ${transaction.getModifyFile().getOffsetStart()}`);
                     }
                     this.logServer.LogToConsole('MonacoPlayer', `Edit: ${JSON.stringify(newEdit)} Undo: ${undo}`);
                     edits.push(newEdit);
