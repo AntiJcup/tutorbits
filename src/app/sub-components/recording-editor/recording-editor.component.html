@@ -1,5 +1,5 @@
-<div #codeeditorcontainer class="code-editor-container">
-    <div class="code-editor-title"><span #codeeditortitle>helloworld.js</span></div>
+<div #codeeditorcontainer class="code-editor-container" *ngIf="visible">
+    <div class="code-editor-title"><span #codeeditortitle>{{currentFilePath}}</span></div>
     <ngx-monaco-editor [options]="editorOptions" [(ngModel)]="startingCode" class="code-editor"
         (onInit)="editorOnInit($event)"></ngx-monaco-editor>
 </div>

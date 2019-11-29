@@ -16,6 +16,7 @@ export abstract class MonacoEditorComponent implements OnDestroy {
   protected fileCache: { [fileName: string]: string } = {};
   private filePath: string;
   private ignoreNext = false;
+  public visible = false;
 
   public get ignoreNextEvent(): boolean {
     const res = this.ignoreNext;
@@ -122,7 +123,9 @@ export abstract class MonacoEditorComponent implements OnDestroy {
     return this.fileCache[path];
   }
 
-  public abstract Show(show: boolean);
+  public Show(show: boolean) {
+    this.visible = show;
+  }
 
   public AllowEdits(edit: boolean): void {
     this.codeEditor.updateOptions(edit ? MonacoEditorComponent.editOptions : MonacoEditorComponent.readOnlyOptions);

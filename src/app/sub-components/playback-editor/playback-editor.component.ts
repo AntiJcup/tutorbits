@@ -9,9 +9,6 @@ import { ILogService } from 'src/app/services/abstract/ILogService';
 })
 
 export class PlaybackEditorComponent extends MonacoEditorComponent implements OnInit {
-  @ViewChild('codeeditorcontainer', { static: true }) componentContainer: ElementRef;
-  @ViewChild('codeeditortitle', { static: true }) editorTitle: ElementRef;
-
   constructor(logServer: ILogService) {
     super(logServer);
   }
@@ -21,14 +18,4 @@ export class PlaybackEditorComponent extends MonacoEditorComponent implements On
       this.Show(false);
     }
   }
-
-  public Show(show: boolean) {
-    if (show) {
-      this.componentContainer.nativeElement.style.visibility = 'visible';
-      this.editorTitle.nativeElement.innerText = this.currentFilePath;
-    } else {
-      this.componentContainer.nativeElement.style.visibility = 'hidden';
-    }
-  }
-
 }
