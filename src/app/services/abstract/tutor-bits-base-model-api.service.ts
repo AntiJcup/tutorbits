@@ -1,4 +1,3 @@
-import { TutorBitsApiService } from '../tutor-bits-api.service';
 import { IModelApiService, ResponseWrapper, Status } from './IModelApiService';
 import { IAPIService } from './IAPIService';
 import { IAuthService } from './IAuthService';

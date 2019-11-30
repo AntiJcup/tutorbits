@@ -64,6 +64,9 @@ import { IPreviewService } from './services/abstract/IPreviewService';
 import { TutorBitsPreviewService } from './services/tutor-bits-preview.service';
 import { MyTutorialsComponent } from './components/tutorials/my-tutorials/my-tutorials.component';
 import { EditTutorialCardComponent } from './sub-components/edit-tutorial-card/edit-tutorial-card.component';
+import { MyAccountComponent } from './components/my-account/my-account.component';
+import { IUserApiService } from './services/abstract/IUserApiService';
+import { TutorBitsUserApiService } from './services/tutor-bits-user-api.service';
 
 const appRoutes: Routes = [
   {
@@ -107,6 +110,12 @@ const appRoutes: Routes = [
     path: 'mytutorials',
     component: MyTutorialsComponent,
     data: { title: 'My Tutorials' },
+    canActivate: [TutorBitsAuthGuardService]
+  },
+  {
+    path: 'myaccount',
+    component: MyAccountComponent,
+    data: { title: 'My Account' },
     canActivate: [TutorBitsAuthGuardService]
   },
   {
@@ -159,7 +168,8 @@ const appRoutes: Routes = [
     TermsComponent,
     ResourceViewerComponent,
     MyTutorialsComponent,
-    EditTutorialCardComponent
+    EditTutorialCardComponent,
+    MyAccountComponent
   ],
   imports: [
     BrowserModule,
@@ -194,7 +204,8 @@ const appRoutes: Routes = [
     { provide: ITracerProjectService, useClass: TutorBitsTracerProjectService },
     { provide: ITracerTransactionService, useClass: TutorBitsTracerTransactionService },
     { provide: IVideoRecordingService, useClass: TutorBitsVideoRecordingService },
-    { provide: IPreviewService, useClass: TutorBitsPreviewService }
+    { provide: IPreviewService, useClass: TutorBitsPreviewService },
+    { provide: IUserApiService, useClass: TutorBitsUserApiService }
   ],
   bootstrap: [AppComponent]
 })

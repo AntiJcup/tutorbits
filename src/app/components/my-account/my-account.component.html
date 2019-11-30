@@ -1,0 +1,19 @@
+<div class="controls">
+    <mat-spinner color="accent" [diameter]="44" class="loading-spinner" *ngIf="loading">
+    </mat-spinner>
+</div>
+<div>
+    <mat-card class="accountCard" *ngIf="user">
+        <mat-card-title>Account</mat-card-title>
+        <mat-card-content>
+            <dl>
+                <dt>UserId:</dt>
+                <dd>{{user.name}}</dd>
+                <dt>UserEmail:</dt>
+                <dd>{{user.email}}</dd>
+                <dt>UserName:</dt>
+                <dd>{{user.nickName}}</dd>
+            </dl>
+        </mat-card-content>
+    </mat-card>
+</div>
