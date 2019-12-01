@@ -1,5 +1,5 @@
 <mat-card class="cardForm">
-    <mat-card-title>Update UserName</mat-card-title>
+    <mat-card-title>Update User Name</mat-card-title>
     <form [formGroup]="form" (keydown.enter)="$event.preventDefault()" (ngSubmit)="submit(model)">
         <formly-form [form]="form" [fields]="fields" [model]="model"></formly-form>
         <app-submit-button [disabled]="!form.valid" [loading]="loading"></app-submit-button>

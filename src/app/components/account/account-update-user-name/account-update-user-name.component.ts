@@ -24,7 +24,17 @@ export class AccountUpdateUserNameComponent implements OnInit {
       placeholder: 'Enter New UserName',
       required: true,
       minLength: 4,
-      maxLength: 256
+      maxLength: 256,
+    },
+    validators: {
+      name($viewValue, $modelValue, scope) {
+        console.log('test');
+        const value = $viewValue.value;
+        if (value) {
+          console.log(`value: ${value} - test: ${(/^[a-z0-9._-]+$/i).test(value)}`);
+          return (/^[a-z0-9._-]+$/i).test(value);
+        }
+      }
     }
   }
   ];
@@ -46,7 +56,7 @@ export class AccountUpdateUserNameComponent implements OnInit {
     this.accountService.UpdateNickName(model.userName).then((a) => {
       this.router.navigate(['myaccount']);
     }).catch((err) => {
-      this.errorServer.HandleError('AccountUpdateUserName', `${JSON.stringify(err)}`);
+      this.errorServer.HandleError('AccountUpdateUserName', `${err}`);
     }).finally(() => {
       this.loading = false;
     });
