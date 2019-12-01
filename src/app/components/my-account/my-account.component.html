@@ -3,16 +3,16 @@
     </mat-spinner>
 </div>
 <div>
-    <mat-card class="accountCard" *ngIf="user">
+    <mat-card class="accountCard" *ngIf="account">
         <mat-card-title>Account</mat-card-title>
         <mat-card-content>
             <dl>
                 <dt>UserId:</dt>
-                <dd>{{user.name}}</dd>
+                <dd>{{account.userId}}</dd>
                 <dt>UserEmail:</dt>
-                <dd>{{user.email}}</dd>
+                <dd>{{account.email}}</dd>
                 <dt>UserName:</dt>
-                <dd>{{user.nickName}}</dd>
+                <dd>{{account.nickName}}</dd>
             </dl>
         </mat-card-content>
     </mat-card>

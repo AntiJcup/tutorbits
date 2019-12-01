@@ -1,5 +1,4 @@
 export interface ViewUser {
-    name: string;
+    Id: string;
     email: string;
-    nickName: string;
 }

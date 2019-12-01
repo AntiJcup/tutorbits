@@ -67,6 +67,7 @@ import { EditTutorialCardComponent } from './sub-components/edit-tutorial-card/e
 import { MyAccountComponent } from './components/my-account/my-account.component';
 import { IUserApiService } from './services/abstract/IUserApiService';
 import { TutorBitsUserApiService } from './services/tutor-bits-user-api.service';
+import { TutorBitsConcreteAccountService, TutorBitsAccountService } from './services/tutor-bits-account.service';
 
 const appRoutes: Routes = [
   {
@@ -201,6 +202,7 @@ const appRoutes: Routes = [
     { provide: ILogService, useClass: TutorBitsLoggingService },
     { provide: IErrorService, useClass: TutorBitsErrorService },
     { provide: TutorBitsTutorialService, useClass: TutorBitsConcreteTutorialService },
+    { provide: TutorBitsAccountService, useClass: TutorBitsConcreteAccountService },
     { provide: ITracerProjectService, useClass: TutorBitsTracerProjectService },
     { provide: ITracerTransactionService, useClass: TutorBitsTracerTransactionService },
     { provide: IVideoRecordingService, useClass: TutorBitsVideoRecordingService },
