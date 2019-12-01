@@ -22,7 +22,7 @@ export class LoginComponent implements OnInit {
 
   ngOnInit() {
     const code: string = this.route.snapshot.queryParamMap.get('code');
-    this.authService.Login(code).then((a) => {
+    this.authService.AuthenticateToken(code).then((a) => {
       this.accountService.Login().then((account) => {
         this.logger.LogToConsole('LoginComponent', `Logged in ${JSON.stringify(account)}`);
       }).catch((err) => {

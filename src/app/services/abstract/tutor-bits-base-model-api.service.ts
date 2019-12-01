@@ -55,7 +55,7 @@ export abstract class TutorBitsBaseModelApiService<CreateModelT, ViewModelT> imp
 
   public async GetAllByOwner(): Promise<ViewModelT[]> {
     const response = await this.apiService.generateRequest()
-      .Get(`${this.basePath}/GetAllByOwner?state=${Status[status]}`,
+      .Get(`${this.basePath}/GetAllByOwner`,
         await this.GetAuthHeaders());
 
     if (!response.ok) {

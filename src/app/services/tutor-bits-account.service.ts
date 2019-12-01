@@ -18,6 +18,7 @@ export abstract class TutorBitsAccountService extends TutorBitsBaseModelApiServi
 
   public abstract async Login(): Promise<ViewAccount>;
   public abstract async GetAccountInformation(): Promise<ViewAccount>;
+  public abstract async UpdateNickName(nickName: string): Promise<void>;
 }
 
 @Injectable()
@@ -46,5 +47,9 @@ export class TutorBitsConcreteAccountService extends TutorBitsAccountService {
     }
 
     return accounts[0];
+  }
+
+  public async UpdateNickName(nickName: string): Promise<void> {
+
   }
 }

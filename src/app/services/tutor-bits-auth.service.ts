@@ -78,7 +78,7 @@ export class TutorBitsAuthService extends IAuthService {
     }
   }
 
-  public async Login(code: string): Promise<void> {
+  public async AuthenticateToken(code: string): Promise<void> {
     try {
       this.logServer.LogToConsole('AuthService', `Logging in with ${code}`);
       const requestBody: JWTRequest = {
