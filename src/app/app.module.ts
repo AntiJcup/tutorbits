@@ -64,10 +64,11 @@ import { IPreviewService } from './services/abstract/IPreviewService';
 import { TutorBitsPreviewService } from './services/tutor-bits-preview.service';
 import { MyTutorialsComponent } from './components/tutorials/my-tutorials/my-tutorials.component';
 import { EditTutorialCardComponent } from './sub-components/edit-tutorial-card/edit-tutorial-card.component';
-import { MyAccountComponent } from './components/my-account/my-account.component';
+import { MyAccountComponent } from './components/account/my-account/my-account.component';
 import { IUserApiService } from './services/abstract/IUserApiService';
 import { TutorBitsUserApiService } from './services/tutor-bits-user-api.service';
 import { TutorBitsConcreteAccountService, TutorBitsAccountService } from './services/tutor-bits-account.service';
+import { AccountUpdateUserNameComponent } from './components/account/account-update-user-name/account-update-user-name.component';
 
 const appRoutes: Routes = [
   {
@@ -117,6 +118,12 @@ const appRoutes: Routes = [
     path: 'myaccount',
     component: MyAccountComponent,
     data: { title: 'My Account' },
+    canActivate: [TutorBitsAuthGuardService]
+  },
+  {
+    path: 'updateaccountusername/:currentUserName',
+    component: AccountUpdateUserNameComponent,
+    data: { title: 'Update Account User Name' },
     canActivate: [TutorBitsAuthGuardService]
   },
   {
@@ -170,7 +177,8 @@ const appRoutes: Routes = [
     ResourceViewerComponent,
     MyTutorialsComponent,
     EditTutorialCardComponent,
-    MyAccountComponent
+    MyAccountComponent,
+    AccountUpdateUserNameComponent
   ],
   imports: [
     BrowserModule,

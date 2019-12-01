@@ -50,6 +50,13 @@ export class TutorBitsConcreteAccountService extends TutorBitsAccountService {
   }
 
   public async UpdateNickName(nickName: string): Promise<void> {
+    const response = await this.apiService.generateRequest()
+      .Post(`api/Account/UpdateNickName?nickName=${nickName}`, null, await this.GetAuthHeaders());
+
+    if (!response.ok) {
+      throw new Error(`Failed updating userName: - ${await response.text()}`);
+    }
+
 
   }
 }
