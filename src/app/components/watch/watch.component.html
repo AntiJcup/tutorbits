@@ -1,11 +1,11 @@
 <div class="controls" *ngIf="publishMode">
   <div class="controlsContainer">
-    <app-saving-button (click)="onBackClicked($event)" text="Record Again" icon="keyboard_backspace" [saving]="false"
+    <app-saving-button (click)="onBackClicked($event)" text="Record Again" icon="keyboard_backspace" [saving]="false" matTooltip="Record again"
       savingText="Loading">
     </app-saving-button>
   </div>
   <div class="controlsContainer">
-    <app-saving-button (click)="onPublishClicked($event)" text="Publish" icon="publish" [saving]="publishing"
+    <app-saving-button (click)="onPublishClicked($event)" text="Publish" icon="publish" [saving]="publishing" matTooltip="Publish this tutorial so others can watch it"
       savingText="publishing">
     </app-saving-button>
   </div>
@@ -13,12 +13,12 @@
 <div class="controls" *ngIf="!publishMode">
   <div class="controlsContainer">
     <app-saving-button (click)="onDownloadClicked($event)" text="Download Project" icon="cloud_download"
-      [saving]="downloading" savingText="Downloading...">
+      [saving]="downloading" savingText="Downloading..." matTooltip="Save project as zip">
     </app-saving-button>
   </div>
   <div class="controlsContainer">
     <app-saving-button (click)="onCopyToSandboxClicked($event)" text="Edit in Sandbox" icon="move_to_inbox"
-      [saving]="false" savingText="">
+      [saving]="false" savingText="" matTooltip="Copies finished project to sandbox for customization">
     </app-saving-button>
   </div>
 </div>

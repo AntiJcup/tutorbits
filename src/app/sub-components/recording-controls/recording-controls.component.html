@@ -2,16 +2,16 @@
     <div class="relative">
         <app-saving-button *ngIf="(!recording && !saving) || loadingRecording" [disabled]="!canRecord || finishSaving"
             (click)="onRecordClicked($event)" text="Record" icon="videocam" [saving]="loadingRecording"
-            savingText="Loading">
+            matTooltip="Start recording" savingText="Loading">
         </app-saving-button>
         <app-saving-button *ngIf="(recording || saving) && !loadingRecording" id="recordingBtn" [saving]="saving"
-            icon="stop" text="Recording" (click)="onStopRecordingClicked($event)">
+            icon="stop" text="Recording" (click)="onStopRecordingClicked($event)" matTooltip="Stop recording">
         </app-saving-button>
 
     </div>
     <div class="relative">
         <app-saving-button *ngIf="canFinish && !recording" (click)="onFinishClicked()" text="Preview" icon="pageview"
-            [saving]="finishSaving">
+            [saving]="finishSaving" matTooltip="Playback this recording">
         </app-saving-button>
     </div>
     <div class="relative">
