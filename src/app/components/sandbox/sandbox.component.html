@@ -1,7 +1,7 @@
 <div class="controls">
   <div class="controlsContainer">
     <app-saving-button *ngIf="!loading" (click)="onDownloadClicked($event)" text="Download Project"
-      icon="cloud_download" [saving]="downloading" savingText="Downloading...">
+      icon="cloud_download" [saving]="downloading" savingText="Downloading..." matTooltip="Save project as zip">
     </app-saving-button>
   </div>
   <!-- <div class="controlsContainer">
