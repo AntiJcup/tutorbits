@@ -1,3 +1,2 @@
-<div>
-  HOME
-</div>
+<app-blog-card *ngFor="let article of articles" [article]="article" (click)="onBlogClicked($event, article)">
+</app-blog-card>

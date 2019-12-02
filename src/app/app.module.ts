@@ -69,6 +69,7 @@ import { IUserApiService } from './services/abstract/IUserApiService';
 import { TutorBitsUserApiService } from './services/tutor-bits-user-api.service';
 import { TutorBitsConcreteAccountService, TutorBitsAccountService } from './services/tutor-bits-account.service';
 import { AccountUpdateUserNameComponent } from './components/account/account-update-user-name/account-update-user-name.component';
+import { BlogCardComponent } from './sub-components/blog-card/blog-card.component';
 
 const appRoutes: Routes = [
   {
@@ -178,7 +179,8 @@ const appRoutes: Routes = [
     MyTutorialsComponent,
     EditTutorialCardComponent,
     MyAccountComponent,
-    AccountUpdateUserNameComponent
+    AccountUpdateUserNameComponent,
+    BlogCardComponent
   ],
   imports: [
     BrowserModule,

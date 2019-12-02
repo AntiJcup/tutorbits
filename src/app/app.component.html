@@ -34,7 +34,6 @@
             </button>
             <mat-menu #appCreateMenu="matMenu">
               <a [routerLink]="[ '/create/tutorial' ]" mat-menu-item>Tutorial</a>
-              <a [routerLink]="[ '/create/example' ]" mat-menu-item>Example</a>
               <a [routerLink]="[ '/sandbox' ]" mat-menu-item>Sandbox</a>
             </mat-menu>
           </li>
@@ -45,9 +44,6 @@
             </button>
             <mat-menu #appTutorialMenu="matMenu">
               <a [routerLink]="[ '/tutorials' ]" mat-menu-item>All</a>
-              <button mat-menu-item>Html</button>
-              <button mat-menu-item>Js</button>
-              <button mat-menu-item>Css</button>
             </mat-menu>
           </li>
           <a *ngIf="!loggedIn" [href]="loginUrl" mat-menu-item>
