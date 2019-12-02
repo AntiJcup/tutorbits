@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, NgZone, OnDestroy } from '@angular/core';
+import { Component, OnInit, ViewChild, NgZone, OnDestroy, HostListener } from '@angular/core';
 import { OnlineProjectLoader } from 'shared/Tracer/lib/ts/OnlineTransaction';
 import { ActivatedRoute, Router } from '@angular/router';
 import { environment } from 'src/environments/environment';
@@ -18,12 +18,14 @@ import { IVideoRecordingService } from 'src/app/services/abstract/IVideoRecordin
 import { FileUploadData } from 'src/app/sub-components/file-tree/ng2-file-tree.component';
 import { ResourceViewerComponent } from 'src/app/sub-components/resource-viewer/resource-viewer.component';
 import { IPreviewService } from 'src/app/services/abstract/IPreviewService';
+import { Observable } from 'rxjs';
+import { ComponentCanDeactivate } from 'src/app/services/guards/tutor-bits-pending-changes-guard.service';
 
 @Component({
   templateUrl: './record.component.html',
   styleUrls: ['./record.component.sass']
 })
-export class RecordComponent implements OnInit, OnDestroy {
+export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivate {
   public projectId: string;
   public recording = false;
   hasRecorded = false;
@@ -144,6 +146,7 @@ export class RecordComponent implements OnInit, OnDestroy {
           this.recording = false;
         });
       });
+
     } else {
       this.recording = false;
       this.recordingTreeComponent.allowEdit(false);
@@ -187,5 +190,13 @@ export class RecordComponent implements OnInit, OnDestroy {
   onFinishClicked() {
     this.finishRecording = true;
     this.router.navigate([`watch/${this.projectId}`], { queryParams: { publish: 'true' } });
+  }
+
+  @HostListener('window:beforeunload')
+  canDeactivate(): Observable<boolean> | boolean {
+    // insert logic to check if there are pending changes here;
+    // returning true will navigate without confirmation
+    // returning false will show a confirm dialog before navigating away
+    return false;
   }
 }

@@ -56,7 +56,7 @@ import { TutorBitsVideoRecordingService } from './services/tutor-bits-video-reco
 import { TimerComponent } from './sub-components/timer/timer.component';
 import { FormlyFieldFileComponent } from './sub-components/formly/formly-field-file/formly-field-file.component';
 import { FileValueAccessorDirective } from './sub-components/formly/file-value-accessor.directive';
-import { TutorBitsAuthGuardService } from './services/tutor-bits-auth-guard.service';
+import { TutorBitsAuthGuardService } from './services/guards/tutor-bits-auth-guard.service';
 import { PrivacyComponent } from './components/privacy/privacy.component';
 import { TermsComponent } from './components/terms/terms.component';
 import { ResourceViewerComponent } from './sub-components/resource-viewer/resource-viewer.component';
@@ -71,6 +71,7 @@ import { TutorBitsConcreteAccountService, TutorBitsAccountService } from './serv
 import { AccountUpdateUserNameComponent } from './components/account/account-update-user-name/account-update-user-name.component';
 import { BlogCardComponent } from './sub-components/blog-card/blog-card.component';
 import { ContactComponent } from './components/contact/contact.component';
+import { TutorBitsPendingChangesGuardService } from './services/guards/tutor-bits-pending-changes-guard.service';
 
 const appRoutes: Routes = [
   {
@@ -97,7 +98,8 @@ const appRoutes: Routes = [
   {
     path: 'sandbox/:projectId',
     component: SandboxComponent,
-    data: { title: 'Sandbox' }
+    data: { title: 'Sandbox' },
+    canDeactivate: [TutorBitsPendingChangesGuardService]
   },
   {
     path: 'create/tutorial',

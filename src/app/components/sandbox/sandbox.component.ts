@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, NgZone } from '@angular/core';
+import { Component, OnInit, ViewChild, NgZone, HostListener } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { environment } from 'src/environments/environment';
 import { MonacoRecorder } from 'src/app/sub-components/recorder/monaco.recorder';
@@ -14,12 +14,14 @@ import { ITracerProjectService } from 'src/app/services/abstract/ITracerProjectS
 import { FileUploadData, PropogateTreeOptions } from 'src/app/sub-components/file-tree/ng2-file-tree.component';
 import { ResourceViewerComponent } from 'src/app/sub-components/resource-viewer/resource-viewer.component';
 import { IPreviewService } from 'src/app/services/abstract/IPreviewService';
+import { ComponentCanDeactivate } from 'src/app/services/guards/tutor-bits-pending-changes-guard.service';
+import { Observable } from 'rxjs';
 
 @Component({
   templateUrl: './sandbox.component.html',
   styleUrls: ['./sandbox.component.sass']
 })
-export class SandboxComponent implements OnInit {
+export class SandboxComponent implements OnInit, ComponentCanDeactivate {
   public projectId: string = Guid.create().toString();
 
   @ViewChild(RecordingFileTreeComponent, { static: true }) recordingTreeComponent: RecordingFileTreeComponent;
@@ -149,5 +151,13 @@ export class SandboxComponent implements OnInit {
   }
 
   public onPublishToExampleClicked(e: any) {
+  }
+
+  @HostListener('window:beforeunload')
+  canDeactivate(): Observable<boolean> | boolean {
+    // insert logic to check if there are pending changes here;
+    // returning true will navigate without confirmation
+    // returning false will show a confirm dialog before navigating away
+    return false;
   }
 }
