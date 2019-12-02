@@ -70,6 +70,7 @@ import { TutorBitsUserApiService } from './services/tutor-bits-user-api.service'
 import { TutorBitsConcreteAccountService, TutorBitsAccountService } from './services/tutor-bits-account.service';
 import { AccountUpdateUserNameComponent } from './components/account/account-update-user-name/account-update-user-name.component';
 import { BlogCardComponent } from './sub-components/blog-card/blog-card.component';
+import { ContactComponent } from './components/contact/contact.component';
 
 const appRoutes: Routes = [
   {
@@ -145,6 +146,11 @@ const appRoutes: Routes = [
   },
   { path: 'privacy', component: PrivacyComponent },
   { path: 'terms', component: TermsComponent },
+  {
+    path: 'contact',
+    component: ContactComponent,
+    data: { title: 'Contact' },
+  },
   { path: '**', component: HomeComponent }
 ];
 
@@ -180,7 +186,8 @@ const appRoutes: Routes = [
     EditTutorialCardComponent,
     MyAccountComponent,
     AccountUpdateUserNameComponent,
-    BlogCardComponent
+    BlogCardComponent,
+    ContactComponent
   ],
   imports: [
     BrowserModule,

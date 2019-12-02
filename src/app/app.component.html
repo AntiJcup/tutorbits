@@ -66,6 +66,7 @@
               <mat-icon class="icon">reorder</mat-icon>
             </button>
             <mat-menu #appExtraMenu="matMenu">
+              <a [routerLink]="[ '/contact' ]" mat-menu-item>Contact Us</a>
               <a [routerLink]="[ '/privacy' ]" target="blank_" mat-menu-item>Privacy
                 Policy</a>
               <a [routerLink]="[ '/terms' ]" target="blank_" mat-menu-item>Terms
