@@ -1,7 +1,7 @@
 export interface ViewTutorial {
     id: string;
     title: string;
-    language: string;
+    type: string;
     description: string;
     owner: string;
     status: string;

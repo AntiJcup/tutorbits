@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, NgZone } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { FormlyFieldConfig } from '@ngx-formly/core';
 import { CreateTutorial } from 'src/app/models/tutorial/create-tutorial';
@@ -14,55 +14,70 @@ import { ILogService } from 'src/app/services/abstract/ILogService';
 export class CreateTutorialComponent implements OnInit, OnDestroy {
   loading = false;
   form = new FormGroup({});
-  model: CreateTutorial = { Title: '', Description: '', Language: 'javascript', ThumbnailData: null };
-  fields: FormlyFieldConfig[] = [{
-    key: 'Title',
-    type: 'input',
-    templateOptions: {
-      label: 'Title',
-      placeholder: 'Enter Tutorial Title',
-      required: true,
-      minLength: 4,
-      maxLength: 64
-    }
-  },
-  {
-    key: 'Language',
-    type: 'input',
-    templateOptions: {
-      label: 'Programming Language',
-      placeholder: 'Enter Tutorial Programming Language',
-      required: true,
-      minLength: 1,
-      maxLength: 64
-    }
-  },
-  {
-    key: 'Description',
-    type: 'textarea',
-    templateOptions: {
-      label: 'Description',
-      placeholder: 'Enter Tutorial Description',
-      required: false,
-    }
-  },
-  {
-    key: 'ThumbnailData',
-    type: 'file',
-    templateOptions: {
-      required: true,
-      description: 'Upload Thumbnail'
-    }
-  },
-  ];
+  model: CreateTutorial = { Title: null, Description: null, Type: null, ThumbnailData: null };
+  fields: FormlyFieldConfig[] = [];
 
   constructor(
     private tutorialService: TutorBitsTutorialService,
     private router: Router,
     private errorServer: IErrorService,
-    private logServer: ILogService) { }
+    private logServer: ILogService,
+    private zone: NgZone) { }
 
   ngOnInit() {
+    this.loading = true;
+    this.tutorialService.GetTutorialTypes().then((tutorialTypes) => {
+      const tutorialTypeOptions = [];
+      tutorialTypes.forEach(element => {
+        tutorialTypeOptions.push({
+          label: element,
+          value: element
+        });
+      });
+
+      this.zone.runTask(() => {
+        this.fields = [{
+          key: 'Title',
+          type: 'input',
+          templateOptions: {
+            label: 'Title',
+            placeholder: 'Enter Tutorial Title',
+            required: true,
+            minLength: 4,
+            maxLength: 64
+          }
+        },
+        {
+          key: 'Type',
+          type: 'select',
+          templateOptions: {
+            label: 'Type',
+            required: true,
+            options: tutorialTypeOptions
+          }
+        },
+        {
+          key: 'Description',
+          type: 'textarea',
+          templateOptions: {
+            label: 'Description',
+            placeholder: 'Enter Tutorial Description',
+            required: false,
+          }
+        },
+        {
+          key: 'ThumbnailData',
+          type: 'file',
+          templateOptions: {
+            required: true,
+            description: 'Upload Thumbnail'
+          }
+        }];
+      });
+      this.loading = false;
+    }).catch((err) => {
+      this.errorServer.HandleError('CreateInitializeError', err);
+    });
   }
 
   ngOnDestroy(): void {
