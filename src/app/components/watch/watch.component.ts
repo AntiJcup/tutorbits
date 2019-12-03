@@ -91,7 +91,7 @@ export class WatchComponent implements OnInit, OnDestroy {
       this.resourceViewerComponent,
       this.logServer,
       new OnlineProjectLoader(this.requestObj, this.publishMode ? Guid.create().toString() : 'play'),
-      new OnlineTransactionLoader(this.requestObj),
+      new OnlineTransactionLoader(this.requestObj, this.publishMode ? Guid.create().toString() : 'play'),
       this.projectId);
 
     this.codePlayer.Load().then(() => {
