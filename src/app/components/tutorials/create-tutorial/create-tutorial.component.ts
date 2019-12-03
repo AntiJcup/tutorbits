@@ -62,7 +62,7 @@ export class CreateTutorialComponent implements OnInit, OnDestroy {
           templateOptions: {
             label: 'Description',
             placeholder: 'Enter Tutorial Description',
-            required: false,
+            required: true,
           }
         },
         {

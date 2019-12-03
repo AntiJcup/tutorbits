@@ -1,18 +1,10 @@
 app-tutorial-card
     margin: 20px
-    max-height: 426px
+    max-height: 458px
 
 .tutorial-card-container
-    display: flex
-    flex-direction: row
-    flex-grow: 0
-    flex-shrink: 0
-    flex-wrap: wrap
-    overflow-y: scroll
-    padding-left: 60px
-    padding-top: 30px
-    height: 100%
     position: relative
+    display: block
 
 ::-webkit-scrollbar-track
     background-color: #4b4b4b99
@@ -28,3 +20,24 @@ app-tutorial-card
     position: absolute
     top: 30%
     left: 50%
+
+.tutorial-row-container
+    height: 100%
+    width: 100%
+    overflow-y: scroll
+    display: block
+.tutorial-row-container-padding
+    padding-bottom: 50px
+    margin-bottom: 0px
+    padding-right: 20px
+
+.tutorial-row
+    display: block
+    width: 100%
+    padding-bottom: 0px
+    margin-bottom: 5px
+    overflow-x: scroll
+    h3
+        padding-left: 25px
+        font-size: 20px
+        margin-bottom: 0px

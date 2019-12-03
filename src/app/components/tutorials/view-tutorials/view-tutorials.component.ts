@@ -11,7 +11,10 @@ import { ILogService } from 'src/app/services/abstract/ILogService';
 })
 export class ViewTutorialsComponent implements OnInit {
   tutorials: Array<ViewTutorial> = [];
+  tutorialsByType: { [key: string]: ViewTutorial[] } = {};
+  tutorialTypes: string[] = [];
   loading = true;
+  allKey = 'All';
 
   constructor(
     private router: Router,
@@ -23,6 +26,19 @@ export class ViewTutorialsComponent implements OnInit {
     this.tutorialsService.GetAll().then((tutorials) => {
       this.tutorials = tutorials;
       this.logServer.LogToConsole('ViewTutorials', tutorials.length);
+      this.tutorials.forEach(element => {
+        this.tutorialsByType[this.allKey] = this.tutorialsByType[this.allKey] ? this.tutorialsByType[this.allKey] : [];
+        this.tutorialsByType[this.allKey].push(element);
+
+        this.tutorialsByType[element.type] = this.tutorialsByType[element.type] ? this.tutorialsByType[element.type] : [];
+        this.tutorialsByType[element.type].push(element);
+        
+        if (this.tutorialTypes.indexOf(element.type) === -1) {
+          this.tutorialTypes.push(element.type);
+        }
+      });
+
+      this.tutorialTypes.push(this.allKey);
     }).catch((e) => {
       this.errorServer.HandleError('ViewTutorials', e);
     }).finally(() => {
