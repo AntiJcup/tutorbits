@@ -98,11 +98,6 @@ export class TutorBitsAuthService extends IAuthService {
 
       const responseToken: JWT = await response.json();
       this.updateToken(responseToken);
-      const newRoute = this.dataService.GetCurrentRoute();
-      this.dataService.SetCurrentRoute(null);
-      if (newRoute) {
-        this.router.navigate([newRoute]);
-      }
     } catch (err) {
       this.errorServer.HandleError('AuthService', `Login Exception: ${err}`);
     }
