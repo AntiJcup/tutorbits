@@ -36,6 +36,12 @@
                 "input": "assets/oil/",
                 "output": "./assets/oil/"
               }
+              ,
+              {
+                "glob": "**/*",
+                "input": "assets/fonts/",
+                "output": "./assets/fonts/"
+              }
             ],
             "styles": [
               "./node_modules/@angular/material/prebuilt-themes/purple-green.css",
