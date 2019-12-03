@@ -74,6 +74,7 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate {
 
   startEditing(): void {
     this.recordingEditor.AllowEdits(true);
+    this.recordingTreeComponent.allowEdit(true);
 
     this.codeRecorder = new MonacoRecorder(
       this.recordingEditor,
