@@ -3,7 +3,7 @@ export interface ViewTutorial {
     title: string;
     language: string;
     description: string;
-    userName: string;
+    owner: string;
     status: string;
     thumbnailUrl: string;
     durationMS: number;
