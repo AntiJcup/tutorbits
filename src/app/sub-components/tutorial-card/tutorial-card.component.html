@@ -5,7 +5,7 @@
     </mat-card-header>
     <img class="thumbnail" mat-card-image [src]="tutorial.thumbnailUrl" alt="Placeholder Image">
     <mat-card-content>
-        <p [innerText]="tutorial.description">
+        <p [innerText]="tutorial.description" matTooltip="{{tutorial.description}}">
         </p>
     </mat-card-content>
     <mat-card-actions>
