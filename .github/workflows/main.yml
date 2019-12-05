@@ -9,17 +9,25 @@ jobs:
 
     steps:
     - name: Checkout
-      uses: actions/checkout@master
+      uses: actions/checkout@v1
       with:
         token: ${{ secrets.ACCESS_TOKEN }}
         submodules: true
+    - name: Angular Github Actions
+        uses: mayur-rawte/github-angular-actions@latest
+    - name: Npm Restore
+        run: |
+            npm install
+    - name: Angular build
+        run: |
+            ng build --prod
     # Upload to S3
     - name: sync s3
       uses: jakejarvis/s3-sync-action@2fb81a9e9fea11e078587911c27754e42e6a6e88
       with:
         args: --exclude '.git*/*' --delete --follow-symlinks
       env:
-        SOURCE_DIR: './'
+        SOURCE_DIR: './dist/tutorbits'
         AWS_REGION: 'us-west-2'
         AWS_S3_BUCKET: ${{ secrets.STAGING_AWS_S3_BUCKET }}
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
