@@ -15,11 +15,10 @@ jobs:
         submodules: true
     - name: Npm Restore
       run: |
-        npm install @angular/cli
-        npm install
+        npm install @angular/cli && npm install
     - name: Angular build
       run: |
-        ng build --prod
+      node_modules/@angular/cli/bin/ng build --prod
     # Upload to S3
     - name: sync s3
       uses: jakejarvis/s3-sync-action@2fb81a9e9fea11e078587911c27754e42e6a6e88
