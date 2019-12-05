@@ -8,6 +8,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - name: Checkout
+      uses: actions/checkout@master
+      with:
+        token: ${{ secrets.ACCESS_TOKEN }}
+        submodules: true
     # Upload to S3
     - name: sync s3
       uses: jakejarvis/s3-sync-action@2fb81a9e9fea11e078587911c27754e42e6a6e88
