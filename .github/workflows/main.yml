@@ -15,7 +15,7 @@ jobs:
         submodules: true
     - name: Npm Restore
       run: |
-        npm install -g @angular/cli
+        npm install @angular/cli
         npm install
     - name: Angular build
       run: |
