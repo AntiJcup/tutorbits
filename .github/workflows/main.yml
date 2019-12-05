@@ -23,10 +23,10 @@ jobs:
     - name: sync s3
       uses: jakejarvis/s3-sync-action@2fb81a9e9fea11e078587911c27754e42e6a6e88
       with:
-        args: --exclude '.git*/*' --delete --follow-symlinks
+        args: --delete --follow-symlinks --acl public-read
       env:
         SOURCE_DIR: './dist/tutorbits'
-        DEST_DIR: 'sites/www/'
+        DEST_DIR: 'sites/www/*'
         AWS_REGION: 'us-west-2'
         AWS_S3_BUCKET: ${{ secrets.STAGING_AWS_S3_BUCKET }}
         AWS_ACCESS_KEY_ID: ${{ secrets.ACCESS_KEY_ID }}
