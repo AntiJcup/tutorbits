@@ -14,13 +14,13 @@ jobs:
         token: ${{ secrets.ACCESS_TOKEN }}
         submodules: true
     - name: Angular Github Actions
-        uses: mayur-rawte/github-angular-actions@latest
+      uses: mayur-rawte/github-angular-actions@latest
     - name: Npm Restore
-        run: |
-            npm install
+      run: |
+        npm install
     - name: Angular build
-        run: |
-            ng build --prod
+      run: |
+        ng build --prod
     # Upload to S3
     - name: sync s3
       uses: jakejarvis/s3-sync-action@2fb81a9e9fea11e078587911c27754e42e6a6e88
