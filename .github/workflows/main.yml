@@ -13,10 +13,9 @@ jobs:
       with:
         token: ${{ secrets.ACCESS_TOKEN }}
         submodules: true
-    - name: Angular Github Actions
-      uses: mayur-rawte/github-angular-actions@latest
     - name: Npm Restore
       run: |
+        npm install -g @angular/cli
         npm install
     - name: Angular build
       run: |
