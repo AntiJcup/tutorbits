@@ -28,8 +28,8 @@ jobs:
         SOURCE_DIR: './dist/tutorbits'
         AWS_REGION: 'us-west-2'
         AWS_S3_BUCKET: ${{ secrets.STAGING_AWS_S3_BUCKET }}
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.SECRET_ACCESS_KEY }}
 
     # Invalidate Cloudfront (this action)
     - name: invalidate
@@ -38,5 +38,5 @@ jobs:
         DISTRIBUTION: ${{ secrets.STAGING_DISTRIBUTION }}
         PATHS: '/*'
         AWS_REGION: 'us-west-2'
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.SECRET_ACCESS_KEY }}
