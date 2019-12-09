@@ -1,12 +1,12 @@
 <div class="controls" *ngIf="publishMode">
   <div class="controlsContainer">
-    <app-saving-button (click)="onBackClicked($event)" text="Record Again" icon="keyboard_backspace" [saving]="false" matTooltip="Record again"
-      savingText="Loading">
+    <app-saving-button (click)="onBackClicked($event)" text="Record Again" icon="keyboard_backspace" [saving]="false"
+      matTooltip="Record again" savingText="Loading">
     </app-saving-button>
   </div>
   <div class="controlsContainer">
-    <app-saving-button (click)="onPublishClicked($event)" text="Publish" icon="publish" [saving]="publishing" matTooltip="Publish this tutorial so others can watch it"
-      savingText="publishing">
+    <app-saving-button (click)="onPublishClicked($event)" text="Publish" icon="publish" [saving]="publishing"
+      matTooltip="Publish this tutorial so others can watch it" savingText="publishing">
     </app-saving-button>
   </div>
 </div>
@@ -33,10 +33,10 @@
     </app-playback-file-tree>
   </div>
   <div class="editorContainer" fxLayout fxLayoutGap="5px">
-    <app-resource-viewer class="resourceViewer">
-    </app-resource-viewer>
     <app-editor-place-holder class="placeHolder">
     </app-editor-place-holder>
+    <app-resource-viewer class="resourceViewer">
+    </app-resource-viewer>
     <app-playback-editor class="recordingEditor" (codeInitialized)="onCodeInitialized($event)">
     </app-playback-editor>
     <app-preview *ngIf="previewPath || loadingPreview" class="preview" (closeClicked)="onCloseClicked($event)"
