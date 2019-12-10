@@ -26,7 +26,7 @@ export class TutorBitsErrorService extends IErrorService {
       this.lastSnackbar.dismiss();
     }
 
-    this.lastSnackbar = this.snackBar.open(`${component} - ${error}`, null);
+    this.lastSnackbar = this.snackBar.open(`${component} - ${error}`, 'close');
   }
 
   public ClearError(): void {
