@@ -1,5 +1,9 @@
 <div class="controls" *ngIf="publishMode">
   <div class="controlsContainer">
+    <mat-spinner color="accent" [diameter]="34" class="loading-spinner" *ngIf="loadingReferences > 0">
+    </mat-spinner>
+  </div>
+  <div class="controlsContainer">
     <app-saving-button (click)="onBackClicked($event)" text="Record Again" icon="keyboard_backspace" [saving]="false"
       matTooltip="Record again" savingText="Loading">
     </app-saving-button>
@@ -11,6 +15,10 @@
   </div>
 </div>
 <div class="controls" *ngIf="!publishMode">
+  <div class="controlsContainer">
+    <mat-spinner color="accent" [diameter]="34" class="loading-spinner" *ngIf="loadingReferences > 0">
+    </mat-spinner>
+  </div>
   <div class="controlsContainer">
     <app-saving-button (click)="onDownloadClicked($event)" text="Download Project" icon="cloud_download"
       [saving]="downloading" savingText="Downloading..." matTooltip="Save project as zip">
@@ -42,6 +50,5 @@
     <app-preview *ngIf="previewPath || loadingPreview" class="preview" (closeClicked)="onCloseClicked($event)"
       [loading]="loadingPreview" [previewPath]="previewPath" [previewBaseUrl]="previewBaseUrl">
     </app-preview>
-
   </div>
 </div>

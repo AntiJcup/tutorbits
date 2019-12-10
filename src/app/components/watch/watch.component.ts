@@ -57,6 +57,8 @@ export class WatchComponent implements OnInit, OnDestroy {
 
   downloading = false;
 
+  loadingReferences = 0;
+
   constructor(
     private router: Router,
     private route: ActivatedRoute,
@@ -93,6 +95,14 @@ export class WatchComponent implements OnInit, OnDestroy {
       new OnlineProjectLoader(this.requestObj, this.publishMode ? Guid.create().toString() : 'play'),
       new OnlineTransactionLoader(this.requestObj, this.publishMode ? Guid.create().toString() : 'play'),
       this.projectId);
+
+    this.codePlayer.loadStart.subscribe((event) => {
+      this.loadingReferences++;
+    });
+
+    this.codePlayer.loadComplete.subscribe((event) => {
+      this.loadingReferences--;
+    });
 
     this.codePlayer.Load().then(() => {
       this.codePlayer.Play();

@@ -9,9 +9,22 @@ import { NodeSelectedEvent } from 'ng2-tree';
 import { Subscription } from 'rxjs';
 import { ILogService } from 'src/app/services/abstract/ILogService';
 import { ResourceViewerComponent, ResourceData } from '../resource-viewer/resource-viewer.component';
+import { EventEmitter } from '@angular/core';
+
+export interface LoadStartEvent {
+    playPosition: number;
+    loadPosition: number;
+}
+
+export interface LoadCompleteEvent {
+    playPosition: number;
+    loadPosition: number;
+}
 
 export class MonacoPlayer extends TransactionPlayer {
     private nodeSelectedListener: Subscription = null;
+    public loadStart: EventEmitter<LoadStartEvent> = new EventEmitter<LoadStartEvent>();
+    public loadComplete: EventEmitter<LoadCompleteEvent> = new EventEmitter<LoadCompleteEvent>();
 
     constructor(
         protected codeComponent: MonacoEditorComponent,
@@ -190,4 +203,11 @@ export class MonacoPlayer extends TransactionPlayer {
         }
     }
 
+    protected onLoadStart(): void {
+        this.loadStart.emit({ playPosition: this.position, loadPosition: this.loadPosition });
+    }
+
+    protected onLoadComplete(): void {
+        this.loadComplete.emit({ playPosition: this.position, loadPosition: this.loadPosition });
+    }
 }
