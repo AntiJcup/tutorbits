@@ -5,9 +5,9 @@
             <div class="tutorial-card-container" fxLayout fxLayoutGap="5px">
                 <app-tutorial-card *ngFor="let tutorial of tutorialsByType[typeKey]" [tutorial]="tutorial"
                     (click)="onTutorialCardClick($event, tutorial)"></app-tutorial-card>
-                <mat-spinner [diameter]="64" class="loading-spinner" *ngIf="loading">
-                </mat-spinner>
             </div>
         </div>
     </div>
+    <mat-spinner [diameter]="64" class="loading-spinner" *ngIf="loading">
+    </mat-spinner>
 </div>
