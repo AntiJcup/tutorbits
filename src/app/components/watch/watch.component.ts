@@ -17,6 +17,7 @@ import { Guid } from 'guid-typescript';
 import { ITracerProjectService } from 'src/app/services/abstract/ITracerProjectService';
 import { ResourceViewerComponent } from 'src/app/sub-components/resource-viewer/resource-viewer.component';
 import { IPreviewService } from 'src/app/services/abstract/IPreviewService';
+import { Subscription } from 'rxjs';
 
 @Component({
   templateUrl: './watch.component.html',
@@ -59,6 +60,9 @@ export class WatchComponent implements OnInit, OnDestroy {
 
   loadingReferences = 0;
 
+  private onLoadStartSub: Subscription;
+  private onLoadCompleteSub: Subscription;
+
   constructor(
     private router: Router,
     private route: ActivatedRoute,
@@ -83,6 +87,14 @@ export class WatchComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     clearInterval(this.paceKeeperInterval);
+
+    if (this.onLoadStartSub) {
+      this.onLoadStartSub.unsubscribe();
+    }
+
+    if (this.onLoadCompleteSub) {
+      this.onLoadCompleteSub.unsubscribe();
+    }
   }
 
   onCodeInitialized(playbackEditor: PlaybackEditorComponent) {
@@ -96,11 +108,11 @@ export class WatchComponent implements OnInit, OnDestroy {
       new OnlineTransactionLoader(this.requestObj, this.publishMode ? Guid.create().toString() : 'play'),
       this.projectId);
 
-    this.codePlayer.loadStart.subscribe((event) => {
+    this.onLoadStartSub = this.codePlayer.loadStart.subscribe((event) => {
       this.loadingReferences++;
     });
 
-    this.codePlayer.loadComplete.subscribe((event) => {
+    this.onLoadCompleteSub = this.codePlayer.loadComplete.subscribe((event) => {
       this.loadingReferences--;
     });
 

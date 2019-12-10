@@ -33,6 +33,8 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
   canRecord = false;
   finishRecording = false;
   loadingRecording = false;
+  timeout = 1000 * 60 * 60;
+  timeoutWarning = this.timeout - (1000 * 60 * 5);
 
   @ViewChild(RecordingFileTreeComponent, { static: true }) recordingTreeComponent: RecordingFileTreeComponent;
   @ViewChild(RecordingEditorComponent, { static: true }) recordingEditor: RecordingEditorComponent;
@@ -52,6 +54,9 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
   loadingPreview = false;
   streamErrored = false;
 
+  timeoutWarningTimer: any;
+  timeoutTimer: any;
+
   constructor(
     private router: Router,
     private route: ActivatedRoute,
@@ -70,7 +75,15 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
   }
 
   ngOnDestroy(): void {
+    if (this.timeoutWarningTimer) {
+      clearTimeout(this.timeoutWarningTimer);
+      this.timeoutWarningTimer = null;
+    }
 
+    if (this.timeoutTimer) {
+      clearTimeout(this.timeoutTimer);
+      this.timeoutTimer = null;
+    }
   }
 
   onStreamInitialized(webCam: RecordingWebCamComponent) {
@@ -96,6 +109,16 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
   }
 
   onRecordingStateChanged(recording: boolean) {
+    if (this.timeoutWarningTimer) {
+      clearTimeout(this.timeoutWarningTimer);
+      this.timeoutWarningTimer = null;
+    }
+
+    if (this.timeoutTimer) {
+      clearTimeout(this.timeoutTimer);
+      this.timeoutTimer = null;
+    }
+
     if (recording) {
       if (this.hasRecorded) {
         if (!confirm('Are you sure you want to start the recording over?')) {
@@ -108,6 +131,16 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
         this.recordingEditor.currentFilePath = '';
       }
 
+      this.timeoutTimer = setTimeout(() => {
+        this.errorServer.HandleError('Timeout', 'Max time reached ending recording');
+        this.onRecordingStateChanged(false);
+        this.timeoutTimer = null;
+      }, this.timeout);
+
+      this.timeoutWarningTimer = setTimeout(() => {
+        this.errorServer.HandleError('TimeoutWarning', 'You are about to reach max recording time. Please wrap up stream within 5 minutes');
+        this.timeoutWarningTimer = null;
+      }, this.timeoutWarning);
 
       this.webCamRecorder = new WebCamRecorder(this.recordingWebCam, this.videoRecordingService, this.projectId);
       this.webCamRecorder.Initialize().then(() => {

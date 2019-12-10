@@ -8,6 +8,6 @@ export const environment = {
   loginClientId: '60bttusi8qioo53pfnqtgqcn4s',
   loginRedirectUri: 'https://www.tutorbits.com/login',
   logoutRedirectUri: 'https://www.tutorbits.com/logout',
-  loggingEnabled: true,
+  loggingEnabled: false,
   loggingTraceEnabled: false
 };
