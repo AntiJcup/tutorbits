@@ -69,6 +69,7 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
     private tracerTransactionService: ITracerTransactionService,
     private videoRecordingService: IVideoRecordingService) {
     this.projectId = this.route.snapshot.paramMap.get('projectId');
+    this.hasRecorded = this.route.snapshot.queryParamMap.get('back') === 'true';
   }
 
   ngOnInit(): void {
@@ -106,6 +107,29 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
   onCodeInitialized(recordingEditor: RecordingEditorComponent) {
     this.recordingEditor.AllowEdits(false);
     this.recordingTreeComponent.selectNodeByPath(this.recordingTreeComponent.treeComponent.tree, '/project');
+  }
+
+  startRecording(): void {
+    this.codeRecorder.DeleteProject(this.projectId).then(() => {
+      this.codeRecorder.New().then(() => {
+        this.webCamRecorder.StartRecording().then(() => {
+          this.loadingRecording = false;
+          this.hasRecorded = true;
+          this.codeRecorder.StartRecording();
+          this.recordingTreeComponent.allowEdit(true);
+          this.recordingEditor.AllowEdits(true);
+          this.recording = true;
+        }).catch((err) => {
+          this.errorServer.HandleError('LoadingError', err);
+          this.loadingRecording = false;
+          this.recording = false;
+        });
+      }).catch((err) => {
+        this.errorServer.HandleError('LoadingError', err);
+        this.loadingRecording = false;
+        this.recording = false;
+      });
+    });
   }
 
   onRecordingStateChanged(recording: boolean) {
@@ -160,25 +184,16 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
         this.tracerTransactionService,
         this.tracerProjectService);
 
-      this.codeRecorder.DeleteProject(this.projectId).then(() => {
-        this.codeRecorder.New().then(() => {
-          this.webCamRecorder.StartRecording().then(() => {
-            this.loadingRecording = false;
-            this.hasRecorded = true;
-            this.codeRecorder.StartRecording();
-            this.recordingTreeComponent.allowEdit(true);
-            this.recordingEditor.AllowEdits(true);
-            this.recording = true;
-          }).catch((err) => {
-            this.errorServer.HandleError('LoadingError', err);
-            this.loadingRecording = false;
-            this.recording = false;
-          });
-        }).catch((err) => {
-          this.errorServer.HandleError('LoadingError', err);
+      this.codeRecorder.LoadProject(this.projectId).then((proj) => {
+        if (proj.getDuration() > 0 && !confirm('Are you sure you want to start the recording over?')) {
           this.loadingRecording = false;
           this.recording = false;
-        });
+          this.hasRecorded = true;
+          return;
+        }
+        this.startRecording();
+      }).catch((e) => {
+        this.startRecording();
       });
 
     } else {
