@@ -93,7 +93,8 @@ const appRoutes: Routes = [
   {
     path: 'sandbox',
     component: SandboxComponent,
-    data: { title: 'New Sandbox' }
+    data: { title: 'New Sandbox' },
+    canDeactivate: [TutorBitsPendingChangesGuardService]
   },
   {
     path: 'sandbox/:projectId',
