@@ -148,9 +148,6 @@ export abstract class NG2FileTreeComponent {
   }
 
   public selectNodeByPath(node: Tree, path: string, retry: boolean = true) {
-    if (path === '/project') {
-      return;
-    }
     this.logServer.LogToConsole('FileTree', `Selecting node: ${path}`);
     this.selectedPath = path;
     this.zone.runTask(() => {

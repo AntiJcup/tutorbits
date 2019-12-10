@@ -92,6 +92,7 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
 
   onCodeInitialized(recordingEditor: RecordingEditorComponent) {
     this.recordingEditor.AllowEdits(false);
+    this.recordingTreeComponent.selectNodeByPath(this.recordingTreeComponent.treeComponent.tree, '/project');
   }
 
   onRecordingStateChanged(recording: boolean) {
