@@ -1,6 +1,6 @@
 <mat-card class="tutorial-card">
     <mat-card-header>
-        <mat-card-title [innerText]="tutorial.title"></mat-card-title>
+        <mat-card-title [innerText]="tutorial.title" matTooltip="{{tutorial.title}}"></mat-card-title>
         <mat-card-subtitle [innerText]="tutorialSubTitle"></mat-card-subtitle>
     </mat-card-header>
     <img class="thumbnail" mat-card-image [src]="tutorial.thumbnailUrl" alt="Placeholder Image">
