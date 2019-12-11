@@ -72,6 +72,9 @@ import { AccountUpdateUserNameComponent } from './components/account/account-upd
 import { BlogCardComponent } from './sub-components/blog-card/blog-card.component';
 import { ContactComponent } from './components/contact/contact.component';
 import { TutorBitsPendingChangesGuardService } from './services/guards/tutor-bits-pending-changes-guard.service';
+import { DeviceDetectorModule } from 'ngx-device-detector';
+import { TutorBitsMobileGuardService } from './services/guards/tutor-bits-mobile-guard.service';
+import { MobileNotSupportedComponent } from './components/mobile-not-supported/mobile-not-supported.component';
 
 const appRoutes: Routes = [
   {
@@ -80,38 +83,47 @@ const appRoutes: Routes = [
     data: { title: 'Home' }
   },
   {
+    path: 'mobilenotsupported',
+    component: MobileNotSupportedComponent,
+    data: { title: 'Sorry' }
+  },
+  {
     path: 'watch/:projectId',
     component: WatchComponent,
-    data: { title: 'Watch' }
+    data: { title: 'Watch' },
+    canActivate: [TutorBitsMobileGuardService]
   },
   {
     path: 'record/:projectId',
     component: RecordComponent,
     data: { title: 'Record' },
-    canActivate: [TutorBitsAuthGuardService]
+    canActivate: [TutorBitsAuthGuardService, TutorBitsMobileGuardService]
   },
   {
     path: 'sandbox',
     component: SandboxComponent,
     data: { title: 'New Sandbox' },
+    canActivate: [TutorBitsMobileGuardService],
     canDeactivate: [TutorBitsPendingChangesGuardService]
   },
   {
     path: 'sandbox/:projectId',
     component: SandboxComponent,
     data: { title: 'Sandbox' },
+    canActivate: [TutorBitsMobileGuardService],
     canDeactivate: [TutorBitsPendingChangesGuardService]
   },
   {
     path: 'create/tutorial',
     component: CreateTutorialComponent,
     data: { title: 'Create Tutorial' },
-    canActivate: [TutorBitsAuthGuardService]
+    canActivate: [TutorBitsAuthGuardService, TutorBitsMobileGuardService]
   },
   {
     path: 'tutorials',
     component: ViewTutorialsComponent,
-    data: { title: 'Tutorials' }
+    data: { title: 'Tutorials' },
+    canActivate: []
   },
   {
     path: 'mytutorials',
@@ -134,7 +146,8 @@ const appRoutes: Routes = [
   {
     path: 'login',
     component: LoginComponent,
-    data: { title: 'LoggedIn' }
+    data: { title: 'LoggedIn' },
+    canActivate: []
   },
   {
     path: 'logout',
@@ -190,7 +203,8 @@ const appRoutes: Routes = [
     MyAccountComponent,
     AccountUpdateUserNameComponent,
     BlogCardComponent,
-    ContactComponent
+    ContactComponent,
+    MobileNotSupportedComponent
   ],
   imports: [
     BrowserModule,
@@ -212,7 +226,8 @@ const appRoutes: Routes = [
         { name: 'file', component: FormlyFieldFileComponent, wrappers: ['form-field'] },
       ],
     }),
-    FormlyMaterialModule
+    FormlyMaterialModule,
+    DeviceDetectorModule.forRoot()
   ],
   providers: [
     { provide: IAPIService, useClass: TutorBitsApiService },
