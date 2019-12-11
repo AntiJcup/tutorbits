@@ -1,8 +1,14 @@
 .controls
   position: fixed
-  top: 0px
-  left: 50%
-  transform: translateX(-50%)
+  top: 48px
+  right: 10px
+  overflow: hidden
+  height: 32px
+  z-index: 14
+
+@media (max-width: 905px)
+  .controls
+    display: none
 
 .sideBar
   min-width: 400px

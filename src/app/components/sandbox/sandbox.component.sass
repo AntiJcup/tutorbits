@@ -1,24 +1,18 @@
-.controls
-  position: fixed
-  top: 0px
-  left: 50%
-  transform: translateX(-50%)
-
 .sideBar
   overflow: hidden
   max-width: 480px
   width: 480px
 
 .tutorialVideo
-    width: 480px
-    height: 300px
-    overflow: hidden
+  width: 480px
+  height: 300px
+  overflow: hidden
 
-.codeEditor 
+.codeEditor
   display: flex
   flex: 1
   height: 99%
-  .editor-container 
+  .editor-container
     height: 99%
 
 .tutorialContainer
@@ -36,7 +30,7 @@
   height: 100%
 
 .editorContainerTitle
-  height:26px
+  height: 26px
   line-height: 26px
   color: #c4c4c4
   font-size: 13px
@@ -69,17 +63,28 @@
 
 .controls
   position: fixed
-  top: 0px
-  left: 50%
-  transform: translateX(-50%)
+  top: 48px
+  right: 0px
   overflow: hidden
-  height: 44px
+  height: 32px
+  z-index: 14
+
+@media (max-width: 615px)
+  .controls
+    display: none
 
 .controlsContainer
   position: relative
   float: left
   margin-left: 5px
+  height: 32px
 
+:host ::ng-deep app-saving-button
+  height: 32px
+  line-height: 32px
+  .mat-menu-item
+    height: 26px
+    line-height: 26px
 .resourceViewer
   position: absolute
   width: 100%

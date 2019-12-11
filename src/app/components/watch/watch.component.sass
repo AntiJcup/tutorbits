@@ -1,9 +1,3 @@
-.controls
-  position: fixed
-  top: 0px
-  left: 50%
-  transform: translateX(-50%)
-
 .tutorialVideo
   width: 400px
   height: 300px
@@ -80,16 +74,28 @@
 
 .controls
   position: fixed
-  top: 0px
-  left: 50%
-  transform: translateX(-50%)
+  top: 48px
+  right: 0px
   overflow: hidden
-  height: 44px
+  height: 32px
+  z-index: 14
+
+@media (max-width: 905px)
+  .controls
+    display: none
 
 .controlsContainer
   position: relative
   float: left
   margin-left: 5px
+  height: 32px
+
+:host ::ng-deep app-saving-button
+  height: 32px
+  line-height: 32px
+  .mat-menu-item
+    height: 26px
+    line-height: 26px
 
 .resourceViewer
   position: absolute

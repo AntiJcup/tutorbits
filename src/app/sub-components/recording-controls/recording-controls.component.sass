@@ -1,6 +1,7 @@
 .container
-    height: 44px
+    height: 26px
     overflow: hidden
+    padding-right: 5px
 
 .relative
     position: relative
@@ -9,3 +10,15 @@
 
 #recordingBtn
     background-color: rgba(255, 0, 0, .25)
+
+:host ::ng-deep app-saving-button
+  height: 26px
+  line-height: 26px
+  .mat-menu-item
+    height: 26px
+    line-height: 26px
+
+:host ::ng-deep app-timer
+    .timerContainer
+        height: 26px
+        line-height: 26px
