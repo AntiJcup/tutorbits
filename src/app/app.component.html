@@ -15,9 +15,53 @@
   <mat-sidenav-content>
     <mat-toolbar color="primary" class="topMenu">
       <div fxHide.gt-xs>
-        <button mat-icon-button>
+        <button mat-icon-button [matMenuTriggerFor]="globalMenu">
           <mat-icon>menu</mat-icon>
         </button>
+        <mat-menu #globalMenu="matMenu">
+          <button mat-menu-item [matMenuTriggerFor]="appCreateMenu">
+            <mat-icon class="icon">create</mat-icon>
+            <span class="label">Create</span>
+          </button>
+          <mat-menu #appCreateMenu="matMenu">
+            <a [routerLink]="[ '/create/tutorial' ]" mat-menu-item>Tutorial</a>
+            <a [routerLink]="[ '/sandbox' ]" mat-menu-item>Sandbox</a>
+          </mat-menu>
+          <button mat-menu-item [matMenuTriggerFor]="appTutorialMenu">
+            <mat-icon class="icon">assignment</mat-icon>
+            <span class="label">Tutorials</span>
+          </button>
+          <mat-menu #appTutorialMenu="matMenu">
+            <a [routerLink]="[ '/tutorials' ]" mat-menu-item>All</a>
+          </mat-menu>
+          <a *ngIf="!loggedIn" [href]="loginUrl" mat-menu-item>
+            <mat-icon class="icon">input</mat-icon>
+            <span class="label">Login</span>
+          </a>
+          <button mat-menu-item [matMenuTriggerFor]="accountMenu" *ngIf="loggedIn">
+            <mat-icon class="icon">account_box</mat-icon>
+            <span class="label">Account</span>
+          </button>
+          <mat-menu #accountMenu="matMenu">
+            <a mat-menu-item [routerLink]="[ '/mytutorials' ]">My Tutorials</a>
+            <a mat-menu-item [routerLink]="[ '/myaccount' ]">My Account</a>
+            <a mat-menu-item [href]="logoutUrl">Logout</a>
+          </mat-menu>
+          <button mat-menu-item [matMenuTriggerFor]="appExtraMenu">
+              <mat-icon class="icon">reorder</mat-icon>
+              <span class="label">Other</span>
+          </button>
+          <mat-menu #appExtraMenu="matMenu">
+            <a [routerLink]="[ '/contact' ]" mat-menu-item>Contact Us</a>
+            <a [routerLink]="[ '/privacy' ]" target="blank_" mat-menu-item>Privacy
+              Policy</a>
+            <a [routerLink]="[ '/terms' ]" target="blank_" mat-menu-item>Terms
+              and Conditions</a>
+            <a href="https://www.termsfeed.com/cookies-policy/0863b492327e119e4d30afcc752af8ed" target="blank_"
+              mat-menu-item>Cookie
+              Policy</a>
+          </mat-menu>
+        </mat-menu>
       </div>
       <div class="title">
         <a [routerLink]="[ '/home' ]" mat-menu-item>
@@ -26,7 +70,6 @@
       </div>
       <div fxFlex fxLayout fxLayoutAlign="flex-end" fxHide.xs>
         <ul fxLayout fxLayoutGap="5px" class="navigation-items">
-
           <li>
             <button mat-menu-item [matMenuTriggerFor]="appCreateMenu">
               <mat-icon class="icon">create</mat-icon>
