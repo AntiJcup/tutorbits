@@ -18,6 +18,7 @@ import { ITracerProjectService } from 'src/app/services/abstract/ITracerProjectS
 import { ResourceViewerComponent } from 'src/app/sub-components/resource-viewer/resource-viewer.component';
 import { IPreviewService } from 'src/app/services/abstract/IPreviewService';
 import { Subscription } from 'rxjs';
+import { IEventService } from 'src/app/services/abstract/IEventService';
 
 @Component({
   templateUrl: './watch.component.html',
@@ -71,7 +72,8 @@ export class WatchComponent implements OnInit, OnDestroy {
     private projectService: ITracerProjectService,
     private previewService: IPreviewService,
     private errorServer: IErrorService,
-    private logServer: ILogService) {
+    private logServer: ILogService,
+    private eventService: IEventService) {
     this.projectId = this.route.snapshot.paramMap.get('projectId');
     this.publishMode = this.route.snapshot.queryParamMap.get('publish') === 'true';
   }
@@ -161,6 +163,7 @@ export class WatchComponent implements OnInit, OnDestroy {
   }
 
   public onPreviewClicked(e: string) {
+    this.eventService.TriggerButtonClick('Watch', `Preview - ${this.projectId} - ${e}`);
     this.loadingPreview = true;
     const previewPos = Math.min(Math.round(this.codePlayer.position), this.codePlayer.duration);
     this.previewService.LoadPreview(this.projectId, previewPos).then((url) => {
@@ -180,11 +183,13 @@ export class WatchComponent implements OnInit, OnDestroy {
   }
 
   public onCloseClicked(e: any) {
+    this.eventService.TriggerButtonClick('Watch', `PreviewClose - ${this.projectId}`);
     this.previewPath = null;
     this.loadingPreview = false;
   }
 
   public onPublishClicked(e: any) {
+    this.eventService.TriggerButtonClick('Watch', `Publish - ${this.projectId}`);
     this.publishing = true;
     this.tutorialService.Publish(this.projectId).then((res) => {
       if (!res) {
@@ -202,6 +207,7 @@ export class WatchComponent implements OnInit, OnDestroy {
   }
 
   public onBackClicked(e: any) {
+    this.eventService.TriggerButtonClick('Watch', `Back - ${this.projectId}`);
     if (!confirm('Are you sure you want to start over?')) {
       return;
     }
@@ -210,6 +216,7 @@ export class WatchComponent implements OnInit, OnDestroy {
   }
 
   public onDownloadClicked(e: any) {
+    this.eventService.TriggerButtonClick('Watch', `Download - ${this.projectId}`);
     this.downloading = true;
     this.projectService.DownloadProject(this.projectId).then((res) => {
       if (!res) {
@@ -224,6 +231,7 @@ export class WatchComponent implements OnInit, OnDestroy {
   }
 
   public onCopyToSandboxClicked(e: any) {
+    this.eventService.TriggerButtonClick('Watch', `Sandbox - ${this.projectId}`);
     this.router.navigate([`sandbox/${this.projectId}`]);
   }
 }
