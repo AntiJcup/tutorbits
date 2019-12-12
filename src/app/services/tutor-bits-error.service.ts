@@ -27,6 +27,9 @@ export class TutorBitsErrorService extends IErrorService {
     }
 
     this.lastSnackbar = this.snackBar.open(`${component} - ${error}`, 'close');
+    (window as any).ga('send', 'event', {
+      eventCategory: `Error - ${component}`, eventAction: error
+    });
   }
 
   public ClearError(): void {
