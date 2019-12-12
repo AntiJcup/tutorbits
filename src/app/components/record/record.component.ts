@@ -20,6 +20,7 @@ import { ResourceViewerComponent } from 'src/app/sub-components/resource-viewer/
 import { IPreviewService } from 'src/app/services/abstract/IPreviewService';
 import { Observable } from 'rxjs';
 import { ComponentCanDeactivate } from 'src/app/services/guards/tutor-bits-pending-changes-guard.service';
+import { IEventService } from 'src/app/services/abstract/IEventService';
 
 @Component({
   templateUrl: './record.component.html',
@@ -67,7 +68,8 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
     private tracerProjectService: ITracerProjectService,
     private previewService: IPreviewService,
     private tracerTransactionService: ITracerTransactionService,
-    private videoRecordingService: IVideoRecordingService) {
+    private videoRecordingService: IVideoRecordingService,
+    private eventService: IEventService) {
     this.projectId = this.route.snapshot.paramMap.get('projectId');
     this.hasRecorded = this.route.snapshot.queryParamMap.get('back') === 'true';
   }
@@ -133,6 +135,7 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
   }
 
   onRecordingStateChanged(recording: boolean) {
+    this.eventService.TriggerButtonClick('Record', `Record - ${this.projectId}`);
     if (this.timeoutWarningTimer) {
       clearTimeout(this.timeoutWarningTimer);
       this.timeoutWarningTimer = null;
@@ -212,11 +215,13 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
   }
 
   public onCloseClicked(e: any) {
+    this.eventService.TriggerButtonClick('Record', `PreviewClose - ${this.projectId}`);
     this.previewPath = null;
     this.loadingPreview = false;
   }
 
   public onPreviewClicked(e: string) {
+    this.eventService.TriggerButtonClick('Record', `Preview - ${this.projectId} - ${e}`);
     const previewPos = Math.round(this.codeRecorder.position);
     this.loadingPreview = true;
     this.previewPath = null;
@@ -237,6 +242,7 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
   }
 
   onFinishClicked() {
+    this.eventService.TriggerButtonClick('Record', `Finish - ${this.projectId}`);
     this.finishRecording = true;
     this.router.navigate([`watch/${this.projectId}`], { queryParams: { publish: 'true' } });
   }

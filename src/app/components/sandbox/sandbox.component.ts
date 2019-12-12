@@ -16,6 +16,7 @@ import { ResourceViewerComponent } from 'src/app/sub-components/resource-viewer/
 import { IPreviewService } from 'src/app/services/abstract/IPreviewService';
 import { ComponentCanDeactivate } from 'src/app/services/guards/tutor-bits-pending-changes-guard.service';
 import { Observable } from 'rxjs';
+import { IEventService } from 'src/app/services/abstract/IEventService';
 
 @Component({
   templateUrl: './sandbox.component.html',
@@ -50,7 +51,8 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate {
     private logServer: ILogService,
     private tracerProjectService: ITracerProjectService,
     private previewService: IPreviewService,
-    private errorServer: IErrorService) {
+    private errorServer: IErrorService,
+    private eventService: IEventService) {
     this.loadProjectId = this.route.snapshot.paramMap.get('projectId');
   }
 
@@ -103,11 +105,13 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate {
   }
 
   public onCloseClicked(e: any) {
+    this.eventService.TriggerButtonClick('Preview', `PreviewClose - ${this.projectId}`);
     this.previewPath = null;
     this.loadingPreview = false;
   }
 
   public onPreviewClicked(e: string) {
+    this.eventService.TriggerButtonClick('Sandbox', `Preview - ${this.projectId} - ${e}`);
     this.loadingPreview = true;
     const previewPos = Math.round(this.codeRecorder.position);
     this.previewService.GeneratePreview(this.projectId, previewPos, this.codeRecorder.logs, this.loadProjectId).then((url) => {
@@ -142,6 +146,7 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate {
   }
 
   public onDownloadClicked(e: any) {
+    this.eventService.TriggerButtonClick('Preview', `Download - ${this.projectId}`);
     this.downloading = true;
     const previewGenerator = new OnlinePreviewGenerator(this.requestObj);
     const previewPos = Math.round(this.codeRecorder.position);
@@ -154,6 +159,7 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate {
   }
 
   public onPublishToExampleClicked(e: any) {
+    this.eventService.TriggerButtonClick('Preview', `PublishExample - ${this.projectId}`);
   }
 
   @HostListener('window:beforeunload')

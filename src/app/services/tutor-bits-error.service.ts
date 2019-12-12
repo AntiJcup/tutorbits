@@ -4,12 +4,13 @@ import { IErrorService } from './abstract/IErrorService';
 import { MatSnackBar, SimpleSnackBar, MatSnackBarRef } from '@angular/material';
 import { Router, Event, NavigationStart } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { IEventService } from './abstract/IEventService';
 
 @Injectable()
 export class TutorBitsErrorService extends IErrorService {
   private lastSnackbar: MatSnackBarRef<SimpleSnackBar> = null;
 
-  constructor(private snackBar: MatSnackBar, private router: Router) {
+  constructor(private snackBar: MatSnackBar, private router: Router, private eventService: IEventService) {
     super();
     this.router.events.subscribe((event: Event) => {
       if (event instanceof NavigationStart) {
@@ -27,9 +28,7 @@ export class TutorBitsErrorService extends IErrorService {
     }
 
     this.lastSnackbar = this.snackBar.open(`${component} - ${error}`, 'close');
-    (window as any).ga('send', 'event', {
-      eventCategory: `Error - ${component}`, eventAction: error
-    });
+    this.eventService.TriggerError(component, error);
   }
 
   public ClearError(): void {

@@ -15,6 +15,7 @@ import {
 import { ILogService } from 'src/app/services/abstract/ILogService';
 import { FileUtils, FileData } from 'shared/web/lib/ts/FileUtils';
 import { TreeService } from 'ng2-tree/src/tree.service';
+import { IEventService } from 'src/app/services/abstract/IEventService';
 
 export interface FileUploadData {
   fileData: FileData;
@@ -57,7 +58,11 @@ export abstract class NG2FileTreeComponent {
   @Output() previewClicked = new EventEmitter<string>();
   @Output() fileUploaded = new EventEmitter<FileUploadData>();
 
-  constructor(private zone: NgZone, private logServer: ILogService, private treeService: TreeService) { }
+  constructor(
+    private zone: NgZone,
+    private logServer: ILogService,
+    private treeService: TreeService,
+    private eventService: IEventService) { }
 
   public nodeSelected(event: NodeSelectedEvent) {
     const test = this.treeComponent.getControllerByNodeId(event.node.id);
@@ -251,6 +256,7 @@ export abstract class NG2FileTreeComponent {
   }
 
   public onNodeCreated(e: NodeCreatedEvent) {
+    this.eventService.TriggerButtonClick('FileTree', 'NodeCreate');
     if (!this.editable) {
       return;
     }
@@ -288,6 +294,7 @@ export abstract class NG2FileTreeComponent {
   }
 
   public onNewFolderClicked(e: MouseEvent) {
+    this.eventService.TriggerButtonClick('FileTree', 'FolderCreate');
     const selectedNode = this.GetSelectedBranch();
     const selectedNodeController = this.treeComponent.getControllerByNodeId(selectedNode.id);
 
@@ -304,6 +311,7 @@ export abstract class NG2FileTreeComponent {
   }
 
   public onNewFileClicked(e: MouseEvent) {
+    this.eventService.TriggerButtonClick('FileTree', 'FileCreate');
     const selectedNode = this.GetSelectedBranch();
     const selectedNodeController = this.treeComponent.getControllerByNodeId(selectedNode.id);
 
@@ -320,6 +328,7 @@ export abstract class NG2FileTreeComponent {
   }
 
   public onUploadFileClicked(e: MouseEvent) {
+    this.eventService.TriggerButtonClick('FileTree', 'UploadFileStart');
     FileUtils.SelectFile().then((fileData: FileData) => {
       // Update path to be relative to selected branch
       // const selectedBranch = this.GetSelectedBranch();
@@ -334,6 +343,7 @@ export abstract class NG2FileTreeComponent {
   }
 
   public addResourceNode(nodePath: string, resourceId: string, nodeName: string) {
+    this.eventService.TriggerButtonClick('FileTree', 'UploadFileFinish');
     const selectedNode = this.findNodeByPath(this.treeComponent.tree, nodePath);
     const selectedNodeController = this.treeComponent.getControllerByNodeId(selectedNode.id);
 
@@ -350,6 +360,7 @@ export abstract class NG2FileTreeComponent {
   }
 
   public onNodeRenamed(e: NodeRenamedEvent) {
+    this.eventService.TriggerButtonClick('FileTree', 'NodeRenamed');
     this.fileSelected = null;
     this.folderSelected = null;
 

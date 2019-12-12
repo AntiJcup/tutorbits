@@ -75,6 +75,8 @@ import { TutorBitsPendingChangesGuardService } from './services/guards/tutor-bit
 import { DeviceDetectorModule } from 'ngx-device-detector';
 import { TutorBitsMobileGuardService } from './services/guards/tutor-bits-mobile-guard.service';
 import { MobileNotSupportedComponent } from './components/mobile-not-supported/mobile-not-supported.component';
+import { IEventService } from './services/abstract/IEventService';
+import { TutorBitsGAEventService } from './services/tutor-bits-ga-event.service';
 
 const appRoutes: Routes = [
   {
@@ -242,7 +244,8 @@ const appRoutes: Routes = [
     { provide: ITracerTransactionService, useClass: TutorBitsTracerTransactionService },
     { provide: IVideoRecordingService, useClass: TutorBitsVideoRecordingService },
     { provide: IPreviewService, useClass: TutorBitsPreviewService },
-    { provide: IUserApiService, useClass: TutorBitsUserApiService }
+    { provide: IUserApiService, useClass: TutorBitsUserApiService },
+    { provide: IEventService, useClass: TutorBitsGAEventService }
   ],
   bootstrap: [AppComponent]
 })
