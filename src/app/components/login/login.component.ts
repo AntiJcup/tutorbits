@@ -36,10 +36,10 @@ export class LoginComponent implements OnInit {
           this.router.navigate(['home']);
         }
       }).catch((err) => {
-        this.errorServer.HandleError('LoginError', JSON.stringify(err));
+        this.errorServer.HandleError('LoginError', err);
       });;
     }).catch((err) => {
-      this.errorServer.HandleError('LoginError', JSON.stringify(err));
+      this.errorServer.HandleError('LoginError', err);
     });
   }
 
