@@ -87,6 +87,14 @@ export class MonacoPlayer extends TransactionPlayer {
             const edits: editor.IIdentifiedSingleEditOperation[] = [];
             this.logServer.LogToConsole('MonacoPlayer', JSON.stringify(transaction.toObject()));
             switch (transaction.getType()) {
+                case TraceTransaction.TraceTransactionType.SCROLLFILE:
+                    const scrollData = transaction.getScrollFile();
+                    if (!undo) {
+                        this.codeComponent.codeEditor.setScrollTop(scrollData.getScrollEnd());
+                    } else {
+                        this.codeComponent.codeEditor.setScrollTop(scrollData.getScrollStart());
+                    }
+                    break;
                 case TraceTransaction.TraceTransactionType.MOSUEMOVE:
                     const mouseMoveData = transaction.getMouseMove();
                     this.playbackMouseComponent.Move(mouseMoveData.getX(), mouseMoveData.getY());

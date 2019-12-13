@@ -1,5 +1,5 @@
 import { TraceTransactionLog } from 'shared/Tracer/models/ts/Tracer_pb';
-import { editor, IDisposable } from 'monaco-editor';
+import { editor, IDisposable, IScrollEvent } from 'monaco-editor';
 import { TransactionRecorder } from 'shared/Tracer/lib/ts/TransactionRecorder';
 import { TransactionWriter } from 'shared/Tracer/lib/ts/TransactionWriter';
 import { ProjectLoader } from 'shared/Tracer/lib/ts/ProjectLoader';
@@ -17,6 +17,7 @@ import { environment } from 'src/environments/environment';
 export class MonacoRecorder extends TransactionRecorder {
 
     private fileChangeListener: IDisposable = null;
+    private scrollChangeListener: IDisposable = null;
 
     private nodeSelectedListener: Subscription = null;
     private nodeCreatedListener: Subscription = null;
@@ -32,6 +33,9 @@ export class MonacoRecorder extends TransactionRecorder {
 
     private delayTimer: any;
     private lastMouseTrackOffset: number;
+    private lastScrollTrackOffset: number;
+
+    private lastScrollHeight: number;
 
     public get position(): number {
         return this.timeOffset;
@@ -92,6 +96,10 @@ export class MonacoRecorder extends TransactionRecorder {
             this.onMouseMoved(e);
         };
         window.addEventListener('mousemove', this.mouseMoveCallbackWrapper);
+
+        this.scrollChangeListener = this.codeComponent.codeEditor.onDidScrollChange((e: IScrollEvent) => {
+            this.onScrolled(e);
+        });
     }
 
     public async StopRecording(): Promise<boolean> {
@@ -123,6 +131,10 @@ export class MonacoRecorder extends TransactionRecorder {
 
         if (this.mouseMoveCallbackWrapper) {
             window.removeEventListener('mousemove', this.mouseMoveCallbackWrapper);
+        }
+
+        if (this.scrollChangeListener) {
+            this.scrollChangeListener.dispose();
         }
 
         return await this.SaveTransactionLogs(true);
@@ -396,6 +408,19 @@ export class MonacoRecorder extends TransactionRecorder {
         this.timeOffset = Date.now() - this.start;
         this.MouseMove(this.timeOffset, e.x, e.y);
         this.TriggerDelayedSave();
+    }
+
+    public onScrolled(e: IScrollEvent) {
+        this.timeOffset = Date.now() - this.start;
+        if (this.timeOffset - this.lastScrollTrackOffset < environment.scrollAccurracyMS) {
+            return;
+        }
+
+        this.lastScrollTrackOffset = this.timeOffset;
+        this.timeOffset = Date.now() - this.start;
+        this.ScrollFile(this.timeOffset, this.codeComponent.currentFilePath, this.lastScrollHeight, this.codeComponent.codeEditor.getScrollTop());
+        this.TriggerDelayedSave();
+        this.lastScrollHeight =  this.codeComponent.codeEditor.getScrollTop();
     }
 
     private TriggerDelayedSave(): void {

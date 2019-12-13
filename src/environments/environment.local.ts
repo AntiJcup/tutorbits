@@ -10,5 +10,6 @@ export const environment = {
   logoutRedirectUri: 'https://local.tutorbits.com/logout',
   loggingEnabled: true,
   loggingTraceEnabled: false,
-  mouseAccurracyMS: 100
+  mouseAccurracyMS: 100,
+  scrollAccurracyMS: 0
 };
