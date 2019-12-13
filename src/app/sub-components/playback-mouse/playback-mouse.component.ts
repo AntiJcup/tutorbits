@@ -6,8 +6,8 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./playback-mouse.component.sass']
 })
 export class PlaybackMouseComponent implements OnInit {
-  private x: number;
-  private y: number;
+  public x: number;
+  public y: number;
 
   constructor() { }
 
