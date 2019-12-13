@@ -21,6 +21,7 @@ import { IPreviewService } from 'src/app/services/abstract/IPreviewService';
 import { Observable } from 'rxjs';
 import { ComponentCanDeactivate } from 'src/app/services/guards/tutor-bits-pending-changes-guard.service';
 import { IEventService } from 'src/app/services/abstract/IEventService';
+import { PreviewComponent } from 'src/app/sub-components/preview/preview.component';
 
 @Component({
   templateUrl: './record.component.html',
@@ -41,6 +42,7 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
   @ViewChild(RecordingEditorComponent, { static: true }) recordingEditor: RecordingEditorComponent;
   @ViewChild(RecordingWebCamComponent, { static: true }) recordingWebCam: RecordingWebCamComponent;
   @ViewChild(ResourceViewerComponent, { static: true }) resourceViewerComponent: ResourceViewerComponent;
+  @ViewChild(PreviewComponent, { static: true }) previewComponent: PreviewComponent;
 
   codeRecorder: MonacoRecorder;
   webCamRecorder: WebCamRecorder;
@@ -50,9 +52,6 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
     headers: {},
   };
   requestObj = new ApiHttpRequest(this.requestInfo);
-  previewPath: string = null;
-  previewBaseUrl: string = null;
-  loadingPreview = false;
   streamErrored = false;
 
   timeoutWarningTimer: any;
@@ -61,12 +60,9 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
   constructor(
     private router: Router,
     private route: ActivatedRoute,
-    private zone: NgZone,
     private errorServer: IErrorService,
     private logServer: ILogService,
-    private tutorialService: TutorBitsTutorialService,
     private tracerProjectService: ITracerProjectService,
-    private previewService: IPreviewService,
     private tracerTransactionService: ITracerTransactionService,
     private videoRecordingService: IVideoRecordingService,
     private eventService: IEventService) {
@@ -178,6 +174,7 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
         this.recordingEditor,
         this.recordingTreeComponent,
         this.resourceViewerComponent,
+        this.previewComponent,
         this.logServer,
         this.errorServer,
         true, /* resourceAuth */
@@ -216,29 +213,17 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
 
   public onCloseClicked(e: any) {
     this.eventService.TriggerButtonClick('Record', `PreviewClose - ${this.projectId}`);
-    this.previewPath = null;
-    this.loadingPreview = false;
+    this.previewComponent.ClosePreview();
   }
 
   public onPreviewClicked(e: string) {
     this.eventService.TriggerButtonClick('Record', `Preview - ${this.projectId} - ${e}`);
     const previewPos = Math.round(this.codeRecorder.position);
-    this.loadingPreview = true;
-    this.previewPath = null;
-    this.previewService.GeneratePreview(this.projectId, previewPos, this.codeRecorder.logs).then((url) => {
-      if (!url) {
-        this.errorServer.HandleError('PreviewError', ' preview url failed to be retrieved');
-        return;
-      }
-      this.zone.runTask(() => {
-        this.previewBaseUrl = url;
-        this.previewPath = e;
+    this.previewComponent.GeneratePreview(this.projectId, previewPos, e, this.codeRecorder.logs)
+      .then()
+      .catch((err) => {
+        this.errorServer.HandleError('PreviewError', err);
       });
-    }).catch((err) => {
-      this.errorServer.HandleError('PreviewError', err);
-    }).finally(() => {
-      this.loadingPreview = false;
-    });
   }
 
   onFinishClicked() {

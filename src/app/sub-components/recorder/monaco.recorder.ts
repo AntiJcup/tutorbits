@@ -13,6 +13,7 @@ import { IErrorService } from 'src/app/services/abstract/IErrorService';
 import { ITracerProjectService } from 'src/app/services/abstract/ITracerProjectService';
 import { ResourceViewerComponent, ResourceData } from '../resource-viewer/resource-viewer.component';
 import { environment } from 'src/environments/environment';
+import { PreviewComponent } from '../preview/preview.component';
 
 export class MonacoRecorder extends TransactionRecorder {
 
@@ -25,6 +26,9 @@ export class MonacoRecorder extends TransactionRecorder {
     private nodeDeletedListener: Subscription = null;
     private nodeMovedListener: Subscription = null;
     private fileUploadedListener: Subscription = null;
+    private previewListener: Subscription = null;
+    private previewCloseListener: Subscription = null;
+
     private mouseMoveCallbackWrapper: any = null;
 
     private timeOffset: number;
@@ -45,6 +49,7 @@ export class MonacoRecorder extends TransactionRecorder {
         protected codeComponent: MonacoEditorComponent,
         protected fileTreeComponent: NG2FileTreeComponent,
         protected resourceViewerComponent: ResourceViewerComponent,
+        protected previewComponent: PreviewComponent,
         protected logging: ILogService,
         protected errorServer: IErrorService,
         protected resourceAuth: boolean,
@@ -100,6 +105,14 @@ export class MonacoRecorder extends TransactionRecorder {
         this.scrollChangeListener = this.codeComponent.codeEditor.onDidScrollChange((e: IScrollEvent) => {
             this.onScrolled(e);
         });
+
+        this.previewListener = this.fileTreeComponent.previewClicked.subscribe((file: string) => {
+            this.onPreviewClicked(file);
+        });
+
+        this.previewCloseListener = this.previewComponent.closeClicked.subscribe((e: any) => {
+            this.onPreviewCloseClicked();
+        });
     }
 
     public async StopRecording(): Promise<boolean> {
@@ -135,6 +148,14 @@ export class MonacoRecorder extends TransactionRecorder {
 
         if (this.scrollChangeListener) {
             this.scrollChangeListener.dispose();
+        }
+
+        if (this.previewListener) {
+            this.previewListener.unsubscribe();
+        }
+
+        if (this.previewCloseListener) {
+            this.previewCloseListener.unsubscribe();
         }
 
         return await this.SaveTransactionLogs(true);
@@ -405,7 +426,6 @@ export class MonacoRecorder extends TransactionRecorder {
         }
 
         this.lastMouseTrackOffset = this.timeOffset;
-        this.timeOffset = Date.now() - this.start;
         this.MouseMove(this.timeOffset, e.x, e.y);
         this.TriggerDelayedSave();
     }
@@ -417,10 +437,22 @@ export class MonacoRecorder extends TransactionRecorder {
         }
 
         this.lastScrollTrackOffset = this.timeOffset;
-        this.timeOffset = Date.now() - this.start;
-        this.ScrollFile(this.timeOffset, this.codeComponent.currentFilePath, this.lastScrollHeight, this.codeComponent.codeEditor.getScrollTop());
+        this.ScrollFile(this.timeOffset, this.codeComponent.currentFilePath, this.lastScrollHeight,
+            this.codeComponent.codeEditor.getScrollTop());
         this.TriggerDelayedSave();
-        this.lastScrollHeight =  this.codeComponent.codeEditor.getScrollTop();
+        this.lastScrollHeight = this.codeComponent.codeEditor.getScrollTop();
+    }
+
+    public onPreviewClicked(file: string) {
+        this.timeOffset = Date.now() - this.start;
+        this.PreviewAction(this.timeOffset, file, this.codeComponent.currentFilePath);
+        this.TriggerDelayedSave();
+    }
+
+    public onPreviewCloseClicked() {
+        this.timeOffset = Date.now() - this.start;
+        this.PreviewCloseAction(this.timeOffset, this.codeComponent.currentFilePath);
+        this.TriggerDelayedSave();
     }
 
     private TriggerDelayedSave(): void {

@@ -17,6 +17,7 @@ import { IPreviewService } from 'src/app/services/abstract/IPreviewService';
 import { ComponentCanDeactivate } from 'src/app/services/guards/tutor-bits-pending-changes-guard.service';
 import { Observable } from 'rxjs';
 import { IEventService } from 'src/app/services/abstract/IEventService';
+import { PreviewComponent } from 'src/app/sub-components/preview/preview.component';
 
 @Component({
   templateUrl: './sandbox.component.html',
@@ -28,6 +29,7 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate {
   @ViewChild(RecordingFileTreeComponent, { static: true }) recordingTreeComponent: RecordingFileTreeComponent;
   @ViewChild(RecordingEditorComponent, { static: true }) recordingEditor: RecordingEditorComponent;
   @ViewChild(ResourceViewerComponent, { static: true }) resourceViewerComponent: ResourceViewerComponent;
+  @ViewChild(PreviewComponent, { static: true }) previewComponent: PreviewComponent;
 
   codeRecorder: MonacoRecorder;
   requestInfo: ApiHttpRequestInfo = {
@@ -36,9 +38,6 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate {
     headers: {},
   };
   requestObj = new ApiHttpRequest(this.requestInfo);
-  previewPath: string = null;
-  previewBaseUrl: string = null;
-  loadingPreview = false;
   loadProjectId: string;
   loadingProject = false;
   downloading = false;
@@ -46,11 +45,9 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate {
 
   constructor(
     private zone: NgZone,
-    private router: Router,
     private route: ActivatedRoute,
     private logServer: ILogService,
     private tracerProjectService: ITracerProjectService,
-    private previewService: IPreviewService,
     private errorServer: IErrorService,
     private eventService: IEventService) {
     this.loadProjectId = this.route.snapshot.paramMap.get('projectId');
@@ -84,6 +81,7 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate {
       this.recordingEditor,
       this.recordingTreeComponent,
       this.resourceViewerComponent,
+      this.previewComponent,
       this.logServer,
       this.errorServer,
       false, /* resourceAuth */
@@ -106,28 +104,17 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate {
 
   public onCloseClicked(e: any) {
     this.eventService.TriggerButtonClick('Preview', `PreviewClose - ${this.projectId}`);
-    this.previewPath = null;
-    this.loadingPreview = false;
+    this.previewComponent.ClosePreview();
   }
 
   public onPreviewClicked(e: string) {
     this.eventService.TriggerButtonClick('Sandbox', `Preview - ${this.projectId} - ${e}`);
-    this.loadingPreview = true;
     const previewPos = Math.round(this.codeRecorder.position);
-    this.previewService.GeneratePreview(this.projectId, previewPos, this.codeRecorder.logs, this.loadProjectId).then((url) => {
-      if (!url) {
-        this.errorServer.HandleError(`PreviewError`, 'failed to be retrieved');
-        return;
-      }
-      this.zone.runTask(() => {
-        this.previewBaseUrl = url;
-        this.previewPath = e;
-      });
-    }).catch((err) => {
-      this.errorServer.HandleError(`PreviewError`, err);
-    }).finally(() => {
-      this.loadingPreview = false;
-    });
+    this.previewComponent.GeneratePreview(this.projectId, previewPos, e, this.codeRecorder.logs)
+    .then()
+    .catch((err) => {
+      this.errorServer.HandleError('PreviewError', err);
+    })
   }
 
   public async Load(): Promise<void> {

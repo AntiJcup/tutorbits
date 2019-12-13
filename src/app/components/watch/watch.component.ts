@@ -9,17 +9,16 @@ import { ApiHttpRequest, ApiHttpRequestInfo } from 'shared/web/lib/ts/ApiHttpReq
 import { VidPlayer } from 'src/app/sub-components/player/vid.player';
 import { OnlineStreamLoader } from 'shared/media/lib/ts/OnlineStreamLoader';
 import { TransactionPlayerState } from 'shared/Tracer/lib/ts/TransactionPlayer';
-import { OnlinePreviewGenerator } from 'shared/Tracer/lib/ts/OnlinePreviewGenerator';
 import { IErrorService } from 'src/app/services/abstract/IErrorService';
 import { ILogService } from 'src/app/services/abstract/ILogService';
 import { TutorBitsTutorialService } from 'src/app/services/tutor-bits-tutorial.service';
 import { Guid } from 'guid-typescript';
 import { ITracerProjectService } from 'src/app/services/abstract/ITracerProjectService';
 import { ResourceViewerComponent } from 'src/app/sub-components/resource-viewer/resource-viewer.component';
-import { IPreviewService } from 'src/app/services/abstract/IPreviewService';
 import { Subscription } from 'rxjs';
 import { IEventService } from 'src/app/services/abstract/IEventService';
 import { PlaybackMouseComponent } from 'src/app/sub-components/playback-mouse/playback-mouse.component';
+import { PreviewComponent } from 'src/app/sub-components/preview/preview.component';
 
 @Component({
   templateUrl: './watch.component.html',
@@ -40,6 +39,7 @@ export class WatchComponent implements OnInit, OnDestroy {
   @ViewChild('video', { static: true }) playbackVideo: ElementRef;
   @ViewChild(ResourceViewerComponent, { static: true }) resourceViewerComponent: ResourceViewerComponent;
   @ViewChild(PlaybackMouseComponent, { static: true }) playbackMouseComponent: PlaybackMouseComponent;
+  @ViewChild(PreviewComponent, { static: true }) previewComponent: PreviewComponent;
 
   codePlayer: MonacoPlayer;
   videoPlayer: VidPlayer;
@@ -51,10 +51,6 @@ export class WatchComponent implements OnInit, OnDestroy {
 
   pausedVideo = false;
   lastVideoTime = 0;
-
-  previewPath: string = null;
-  previewBaseUrl: string = null;
-  loadingPreview = false;
 
   publishing = false;
   publishMode = false;
@@ -72,7 +68,6 @@ export class WatchComponent implements OnInit, OnDestroy {
     private zone: NgZone,
     private tutorialService: TutorBitsTutorialService,
     private projectService: ITracerProjectService,
-    private previewService: IPreviewService,
     private errorServer: IErrorService,
     private logServer: ILogService,
     private eventService: IEventService) {
@@ -108,6 +103,7 @@ export class WatchComponent implements OnInit, OnDestroy {
       this.playbackTreeComponent,
       this.resourceViewerComponent,
       this.playbackMouseComponent,
+      this.previewComponent,
       this.logServer,
       new OnlineProjectLoader(this.requestObj, this.publishMode ? Guid.create().toString() : 'play'),
       new OnlineTransactionLoader(this.requestObj, this.publishMode ? Guid.create().toString() : 'play'),
@@ -167,28 +163,16 @@ export class WatchComponent implements OnInit, OnDestroy {
 
   public onPreviewClicked(e: string) {
     this.eventService.TriggerButtonClick('Watch', `Preview - ${this.projectId} - ${e}`);
-    this.loadingPreview = true;
     const previewPos = Math.min(Math.round(this.codePlayer.position), this.codePlayer.duration);
-    this.previewService.LoadPreview(this.projectId, previewPos).then((url) => {
-      if (!url) {
-        this.errorServer.HandleError(`PreviewError`, 'failed to be retrieved');
-        return;
-      }
-      this.zone.runTask(() => {
-        this.previewBaseUrl = url;
-        this.previewPath = e;
-      });
-    }).catch((err) => {
+    this.previewComponent.LoadPreview(this.projectId, previewPos, e).then()
+    .catch((err) => {
       this.errorServer.HandleError(`PreviewError`, err);
-    }).finally(() => {
-      this.loadingPreview = false;
     });
   }
 
   public onCloseClicked(e: any) {
     this.eventService.TriggerButtonClick('Watch', `PreviewClose - ${this.projectId}`);
-    this.previewPath = null;
-    this.loadingPreview = false;
+    this.previewComponent.ClosePreview();
   }
 
   public onPublishClicked(e: any) {

@@ -1,4 +1,4 @@
-<div class="container">
+<div class="container" [hidden]="(!loading && !previewPath)">
     <div *ngIf="loading" class="loadingContainer">
         <mat-spinner [diameter]="64" class="loading-spinner">
         </mat-spinner>

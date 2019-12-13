@@ -11,6 +11,7 @@ import { ILogService } from 'src/app/services/abstract/ILogService';
 import { ResourceViewerComponent, ResourceData } from '../resource-viewer/resource-viewer.component';
 import { EventEmitter } from '@angular/core';
 import { PlaybackMouseComponent } from '../playback-mouse/playback-mouse.component';
+import { PreviewComponent } from '../preview/preview.component';
 
 export interface LoadStartEvent {
     playPosition: number;
@@ -32,6 +33,7 @@ export class MonacoPlayer extends TransactionPlayer {
         protected fileTreeComponent: NG2FileTreeComponent,
         protected resourceViewerComponent: ResourceViewerComponent,
         protected playbackMouseComponent: PlaybackMouseComponent,
+        protected previewComponent: PreviewComponent,
         protected logServer: ILogService,
         projectLoader: ProjectLoader,
         transactionLoader: TransactionLoader,
@@ -87,6 +89,28 @@ export class MonacoPlayer extends TransactionPlayer {
             const edits: editor.IIdentifiedSingleEditOperation[] = [];
             this.logServer.LogToConsole('MonacoPlayer', JSON.stringify(transaction.toObject()));
             switch (transaction.getType()) {
+                case TraceTransaction.TraceTransactionType.CUSTOMACTION:
+                    const customData = transaction.getCustomAction();
+                    switch (customData.getAction()) {
+                        case 'previewFile':
+                            if (!undo) {
+                                this.previewComponent.LoadPreview(this.projectId, transaction.getTimeOffsetMs(), customData.getData());
+                            } else {
+                                this.previewComponent.ClosePreview();
+                            }
+                            break;
+                        case 'previewFileclose':
+                            if (undo) {
+                                this.previewComponent.LoadPreview(this.projectId, transaction.getTimeOffsetMs(), customData.getData());
+                            } else {
+                                this.previewComponent.ClosePreview();
+                            }
+                            break;
+                        default:
+                            this.logServer.LogToConsole('MonacoPlayer', `Unidentified action: ${customData.getAction()}`);
+                            break;
+                    }
+                    break;
                 case TraceTransaction.TraceTransactionType.SCROLLFILE:
                     const scrollData = transaction.getScrollFile();
                     if (!undo) {

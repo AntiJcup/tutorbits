@@ -1,6 +1,9 @@
-import { Component, OnInit, EventEmitter, Output, Input } from '@angular/core';
+import { Component, OnInit, EventEmitter, Output, Input, NgZone } from '@angular/core';
 import { environment } from 'src/environments/environment';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
+import { IPreviewService } from 'src/app/services/abstract/IPreviewService';
+import { IErrorService } from 'src/app/services/abstract/IErrorService';
+import { TraceTransactionLog } from 'shared/Tracer/models/ts/Tracer_pb';
 
 @Component({
   selector: 'app-preview',
@@ -14,6 +17,7 @@ export class PreviewComponent implements OnInit {
   internalPreviewBaseUrl: string;
   internalPreviewPath: string;
   internalPreviewUrl: SafeUrl;
+
   get previewUrl(): SafeUrl {
     return this.internalPreviewUrl;
   }
@@ -33,10 +37,13 @@ export class PreviewComponent implements OnInit {
     return this.internalPreviewPath;
   }
 
-  @Input()
-  loading = false;
+  @Input() loading = false;
 
-  constructor(private sanitizer: DomSanitizer) { }
+  constructor(
+    private sanitizer: DomSanitizer,
+    private previewService: IPreviewService,
+    private errorServer: IErrorService,
+    private zone: NgZone) { }
 
   ngOnInit() {
   }
@@ -47,5 +54,48 @@ export class PreviewComponent implements OnInit {
 
   onCloseClicked() {
     this.closeClicked.next();
+  }
+
+  public async LoadPreview(projectId: string, offset: number, path: string): Promise<void> {
+    try {
+      this.loading = true;
+      const url = await this.previewService.LoadPreview(projectId, offset);
+
+      if (!url) {
+        this.errorServer.HandleError(`PreviewError`, 'failed to be retrieved');
+        return;
+      }
+
+      this.zone.runTask(() => {
+        this.previewBaseUrl = url;
+        this.previewPath = path;
+      });
+    } catch (err) {
+      this.errorServer.HandleError('PreviewError', err);
+    }
+    this.loading = false;
+  }
+
+  public async GeneratePreview(projectId: string, offset: number, path: string, logs: TraceTransactionLog[]): Promise<void> {
+    try {
+      const url = await this.previewService.GeneratePreview(projectId, offset, logs);
+
+      if (!url) {
+        this.errorServer.HandleError('PreviewError', ' preview url failed to be retrieved');
+        return;
+      }
+      this.zone.runTask(() => {
+        this.previewBaseUrl = url;
+        this.previewPath = path;
+      });
+    } catch (err) {
+      this.errorServer.HandleError('PreviewError', err);
+    }
+    this.loading = false;
+  }
+
+  public ClosePreview() {
+    this.previewBaseUrl = '';
+    this.previewPath = '';
   }
 }
