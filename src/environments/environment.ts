@@ -13,7 +13,8 @@ export const environment = {
   loginRedirectUri: 'https://local.tutorbits.com/login',
   logoutRedirectUri: 'https://local.tutorbits.com/logout',
   loggingEnabled: true,
-  loggingTraceEnabled: false
+  loggingTraceEnabled: false,
+  mouseAccurracyMS: 100
 };
 
 /*

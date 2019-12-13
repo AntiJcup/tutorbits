@@ -19,6 +19,7 @@ import { ResourceViewerComponent } from 'src/app/sub-components/resource-viewer/
 import { IPreviewService } from 'src/app/services/abstract/IPreviewService';
 import { Subscription } from 'rxjs';
 import { IEventService } from 'src/app/services/abstract/IEventService';
+import { PlaybackMouseComponent } from 'src/app/sub-components/playback-mouse/playback-mouse.component';
 
 @Component({
   templateUrl: './watch.component.html',
@@ -38,6 +39,7 @@ export class WatchComponent implements OnInit, OnDestroy {
   @ViewChild(PlaybackEditorComponent, { static: true }) playbackEditor: PlaybackEditorComponent;
   @ViewChild('video', { static: true }) playbackVideo: ElementRef;
   @ViewChild(ResourceViewerComponent, { static: true }) resourceViewerComponent: ResourceViewerComponent;
+  @ViewChild(PlaybackMouseComponent, { static: true }) playbackMouseComponent: PlaybackMouseComponent;
 
   codePlayer: MonacoPlayer;
   videoPlayer: VidPlayer;
@@ -105,6 +107,7 @@ export class WatchComponent implements OnInit, OnDestroy {
       this.playbackEditor,
       this.playbackTreeComponent,
       this.resourceViewerComponent,
+      this.playbackMouseComponent,
       this.logServer,
       new OnlineProjectLoader(this.requestObj, this.publishMode ? Guid.create().toString() : 'play'),
       new OnlineTransactionLoader(this.requestObj, this.publishMode ? Guid.create().toString() : 'play'),

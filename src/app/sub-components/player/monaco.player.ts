@@ -10,6 +10,7 @@ import { Subscription } from 'rxjs';
 import { ILogService } from 'src/app/services/abstract/ILogService';
 import { ResourceViewerComponent, ResourceData } from '../resource-viewer/resource-viewer.component';
 import { EventEmitter } from '@angular/core';
+import { PlaybackMouseComponent } from '../playback-mouse/playback-mouse.component';
 
 export interface LoadStartEvent {
     playPosition: number;
@@ -30,6 +31,7 @@ export class MonacoPlayer extends TransactionPlayer {
         protected codeComponent: MonacoEditorComponent,
         protected fileTreeComponent: NG2FileTreeComponent,
         protected resourceViewerComponent: ResourceViewerComponent,
+        protected playbackMouseComponent: PlaybackMouseComponent,
         protected logServer: ILogService,
         projectLoader: ProjectLoader,
         transactionLoader: TransactionLoader,
@@ -85,6 +87,10 @@ export class MonacoPlayer extends TransactionPlayer {
             const edits: editor.IIdentifiedSingleEditOperation[] = [];
             this.logServer.LogToConsole('MonacoPlayer', JSON.stringify(transaction.toObject()));
             switch (transaction.getType()) {
+                case TraceTransaction.TraceTransactionType.MOSUEMOVE:
+                    const mouseMoveData = transaction.getMouseMove();
+                    this.playbackMouseComponent.Move(mouseMoveData.getX(), mouseMoveData.getY());
+                    break;
                 case TraceTransaction.TraceTransactionType.UPLOADFILE:
                     const uploadResourceId = transaction.getUploadFile().getResourceId();
                     const uploadNewPath = transaction.getUploadFile().getNewFilePath();

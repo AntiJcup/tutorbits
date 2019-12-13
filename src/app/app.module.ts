@@ -77,6 +77,7 @@ import { TutorBitsMobileGuardService } from './services/guards/tutor-bits-mobile
 import { MobileNotSupportedComponent } from './components/mobile-not-supported/mobile-not-supported.component';
 import { IEventService } from './services/abstract/IEventService';
 import { TutorBitsGAEventService } from './services/tutor-bits-ga-event.service';
+import { PlaybackMouseComponent } from './sub-components/playback-mouse/playback-mouse.component';
 
 const appRoutes: Routes = [
   {
@@ -206,7 +207,8 @@ const appRoutes: Routes = [
     AccountUpdateUserNameComponent,
     BlogCardComponent,
     ContactComponent,
-    MobileNotSupportedComponent
+    MobileNotSupportedComponent,
+    PlaybackMouseComponent
   ],
   imports: [
     BrowserModule,

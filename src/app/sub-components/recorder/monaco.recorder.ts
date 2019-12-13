@@ -12,6 +12,7 @@ import { ILogService } from 'src/app/services/abstract/ILogService';
 import { IErrorService } from 'src/app/services/abstract/IErrorService';
 import { ITracerProjectService } from 'src/app/services/abstract/ITracerProjectService';
 import { ResourceViewerComponent, ResourceData } from '../resource-viewer/resource-viewer.component';
+import { environment } from 'src/environments/environment';
 
 export class MonacoRecorder extends TransactionRecorder {
 
@@ -23,12 +24,14 @@ export class MonacoRecorder extends TransactionRecorder {
     private nodeDeletedListener: Subscription = null;
     private nodeMovedListener: Subscription = null;
     private fileUploadedListener: Subscription = null;
+    private mouseMoveCallbackWrapper: any = null;
 
     private timeOffset: number;
     private start: number;
     private recording: boolean;
 
     private delayTimer: any;
+    private lastMouseTrackOffset: number;
 
     public get position(): number {
         return this.timeOffset;
@@ -84,6 +87,11 @@ export class MonacoRecorder extends TransactionRecorder {
         this.fileUploadedListener = this.fileTreeComponent.fileUploaded.subscribe((e: FileUploadData) => {
             this.onFileUploaded(e);
         });
+
+        this.mouseMoveCallbackWrapper = (e: MouseEvent) => {
+            this.onMouseMoved(e);
+        };
+        window.addEventListener('mousemove', this.mouseMoveCallbackWrapper);
     }
 
     public async StopRecording(): Promise<boolean> {
@@ -111,6 +119,10 @@ export class MonacoRecorder extends TransactionRecorder {
 
         if (this.fileUploadedListener) {
             this.fileUploadedListener.unsubscribe();
+        }
+
+        if (this.mouseMoveCallbackWrapper) {
+            window.removeEventListener('mousemove', this.mouseMoveCallbackWrapper);
         }
 
         return await this.SaveTransactionLogs(true);
@@ -372,6 +384,18 @@ export class MonacoRecorder extends TransactionRecorder {
         }).catch((err) => {
             this.errorServer.HandleError(`UploadResourceError`, `${err}`);
         });
+    }
+
+    public onMouseMoved(e: MouseEvent) {
+        this.timeOffset = Date.now() - this.start;
+        if (this.timeOffset - this.lastMouseTrackOffset < environment.mouseAccurracyMS) {
+            return;
+        }
+
+        this.lastMouseTrackOffset = this.timeOffset;
+        this.timeOffset = Date.now() - this.start;
+        this.MouseMove(this.timeOffset, e.x, e.y);
+        this.TriggerDelayedSave();
     }
 
     private TriggerDelayedSave(): void {

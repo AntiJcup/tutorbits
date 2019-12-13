@@ -9,5 +9,6 @@ export const environment = {
   loginRedirectUri: 'https://www-staging.tutorbits.com/login',
   logoutRedirectUri: 'https://www-staging.tutorbits.com/logout',
   loggingEnabled: true,
-  loggingTraceEnabled: false
+  loggingTraceEnabled: false,
+  mouseAccurracyMS: 100
 };
