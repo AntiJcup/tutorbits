@@ -3,7 +3,7 @@ import { ApiHttpRequest } from 'shared/web/lib/ts/ApiHttpRequest';
 
 export class OnlineStreamLoader extends StreamLoader {
 
-    constructor(protected projectId: string, protected requestor: ApiHttpRequest) {
+    constructor(protected projectId: string, protected requestor: ApiHttpRequest, protected cacheBuster: string = null) {
         super(projectId);
     }
 
@@ -13,6 +13,6 @@ export class OnlineStreamLoader extends StreamLoader {
             return null;
         }
 
-        return await response.json();
+        return `${await response.json()}${this.cacheBuster === null ? '' : `?cb=${this.cacheBuster}`}`;
     }
 }

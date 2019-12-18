@@ -77,7 +77,8 @@ export class WatchComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     const requestObj = new ApiHttpRequest(this.requestInfo);
-    this.videoPlayer = new VidPlayer(new OnlineStreamLoader(this.projectId, requestObj), this.playbackVideo.nativeElement);
+    this.videoPlayer = new VidPlayer(new OnlineStreamLoader(this.projectId, requestObj,
+      this.publishMode ? Guid.create().toString() : 'play'), this.playbackVideo.nativeElement);
     this.videoPlayer.Load().then().catch((e) => {
       this.errorServer.HandleError(`VideoError`, e);
     });
@@ -165,9 +166,9 @@ export class WatchComponent implements OnInit, OnDestroy {
     this.eventService.TriggerButtonClick('Watch', `Preview - ${this.projectId} - ${e}`);
     const previewPos = Math.min(Math.round(this.codePlayer.position), this.codePlayer.duration);
     this.previewComponent.LoadPreview(this.projectId, previewPos, e).then()
-    .catch((err) => {
-      this.errorServer.HandleError(`PreviewError`, err);
-    });
+      .catch((err) => {
+        this.errorServer.HandleError(`PreviewError`, err);
+      });
   }
 
   public onCloseClicked(e: any) {
