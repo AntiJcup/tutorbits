@@ -100,7 +100,8 @@ const appRoutes: Routes = [
     path: 'record/:projectId',
     component: RecordComponent,
     data: { title: 'Record' },
-    canActivate: [TutorBitsAuthGuardService, TutorBitsMobileGuardService]
+    canActivate: [TutorBitsAuthGuardService, TutorBitsMobileGuardService],
+    canDeactivate: [TutorBitsPendingChangesGuardService]
   },
   {
     path: 'sandbox',

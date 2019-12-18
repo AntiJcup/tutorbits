@@ -58,6 +58,7 @@ export class MonacoRecorder extends TransactionRecorder {
         projectWriter: ProjectWriter,
         transactionWriter: TransactionWriter,
         protected projectService: ITracerProjectService,
+        protected trackNonFile: boolean,
         transactionLogs?: TraceTransactionLog[]) {
         super(projectId, projectLoader, projectWriter, transactionWriter, transactionLogs);
 
@@ -97,22 +98,24 @@ export class MonacoRecorder extends TransactionRecorder {
             this.onFileUploaded(e);
         });
 
-        this.mouseMoveCallbackWrapper = (e: MouseEvent) => {
-            this.onMouseMoved(e);
-        };
-        window.addEventListener('mousemove', this.mouseMoveCallbackWrapper);
+        if (this.trackNonFile) {
+            this.mouseMoveCallbackWrapper = (e: MouseEvent) => {
+                this.onMouseMoved(e);
+            };
+            window.addEventListener('mousemove', this.mouseMoveCallbackWrapper);
 
-        this.scrollChangeListener = this.codeComponent.codeEditor.onDidScrollChange((e: IScrollEvent) => {
-            this.onScrolled(e);
-        });
+            this.scrollChangeListener = this.codeComponent.codeEditor.onDidScrollChange((e: IScrollEvent) => {
+                this.onScrolled(e);
+            });
 
-        this.previewListener = this.fileTreeComponent.previewClicked.subscribe((file: string) => {
-            this.onPreviewClicked(file);
-        });
+            this.previewListener = this.fileTreeComponent.previewClicked.subscribe((file: string) => {
+                this.onPreviewClicked(file);
+            });
 
-        this.previewCloseListener = this.previewComponent.closeClicked.subscribe((e: any) => {
-            this.onPreviewCloseClicked();
-        });
+            this.previewCloseListener = this.previewComponent.closeClicked.subscribe((e: any) => {
+                this.onPreviewCloseClicked();
+            });
+        }
     }
 
     public async StopRecording(): Promise<boolean> {

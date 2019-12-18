@@ -37,6 +37,7 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
   loadingRecording = false;
   timeout = 1000 * 60 * 60;
   timeoutWarning = this.timeout - (1000 * 60 * 5);
+  confirmMessage = 'WARNING: You will lose your current recording if you navigate away!';
 
   @ViewChild(RecordingFileTreeComponent, { static: true }) recordingTreeComponent: RecordingFileTreeComponent;
   @ViewChild(RecordingEditorComponent, { static: true }) recordingEditor: RecordingEditorComponent;
@@ -182,7 +183,8 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
         new OnlineProjectLoader(this.requestObj),
         this.tracerProjectService,
         this.tracerTransactionService,
-        this.tracerProjectService);
+        this.tracerProjectService,
+        true);
 
       this.codeRecorder.LoadProject(this.projectId).then((proj) => {
         if (proj.getDuration() > 0 && !confirm('Are you sure you want to start the recording over?')) {
@@ -237,6 +239,6 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
     // insert logic to check if there are pending changes here;
     // returning true will navigate without confirmation
     // returning false will show a confirm dialog before navigating away
-    return false;
+    return !this.recording;
   }
 }
