@@ -82,7 +82,6 @@ export class WatchComponent implements OnInit, OnDestroy {
     this.videoPlayer.Load().then().catch((e) => {
       this.errorServer.HandleError(`VideoError`, e);
     });
-
   }
 
   ngOnDestroy(): void {
@@ -94,6 +93,10 @@ export class WatchComponent implements OnInit, OnDestroy {
 
     if (this.onLoadCompleteSub) {
       this.onLoadCompleteSub.unsubscribe();
+    }
+
+    if (this.codePlayer) {
+      this.codePlayer.Dispose();
     }
   }
 

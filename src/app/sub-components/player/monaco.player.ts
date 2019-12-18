@@ -60,6 +60,12 @@ export class MonacoPlayer extends TransactionPlayer {
         });
     }
 
+    public Dispose() {
+        if (this.nodeSelectedListener) {
+            this.nodeSelectedListener.unsubscribe();
+        }
+    }
+
     protected OnNodeSelected(e: NodeSelectedEvent): void {
         this.logServer.LogToConsole('MonacoPlayer', `OnNodeSelected: ${JSON.stringify(e.node.node)}`);
         if (e.node.isBranch()) {
