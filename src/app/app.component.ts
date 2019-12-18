@@ -2,6 +2,7 @@ import { Component, OnInit, NgZone, ChangeDetectorRef } from '@angular/core';
 import { environment } from 'src/environments/environment';
 import { IAuthService } from './services/abstract/IAuthService';
 import { Router, NavigationEnd } from '@angular/router';
+import { IEventService } from './services/abstract/IEventService';
 
 @Component({
   selector: 'app-root',
@@ -14,17 +15,18 @@ export class AppComponent implements OnInit {
   public logoutUrl: string;
   public loggedIn = false;
 
-  constructor(private auth: IAuthService, private zone: NgZone, private cdr: ChangeDetectorRef, private router: Router) {
+  constructor(
+    private auth: IAuthService,
+    private zone: NgZone,
+    private cdr: ChangeDetectorRef,
+    private router: Router,
+    private eventService: IEventService) {
     this.loginUrl = environment.loginUrl;
     this.logoutUrl = environment.logoutUrl;
 
     this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
-        if (!(window as any).ga) {
-          return;
-        }
-        (window as any).ga('set', 'page', event.urlAfterRedirects);
-        (window as any).ga('send', 'pageview');
+        this.eventService.TriggerPageView(event.urlAfterRedirects);
       }
     });
   }
