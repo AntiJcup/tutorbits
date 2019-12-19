@@ -207,6 +207,9 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
       this.codeRecorder.StopRecording()
       ]).then(() => {
         this.logServer.LogToConsole('Record', 'Finished recording');
+      }).catch(() => {
+        this.errorServer.HandleError('Record', 'Failed saving recording');
+        this.hasRecorded = false;
       }).finally(() => {
         this.saving = false;
       });

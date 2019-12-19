@@ -10,7 +10,7 @@ export class OnlineStreamWriter extends StreamWriter {
     public async StartUpload(projectId: string): Promise<string> {
         const response = await this.requestor.Post(`api/project/video/recording/start?projectId=${projectId}`);
         if (!response.ok) {
-            return null;
+            throw new Error('Failed starting upload');
         }
 
         return await response.json();
@@ -21,7 +21,7 @@ export class OnlineStreamWriter extends StreamWriter {
             `api/project/video/recording/continue?projectId=${projectId}&recordingId=${recordingId}&part=${part}&last=${last}`, data);
 
         if (!response.ok) {
-            return null;
+            throw new Error('Failed upload part');
         }
 
         return await response.json();
@@ -33,7 +33,7 @@ export class OnlineStreamWriter extends StreamWriter {
             { 'Content-Type': 'application/json' });
 
         if (!response.ok) {
-            return null;
+            throw new Error('Failed finish upload');
         }
 
         return await response.json();

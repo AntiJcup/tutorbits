@@ -23,7 +23,7 @@ export class TutorBitsVideoRecordingService extends IVideoRecordingService {
       .Post(`api/project/video/recording/start?projectId=${projectId}`, null, (await this.GetAuthHeaders()));
 
     if (!response.ok) {
-      return null;
+      throw new Error('Failed start upload');
     }
 
     return await response.json();
@@ -35,7 +35,7 @@ export class TutorBitsVideoRecordingService extends IVideoRecordingService {
       (await this.GetAuthHeaders()));
 
     if (!response.ok) {
-      return null;
+      throw new Error('Failed continue upload');
     }
 
     return await response.json();
@@ -47,7 +47,7 @@ export class TutorBitsVideoRecordingService extends IVideoRecordingService {
       (await this.GetAuthHeaders()));
 
     if (!response.ok) {
-      return null;
+      throw new Error('Failed finish upload');
     }
 
     return await response.json();
