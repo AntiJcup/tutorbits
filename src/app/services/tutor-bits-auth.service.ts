@@ -43,6 +43,12 @@ export class TutorBitsAuthService extends IAuthService {
     }
     this.dataService.SetAuthToken(this.token);
     this.tokenObs.next(this.token);
+
+    const timeOut = Math.max(1, ((new Date()).valueOf() - this.token.expire_date) - this.refreshLookAheadMilliseconds);
+
+    setTimeout(() => {
+      this.RefreshToken().then();
+    }, timeOut);
   }
 
   public getTokenObserver(): BehaviorSubject<JWT> {
@@ -111,11 +117,12 @@ export class TutorBitsAuthService extends IAuthService {
 
   public async RefreshToken(): Promise<void> {
     try {
-      if (!this.token || this.IsTokenValid(this.token)) {
+      if (!this.token || this.IsTokenValid(this.token, true)) {
         return;
       }
 
       if (!this.token.refresh_token) {
+        this.errorServer.HandleError('AuthService', `Missing refresh token`);
         this.updateToken(null);
         throw new Error('Missing refresh token');
       }
@@ -150,19 +157,19 @@ export class TutorBitsAuthService extends IAuthService {
       return;
     }
 
-    if (cachedToken && !this.IsTokenValid(cachedToken)) {
+    if (cachedToken) {
       await this.RefreshToken();
     }
 
     this.logServer.LogToConsole('AuthService', `Loaded cached token`, this.token);
   }
 
-  private IsTokenValid(token: JWT): boolean {
-    return token && token.expire_date >= ((new Date()).valueOf() + this.refreshLookAheadMilliseconds);
+  private IsTokenValid(token: JWT, lookAhead: boolean): boolean {
+    return token && token.expire_date >= ((new Date()).valueOf() + (lookAhead ? this.refreshLookAheadMilliseconds : 0));
   }
 
   public IsLoggedIn(): boolean {
-    return this.IsTokenValid(this.token);
+    return this.IsTokenValid(this.token, false);
   }
 
   public RequestLogin(returnRoute: string = null): void {
