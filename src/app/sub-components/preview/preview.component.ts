@@ -61,6 +61,10 @@ export class PreviewComponent implements OnInit {
       this.loading = true;
       const url = await this.previewService.LoadPreview(projectId, offset);
 
+      if (!this.loading) {
+        return;
+      }
+
       if (!url) {
         this.errorServer.HandleError(`PreviewError`, 'failed to be retrieved');
         return;
@@ -78,7 +82,12 @@ export class PreviewComponent implements OnInit {
 
   public async GeneratePreview(projectId: string, offset: number, path: string, logs: TraceTransactionLog[]): Promise<void> {
     try {
+      this.loading = true;
       const url = await this.previewService.GeneratePreview(projectId, offset, logs);
+
+      if (!this.loading) {
+        return;
+      }
 
       if (!url) {
         this.errorServer.HandleError('PreviewError', ' preview url failed to be retrieved');
@@ -97,5 +106,6 @@ export class PreviewComponent implements OnInit {
   public ClosePreview() {
     this.previewBaseUrl = '';
     this.previewPath = '';
+    this.loading = false;
   }
 }
