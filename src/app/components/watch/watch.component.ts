@@ -130,6 +130,7 @@ export class WatchComponent implements OnInit, OnDestroy {
 
     this.codePlayer.Load().then(() => {
       this.codePlayer.Play();
+      this.playbackVideo.nativeElement.volume = 0.5;
       // this.playbackVideo.nativeElement.play();
       this.paceKeeperInterval = setInterval(() => {
         this.paceKeeperLoop();
