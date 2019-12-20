@@ -10,3 +10,16 @@
 
 .treeHeader
     position: relative
+
+.tutorialFileTreeContainer
+    position: relative
+    &:hover
+        &::after
+            content: "Read Only"
+            position: absolute
+            color: white
+            background-color: rgba(0, 0, 0, .5)
+            border-radius: 10px
+            bottom: 368px
+            right: 25px
+            padding: 10px
