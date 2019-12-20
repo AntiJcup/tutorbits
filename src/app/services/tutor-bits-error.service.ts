@@ -3,12 +3,13 @@ import { environment } from 'src/environments/environment';
 import { IErrorService } from './abstract/IErrorService';
 import { MatSnackBar, SimpleSnackBar, MatSnackBarRef } from '@angular/material';
 import { Router, Event, NavigationStart } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Subscription, Observable } from 'rxjs';
 import { IEventService } from './abstract/IEventService';
 
 @Injectable()
 export class TutorBitsErrorService extends IErrorService {
   private lastSnackbar: MatSnackBarRef<SimpleSnackBar> = null;
+  private lastSnackBarCloseListener: Subscription;
 
   constructor(private snackBar: MatSnackBar, private router: Router, private eventService: IEventService) {
     super();
@@ -23,11 +24,28 @@ export class TutorBitsErrorService extends IErrorService {
   }
 
   public HandleError(component: string, error: string): void {
+    const message = `${component} - ${error}`;
     if (this.lastSnackbar) {
+      if (this.lastSnackbar.instance.data.message === message) {
+        return; // Already showing
+      }
       this.lastSnackbar.dismiss();
+      if (this.lastSnackBarCloseListener) {
+        this.lastSnackBarCloseListener.unsubscribe();
+      }
     }
 
-    this.lastSnackbar = this.snackBar.open(`${component} - ${error}`, 'close');
+    this.lastSnackbar = this.snackBar.open(message, 'close');
+
+    this.lastSnackBarCloseListener = this.lastSnackbar.afterDismissed().subscribe(() => {
+      this.lastSnackbar = null;
+      if (!this.lastSnackBarCloseListener) {
+        return;
+      }
+
+      this.lastSnackBarCloseListener.unsubscribe();
+    });
+
     this.eventService.TriggerError(component, error);
   }
 
