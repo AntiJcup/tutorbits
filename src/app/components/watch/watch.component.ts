@@ -130,7 +130,7 @@ export class WatchComponent implements OnInit, OnDestroy {
 
     this.codePlayer.Load().then(() => {
       this.codePlayer.Play();
-      this.playbackVideo.nativeElement.play();
+      // this.playbackVideo.nativeElement.play();
       this.paceKeeperInterval = setInterval(() => {
         this.paceKeeperLoop();
       }, this.paceKeeperCheckSpeedMS);
@@ -144,6 +144,10 @@ export class WatchComponent implements OnInit, OnDestroy {
       return;
     }
     const currentVideoTime = this.videoPlayer.player.currentTime * 1000;
+    if (currentVideoTime === 0) {
+      this.codePlayer.SetPostionPct(1);
+      return;
+    }
     if (this.videoPlayer.IsBuffering() && !this.pausedVideo) {
       this.paceKeperPosition = this.codePlayer.position = currentVideoTime;
       return;
