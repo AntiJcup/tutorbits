@@ -78,6 +78,8 @@ import { MobileNotSupportedComponent } from './components/mobile-not-supported/m
 import { IEventService } from './services/abstract/IEventService';
 import { TutorBitsGAEventService } from './services/tutor-bits-ga-event.service';
 import { PlaybackMouseComponent } from './sub-components/playback-mouse/playback-mouse.component';
+import { ITitleService } from './services/abstract/ITitleService';
+import { TutorBitsTitleService } from './services/tutor-bits-title.service';
 
 const appRoutes: Routes = [
   {
@@ -248,6 +250,7 @@ const appRoutes: Routes = [
     { provide: IVideoRecordingService, useClass: TutorBitsVideoRecordingService },
     { provide: IPreviewService, useClass: TutorBitsPreviewService },
     { provide: IUserApiService, useClass: TutorBitsUserApiService },
+    { provide: ITitleService, useClass: TutorBitsTitleService },
     { provide: IEventService, useClass: TutorBitsGAEventService }
   ],
   bootstrap: [AppComponent]

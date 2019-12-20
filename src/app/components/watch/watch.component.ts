@@ -19,6 +19,8 @@ import { Subscription } from 'rxjs';
 import { IEventService } from 'src/app/services/abstract/IEventService';
 import { PlaybackMouseComponent } from 'src/app/sub-components/playback-mouse/playback-mouse.component';
 import { PreviewComponent } from 'src/app/sub-components/preview/preview.component';
+import { ITitleService } from 'src/app/services/abstract/ITitleService';
+import { ViewTutorial } from 'src/app/models/tutorial/view-tutorial';
 
 @Component({
   templateUrl: './watch.component.html',
@@ -70,7 +72,8 @@ export class WatchComponent implements OnInit, OnDestroy {
     private projectService: ITracerProjectService,
     private errorServer: IErrorService,
     private logServer: ILogService,
-    private eventService: IEventService) {
+    private eventService: IEventService,
+    private titleService: ITitleService) {
     this.projectId = this.route.snapshot.paramMap.get('projectId');
     this.publishMode = this.route.snapshot.queryParamMap.get('publish') === 'true';
   }
@@ -81,6 +84,10 @@ export class WatchComponent implements OnInit, OnDestroy {
       this.publishMode ? Guid.create().toString() : 'play'), this.playbackVideo.nativeElement);
     this.videoPlayer.Load().then().catch((e) => {
       this.errorServer.HandleError(`VideoError`, e);
+    });
+
+    this.tutorialService.Get(this.projectId).then((tutorial: ViewTutorial) => {
+      this.titleService.SetTitle(`Watching ${tutorial.title}`);
     });
   }
 

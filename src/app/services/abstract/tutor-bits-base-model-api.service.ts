@@ -74,4 +74,15 @@ export abstract class TutorBitsBaseModelApiService<CreateModelT, ViewModelT> imp
 
     return response.ok;
   }
+
+  public async Get(id: string): Promise<ViewModelT> {
+    const response = await this.apiService.generateRequest()
+      .Get(`${this.basePath}/GetById?id=${id}`, await this.GetHeaders());
+
+    if (!response.ok) {
+      return null;
+    }
+
+    return (await response.json()) as ViewModelT;
+  }
 }

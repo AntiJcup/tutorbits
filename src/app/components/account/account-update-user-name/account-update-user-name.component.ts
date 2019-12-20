@@ -6,6 +6,7 @@ import { FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ILogService } from 'src/app/services/abstract/ILogService';
 import { IErrorService } from 'src/app/services/abstract/IErrorService';
+import { ITitleService } from 'src/app/services/abstract/ITitleService';
 
 @Component({
   templateUrl: './account-update-user-name.component.html',
@@ -43,9 +44,11 @@ export class AccountUpdateUserNameComponent implements OnInit {
     private route: ActivatedRoute,
     private logServer: ILogService,
     private accountService: TutorBitsAccountService,
-    private errorServer: IErrorService) { }
+    private errorServer: IErrorService,
+    private titleService: ITitleService) { }
 
   ngOnInit() {
+    this.titleService.SetTitle('Update UserName');
     this.model.userName = this.route.snapshot.paramMap.get('currentUserName');
   }
 

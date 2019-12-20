@@ -22,6 +22,8 @@ import { Observable } from 'rxjs';
 import { ComponentCanDeactivate } from 'src/app/services/guards/tutor-bits-pending-changes-guard.service';
 import { IEventService } from 'src/app/services/abstract/IEventService';
 import { PreviewComponent } from 'src/app/sub-components/preview/preview.component';
+import { ITitleService } from 'src/app/services/abstract/ITitleService';
+import { ViewTutorial } from 'src/app/models/tutorial/view-tutorial';
 
 @Component({
   templateUrl: './record.component.html',
@@ -66,12 +68,17 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
     private tracerProjectService: ITracerProjectService,
     private tracerTransactionService: ITracerTransactionService,
     private videoRecordingService: IVideoRecordingService,
-    private eventService: IEventService) {
+    private eventService: IEventService,
+    private tutorialService: TutorBitsTutorialService,
+    private titleService: ITitleService) {
     this.projectId = this.route.snapshot.paramMap.get('projectId');
     this.hasRecorded = this.route.snapshot.queryParamMap.get('back') === 'true';
   }
 
   ngOnInit(): void {
+    this.tutorialService.Get(this.projectId).then((tutorial: ViewTutorial) => {
+      this.titleService.SetTitle(`Recording ${tutorial.title}`);
+    });
   }
 
   ngOnDestroy(): void {

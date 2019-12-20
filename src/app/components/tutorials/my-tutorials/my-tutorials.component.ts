@@ -5,6 +5,7 @@ import { TutorBitsTutorialService } from 'src/app/services/tutor-bits-tutorial.s
 import { IErrorService } from 'src/app/services/abstract/IErrorService';
 import { ILogService } from 'src/app/services/abstract/ILogService';
 import { DeleteTutorialEvent } from 'src/app/sub-components/edit-tutorial-card/edit-tutorial-card.component';
+import { ITitleService } from 'src/app/services/abstract/ITitleService';
 
 @Component({
   templateUrl: './my-tutorials.component.html',
@@ -18,9 +19,11 @@ export class MyTutorialsComponent implements OnInit {
     private router: Router,
     private tutorialsService: TutorBitsTutorialService,
     private errorServer: IErrorService,
-    private logServer: ILogService) { }
+    private logServer: ILogService,
+    private titleService: ITitleService) { }
 
   ngOnInit() {
+    this.titleService.SetTitle('My Tutorials');
     this.tutorialsService.GetAllByOwner().then((tutorials) => {
       this.tutorials = tutorials;
       this.logServer.LogToConsole('MyTutorialsComponent', tutorials.length);

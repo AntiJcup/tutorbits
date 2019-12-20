@@ -18,6 +18,9 @@ import { ComponentCanDeactivate } from 'src/app/services/guards/tutor-bits-pendi
 import { Observable } from 'rxjs';
 import { IEventService } from 'src/app/services/abstract/IEventService';
 import { PreviewComponent } from 'src/app/sub-components/preview/preview.component';
+import { ViewTutorial } from 'src/app/models/tutorial/view-tutorial';
+import { TutorBitsTutorialService } from 'src/app/services/tutor-bits-tutorial.service';
+import { ITitleService } from 'src/app/services/abstract/ITitleService';
 
 @Component({
   templateUrl: './sandbox.component.html',
@@ -49,11 +52,20 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate {
     private logServer: ILogService,
     private tracerProjectService: ITracerProjectService,
     private errorServer: IErrorService,
-    private eventService: IEventService) {
+    private eventService: IEventService,
+    private tutorialService: TutorBitsTutorialService,
+    private titleService: ITitleService) {
     this.loadProjectId = this.route.snapshot.paramMap.get('projectId');
   }
 
   ngOnInit(): void {
+    if (this.loadProjectId) {
+      this.tutorialService.Get(this.loadProjectId).then((tutorial: ViewTutorial) => {
+        this.titleService.SetTitle(`Sandbox of ${tutorial.title}`);
+      });
+    } else {
+      this.titleService.SetTitle(`Sandbox`);
+    }
   }
 
   onCodeInitialized(recordingEditor: RecordingEditorComponent) {
@@ -112,10 +124,10 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate {
     this.eventService.TriggerButtonClick('Sandbox', `Preview - ${this.projectId} - ${e}`);
     const previewPos = Math.round(this.codeRecorder.position);
     this.previewComponent.GeneratePreview(this.projectId, previewPos, e, this.codeRecorder.logs)
-    .then()
-    .catch((err) => {
-      this.errorServer.HandleError('PreviewError', err);
-    })
+      .then()
+      .catch((err) => {
+        this.errorServer.HandleError('PreviewError', err);
+      })
   }
 
   public async Load(): Promise<void> {

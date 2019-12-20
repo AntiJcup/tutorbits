@@ -1,8 +1,9 @@
 import { Component, OnInit, NgZone, ChangeDetectorRef } from '@angular/core';
 import { environment } from 'src/environments/environment';
 import { IAuthService } from './services/abstract/IAuthService';
-import { Router, NavigationEnd } from '@angular/router';
+import { Router, NavigationEnd, Route, ActivatedRoute, NavigationStart } from '@angular/router';
 import { IEventService } from './services/abstract/IEventService';
+import { ITitleService } from './services/abstract/ITitleService';
 
 @Component({
   selector: 'app-root',
@@ -14,19 +15,29 @@ export class AppComponent implements OnInit {
   public loginUrl: string;
   public logoutUrl: string;
   public loggedIn = false;
+  public title = 'Home';
 
   constructor(
     private auth: IAuthService,
     private zone: NgZone,
     private cdr: ChangeDetectorRef,
     private router: Router,
-    private eventService: IEventService) {
+    private eventService: IEventService,
+    private titleService: ITitleService) {
     this.loginUrl = environment.loginUrl;
     this.logoutUrl = environment.logoutUrl;
+
+    this.titleService.GetTitleObs().subscribe((title: string) => {
+      this.title = title;
+    });
 
     this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
         this.eventService.TriggerPageView(event.urlAfterRedirects);
+      }
+
+      if (event instanceof NavigationStart) {
+        this.titleService.SetTitle('');
       }
     });
   }

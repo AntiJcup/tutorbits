@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { TutorBitsTutorialService } from 'src/app/services/tutor-bits-tutorial.service';
 import { IErrorService } from 'src/app/services/abstract/IErrorService';
 import { ILogService } from 'src/app/services/abstract/ILogService';
+import { ITitleService } from 'src/app/services/abstract/ITitleService';
 
 @Component({
   templateUrl: './view-tutorials.component.html',
@@ -20,9 +21,11 @@ export class ViewTutorialsComponent implements OnInit {
     private router: Router,
     private tutorialsService: TutorBitsTutorialService,
     private errorServer: IErrorService,
-    private logServer: ILogService) { }
+    private logServer: ILogService,
+    private titleService: ITitleService) { }
 
   ngOnInit() {
+    this.titleService.SetTitle('Gallery');
     this.tutorialsService.GetAll().then((tutorials) => {
       this.tutorials = tutorials;
       this.logServer.LogToConsole('ViewTutorials', tutorials.length);
@@ -32,7 +35,7 @@ export class ViewTutorialsComponent implements OnInit {
 
         this.tutorialsByType[element.type] = this.tutorialsByType[element.type] ? this.tutorialsByType[element.type] : [];
         this.tutorialsByType[element.type].push(element);
-        
+
         if (this.tutorialTypes.indexOf(element.type) === -1) {
           this.tutorialTypes.push(element.type);
         }

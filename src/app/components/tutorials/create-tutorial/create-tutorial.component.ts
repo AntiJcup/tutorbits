@@ -6,6 +6,7 @@ import { TutorBitsTutorialService } from 'src/app/services/tutor-bits-tutorial.s
 import { Router } from '@angular/router';
 import { IErrorService } from 'src/app/services/abstract/IErrorService';
 import { ILogService } from 'src/app/services/abstract/ILogService';
+import { ITitleService } from 'src/app/services/abstract/ITitleService';
 
 @Component({
   templateUrl: './create-tutorial.component.html',
@@ -22,9 +23,11 @@ export class CreateTutorialComponent implements OnInit, OnDestroy {
     private router: Router,
     private errorServer: IErrorService,
     private logServer: ILogService,
-    private zone: NgZone) { }
+    private zone: NgZone,
+    private titleService: ITitleService) { }
 
   ngOnInit() {
+    this.titleService.SetTitle('Create Tutorial');
     this.loading = true;
     this.tutorialService.GetTutorialTypes().then((tutorialTypes) => {
       const tutorialTypeOptions = [];

@@ -16,4 +16,5 @@ export interface IModelApiService<CreateModelT, ViewModelT> {
     Create(tutorial: CreateModelT): Promise<ResponseWrapper<ViewModelT>>;
     UpdateStatus(id: string, status: Status): Promise<boolean>;
     GetAll(status: Status): Promise<ViewModelT[]>;
+    Get(id: string): Promise<ViewModelT>;
 }

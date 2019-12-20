@@ -5,6 +5,7 @@ import { IErrorService } from 'src/app/services/abstract/IErrorService';
 import { ILogService } from 'src/app/services/abstract/ILogService';
 import { TutorBitsAccountService } from 'src/app/services/tutor-bits-account.service';
 import { ViewAccount } from 'src/app/models/user/view-account';
+import { ITitleService } from 'src/app/services/abstract/ITitleService';
 
 @Component({
   templateUrl: './my-account.component.html',
@@ -17,9 +18,11 @@ export class MyAccountComponent implements OnInit {
   constructor(
     protected accountService: TutorBitsAccountService,
     private errorServer: IErrorService,
-    private logServer: ILogService) { }
+    private logServer: ILogService,
+    private titleService: ITitleService) { }
 
   ngOnInit() {
+    this.titleService.SetTitle('Account');
     this.accountService.GetAccountInformation().then((account: ViewAccount) => {
       this.account = account;
     }).catch((err) => {
