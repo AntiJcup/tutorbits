@@ -77,7 +77,7 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
 
   ngOnInit(): void {
     this.tutorialService.Get(this.projectId).then((tutorial: ViewTutorial) => {
-      this.titleService.SetTitle(`Recording ${tutorial.title}`);
+      this.titleService.SetTitle(`Recording: ${tutorial.title}`);
     });
   }
 
