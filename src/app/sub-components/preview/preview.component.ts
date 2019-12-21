@@ -4,6 +4,7 @@ import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { IPreviewService } from 'src/app/services/abstract/IPreviewService';
 import { IErrorService } from 'src/app/services/abstract/IErrorService';
 import { TraceTransactionLog } from 'shared/Tracer/models/ts/Tracer_pb';
+import { Guid } from 'guid-typescript';
 
 @Component({
   selector: 'app-preview',
@@ -17,6 +18,7 @@ export class PreviewComponent implements OnInit {
   internalPreviewBaseUrl: string;
   internalPreviewPath: string;
   internalPreviewUrl: SafeUrl;
+  internalLoadingId: string;
 
   get previewUrl(): SafeUrl {
     return this.internalPreviewUrl;
@@ -59,9 +61,12 @@ export class PreviewComponent implements OnInit {
   public async LoadPreview(projectId: string, offset: number, path: string): Promise<void> {
     try {
       this.loading = true;
+      this.internalLoadingId = Guid.create().toString();
+      const loadingRef = this.internalLoadingId;
       const url = await this.previewService.LoadPreview(projectId, offset);
 
-      if (!this.loading) {
+      // Was cancelled or another preview started loading
+      if (!this.loading || this.internalLoadingId !== loadingRef) {
         return;
       }
 
