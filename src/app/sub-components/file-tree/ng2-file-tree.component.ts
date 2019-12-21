@@ -210,6 +210,18 @@ export abstract class NG2FileTreeComponent {
       return;
     }
     this.zone.runTask(() => {
+      if (sourcePath.endsWith('/') && !isBranch) {
+        sourcePath = sourcePath.substr(0, sourcePath.length - 1);
+      } else if (!sourcePath.endsWith('/') && isBranch) {
+        sourcePath += '/';
+      }
+
+      if (destinationPath.endsWith('/') && !isBranch) {
+        destinationPath = destinationPath.substr(0, destinationPath.length - 1);
+      } else if (!destinationPath.endsWith('/') && isBranch) {
+        destinationPath += '/';
+      }
+
       const oldNode = this.internalFiles[sourcePath];
       this.internalFiles[destinationPath] = oldNode;
       delete this.internalFiles[sourcePath];
