@@ -37,8 +37,8 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
   canRecord = false;
   finishRecording = false;
   loadingRecording = false;
-  timeout = 1000 * 60 * 60;
-  timeoutWarning = this.timeout - (1000 * 60 * 5);
+  timeout = 1000 * 60 * 15;
+  timeoutWarning = this.timeout - (1000 * 60 * 2);
   confirmMessage = 'WARNING: You will lose your current recording if you navigate away!';
 
   @ViewChild(RecordingFileTreeComponent, { static: true }) recordingTreeComponent: RecordingFileTreeComponent;
@@ -138,6 +138,13 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
     });
   }
 
+  resetState() {
+    this.recordingTreeComponent.treeComponent.treeModel = this.recordingTreeComponent.tree;
+    this.recordingTreeComponent.treeComponent.ngOnChanges(null);
+    this.recordingEditor.ClearCacheForFolder('/');
+    this.recordingEditor.currentFilePath = '';
+  }
+
   onRecordingStateChanged(recording: boolean) {
     this.eventService.TriggerButtonClick('Record', `Record - ${this.projectId}`);
     if (this.timeoutWarningTimer) {
@@ -156,10 +163,7 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
           return;
         }
 
-        this.recordingTreeComponent.treeComponent.treeModel = this.recordingTreeComponent.tree;
-        this.recordingTreeComponent.treeComponent.ngOnChanges(null);
-        this.recordingEditor.ClearCacheForFolder('/');
-        this.recordingEditor.currentFilePath = '';
+        this.resetState();
       }
 
       this.timeoutTimer = setTimeout(() => {
@@ -217,6 +221,7 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
       }).catch(() => {
         this.errorServer.HandleError('Record', 'Failed saving recording');
         this.hasRecorded = false;
+        this.resetState();
       }).finally(() => {
         this.saving = false;
       });
