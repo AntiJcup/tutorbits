@@ -240,8 +240,10 @@ export class MonacoRecorder extends TransactionRecorder {
 
         switch (this.fileTreeComponent.GetNodeType(e.node)) {
             case ResourceType.code:
-                this.codeComponent.currentFilePath = newFileName;
-                this.codeComponent.codeEditor.focus();
+                if (!e.node.isBranch()) {
+                    this.codeComponent.currentFilePath = newFileName;
+                    this.codeComponent.codeEditor.focus();
+                }
                 break;
             case ResourceType.asset:
                 return;
@@ -290,11 +292,13 @@ export class MonacoRecorder extends TransactionRecorder {
         let oldFileData = null;
         switch (this.fileTreeComponent.GetNodeType(e.node)) {
             case ResourceType.code:
-                oldFileData = this.codeComponent.GetCacheForFileName(oldFileName);
-                this.codeComponent.ClearCacheForFile(oldFileName);
-                this.codeComponent.currentFilePath = '';
-                this.codeComponent.UpdateCacheForFile(newFileName, oldFileData);
-                this.codeComponent.currentFilePath = newFileName;
+                if (!e.node.isBranch()) {
+                    oldFileData = this.codeComponent.GetCacheForFileName(oldFileName);
+                    this.codeComponent.ClearCacheForFile(oldFileName);
+                    this.codeComponent.currentFilePath = '';
+                    this.codeComponent.UpdateCacheForFile(newFileName, oldFileData);
+                    this.codeComponent.currentFilePath = newFileName;
+                }
                 break;
             case ResourceType.asset:
                 break;
@@ -321,11 +325,13 @@ export class MonacoRecorder extends TransactionRecorder {
 
         switch (this.fileTreeComponent.GetNodeType(node)) {
             case ResourceType.code:
-                oldFileData = this.codeComponent.GetCacheForFileName(oldFileName);
-                this.codeComponent.ClearCacheForFile(oldFileName);
-                this.codeComponent.currentFilePath = '';
-                this.codeComponent.UpdateCacheForFile(newFileName, oldFileData);
-                this.codeComponent.currentFilePath = newFileName;
+                if (!node.isBranch()) {
+                    oldFileData = this.codeComponent.GetCacheForFileName(oldFileName);
+                    this.codeComponent.ClearCacheForFile(oldFileName);
+                    this.codeComponent.currentFilePath = '';
+                    this.codeComponent.UpdateCacheForFile(newFileName, oldFileData);
+                    this.codeComponent.currentFilePath = newFileName;
+                }
                 break;
             case ResourceType.asset:
                 break;
@@ -386,11 +392,13 @@ export class MonacoRecorder extends TransactionRecorder {
 
         switch (this.fileTreeComponent.GetNodeType(e.node)) {
             case ResourceType.code:
-                oldFileData = this.codeComponent.GetCacheForFileName(oldFileName);
-                this.codeComponent.ClearCacheForFile(oldFileName);
-                this.codeComponent.currentFilePath = '';
-                this.codeComponent.UpdateCacheForFile(newFileName, oldFileData);
-                this.codeComponent.currentFilePath = newFileName;
+                if (!e.node.isBranch()) {
+                    oldFileData = this.codeComponent.GetCacheForFileName(oldFileName);
+                    this.codeComponent.ClearCacheForFile(oldFileName);
+                    this.codeComponent.currentFilePath = '';
+                    this.codeComponent.UpdateCacheForFile(newFileName, oldFileData);
+                    this.codeComponent.currentFilePath = newFileName;
+                }
                 break;
             case ResourceType.asset:
                 break;
