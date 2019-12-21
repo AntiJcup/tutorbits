@@ -141,6 +141,7 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
   resetState() {
     this.recordingTreeComponent.treeComponent.treeModel = this.recordingTreeComponent.tree;
     this.recordingTreeComponent.treeComponent.ngOnChanges(null);
+    this.recordingTreeComponent.selectNodeByPath(this.recordingTreeComponent.treeComponent.tree, '/project');
     this.recordingEditor.ClearCacheForFolder('/');
     this.recordingEditor.currentFilePath = '';
   }
