@@ -227,14 +227,18 @@ export class MonacoRecorder extends TransactionRecorder {
         const nodeName = e.node.value;
         const sanitizedNodeName = this.fileTreeComponent.SantizeFileName(nodeName);
         if (nodeName !== sanitizedNodeName) {
-            this.fileTreeComponent.treeComponent.getControllerByNodeId(e.node.id).rename(sanitizedNodeName);
+            try {
+                this.fileTreeComponent.treeComponent.getControllerByNodeId(e.node.id).rename(sanitizedNodeName);
+            } catch (e) { }
         }
         let newFileName = this.fileTreeComponent.getPathForNode(e.node);
 
         const modifiedNewFileName = this.fileTreeComponent.AddModifiersToFilePath(newFileName, e.node);
         if (modifiedNewFileName !== nodeName) {
             e.node.value = modifiedNewFileName;
-            this.fileTreeComponent.treeComponent.getControllerByNodeId(e.node.id).rename(modifiedNewFileName);
+            try {
+                this.fileTreeComponent.treeComponent.getControllerByNodeId(e.node.id).rename(modifiedNewFileName);
+            } catch (e) { }
             newFileName = this.fileTreeComponent.getPathForNode(e.node);
         }
 
@@ -264,7 +268,9 @@ export class MonacoRecorder extends TransactionRecorder {
         const nodeName = e.node.value;
         const sanitizedNodeName = this.fileTreeComponent.SantizeFileName(nodeName);
         if (nodeName !== sanitizedNodeName) {
-            this.fileTreeComponent.treeComponent.getControllerByNodeId(e.node.id).rename(sanitizedNodeName);
+            try {
+                this.fileTreeComponent.treeComponent.getControllerByNodeId(e.node.id).rename(sanitizedNodeName);
+            } catch (e) { }
         }
         const oldNodeName = e.oldValue as string;
         const sanitizedOldNodeName = this.fileTreeComponent.SantizeFileName(oldNodeName);
@@ -279,7 +285,9 @@ export class MonacoRecorder extends TransactionRecorder {
         const modifiedNewFileName = this.fileTreeComponent.AddModifiersToFilePath(newFileName, e.node);
         if (modifiedNewFileName !== nodeName) {
             e.node.value = modifiedNewFileName;
-            this.fileTreeComponent.treeComponent.getControllerByNodeId(e.node.id).rename(modifiedNewFileName);
+            try {
+                this.fileTreeComponent.treeComponent.getControllerByNodeId(e.node.id).rename(modifiedNewFileName);
+            } catch (e) { }
             newFileName = this.fileTreeComponent.getPathForNode(e.node);
         }
 

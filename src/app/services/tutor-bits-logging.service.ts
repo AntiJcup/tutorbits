@@ -23,5 +23,11 @@ export class TutorBitsLoggingService extends ILogService {
 
   public LogErrorToConsole(component: string, ...args: any[]): void {
     console.error.apply(console, [`LSError: ${component} - `].concat(args));
+
+    if (!environment.loggingTraceEnabled) {
+      return;
+    }
+    // tslint:disable-next-line: no-console
+    console.trace();
   }
 }
