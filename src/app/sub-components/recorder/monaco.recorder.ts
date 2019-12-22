@@ -313,7 +313,9 @@ export class MonacoRecorder extends TransactionRecorder {
         }
 
         this.timeOffset = Date.now() - this.start;
-        this.fileTreeComponent.treeComponent.getControllerByNodeId(e.node.id).select();
+        try {
+            this.fileTreeComponent.treeComponent.getControllerByNodeId(e.node.id).select();
+        } catch (e) { }
         this.RenameFile(this.timeOffset, oldFileName, newFileName, oldFileData, e.node.isBranch());
 
         this.TriggerDelayedSave();
@@ -346,7 +348,9 @@ export class MonacoRecorder extends TransactionRecorder {
         }
 
         this.timeOffset = Date.now() - this.start;
-        this.fileTreeComponent.treeComponent.getControllerByNodeId(node.id).select();
+        try {
+            this.fileTreeComponent.treeComponent.getControllerByNodeId(node.id).select();
+        } catch (e) { }
         this.RenameFile(this.timeOffset, oldFileName, newFileName, oldFileData, node.isBranch());
         this.TriggerDelayedSave();
     }
@@ -413,7 +417,9 @@ export class MonacoRecorder extends TransactionRecorder {
         }
 
         this.timeOffset = Date.now() - this.start;
-        this.fileTreeComponent.treeComponent.getControllerByNodeId(e.node.id).select();
+        try {
+            this.fileTreeComponent.treeComponent.getControllerByNodeId(e.node.id).select();
+        } catch (e) { }
         this.RenameFile(this.timeOffset, oldFileName, newFileName, oldFileData, e.node.isBranch());
         this.TriggerDelayedSave();
     }
