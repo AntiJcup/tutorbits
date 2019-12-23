@@ -41,13 +41,25 @@ export class TutorBitsVideoRecordingService extends IVideoRecordingService {
     return await response.json();
   }
 
-  public async FinishUpload(projectId: string, recordingId: string, parts: Array<Part>): Promise<string> {
+  public async FinishUpload(projectId: string, recordingId: string, parts: Array<Part>): Promise<boolean> {
     const response = await this.apiService.generateRequest().Post(
       `api/project/video/recording/stop?projectId=${projectId}&recordingId=${recordingId}`, JSON.stringify(parts),
       (await this.GetAuthHeaders()));
 
     if (!response.ok) {
       throw new Error('Failed finish upload');
+    }
+
+    return true;
+  }
+
+  public async CheckStatus(projectId: string): Promise<string> {
+    const response = await this.apiService.generateRequest().Get(
+      `api/project/video/recording/status?projectId=${projectId}`,
+      (await this.GetAuthHeaders()));
+
+    if (!response.ok) {
+      throw new Error('Failed to check status');
     }
 
     return await response.json();

@@ -1,5 +1,5 @@
 import { StreamWriter } from './StreamWriter';
-import { EventEmitter } from 'events';
+import { sleep } from './Common';
 
 
 export interface StreamRecorderSettings {
@@ -73,6 +73,21 @@ export class StreamRecorder {
         });
 
         await this.writer.FinishUpload(this.projectId, this.recordingId, this.sentParts);
+
+        while (true) {
+            const res = await this.writer.CheckStatus(this.projectId);
+            switch (res) {
+                case 'Finished':
+                    return;
+                case 'Errored':
+                    throw Error('An error occurred in transcoding');
+                case 'Timeout':
+                    throw Error('Transcoding timedout');
+                case 'Cancelled':
+                    throw Error('Transcoding cancelled');
+            }
+            await sleep(5000); // Check every 5 seconds
+        }
     }
 
     public WriteLoop(force: boolean = false) {

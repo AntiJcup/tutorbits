@@ -1,6 +1,7 @@
 import { ApiHttpRequest } from 'shared/web/lib/ts/ApiHttpRequest';
 import { StreamWriter } from './StreamWriter';
 import { Part } from './StreamRecorder';
+import { TutorBitsErrorService } from 'src/app/services/tutor-bits-error.service';
 
 export class OnlineStreamWriter extends StreamWriter {
     constructor(protected requestor: ApiHttpRequest) {
@@ -27,13 +28,26 @@ export class OnlineStreamWriter extends StreamWriter {
         return await response.json();
     }
 
-    public async FinishUpload(projectId: string, recordingId: string, parts: Array<Part>): Promise<string> {
+    public async FinishUpload(projectId: string, recordingId: string, parts: Array<Part>): Promise<boolean> {
         const response = await this.requestor.Post(
             `api/project/video/recording/stop?projectId=${projectId}&recordingId=${recordingId}`, JSON.stringify(parts),
             { 'Content-Type': 'application/json' });
 
         if (!response.ok) {
             throw new Error('Failed finish upload');
+        }
+
+        return true;
+    }
+
+
+    public async CheckStatus(projectId: string): Promise<string> {
+        const response = await this.requestor.Get(
+            `api/project/video/recording/status?projectId=${projectId}`,
+            { 'Content-Type': 'application/json' });
+
+        if (!response.ok) {
+            throw new Error('Failed to check status');
         }
 
         return await response.json();
