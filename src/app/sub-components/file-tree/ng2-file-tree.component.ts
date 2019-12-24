@@ -197,10 +197,15 @@ export abstract class NG2FileTreeComponent {
     });
   }
 
-  public deleteNodeByPath(path: string, retry: boolean = true): void {
+  public deleteNodeByPath(path: string, isBranch: boolean, retry: boolean = true): void {
     this.zone.runTask(() => {
-      delete this.internalFiles[path];
+      if (path.endsWith('/') && !isBranch) {
+        path = path.substr(0, path.length - 1);
+      } else if (!path.endsWith('/') && isBranch) {
+        path += '/';
+      }
 
+      delete this.internalFiles[path];
       this.PropogateTree(this.internalFiles);
     });
   }

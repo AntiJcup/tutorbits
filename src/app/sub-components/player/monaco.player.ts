@@ -139,7 +139,7 @@ export class MonacoPlayer extends TransactionPlayer {
                             type: ResourceType.asset
                         } as TutorBitsTreeModel);
                     } else {
-                        this.fileTreeComponent.deleteNodeByPath(uploadNewPath);
+                        this.fileTreeComponent.deleteNodeByPath(uploadNewPath, false);
                         this.fileTreeComponent.selectNodeByPath(this.fileTreeComponent.treeComponent.tree, uploadOldPath);
                     }
                     break;
@@ -150,7 +150,7 @@ export class MonacoPlayer extends TransactionPlayer {
                         this.fileTreeComponent.addNodeByPath(createNewPath, transaction.getCreateFile().getIsFolder());
                         this.fileTreeComponent.selectNodeByPath(this.fileTreeComponent.treeComponent.tree, createNewPath);
                     } else {
-                        this.fileTreeComponent.deleteNodeByPath(createNewPath);
+                        this.fileTreeComponent.deleteNodeByPath(createNewPath, transaction.getCreateFile().getIsFolder());
                         this.fileTreeComponent.selectNodeByPath(this.fileTreeComponent.treeComponent.tree, createOldPath);
                     }
                     break;
@@ -168,7 +168,7 @@ export class MonacoPlayer extends TransactionPlayer {
                     const deletePath = transaction.getFilePath();
                     const deleteIsFolder = transaction.getDeleteFile().getIsFolder();
                     if (!undo) {
-                        this.fileTreeComponent.deleteNodeByPath(deletePath);
+                        this.fileTreeComponent.deleteNodeByPath(deletePath, deleteIsFolder);
                         this.codeComponent.currentFilePath = '';
                         this.codeComponent.ClearCacheForFile(deletePath);
                     } else {
