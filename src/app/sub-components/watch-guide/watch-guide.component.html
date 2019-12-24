@@ -1,3 +1,28 @@
-<div id="hint-overlay">
-    <app-play-button-hint></app-play-button-hint>
-</div>
+<h1 mat-dialog-title>Guide:</h1>
+<hr />
+<mat-dialog-content class="mat-typography">
+
+    <h3>Play:</h3>
+    <p>By clicking the play button the tutorial video will begin to play and the code will type out as the tutorial
+        creator typed it.</p>
+
+    <h3>Jump:</h3>
+    <p>Use the video scrubber to jump to any point of the tutorial and see what the creator did at that time of
+        the tutorial.</p>
+    <img src="assets/images/scrub.png" />
+
+    <br />
+    <h3>Preview:</h3>
+    <p>Click the Preview button or right click any file and preview to see the result of the code at that
+        point in the video.</p>
+    <img src="assets/images/filecontrols.png" />
+
+    <h3>Download:</h3>
+    <p>Click the Download Project button to download the finished project for modification in your own IDE.</p>
+    <h3>Edit:</h3>
+    <p>Click Edit in Sandbox to change the project directly in the website and preview after</p>
+    <img src="assets/images/toprightcontrols.png" />
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+    <button mat-button [mat-dialog-close]="true" cdkFocusInitial>OK</button>
+</mat-dialog-actions>

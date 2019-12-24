@@ -1,4 +1,3 @@
-<!-- <app-watch-guide></app-watch-guide> -->
 <div class="controls" *ngIf="publishMode">
   <div class="controlsContainer">
     <mat-spinner color="accent" [diameter]="24" class="loading-spinner" *ngIf="loadingReferences > 0">
@@ -29,6 +28,13 @@
     <app-saving-button (click)="onCopyToSandboxClicked($event)" text="Edit in Sandbox" icon="move_to_inbox"
       [saving]="false" savingText="" matTooltip="Copies finished project to sandbox for customization">
     </app-saving-button>
+  </div>
+  <div class="controlsContainer">
+    <button id="helpBtn" mat-menu-item (click)="onShowHelp($event)"
+      matTooltip="Shows help dialog">
+      <mat-icon>help_outline</mat-icon>
+      <span class="label">Help</span>
+    </button>
   </div>
 </div>
 <div fxLayout fxLayoutGap="5px" class="tutorialContainer">

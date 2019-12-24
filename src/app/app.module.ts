@@ -257,6 +257,7 @@ const appRoutes: Routes = [
     { provide: ITitleService, useClass: TutorBitsTitleService },
     { provide: IEventService, useClass: TutorBitsGAEventService }
   ],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
+  entryComponents: [WatchGuideComponent]
 })
 export class AppModule { }

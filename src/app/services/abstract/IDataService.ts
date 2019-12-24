@@ -7,4 +7,7 @@ export abstract class IDataService {
 
     public abstract GetCurrentRoute(): string;
     public abstract SetCurrentRoute(route: string): void;
+
+    public abstract GetShownWatchHelp(): boolean;
+    public abstract SetShownWatchHelp(shown: boolean): void;
 }

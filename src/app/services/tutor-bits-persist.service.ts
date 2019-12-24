@@ -7,6 +7,7 @@ import { JWT } from '../models/auth/JWT';
 export class TutorBitsDataService extends IDataService {
   private readonly AuthTokenKey = 'auth';
   private readonly CurrentRouteKey = 'currentRoute';
+  private readonly ShownWatchHelpKey = 'shownwatchhelp';
   constructor(private storage: IStorageService) { super(); }
 
   public GetAuthToken(): JWT {
@@ -27,5 +28,16 @@ export class TutorBitsDataService extends IDataService {
 
   public SetCurrentRoute(route: string): void {
     this.storage.SetItem(this.CurrentRouteKey, route);
+  }
+
+  public GetShownWatchHelp(): boolean {
+    try {
+      return this.storage.GetItem(this.ShownWatchHelpKey);
+    } catch (e) { }
+    return false;
+  }
+
+  public SetShownWatchHelp(shown: boolean): void {
+    return this.storage.SetItem(this.ShownWatchHelpKey, shown);
   }
 }

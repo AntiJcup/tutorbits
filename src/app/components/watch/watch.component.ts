@@ -21,6 +21,9 @@ import { PlaybackMouseComponent } from 'src/app/sub-components/playback-mouse/pl
 import { PreviewComponent } from 'src/app/sub-components/preview/preview.component';
 import { ITitleService } from 'src/app/services/abstract/ITitleService';
 import { ViewTutorial } from 'src/app/models/tutorial/view-tutorial';
+import { MatDialog } from '@angular/material';
+import { WatchGuideComponent } from 'src/app/sub-components/watch-guide/watch-guide.component';
+import { IDataService } from 'src/app/services/abstract/IDataService';
 
 @Component({
   templateUrl: './watch.component.html',
@@ -74,7 +77,9 @@ export class WatchComponent implements OnInit, OnDestroy {
     private errorServer: IErrorService,
     private logServer: ILogService,
     private eventService: IEventService,
-    private titleService: ITitleService) {
+    private titleService: ITitleService,
+    public dialog: MatDialog,
+    private dataService: IDataService) {
     this.projectId = this.route.snapshot.paramMap.get('projectId');
     this.publishMode = this.route.snapshot.queryParamMap.get('publish') === 'true';
   }
@@ -90,6 +95,11 @@ export class WatchComponent implements OnInit, OnDestroy {
     this.tutorialService.Get(this.projectId).then((tutorial: ViewTutorial) => {
       this.titleService.SetTitle(`Watching: ${tutorial.title}`);
     });
+
+    if (!this.dataService.GetShownWatchHelp()) {
+      this.dialog.open(WatchGuideComponent);
+      this.dataService.SetShownWatchHelp(true);
+    }
   }
 
   ngOnDestroy(): void {
@@ -242,5 +252,9 @@ export class WatchComponent implements OnInit, OnDestroy {
   public onCopyToSandboxClicked(e: any) {
     this.eventService.TriggerButtonClick('Watch', `Sandbox - ${this.projectId}`);
     this.router.navigate([`sandbox/${this.projectId}`]);
+  }
+
+  public onShowHelp() {
+    this.dialog.open(WatchGuideComponent);
   }
 }
