@@ -80,6 +80,8 @@ import { TutorBitsGAEventService } from './services/tutor-bits-ga-event.service'
 import { PlaybackMouseComponent } from './sub-components/playback-mouse/playback-mouse.component';
 import { ITitleService } from './services/abstract/ITitleService';
 import { TutorBitsTitleService } from './services/tutor-bits-title.service';
+import { WatchGuideComponent } from './sub-components/watch-guide/watch-guide.component';
+import { PlayButtonHintComponent } from './sub-components/play-button-hint/play-button-hint.component';
 
 const appRoutes: Routes = [
   {
@@ -211,7 +213,9 @@ const appRoutes: Routes = [
     BlogCardComponent,
     ContactComponent,
     MobileNotSupportedComponent,
-    PlaybackMouseComponent
+    PlaybackMouseComponent,
+    WatchGuideComponent,
+    PlayButtonHintComponent
   ],
   imports: [
     BrowserModule,

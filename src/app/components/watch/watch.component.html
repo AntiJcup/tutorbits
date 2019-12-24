@@ -1,3 +1,4 @@
+<!-- <app-watch-guide></app-watch-guide> -->
 <div class="controls" *ngIf="publishMode">
   <div class="controlsContainer">
     <mat-spinner color="accent" [diameter]="24" class="loading-spinner" *ngIf="loadingReferences > 0">
@@ -33,6 +34,7 @@
 <div fxLayout fxLayoutGap="5px" class="tutorialContainer">
   <div class="sideBar">
     <vg-player class="tutorialVideo">
+      <app-play-button-hint id="play-hint" *ngIf="!started"></app-play-button-hint>
       <video #video class="tutorialVideo" [vgMedia]="media" #media id="singleVideo" preload="auto" controls>
         <source #videoSource type="video/webm">
       </video>

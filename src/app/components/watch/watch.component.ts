@@ -29,6 +29,7 @@ import { ViewTutorial } from 'src/app/models/tutorial/view-tutorial';
 
 export class WatchComponent implements OnInit, OnDestroy {
   public projectId: string;
+  public started = false;
   requestInfo: ApiHttpRequestInfo = {
     host: environment.apiHost,
     credentials: undefined,
@@ -149,6 +150,11 @@ export class WatchComponent implements OnInit, OnDestroy {
       this.codePlayer.SetPostionPct(1);
       return;
     }
+
+    if (!this.started) {
+      this.started = true;
+    }
+
     if (this.videoPlayer.IsBuffering() && !this.pausedVideo) {
       this.paceKeperPosition = this.codePlayer.position = currentVideoTime;
       return;
