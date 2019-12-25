@@ -123,7 +123,7 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate {
   public onPreviewClicked(e: string) {
     this.eventService.TriggerButtonClick('Sandbox', `Preview - ${this.projectId} - ${e}`);
     const previewPos = Math.round(this.codeRecorder.position);
-    this.previewComponent.GeneratePreview(this.projectId, previewPos, e, this.codeRecorder.logs)
+    this.previewComponent.GeneratePreview(this.projectId, previewPos, e, this.codeRecorder.logs, this.loadProjectId)
       .then()
       .catch((err) => {
         this.errorServer.HandleError('PreviewError', err);

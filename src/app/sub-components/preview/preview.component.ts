@@ -85,10 +85,11 @@ export class PreviewComponent implements OnInit {
     this.loading = false;
   }
 
-  public async GeneratePreview(projectId: string, offset: number, path: string, logs: TraceTransactionLog[]): Promise<void> {
+  public async GeneratePreview(projectId: string, offset: number, path: string, logs: TraceTransactionLog[],
+    baseProjectId?: string): Promise<void> {
     try {
       this.loading = true;
-      const url = await this.previewService.GeneratePreview(projectId, offset, logs);
+      const url = await this.previewService.GeneratePreview(projectId, offset, logs, baseProjectId);
 
       if (!this.loading) {
         return;
