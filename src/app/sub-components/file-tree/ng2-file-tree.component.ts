@@ -16,6 +16,7 @@ import { ILogService } from 'src/app/services/abstract/ILogService';
 import { FileUtils, FileData } from 'shared/web/lib/ts/FileUtils';
 import { TreeService } from 'ng2-tree/src/tree.service';
 import { IEventService } from 'src/app/services/abstract/IEventService';
+import { Guid } from 'guid-typescript';
 
 export interface FileUploadData {
   fileData: FileData;
@@ -439,7 +440,7 @@ export abstract class NG2FileTreeComponent {
       } else {
         model.children = [childTree];
       }
-    } else { // This implies there was a trailing slash implying a folder
+    } else if (!model.children || model.children.length <= 0) { // This implies there was a trailing slash implying a folder
       model.children = [];
       model.settings.menuItems = options.branchMenu || [
         { action: NodeMenuItemAction.NewFolder, name: 'Add folder', cssClass: '' },
@@ -457,7 +458,7 @@ export abstract class NG2FileTreeComponent {
 
     for (let path of Object.keys(fileJson)) {
       const model = {
-
+        id: Guid.create().toString()
       } as TutorBitsTreeModel;
 
       if (path.startsWith('res:')) {
