@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { TreeModel, NodeMenuItemAction } from 'ng2-tree';
 import { NG2FileTreeComponent } from '../file-tree/ng2-file-tree.component';
 
@@ -8,7 +8,8 @@ import { NG2FileTreeComponent } from '../file-tree/ng2-file-tree.component';
   styleUrls: ['./recording-file-tree.component.sass']
 })
 
-export class RecordingFileTreeComponent extends NG2FileTreeComponent implements OnInit {
+export class RecordingFileTreeComponent extends NG2FileTreeComponent implements OnInit, OnDestroy {
+  private keyboardCallback: (e: KeyboardEvent) => void;
   public tree: TreeModel = {
     value: '/',
     id: 1,
@@ -46,5 +47,34 @@ export class RecordingFileTreeComponent extends NG2FileTreeComponent implements 
   };
 
   ngOnInit() {
+    this.keyboardCallback = (e: KeyboardEvent) => {
+      if (!this.selectedPath) {
+        return;
+      }
+
+      if (this.selectedPath === '/project') {
+        return;
+      }
+
+      const selectedNode = this.findNodeByPath(this.treeComponent.tree, this.selectedPath);
+      if (!selectedNode) {
+        return;
+      }
+
+      switch (e.keyCode) {
+        case 113: // F2
+          selectedNode.markAsBeingRenamed();
+          break;
+        case 46: // Delete
+          this.treeComponent.getControllerByNodeId(selectedNode.id).remove();
+          // this.deleteNodeByPath(this.selectedPath, selectedNode.isBranch());
+          break;
+      }
+    };
+    document.addEventListener('keydown', this.keyboardCallback, false);
+  }
+
+  ngOnDestroy() {
+    document.removeEventListener('keydown', this.keyboardCallback);
   }
 }

@@ -209,7 +209,8 @@ export class MonacoRecorder extends TransactionRecorder {
                 this.resourceViewerComponent.Resource = {
                     projectId: model.overrideProjectId || this.id,
                     fileName: model.value,
-                    resourceId: model.resourceId
+                    resourceId: model.resourceId,
+                    path: newFileName
                 } as ResourceData;
                 break;
         }
@@ -309,6 +310,11 @@ export class MonacoRecorder extends TransactionRecorder {
                 }
                 break;
             case ResourceType.asset:
+                if (oldFileName === (this.resourceViewerComponent.Resource ? this.resourceViewerComponent.Resource.path : null)) {
+                    this.resourceViewerComponent.Resource.path = newFileName;
+                    this.resourceViewerComponent.Resource.fileName = sanitizedNodeName;
+                    this.resourceViewerComponent.Resource = this.resourceViewerComponent.Resource;
+                }
                 break;
         }
 
@@ -344,6 +350,9 @@ export class MonacoRecorder extends TransactionRecorder {
                 }
                 break;
             case ResourceType.asset:
+                if (oldFileName === (this.resourceViewerComponent.Resource ? this.resourceViewerComponent.Resource.path : null)) {
+                    this.resourceViewerComponent.Resource.fileName = newFileName;
+                }
                 break;
         }
 
@@ -375,6 +384,9 @@ export class MonacoRecorder extends TransactionRecorder {
                 }
                 break;
             case ResourceType.asset:
+                if (nodePath === (this.resourceViewerComponent.Resource ? this.resourceViewerComponent.Resource.path : null)) {
+                    this.resourceViewerComponent.Resource = null;
+                }
                 break;
         }
 

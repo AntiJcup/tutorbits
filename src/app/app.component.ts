@@ -43,7 +43,7 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    document.addEventListener('keydown', (e) => {
+    document.addEventListener('keydown', (e) => { // Prevent ctrl + s from prompting
       if (e.keyCode === 83 && (navigator.platform.match('Mac') ? e.metaKey : e.ctrlKey)) {
         e.preventDefault();
       }

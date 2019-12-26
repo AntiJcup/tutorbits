@@ -10,7 +10,8 @@ import {
   MenuItemSelectedEvent,
   TreeModel,
   NodeRenamedEvent,
-  TreeController
+  TreeController,
+  NodeRemovedEvent
 } from 'ng2-tree';
 import { ILogService } from 'src/app/services/abstract/ILogService';
 import { FileUtils, FileData } from 'shared/web/lib/ts/FileUtils';
@@ -69,11 +70,12 @@ export abstract class NG2FileTreeComponent {
     const test = this.treeComponent.getControllerByNodeId(event.node.id);
     this.fileSelected = null;
     this.folderSelected = null;
+
     if (!event.node.isBranch()) {
-      this.fileSelected = this.getPathForNode(event.node);
+      this.selectedPath = this.fileSelected = this.getPathForNode(event.node);
       return;
     }
-    this.folderSelected = this.getPathForNode(event.node);
+    this.selectedPath = this.folderSelected = this.getPathForNode(event.node);
 
     if (!test.isCollapsed()) {
       test.collapse();
@@ -206,8 +208,13 @@ export abstract class NG2FileTreeComponent {
         path += '/';
       }
 
+      const deletedNode = this.findNodeByPath(this.treeComponent.tree, path);
+
       delete this.internalFiles[path];
       this.PropogateTree(this.internalFiles);
+      this.treeComponent.nodeRemoved.next({
+        node: deletedNode
+      } as NodeRemovedEvent);
     });
   }
 
@@ -342,6 +349,8 @@ export abstract class NG2FileTreeComponent {
       const newNodeController = this.treeComponent.getControllerByNodeId(newNode.id);
       newNodeController.rename('Untitled_File');
       newNodeController.startRenaming();
+
+      this.internalFiles[this.getPathForNode(newNode)] = newNode.node;
     });
   }
 
@@ -470,6 +479,7 @@ export abstract class NG2FileTreeComponent {
       files[path] = model;
     }
 
+    this.internalFiles = files;
     this.PropogateTree(files, options);
   }
 

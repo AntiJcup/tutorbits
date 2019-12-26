@@ -6,6 +6,7 @@ export interface ResourceData {
   fileName: string;
   resourceId: string;
   projectId: string;
+  path: string;
 }
 
 @Component({
