@@ -25,13 +25,16 @@
     </app-saving-button>
   </div>
   <div class="controlsContainer">
-    <app-saving-button (click)="onCopyToSandboxClicked($event)" text="Edit in Sandbox" icon="move_to_inbox"
-      [saving]="false" savingText="" matTooltip="Copies finished project to sandbox for customization">
+    <app-saving-button text="Edit in Sandbox" icon="move_to_inbox"
+      [saving]="false" savingText="" matTooltip="Copies finished project to sandbox for customization" [matMenuTriggerFor]="sandboxMenu">
     </app-saving-button>
+    <mat-menu #sandboxMenu="matMenu">
+      <button mat-menu-item (click)="onCopyToSandboxClicked($event, true)">New Window</button>
+      <button mat-menu-item (click)="onCopyToSandboxClicked($event, false)">New Tab</button>
+    </mat-menu>
   </div>
   <div class="controlsContainer">
-    <button id="helpBtn" mat-menu-item (click)="onShowHelp()"
-      matTooltip="Shows help dialog">
+    <button id="helpBtn" mat-menu-item (click)="onShowHelp()" matTooltip="Shows help dialog">
       <mat-icon>help_outline</mat-icon>
       <span class="label">Help</span>
     </button>
