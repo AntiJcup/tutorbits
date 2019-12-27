@@ -251,7 +251,12 @@ export class WatchComponent implements OnInit, OnDestroy {
 
   public onCopyToSandboxClicked(e: any) {
     this.eventService.TriggerButtonClick('Watch', `Sandbox - ${this.projectId}`);
-    this.router.navigate([`sandbox/${this.projectId}`]);
+    // this.router.navigate([`sandbox/${this.projectId}`]);
+    if (confirm(`Click "Ok" to open the sandbox in a new window or "Cancel" in a newtab`)) {
+      window.open(`sandbox/${this.projectId}`, 'Sandbox', 'height=720,width=1080');
+    } else {
+      window.open(`sandbox/${this.projectId}`);
+    }
   }
 
   public onShowHelp() {
