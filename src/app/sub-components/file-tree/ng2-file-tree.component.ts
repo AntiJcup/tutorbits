@@ -425,11 +425,11 @@ export abstract class NG2FileTreeComponent {
         id,
         value: nodeName,
         settings: {
-          menuItems: options.fileMenu || [
+          menuItems: options.fileMenu || ([
             { action: NodeMenuItemAction.Remove, name: 'Delete', cssClass: '' },
             { action: NodeMenuItemAction.Rename, name: 'Rename', cssClass: '' },
             { action: NodeMenuItemAction.Custom, name: 'Preview', cssClass: '' }
-          ]
+          ])
         },
         type,
         resourceId,
@@ -449,8 +449,10 @@ export abstract class NG2FileTreeComponent {
       } else {
         model.children = [childTree];
       }
-    } else if (!model.children || model.children.length <= 0) { // This implies there was a trailing slash implying a folder
-      model.children = [];
+    } else { // This implies there was a trailing slash implying a folder
+      if (!model.children || model.children.length <= 0) {
+        model.children = [];
+      }
       model.settings.menuItems = options.branchMenu || [
         { action: NodeMenuItemAction.NewFolder, name: 'Add folder', cssClass: '' },
         { action: NodeMenuItemAction.NewTag, name: 'Add file', cssClass: '' },
@@ -486,7 +488,11 @@ export abstract class NG2FileTreeComponent {
   public PropogateTree(files: { [path: string]: TutorBitsTreeModel }, options: PropogateTreeOptions = {}): void {
     const stagingChildren: Array<TreeModel> = [];
     const cache = {};
-    for (const path of Object.keys(files)) {
+    for (const path of Object.keys(files).sort((a, b) => {
+      // ASC  -> a.length - b.length
+      // DESC -> b.length - a.length
+      return a.length - b.length;
+    })) {
       const child = this.CreateChildTree(path, files[path], options, cache);
       if (child) {
         const exists = stagingChildren.find((c) => {
