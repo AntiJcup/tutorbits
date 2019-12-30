@@ -29,10 +29,8 @@ export class AccountUpdateUserNameComponent implements OnInit {
     },
     validators: {
       name($viewValue, $modelValue, scope) {
-        console.log('test');
         const value = $viewValue.value;
         if (value) {
-          console.log(`value: ${value} - test: ${(/^[a-z0-9._-]+$/i).test(value)}`);
           return (/^[a-z0-9._-]+$/i).test(value);
         }
       }
