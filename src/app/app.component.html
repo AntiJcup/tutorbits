@@ -19,7 +19,7 @@
           <mat-icon>menu</mat-icon>
         </button>
         <mat-menu #globalMenu="matMenu">
-          <button mat-menu-item [matMenuTriggerFor]="appCreateMenu">
+          <button mat-menu-item *ngIf="allowCreate" [matMenuTriggerFor]="appCreateMenu">
             <mat-icon class="icon">create</mat-icon>
             <span class="label">Create</span>
           </button>
@@ -72,7 +72,7 @@
       <div fxFlex fxLayout fxLayoutAlign="flex-end" fxHide.xs>
         <ul fxLayout fxLayoutGap="5px" class="navigation-items">
           <li>
-            <button mat-menu-item [matMenuTriggerFor]="appCreateMenu">
+            <button mat-menu-item *ngIf="allowCreate" [matMenuTriggerFor]="appCreateMenu">
               <mat-icon class="icon">create</mat-icon>
               <span class="label">Create</span>
             </button>

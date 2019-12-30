@@ -12,5 +12,6 @@ export const environment = {
   loggingTraceEnabled: false,
   mouseAccurracyMS: 100,
   scrollAccurracyMS: 0,
-  envName: 'prod'
+  envName: 'prod',
+  allowCreate: false
 };

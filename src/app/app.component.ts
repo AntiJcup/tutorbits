@@ -15,6 +15,7 @@ export class AppComponent implements OnInit {
   public loginUrl: string;
   public logoutUrl: string;
   public loggedIn = false;
+  public allowCreate = false;
   public title = 'Home';
 
   constructor(
@@ -26,6 +27,7 @@ export class AppComponent implements OnInit {
     private titleService: ITitleService) {
     this.loginUrl = environment.loginUrl;
     this.logoutUrl = environment.logoutUrl;
+    this.allowCreate = environment.allowCreate;
 
     this.titleService.GetTitleObs().subscribe((title: string) => {
       this.title = title;
