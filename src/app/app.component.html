@@ -19,12 +19,12 @@
           <mat-icon>menu</mat-icon>
         </button>
         <mat-menu #globalMenu="matMenu">
-          <button mat-menu-item *ngIf="allowCreate" [matMenuTriggerFor]="appCreateMenu">
+          <button mat-menu-item [matMenuTriggerFor]="appCreateMenu">
             <mat-icon class="icon">create</mat-icon>
             <span class="label">Create</span>
           </button>
           <mat-menu #appCreateMenu="matMenu">
-            <a [routerLink]="[ '/create/tutorial' ]" mat-menu-item>Tutorial</a>
+            <a [routerLink]="[ '/create/tutorial' ]" mat-menu-item *ngIf="allowCreate">Tutorial</a>
             <a [routerLink]="[ '/sandbox' ]" mat-menu-item>Sandbox</a>
           </mat-menu>
           <button mat-menu-item [matMenuTriggerFor]="appTutorialMenu">
@@ -72,12 +72,12 @@
       <div fxFlex fxLayout fxLayoutAlign="flex-end" fxHide.xs>
         <ul fxLayout fxLayoutGap="5px" class="navigation-items">
           <li>
-            <button mat-menu-item *ngIf="allowCreate" [matMenuTriggerFor]="appCreateMenu">
+            <button mat-menu-item [matMenuTriggerFor]="appCreateMenu">
               <mat-icon class="icon">create</mat-icon>
               <span class="label">Create</span>
             </button>
             <mat-menu #appCreateMenu="matMenu">
-              <a [routerLink]="[ '/create/tutorial' ]" mat-menu-item>Tutorial</a>
+              <a [routerLink]="[ '/create/tutorial' ]" mat-menu-item *ngIf="allowCreate">Tutorial</a>
               <a [routerLink]="[ '/sandbox' ]" mat-menu-item>Sandbox</a>
             </mat-menu>
           </li>
