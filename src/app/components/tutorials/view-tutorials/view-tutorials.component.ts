@@ -51,7 +51,7 @@ export class ViewTutorialsComponent implements OnInit {
 
   onTutorialCardClick(e: any, tutorial: ViewTutorial) {
     this.logServer.LogToConsole('ViewTutorials', 'card clicked', tutorial);
-    this.router.navigate([`watch/${tutorial.id}`]);
+    this.router.navigate([`watch/${tutorial.id}/${tutorial.title}`]);
   }
 
 }
