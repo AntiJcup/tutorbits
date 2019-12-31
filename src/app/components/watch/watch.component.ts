@@ -24,6 +24,7 @@ import { ViewTutorial } from 'src/app/models/tutorial/view-tutorial';
 import { MatDialog } from '@angular/material';
 import { WatchGuideComponent } from 'src/app/sub-components/watch-guide/watch-guide.component';
 import { IDataService } from 'src/app/services/abstract/IDataService';
+import { Meta } from '@angular/platform-browser';
 
 @Component({
   templateUrl: './watch.component.html',
@@ -80,7 +81,8 @@ export class WatchComponent implements OnInit, OnDestroy {
     private eventService: IEventService,
     private titleService: ITitleService,
     public dialog: MatDialog,
-    private dataService: IDataService) {
+    private dataService: IDataService,
+    private metaService: Meta) {
     this.projectId = this.route.snapshot.paramMap.get('projectId');
     this.title = this.route.snapshot.paramMap.get('title');
     this.publishMode = this.route.snapshot.queryParamMap.get('publish') === 'true';
@@ -94,13 +96,15 @@ export class WatchComponent implements OnInit, OnDestroy {
       this.errorServer.HandleError(`VideoError`, e);
     });
 
-    if (!this.title) {
-      this.tutorialService.Get(this.projectId).then((tutorial: ViewTutorial) => {
-        this.titleService.SetTitle(`${tutorial.title}`);
-      });
-    } else {
+    if (this.title) {
       this.titleService.SetTitle(`${this.title}`);
     }
+
+    this.tutorialService.Get(this.projectId).then((tutorial: ViewTutorial) => {
+      this.titleService.SetTitle(`${tutorial.title}`);
+      this.metaService.updateTag({ name: 'description', content: `TutotorBits Tutorial = ${tutorial.description}` },
+        'name=\'description\'');
+    });
 
     if (!this.dataService.GetShownWatchHelp()) {
       this.dialog.open(WatchGuideComponent);
@@ -109,6 +113,7 @@ export class WatchComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.metaService.removeTag('name=\'description\'');
     clearInterval(this.paceKeeperInterval);
 
     if (this.onLoadStartSub) {
