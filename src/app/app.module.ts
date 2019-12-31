@@ -101,6 +101,12 @@ const appRoutes: Routes = [
     canActivate: [TutorBitsMobileGuardService]
   },
   {
+    path: 'watch/:projectId/:title',
+    component: WatchComponent,
+    data: { title: 'Watch' },
+    canActivate: [TutorBitsMobileGuardService]
+  },
+  {
     path: 'record/:projectId',
     component: RecordComponent,
     data: { title: 'Record' },

@@ -32,6 +32,7 @@ import { IDataService } from 'src/app/services/abstract/IDataService';
 
 export class WatchComponent implements OnInit, OnDestroy {
   public projectId: string;
+  public title: string;
   public started = false;
   requestInfo: ApiHttpRequestInfo = {
     host: environment.apiHost,
@@ -81,6 +82,7 @@ export class WatchComponent implements OnInit, OnDestroy {
     public dialog: MatDialog,
     private dataService: IDataService) {
     this.projectId = this.route.snapshot.paramMap.get('projectId');
+    this.title = this.route.snapshot.paramMap.get('title');
     this.publishMode = this.route.snapshot.queryParamMap.get('publish') === 'true';
   }
 
@@ -92,9 +94,13 @@ export class WatchComponent implements OnInit, OnDestroy {
       this.errorServer.HandleError(`VideoError`, e);
     });
 
-    this.tutorialService.Get(this.projectId).then((tutorial: ViewTutorial) => {
-      this.titleService.SetTitle(`${tutorial.title}`);
-    });
+    if (!this.title) {
+      this.tutorialService.Get(this.projectId).then((tutorial: ViewTutorial) => {
+        this.titleService.SetTitle(`${tutorial.title}`);
+      });
+    } else {
+      this.titleService.SetTitle(`${this.title}`);
+    }
 
     if (!this.dataService.GetShownWatchHelp()) {
       this.dialog.open(WatchGuideComponent);
