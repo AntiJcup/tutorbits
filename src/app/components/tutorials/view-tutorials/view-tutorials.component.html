@@ -3,8 +3,12 @@
         <div class="tutorial-row" *ngFor="let typeKey of tutorialTypes">
             <h3>{{typeKey}}</h3>
             <div class="tutorial-card-container" fxLayout fxLayoutGap="5px">
-                <app-tutorial-card *ngFor="let tutorial of tutorialsByType[typeKey]" [tutorial]="tutorial"
-                    (click)="onTutorialCardClick($event, tutorial)"></app-tutorial-card>
+                <a *ngFor="let tutorial of tutorialsByType[typeKey]"
+                    [routerLink]="[ '/watch', tutorial.id, tutorial.title ]"
+                    (click)="onTutorialCardClick($event, tutorial)">
+                    <app-tutorial-card [tutorial]="tutorial">
+                    </app-tutorial-card>
+                </a>
             </div>
         </div>
     </div>

@@ -58,7 +58,6 @@ export class ViewTutorialsComponent implements OnInit, OnDestroy {
 
   onTutorialCardClick(e: any, tutorial: ViewTutorial) {
     this.logServer.LogToConsole('ViewTutorials', 'card clicked', tutorial);
-    this.router.navigate([`watch/${tutorial.id}/${tutorial.title}`]);
   }
 
   ngOnDestroy(): void {
