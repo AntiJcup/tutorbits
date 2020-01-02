@@ -1,4 +1,4 @@
-import { ViewChild, NgZone, Injectable, SimpleChange, SimpleChanges, Output, EventEmitter } from '@angular/core';
+import { ViewChild, NgZone, Injectable, Output, EventEmitter, ElementRef } from '@angular/core';
 import {
   TreeComponent,
   Ng2TreeSettings,
@@ -64,7 +64,8 @@ export abstract class NG2FileTreeComponent {
     private zone: NgZone,
     private logServer: ILogService,
     private treeService: TreeService,
-    private eventService: IEventService) { }
+    private eventService: IEventService,
+    protected myElement: ElementRef) { }
 
   public nodeSelected(event: NodeSelectedEvent) {
     const test = this.treeComponent.getControllerByNodeId(event.node.id);

@@ -48,7 +48,7 @@ export class RecordingFileTreeComponent extends NG2FileTreeComponent implements 
 
   ngOnInit() {
     this.keyboardCallback = (e: KeyboardEvent) => {
-      if (!this.selectedPath) {
+      if (!this.selectedPath || this.myElement.nativeElement !== document.activeElement) {
         return;
       }
 
@@ -67,7 +67,6 @@ export class RecordingFileTreeComponent extends NG2FileTreeComponent implements 
           break;
         case 46: // Delete
           this.treeComponent.getControllerByNodeId(selectedNode.id).remove();
-          // this.deleteNodeByPath(this.selectedPath, selectedNode.isBranch());
           break;
       }
     };
