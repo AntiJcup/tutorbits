@@ -399,6 +399,12 @@ export abstract class NG2FileTreeComponent {
     }
   }
 
+  public onNodeRemoved(e: NodeRemovedEvent) {
+    this.eventService.TriggerButtonClick('FileTree', 'NodeRemoved');
+    this.fileSelected = null;
+    this.folderSelected = null;
+  }
+
   private CreateChildTree(
     path: string, tmodel: TutorBitsTreeModel, options: PropogateTreeOptions,
     cache?: { [path: string]: TreeModel }, parentPath?: string): TreeModel {

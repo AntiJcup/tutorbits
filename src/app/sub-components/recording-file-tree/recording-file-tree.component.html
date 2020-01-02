@@ -22,6 +22,6 @@
     </div>
     <tree id="tutorialFileTree" class='tutorialFileTree' [tree]="tree" [settings]="settings"
         (nodeSelected)="nodeSelected($event)" (menuItemSelected)="onMenuItemSelected($event)"
-        (nodeCreated)="onNodeCreated($event)" (nodeRenamed)="onNodeRenamed($event)">
+        (nodeCreated)="onNodeCreated($event)" (nodeRenamed)="onNodeRenamed($event)" (nodeRemoved)="onNodeRemoved($event)">
     </tree>
 </div>
