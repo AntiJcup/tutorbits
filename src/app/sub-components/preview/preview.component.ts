@@ -32,7 +32,17 @@ export class PreviewComponent implements OnInit {
   @Input()
   set previewPath(path: string) {
     this.internalPreviewPath = path;
-    this.internalPreviewUrl = this.sanitizer.bypassSecurityTrustResourceUrl(`${this.internalPreviewBaseUrl}${path}`);
+    const fileUrl = `${this.internalPreviewBaseUrl}${path}`;
+
+    let urlPath = path;
+    const extensionType = path.split('.').pop();
+    switch (extensionType) {
+      case 'js':
+        const sourceUrl = encodeURIComponent(fileUrl);
+        urlPath = `/preview-helpers/js/preview.html?src=${sourceUrl}`;
+        break;
+    }
+    this.internalPreviewUrl = this.sanitizer.bypassSecurityTrustResourceUrl(`${this.internalPreviewBaseUrl}${urlPath}`);
   }
 
   get previewPath(): string {
@@ -70,22 +80,18 @@ export class PreviewComponent implements OnInit {
         return;
       }
 
-      if (!url) {
-        this.errorServer.HandleError(`PreviewError`, 'failed to be retrieved');
-        return;
-      }
-
-      this.zone.runTask(() => {
-        this.previewBaseUrl = url;
-        this.previewPath = path;
-      });
+      this.ShowPreview(url, path);
     } catch (err) {
       this.errorServer.HandleError('PreviewError', err);
     }
     this.loading = false;
   }
 
-  public async GeneratePreview(projectId: string, offset: number, path: string, logs: TraceTransactionLog[],
+  public async GeneratePreview(
+    projectId: string,
+    offset: number,
+    path: string,
+    logs: TraceTransactionLog[],
     baseProjectId?: string): Promise<void> {
     try {
       this.loading = true;
@@ -95,14 +101,7 @@ export class PreviewComponent implements OnInit {
         return;
       }
 
-      if (!url) {
-        this.errorServer.HandleError('PreviewError', ' preview url failed to be retrieved');
-        return;
-      }
-      this.zone.runTask(() => {
-        this.previewBaseUrl = url;
-        this.previewPath = path;
-      });
+      this.ShowPreview(url, path);
     } catch (err) {
       this.errorServer.HandleError('PreviewError', err);
     }
@@ -113,5 +112,17 @@ export class PreviewComponent implements OnInit {
     this.previewBaseUrl = '';
     this.previewPath = '';
     this.loading = false;
+  }
+
+  private async ShowPreview(url: string, path: string): Promise<void> {
+    if (!url) {
+      this.errorServer.HandleError('PreviewError', ' preview url failed to be retrieved');
+      return;
+    }
+
+    this.zone.runTask(() => {
+      this.previewBaseUrl = url;
+      this.previewPath = path;
+    });
   }
 }
