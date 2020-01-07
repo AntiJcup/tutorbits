@@ -86,6 +86,10 @@ export class WatchComponent implements OnInit, OnDestroy {
     this.projectId = this.route.snapshot.paramMap.get('projectId');
     this.title = this.route.snapshot.paramMap.get('title');
     this.publishMode = this.route.snapshot.queryParamMap.get('publish') === 'true';
+
+    if (this.title) {
+      this.titleService.SetTitle(`${this.title} - TutorBits Tutorial`);
+    }
   }
 
   ngOnInit(): void {
@@ -95,10 +99,6 @@ export class WatchComponent implements OnInit, OnDestroy {
     this.videoPlayer.Load().then().catch((e) => {
       this.errorServer.HandleError(`VideoError`, e);
     });
-
-    if (this.title) {
-      this.titleService.SetTitle(`${this.title} - TutorBits Tutorial`);
-    }
 
     this.tutorialService.Get(this.projectId).then((tutorial: ViewTutorial) => {
       this.titleService.SetTitle(`${tutorial.title} - ${tutorial.type} Tutorial - TutorBits`);
