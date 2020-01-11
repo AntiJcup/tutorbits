@@ -101,7 +101,7 @@ export class WatchComponent implements OnInit, OnDestroy {
     });
 
     this.tutorialService.Get(this.projectId).then((tutorial: ViewTutorial) => {
-      this.titleService.SetTitle(`${tutorial.title} - ${tutorial.type} Tutorial - TutorBits`);
+      this.titleService.SetTitle(`${tutorial.title} - ${tutorial.language} Tutorial - TutorBits`);
       this.metaService.updateTag({ name: 'description', content: `TutotorBits Tutorial - ${tutorial.title}: ${tutorial.description}` },
         'name=\'description\'');
     });

@@ -33,7 +33,7 @@ export class EditTutorialCardComponent implements OnInit {
   }
 
   get tutorialSubTitle(): string {
-    return `${this.tutorial.type} - ${this.tutorialDuration} - ${this.tutorial.status}`;
+    return `${this.tutorial.language} - ${this.tutorialDuration} - ${this.tutorial.status}`;
   }
 
   constructor() { }

@@ -29,7 +29,7 @@ export class CreateTutorialComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.titleService.SetTitle('Create Tutorial');
     this.loading = true;
-    this.tutorialService.GetTutorialTypes().then((tutorialTypes) => {
+    this.tutorialService.GetTutorialLanguages().then((tutorialTypes) => {
       const tutorialTypeOptions = [];
       tutorialTypes.forEach(element => {
         tutorialTypeOptions.push({
