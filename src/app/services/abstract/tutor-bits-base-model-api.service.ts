@@ -2,7 +2,7 @@ import { IModelApiService, ResponseWrapper, Status } from './IModelApiService';
 import { IAPIService } from './IAPIService';
 import { IAuthService } from './IAuthService';
 
-export abstract class TutorBitsBaseModelApiService<CreateModelT, ViewModelT> implements IModelApiService<CreateModelT, ViewModelT> {
+export abstract class TutorBitsBaseModelApiService<CreateModelT, UpdateModelT, ViewModelT> implements IModelApiService<CreateModelT, UpdateModelT, ViewModelT> {
   protected abstract readonly basePath: string;
   protected baseHeaders = {
     'Content-Type': 'application/json'
@@ -18,10 +18,24 @@ export abstract class TutorBitsBaseModelApiService<CreateModelT, ViewModelT> imp
     return { ...this.baseHeaders, ...(await this.auth.getAuthHeader()) };
   }
 
-  public async Create(tutorial: CreateModelT): Promise<ResponseWrapper<ViewModelT>> {
+  public async Create(model: CreateModelT): Promise<ResponseWrapper<ViewModelT>> {
     const responseWrapper = { error: null, data: null } as ResponseWrapper<ViewModelT>;
     const response = await this.apiService.generateRequest()
-      .Post(`${this.basePath}/Create`, JSON.stringify(tutorial), await this.GetAuthHeaders());
+      .Post(`${this.basePath}/Create`, JSON.stringify(model), await this.GetAuthHeaders());
+
+    if (!response.ok) {
+      responseWrapper.error = await response.json();
+      return responseWrapper;
+    }
+
+    responseWrapper.data = await response.json() as ViewModelT;
+    return responseWrapper;
+  }
+
+  public async Update(model: UpdateModelT): Promise<ResponseWrapper<ViewModelT>> {
+    const responseWrapper = { error: null, data: null } as ResponseWrapper<ViewModelT>;
+    const response = await this.apiService.generateRequest()
+      .Post(`${this.basePath}/Update`, JSON.stringify(model), await this.GetAuthHeaders());
 
     if (!response.ok) {
       responseWrapper.error = await response.json();

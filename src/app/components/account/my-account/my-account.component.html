@@ -12,7 +12,7 @@
                 <dt>UserEmail:</dt>
                 <dd>{{account.email}}</dd>
                 <dt>UserName:</dt>
-                <dd>{{account.nickName}} <a class="updateNameLink" [routerLink]="['/updateaccountusername', account.nickName]" mat-icon-button><mat-icon>input</mat-icon></a></dd>
+                <dd>{{account.nickName}} <a class="updateNameLink" [routerLink]="['/updateaccountusername', account.nickName, account.id]" mat-icon-button><mat-icon>input</mat-icon></a></dd>
             </dl>
         </mat-card-content>
     </mat-card>

@@ -152,7 +152,7 @@ const appRoutes: Routes = [
     canActivate: [TutorBitsAuthGuardService]
   },
   {
-    path: 'updateaccountusername/:currentUserName',
+    path: 'updateaccountusername/:currentUserName/:accountId',
     component: AccountUpdateUserNameComponent,
     data: { title: 'Update Account User Name' },
     canActivate: [TutorBitsAuthGuardService]

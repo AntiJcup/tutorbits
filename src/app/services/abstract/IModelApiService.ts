@@ -12,8 +12,9 @@ export enum Status {
     Deleted
 }
 
-export interface IModelApiService<CreateModelT, ViewModelT> {
+export interface IModelApiService<CreateModelT, UpdateModelT, ViewModelT> {
     Create(tutorial: CreateModelT): Promise<ResponseWrapper<ViewModelT>>;
+    Update(tutorial: UpdateModelT): Promise<ResponseWrapper<ViewModelT>>;
     UpdateStatus(id: string, status: Status): Promise<boolean>;
     GetAll(status: Status): Promise<ViewModelT[]>;
     Get(id: string): Promise<ViewModelT>;

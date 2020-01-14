@@ -15,7 +15,7 @@ import { ITitleService } from 'src/app/services/abstract/ITitleService';
 export class CreateTutorialComponent implements OnInit, OnDestroy {
   loading = false;
   form = new FormGroup({});
-  model: CreateTutorial = { Title: null, Description: null, Type: null, ThumbnailData: null };
+  model: CreateTutorial = { Title: null, Description: null, Language: null, ThumbnailData: null, Category: 'Tutorial' };
   fields: FormlyFieldConfig[] = [];
 
   constructor(
@@ -51,10 +51,10 @@ export class CreateTutorialComponent implements OnInit, OnDestroy {
           }
         },
         {
-          key: 'Type',
+          key: 'Language',
           type: 'select',
           templateOptions: {
-            label: 'Type',
+            label: 'Language',
             required: true,
             options: tutorialTypeOptions
           }
@@ -66,6 +66,7 @@ export class CreateTutorialComponent implements OnInit, OnDestroy {
             label: 'Description',
             placeholder: 'Enter Tutorial Description',
             required: true,
+            maxLength: 1028
           }
         },
         {

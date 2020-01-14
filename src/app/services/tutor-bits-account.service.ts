@@ -9,16 +9,17 @@ import { ResponseWrapper } from './abstract/IModelApiService';
 import { FileUtils } from 'shared/web/lib/ts/FileUtils';
 import { CreateAccount } from '../models/tutorial/create-account';
 import { ViewAccount } from '../models/user/view-account';
+import { UpdateAccount } from '../models/tutorial/update-account';
 
 // Import this as your service so tests can override it
-export abstract class TutorBitsAccountService extends TutorBitsBaseModelApiService<CreateAccount, ViewAccount> {
+export abstract class TutorBitsAccountService extends TutorBitsBaseModelApiService<CreateAccount, UpdateAccount, ViewAccount> {
   constructor(apiService: IAPIService, auth: IAuthService) {
     super(apiService, auth);
   }
 
   public abstract async Login(): Promise<ViewAccount>;
   public abstract async GetAccountInformation(): Promise<ViewAccount>;
-  public abstract async UpdateNickName(nickName: string): Promise<void>;
+  public abstract async UpdateNickName(nickName: string, accountId: string): Promise<void>;
 }
 
 @Injectable()
@@ -49,14 +50,15 @@ export class TutorBitsConcreteAccountService extends TutorBitsAccountService {
     return accounts[0];
   }
 
-  public async UpdateNickName(nickName: string): Promise<void> {
-    const response = await this.apiService.generateRequest()
-      .Post(`api/Account/UpdateNickName?nickName=${nickName}`, null, await this.GetAuthHeaders());
+  public async UpdateNickName(nickName: string, accountId: string): Promise<void> {
+    const updatedModel = {
+      Id: accountId,
+      NickName: nickName
+    } as UpdateAccount;
 
-    if (!response.ok) {
-      throw new Error(`Failed updating userName: - ${await response.text()}`);
+    const response = await this.Update(updatedModel);
+    if (response.data === null) {
+      throw new Error(response.error);
     }
-
-
   }
 }

@@ -5,11 +5,11 @@ import { TutorBitsBaseModelApiService } from './abstract/tutor-bits-base-model-a
 import { IAPIService } from './abstract/IAPIService';
 import { Injectable } from '@angular/core';
 import { IAuthService } from './abstract/IAuthService';
-import { ResponseWrapper } from './abstract/IModelApiService';
 import { FileUtils } from 'shared/web/lib/ts/FileUtils';
+import { UpdateTutorial } from '../models/tutorial/update-tutorial';
 
 // Import this as your service so tests can override it
-export abstract class TutorBitsTutorialService extends TutorBitsBaseModelApiService<CreateTutorial, ViewTutorial> {
+export abstract class TutorBitsTutorialService extends TutorBitsBaseModelApiService<CreateTutorial, UpdateTutorial, ViewTutorial> {
   constructor(apiService: IAPIService, auth: IAuthService) {
     super(apiService, auth);
   }

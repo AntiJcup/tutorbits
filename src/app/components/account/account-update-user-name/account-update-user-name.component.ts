@@ -15,6 +15,7 @@ import { ITitleService } from 'src/app/services/abstract/ITitleService';
 export class AccountUpdateUserNameComponent implements OnInit {
   loading = false;
   form = new FormGroup({});
+  accountId: string;
   model: UpdateAccountUserName = { userName: null };
   fields: FormlyFieldConfig[] = [{
     model: this.model,
@@ -48,13 +49,14 @@ export class AccountUpdateUserNameComponent implements OnInit {
   ngOnInit() {
     this.titleService.SetTitle('Update UserName');
     this.model.userName = this.route.snapshot.paramMap.get('currentUserName');
+    this.accountId = this.route.snapshot.paramMap.get('accountId');
   }
 
   submit(model: UpdateAccountUserName) {
     this.logServer.LogToConsole('AccountUpdateUserName', model);
     this.loading = true;
 
-    this.accountService.UpdateNickName(model.userName).then((a) => {
+    this.accountService.UpdateNickName(model.userName, this.accountId).then((a) => {
       this.router.navigate(['myaccount']);
     }).catch((err) => {
       this.errorServer.HandleError('AccountUpdateUserName', `${err}`);
