@@ -15,7 +15,7 @@ export abstract class TutorBitsTutorialService extends TutorBitsBaseModelApiServ
 
   public abstract async UploadThumbnail(thumbnail: File, tutorialId: string): Promise<void>;
   public abstract async Publish(tutorialId: string): Promise<boolean>;
-  public abstract async GetTutorialLanguages(): Promise<string[]>;
+  public abstract async GetTutorialTopics(): Promise<string[]>;
 }
 
 @Injectable()
@@ -42,7 +42,7 @@ export class TutorBitsConcreteTutorialService extends TutorBitsTutorialService {
     return response.ok;
   }
 
-  public async GetTutorialLanguages(): Promise<string[]> {
+  public async GetTutorialTopics(): Promise<string[]> {
     const response = await this.apiService.generateRequest()
       .Get(`${this.basePath}/GetTutorialTopics`, await this.GetAuthHeaders());
 

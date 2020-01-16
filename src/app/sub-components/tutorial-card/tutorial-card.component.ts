@@ -27,7 +27,7 @@ export class TutorialCardComponent implements OnInit {
   }
 
   get tutorialSubTitle(): string {
-    return `${this.tutorial.owner} - ${this.tutorial.language} - ${this.tutorialDuration}`;
+    return `${this.tutorial.owner} - ${this.tutorial.topic} - ${this.tutorialDuration}`;
   }
 
   constructor() { }

@@ -40,11 +40,11 @@ export class ViewTutorialsComponent implements OnInit, OnDestroy {
         this.tutorialsByType[this.allKey] = this.tutorialsByType[this.allKey] ? this.tutorialsByType[this.allKey] : [];
         this.tutorialsByType[this.allKey].push(element);
 
-        this.tutorialsByType[element.language] = this.tutorialsByType[element.language] ? this.tutorialsByType[element.language] : [];
-        this.tutorialsByType[element.language].push(element);
+        this.tutorialsByType[element.topic] = this.tutorialsByType[element.topic] ? this.tutorialsByType[element.topic] : [];
+        this.tutorialsByType[element.topic].push(element);
 
-        if (this.tutorialTypes.indexOf(element.language) === -1) {
-          this.tutorialTypes.push(element.language);
+        if (this.tutorialTypes.indexOf(element.topic) === -1) {
+          this.tutorialTypes.push(element.topic);
         }
       });
 
