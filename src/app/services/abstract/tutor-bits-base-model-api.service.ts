@@ -56,9 +56,10 @@ export abstract class TutorBitsBaseModelApiService<CreateModelT, UpdateModelT, V
     return response.ok;
   }
 
-  public async GetAll(status: Status = Status.Active): Promise<ViewModelT[]> {
+  public async GetAll(status: Status = Status.Active, take: number = null, skip: number = null): Promise<ViewModelT[]> {
     const response = await this.apiService.generateRequest()
-      .Get(`${this.basePath}/GetAll?state=${Status[status]}`, await this.GetHeaders());
+      .Get(`${this.basePath}/GetAll?state=${Status[status]}${take === null ? '' : `&take=${take}`}${skip === null ? '' : `&skip=${skip}`}`,
+        await this.GetHeaders());
 
     if (!response.ok) {
       return null;
@@ -67,9 +68,9 @@ export abstract class TutorBitsBaseModelApiService<CreateModelT, UpdateModelT, V
     return (await response.json()) as ViewModelT[];
   }
 
-  public async GetAllByOwner(): Promise<ViewModelT[]> {
+  public async GetAllByOwner(take: number = null, skip: number = null): Promise<ViewModelT[]> {
     const response = await this.apiService.generateRequest()
-      .Get(`${this.basePath}/GetAllByOwner`,
+      .Get(`${this.basePath}/GetAllByOwner${take === null ? '' : `?take=${take}`}${skip === null ? '' : `${take === null ? '?' : '&'}skip=${skip}`}`,
         await this.GetAuthHeaders());
 
     if (!response.ok) {

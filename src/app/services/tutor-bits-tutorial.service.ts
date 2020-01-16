@@ -1,4 +1,3 @@
-import { TutorBitsApiService } from './tutor-bits-api.service';
 import { ViewTutorial } from '../models/tutorial/view-tutorial';
 import { CreateTutorial } from '../models/tutorial/create-tutorial';
 import { TutorBitsBaseModelApiService } from './abstract/tutor-bits-base-model-api.service';
@@ -45,7 +44,7 @@ export class TutorBitsConcreteTutorialService extends TutorBitsTutorialService {
 
   public async GetTutorialLanguages(): Promise<string[]> {
     const response = await this.apiService.generateRequest()
-      .Get(`${this.basePath}/GetTutorialLanguages`, await this.GetAuthHeaders());
+      .Get(`${this.basePath}/GetTutorialTopics`, await this.GetAuthHeaders());
 
     if (!response.ok) {
       throw new Error(`Failed getting tutorial types: ${response.status}`);

@@ -82,6 +82,10 @@ import { ITitleService } from './services/abstract/ITitleService';
 import { TutorBitsTitleService } from './services/tutor-bits-title.service';
 import { WatchGuideComponent } from './sub-components/watch-guide/watch-guide.component';
 import { PlayButtonHintComponent } from './sub-components/play-button-hint/play-button-hint.component';
+import { TutorBitsTutorialCommentService, TutorBitsConcreteTutorialCommentService } from './services/tutor-bits-tutorial-comment.service';
+import { TutorBitsConcreteQuestionCommentService, TutorBitsQuestionCommentService } from './services/tutor-bits-question-comment.service';
+import { TutorBitsAnswerService, TutorBitsConcreteAnswerService } from './services/tutor-bits-answer.service';
+import { TutorBitsAnswerCommentService, TutorBitsConcreteAnswerCommentService } from './services/tutor-bits-answer-comment.service';
 
 const appRoutes: Routes = [
   {
@@ -261,7 +265,11 @@ const appRoutes: Routes = [
     { provide: IPreviewService, useClass: TutorBitsPreviewService },
     { provide: IUserApiService, useClass: TutorBitsUserApiService },
     { provide: ITitleService, useClass: TutorBitsTitleService },
-    { provide: IEventService, useClass: TutorBitsGAEventService }
+    { provide: IEventService, useClass: TutorBitsGAEventService },
+    { provide: TutorBitsTutorialCommentService, useClass: TutorBitsConcreteTutorialCommentService },
+    { provide: TutorBitsQuestionCommentService, useClass: TutorBitsConcreteQuestionCommentService },
+    { provide: TutorBitsAnswerService, useClass: TutorBitsConcreteAnswerService },
+    { provide: TutorBitsAnswerCommentService, useClass: TutorBitsConcreteAnswerCommentService },
   ],
   bootstrap: [AppComponent],
   entryComponents: [WatchGuideComponent]
