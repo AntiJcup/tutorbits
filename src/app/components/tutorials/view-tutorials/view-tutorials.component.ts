@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ViewTutorial } from 'src/app/models/tutorial/view-tutorial';
 import { Router } from '@angular/router';
-import { TutorBitsTutorialService } from 'src/app/services/tutor-bits-tutorial.service';
+import { TutorBitsTutorialService } from 'src/app/services/tutorial/tutor-bits-tutorial.service';
 import { IErrorService } from 'src/app/services/abstract/IErrorService';
 import { ILogService } from 'src/app/services/abstract/ILogService';
 import { ITitleService } from 'src/app/services/abstract/ITitleService';

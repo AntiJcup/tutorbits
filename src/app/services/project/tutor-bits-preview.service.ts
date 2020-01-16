@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { environment } from 'src/environments/environment';
-import { ILogService } from './abstract/ILogService';
-import { IPreviewService } from './abstract/IPreviewService';
+import { ILogService } from '../abstract/ILogService';
+import { IPreviewService } from '../abstract/IPreviewService';
 import { OnlinePreviewGenerator } from 'shared/Tracer/lib/ts/OnlinePreviewGenerator';
-import { IAPIService } from './abstract/IAPIService';
+import { IAPIService } from '../abstract/IAPIService';
 import { TraceTransactionLogs, TraceTransactionLog } from 'shared/Tracer/models/ts/Tracer_pb';
 
 @Injectable()

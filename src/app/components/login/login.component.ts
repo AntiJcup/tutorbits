@@ -5,7 +5,7 @@ import { IErrorService } from 'src/app/services/abstract/IErrorService';
 import { ReturnStatement } from '@angular/compiler';
 import { environment } from 'src/environments/environment';
 import { ILogService } from 'src/app/services/abstract/ILogService';
-import { TutorBitsAccountService } from 'src/app/services/tutor-bits-account.service';
+import { TutorBitsAccountService } from 'src/app/services/user/tutor-bits-account.service';
 import { IDataService } from 'src/app/services/abstract/IDataService';
 
 @Component({

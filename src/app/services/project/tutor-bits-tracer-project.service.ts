@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
-import { IAPIService } from './abstract/IAPIService';
-import { ITracerProjectService } from './abstract/ITracerProjectService';
-import { IAuthService } from './abstract/IAuthService';
-import { ILogService } from './abstract/ILogService';
+import { IAPIService } from '../abstract/IAPIService';
+import { ITracerProjectService } from '../abstract/ITracerProjectService';
+import { IAuthService } from '../abstract/IAuthService';
+import { ILogService } from '../abstract/ILogService';
 
 @Injectable()
 export class TutorBitsTracerProjectService extends ITracerProjectService {

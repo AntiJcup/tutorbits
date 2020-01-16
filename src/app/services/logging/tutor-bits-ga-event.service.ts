@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { IEventService } from './abstract/IEventService';
+import { IEventService } from '../abstract/IEventService';
 import { environment } from 'src/environments/environment';
 
 @Injectable()

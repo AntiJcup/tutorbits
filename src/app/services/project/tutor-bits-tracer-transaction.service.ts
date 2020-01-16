@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
-import { IAPIService } from './abstract/IAPIService';
-import { IAuthService } from './abstract/IAuthService';
-import { ITracerTransactionService } from './abstract/ITracerTransactionService';
+import { IAPIService } from '../abstract/IAPIService';
+import { IAuthService } from '../abstract/IAuthService';
+import { ITracerTransactionService } from '../abstract/ITracerTransactionService';
 import { TraceTransactionLog } from 'shared/Tracer/models/ts/Tracer_pb';
 import { IPerfLoggingPrefs } from 'selenium-webdriver/chrome';
-import { ILogService } from './abstract/ILogService';
+import { ILogService } from '../abstract/ILogService';
 
 @Injectable()
 export class TutorBitsTracerTransactionService extends ITracerTransactionService {

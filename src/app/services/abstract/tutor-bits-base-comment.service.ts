@@ -25,7 +25,7 @@ export abstract class TutorBitsBaseCommentService extends TutorBitsBaseModelApiS
 
   public async GetCommentCount(targetId: string, status: Status = Status.Active): Promise<number> {
     const response = await this.apiService.generateRequest()
-      .Get(`${this.basePath}/GetCountForTarget?state=${Status[status]}`,
+      .Get(`${this.basePath}/GetCountForTarget?state=${Status[status]}&targetId=${targetId}`,
         await this.GetHeaders());
 
     if (!response.ok) {

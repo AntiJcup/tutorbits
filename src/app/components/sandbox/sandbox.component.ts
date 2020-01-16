@@ -19,7 +19,7 @@ import { Observable } from 'rxjs';
 import { IEventService } from 'src/app/services/abstract/IEventService';
 import { PreviewComponent } from 'src/app/sub-components/preview/preview.component';
 import { ViewTutorial } from 'src/app/models/tutorial/view-tutorial';
-import { TutorBitsTutorialService } from 'src/app/services/tutor-bits-tutorial.service';
+import { TutorBitsTutorialService } from 'src/app/services/tutorial/tutor-bits-tutorial.service';
 import { ITitleService } from 'src/app/services/abstract/ITitleService';
 
 @Component({

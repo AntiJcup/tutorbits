@@ -1,12 +1,12 @@
 import { Injectable } from '@angular/core';
 import { environment } from 'src/environments/environment';
-import { IAuthService } from './abstract/IAuthService';
-import { IAPIService } from './abstract/IAPIService';
-import { JWT } from '../models/auth/JWT';
-import { IDataService } from './abstract/IDataService';
+import { IAuthService } from '../abstract/IAuthService';
+import { IAPIService } from '../abstract/IAPIService';
+import { JWT } from '../../models/auth/JWT';
+import { IDataService } from '../abstract/IDataService';
 import { BehaviorSubject } from 'rxjs';
-import { ILogService } from './abstract/ILogService';
-import { IErrorService } from './abstract/IErrorService';
+import { ILogService } from '../abstract/ILogService';
+import { IErrorService } from '../abstract/IErrorService';
 import { Router } from '@angular/router';
 
 interface JWTRequest {

@@ -36,23 +36,23 @@ import { LoginComponent } from './components/login/login.component';
 import { IAPIService } from './services/abstract/IAPIService';
 import { TutorBitsApiService } from './services/tutor-bits-api.service';
 import { IAuthService } from './services/abstract/IAuthService';
-import { TutorBitsAuthService } from './services/tutor-bits-auth.service';
+import { TutorBitsAuthService } from './services/user/tutor-bits-auth.service';
 import { ILogService } from './services/abstract/ILogService';
-import { TutorBitsLoggingService } from './services/tutor-bits-logging.service';
-import { TutorBitsTutorialService, TutorBitsConcreteTutorialService } from './services/tutor-bits-tutorial.service';
+import { TutorBitsLoggingService } from './services/logging/tutor-bits-logging.service';
+import { TutorBitsTutorialService, TutorBitsConcreteTutorialService } from './services/tutorial/tutor-bits-tutorial.service';
 import { IStorageService } from './services/abstract/IStorageService';
-import { TutorBitsStorageService } from './services/tutor-bits-storage.service';
-import { TutorBitsErrorService } from './services/tutor-bits-error.service';
+import { TutorBitsStorageService } from './services/storage/tutor-bits-storage.service';
+import { TutorBitsErrorService } from './services/logging/tutor-bits-error.service';
 import { IErrorService } from './services/abstract/IErrorService';
 import { IDataService } from './services/abstract/IDataService';
-import { TutorBitsDataService } from './services/tutor-bits-persist.service';
+import { TutorBitsDataService } from './services/storage/tutor-bits-persist.service';
 import { LogoutComponent } from './components/logout/logout.component';
-import { TutorBitsTracerProjectService } from './services/tutor-bits-tracer-project.service';
+import { TutorBitsTracerProjectService } from './services/project/tutor-bits-tracer-project.service';
 import { ITracerProjectService } from './services/abstract/ITracerProjectService';
 import { ITracerTransactionService } from './services/abstract/ITracerTransactionService';
-import { TutorBitsTracerTransactionService } from './services/tutor-bits-tracer-transaction.service';
+import { TutorBitsTracerTransactionService } from './services/project/tutor-bits-tracer-transaction.service';
 import { IVideoRecordingService } from './services/abstract/IVideoRecordingService';
-import { TutorBitsVideoRecordingService } from './services/tutor-bits-video-recording.service';
+import { TutorBitsVideoRecordingService } from './services/project/tutor-bits-video-recording.service';
 import { TimerComponent } from './sub-components/timer/timer.component';
 import { FormlyFieldFileComponent } from './sub-components/formly/formly-field-file/formly-field-file.component';
 import { FileValueAccessorDirective } from './sub-components/formly/file-value-accessor.directive';
@@ -61,13 +61,13 @@ import { PrivacyComponent } from './components/privacy/privacy.component';
 import { TermsComponent } from './components/terms/terms.component';
 import { ResourceViewerComponent } from './sub-components/resource-viewer/resource-viewer.component';
 import { IPreviewService } from './services/abstract/IPreviewService';
-import { TutorBitsPreviewService } from './services/tutor-bits-preview.service';
+import { TutorBitsPreviewService } from './services/project/tutor-bits-preview.service';
 import { MyTutorialsComponent } from './components/tutorials/my-tutorials/my-tutorials.component';
 import { EditTutorialCardComponent } from './sub-components/edit-tutorial-card/edit-tutorial-card.component';
 import { MyAccountComponent } from './components/account/my-account/my-account.component';
 import { IUserApiService } from './services/abstract/IUserApiService';
-import { TutorBitsUserApiService } from './services/tutor-bits-user-api.service';
-import { TutorBitsConcreteAccountService, TutorBitsAccountService } from './services/tutor-bits-account.service';
+import { TutorBitsUserApiService } from './services/user/tutor-bits-user-api.service';
+import { TutorBitsConcreteAccountService, TutorBitsAccountService } from './services/user/tutor-bits-account.service';
 import { AccountUpdateUserNameComponent } from './components/account/account-update-user-name/account-update-user-name.component';
 import { BlogCardComponent } from './sub-components/blog-card/blog-card.component';
 import { ContactComponent } from './components/contact/contact.component';
@@ -76,16 +76,22 @@ import { DeviceDetectorModule } from 'ngx-device-detector';
 import { TutorBitsMobileGuardService } from './services/guards/tutor-bits-mobile-guard.service';
 import { MobileNotSupportedComponent } from './components/mobile-not-supported/mobile-not-supported.component';
 import { IEventService } from './services/abstract/IEventService';
-import { TutorBitsGAEventService } from './services/tutor-bits-ga-event.service';
+import { TutorBitsGAEventService } from './services/logging/tutor-bits-ga-event.service';
 import { PlaybackMouseComponent } from './sub-components/playback-mouse/playback-mouse.component';
 import { ITitleService } from './services/abstract/ITitleService';
 import { TutorBitsTitleService } from './services/tutor-bits-title.service';
 import { WatchGuideComponent } from './sub-components/watch-guide/watch-guide.component';
 import { PlayButtonHintComponent } from './sub-components/play-button-hint/play-button-hint.component';
-import { TutorBitsTutorialCommentService, TutorBitsConcreteTutorialCommentService } from './services/tutor-bits-tutorial-comment.service';
-import { TutorBitsConcreteQuestionCommentService, TutorBitsQuestionCommentService } from './services/tutor-bits-question-comment.service';
-import { TutorBitsAnswerService, TutorBitsConcreteAnswerService } from './services/tutor-bits-answer.service';
-import { TutorBitsAnswerCommentService, TutorBitsConcreteAnswerCommentService } from './services/tutor-bits-answer-comment.service';
+import { TutorBitsTutorialCommentService, TutorBitsConcreteTutorialCommentService } from './services/tutorial/tutor-bits-tutorial-comment.service';
+import { TutorBitsConcreteQuestionCommentService, TutorBitsQuestionCommentService } from './services/question/tutor-bits-question-comment.service';
+import { TutorBitsAnswerService, TutorBitsConcreteAnswerService } from './services/question/tutor-bits-answer.service';
+import { TutorBitsAnswerCommentService, TutorBitsConcreteAnswerCommentService } from './services/question/tutor-bits-answer-comment.service';
+import { TutorBitsTutorialRatingService, TutorBitsConcreteTutorialRatingService } from './services/tutorial/tutor-bits-tutorial-rating.service';
+import { TutorBitsTutorialCommentRatingService, TutorBitsConcreteTutorialCommentRatingService } from './services/tutorial/tutor-bits-tutorial-comment-rating.service';
+import { TutorBitsQuestionRatingService, TutorBitsConcreteQuestionRatingService } from './services/question/tutor-bits-question-rating.service';
+import { TutorBitsQuestionCommentRatingService, TutorBitsConcreteQuestionCommentRatingService } from './services/question/tutor-bits-question-comment-rating.service';
+import { TutorBitsAnswerRatingService, TutorBitsConcreteAnswerRatingService } from './services/question/tutor-bits-answer-rating.service';
+import { TutorBitsAnswerCommentRatingService, TutorBitsConcreteAnswerCommentRatingService } from './services/question/tutor-bits-answer-comment-rating.service';
 
 const appRoutes: Routes = [
   {
@@ -270,6 +276,12 @@ const appRoutes: Routes = [
     { provide: TutorBitsQuestionCommentService, useClass: TutorBitsConcreteQuestionCommentService },
     { provide: TutorBitsAnswerService, useClass: TutorBitsConcreteAnswerService },
     { provide: TutorBitsAnswerCommentService, useClass: TutorBitsConcreteAnswerCommentService },
+    { provide: TutorBitsTutorialRatingService, useClass: TutorBitsConcreteTutorialRatingService },
+    { provide: TutorBitsTutorialCommentRatingService, useClass: TutorBitsConcreteTutorialCommentRatingService },
+    { provide: TutorBitsQuestionRatingService, useClass: TutorBitsConcreteQuestionRatingService },
+    { provide: TutorBitsQuestionCommentRatingService, useClass: TutorBitsConcreteQuestionCommentRatingService },
+    { provide: TutorBitsAnswerRatingService, useClass: TutorBitsConcreteAnswerRatingService },
+    { provide: TutorBitsAnswerCommentRatingService, useClass: TutorBitsConcreteAnswerCommentRatingService },
   ],
   bootstrap: [AppComponent],
   entryComponents: [WatchGuideComponent]

@@ -3,7 +3,7 @@ import { IUserApiService } from 'src/app/services/abstract/IUserApiService';
 import { ViewUser } from 'src/app/models/user/view-user';
 import { IErrorService } from 'src/app/services/abstract/IErrorService';
 import { ILogService } from 'src/app/services/abstract/ILogService';
-import { TutorBitsAccountService } from 'src/app/services/tutor-bits-account.service';
+import { TutorBitsAccountService } from 'src/app/services/user/tutor-bits-account.service';
 import { ViewAccount } from 'src/app/models/user/view-account';
 import { ITitleService } from 'src/app/services/abstract/ITitleService';
 

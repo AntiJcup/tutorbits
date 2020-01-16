@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { IStorageService } from './abstract/IStorageService';
-import { IDataService } from './abstract/IDataService';
-import { JWT } from '../models/auth/JWT';
+import { IStorageService } from '../abstract/IStorageService';
+import { IDataService } from '../abstract/IDataService';
+import { JWT } from '../../models/auth/JWT';
 
 @Injectable()
 export class TutorBitsDataService extends IDataService {

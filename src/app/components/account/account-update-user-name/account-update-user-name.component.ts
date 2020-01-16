@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { UpdateAccountUserName } from 'src/app/models/tutorial/update-account-user-name';
 import { FormlyFieldConfig } from '@ngx-formly/core';
-import { TutorBitsAccountService } from 'src/app/services/tutor-bits-account.service';
+import { TutorBitsAccountService } from 'src/app/services/user/tutor-bits-account.service';
 import { FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ILogService } from 'src/app/services/abstract/ILogService';

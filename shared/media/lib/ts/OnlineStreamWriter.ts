@@ -1,7 +1,7 @@
 import { ApiHttpRequest } from 'shared/web/lib/ts/ApiHttpRequest';
 import { StreamWriter } from './StreamWriter';
 import { Part } from './StreamRecorder';
-import { TutorBitsErrorService } from 'src/app/services/tutor-bits-error.service';
+import { TutorBitsErrorService } from 'src/app/services/logging/tutor-bits-error.service';
 
 export class OnlineStreamWriter extends StreamWriter {
     constructor(protected requestor: ApiHttpRequest) {

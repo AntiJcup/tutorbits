@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { IStorageService } from './abstract/IStorageService';
+import { IStorageService } from '../abstract/IStorageService';
 
 @Injectable()
 export class TutorBitsStorageService extends IStorageService {

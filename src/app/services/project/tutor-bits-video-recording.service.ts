@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { IAPIService } from './abstract/IAPIService';
-import { IAuthService } from './abstract/IAuthService';
-import { IVideoRecordingService } from './abstract/IVideoRecordingService';
+import { IAPIService } from '../abstract/IAPIService';
+import { IAuthService } from '../abstract/IAuthService';
+import { IVideoRecordingService } from '../abstract/IVideoRecordingService';
 import { Part } from 'shared/media/lib/ts/Common';
 
 @Injectable()

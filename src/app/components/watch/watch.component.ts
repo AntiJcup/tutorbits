@@ -11,7 +11,7 @@ import { OnlineStreamLoader } from 'shared/media/lib/ts/OnlineStreamLoader';
 import { TransactionPlayerState } from 'shared/Tracer/lib/ts/TransactionPlayer';
 import { IErrorService } from 'src/app/services/abstract/IErrorService';
 import { ILogService } from 'src/app/services/abstract/ILogService';
-import { TutorBitsTutorialService } from 'src/app/services/tutor-bits-tutorial.service';
+import { TutorBitsTutorialService } from 'src/app/services/tutorial/tutor-bits-tutorial.service';
 import { Guid } from 'guid-typescript';
 import { ITracerProjectService } from 'src/app/services/abstract/ITracerProjectService';
 import { ResourceViewerComponent } from 'src/app/sub-components/resource-viewer/resource-viewer.component';

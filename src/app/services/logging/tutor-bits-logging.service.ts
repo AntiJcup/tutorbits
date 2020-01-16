@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { environment } from 'src/environments/environment';
-import { ILogService } from './abstract/ILogService';
+import { ILogService } from '../abstract/ILogService';
 
 @Injectable()
 export class TutorBitsLoggingService extends ILogService {

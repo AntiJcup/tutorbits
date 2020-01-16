@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
 import { environment } from 'src/environments/environment';
-import { IErrorService } from './abstract/IErrorService';
+import { IErrorService } from '../abstract/IErrorService';
 import { MatSnackBar, SimpleSnackBar, MatSnackBarRef } from '@angular/material';
 import { Router, Event, NavigationStart } from '@angular/router';
 import { Subscription, Observable } from 'rxjs';
-import { IEventService } from './abstract/IEventService';
-import { ILogService } from './abstract/ILogService';
+import { IEventService } from '../abstract/IEventService';
+import { ILogService } from '../abstract/ILogService';
 
 @Injectable()
 export class TutorBitsErrorService extends IErrorService {
