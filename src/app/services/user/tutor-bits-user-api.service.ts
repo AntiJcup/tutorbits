@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { environment } from 'src/environments/environment';
 import { IUserApiService } from '../abstract/IUserApiService';
 import { ViewUser } from '../../models/user/view-user';
 import { IAPIService } from '../abstract/IAPIService';
