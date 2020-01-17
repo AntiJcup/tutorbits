@@ -92,6 +92,9 @@ import { TutorBitsQuestionRatingService, TutorBitsConcreteQuestionRatingService 
 import { TutorBitsQuestionCommentRatingService, TutorBitsConcreteQuestionCommentRatingService } from './services/question/tutor-bits-question-comment-rating.service';
 import { TutorBitsAnswerRatingService, TutorBitsConcreteAnswerRatingService } from './services/question/tutor-bits-answer-rating.service';
 import { TutorBitsAnswerCommentRatingService, TutorBitsConcreteAnswerCommentRatingService } from './services/question/tutor-bits-answer-comment-rating.service';
+import { CommentSectionComponent } from './sub-components/comment-section/comment-section.component';
+import { CommentComponent } from './sub-components/comment/comment.component';
+import { CreateCommentComponent } from './sub-components/create-comment/create-comment.component';
 
 const appRoutes: Routes = [
   {
@@ -231,7 +234,10 @@ const appRoutes: Routes = [
     MobileNotSupportedComponent,
     PlaybackMouseComponent,
     WatchGuideComponent,
-    PlayButtonHintComponent
+    PlayButtonHintComponent,
+    CommentSectionComponent,
+    CommentComponent,
+    CreateCommentComponent
   ],
   imports: [
     BrowserModule,

@@ -43,7 +43,7 @@ export abstract class MonacoEditorComponent implements OnDestroy {
   }
 
   onWindowResize() {
-    this.codeEditor.layout({ width: window.innerWidth - 410, height: window.innerHeight });
+    this.codeEditor.layout({ width: window.innerWidth - 810, height: window.innerHeight });
   }
 
   editorOnInit(codeEditor: editor.IEditor) {

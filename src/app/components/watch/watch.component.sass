@@ -81,8 +81,12 @@
   height: 32px
   z-index: 14
 
-@media (max-width: 905px)
+@media (max-width: 945px)
   .controls
+    display: none
+
+@media (max-width: 1080px)
+  #downloadButtonContainer
     display: none
 
 .controlsContainer
@@ -126,3 +130,12 @@ app-preview
   z-index: 20
   opacity: 90%
   pointer-events: none
+
+.commentSection
+  display: flex
+  flex-shrink: 0
+  min-width: 400px
+  max-width: 400px
+  height: 99%
+  app-comment-section
+    width: 100%

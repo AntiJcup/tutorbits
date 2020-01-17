@@ -25,6 +25,8 @@ import { MatDialog } from '@angular/material';
 import { WatchGuideComponent } from 'src/app/sub-components/watch-guide/watch-guide.component';
 import { IDataService } from 'src/app/services/abstract/IDataService';
 import { Meta } from '@angular/platform-browser';
+import { TutorBitsTutorialCommentService } from 'src/app/services/tutorial/tutor-bits-tutorial-comment.service';
+import { ViewComment } from 'src/app/models/comment/view-comment';
 
 @Component({
   templateUrl: './watch.component.html',
@@ -67,6 +69,10 @@ export class WatchComponent implements OnInit, OnDestroy {
 
   loadingReferences = 0;
 
+  loadingComments = false;
+  comments: ViewComment[];
+  showCommentSection = false;
+
   private onLoadStartSub: Subscription;
   private onLoadCompleteSub: Subscription;
 
@@ -82,7 +88,8 @@ export class WatchComponent implements OnInit, OnDestroy {
     private titleService: ITitleService,
     public dialog: MatDialog,
     private dataService: IDataService,
-    private metaService: Meta) {
+    private metaService: Meta,
+    private commentService: TutorBitsTutorialCommentService) {
     this.projectId = this.route.snapshot.paramMap.get('projectId');
     this.title = this.route.snapshot.paramMap.get('title');
     this.publishMode = this.route.snapshot.queryParamMap.get('publish') === 'true';
@@ -213,9 +220,15 @@ export class WatchComponent implements OnInit, OnDestroy {
       });
   }
 
-  public onCloseClicked(e: any) {
+  public onPreviewClosed(e: any) {
     this.eventService.TriggerButtonClick('Watch', `PreviewClose - ${this.projectId}`);
     this.previewComponent.ClosePreview();
+  }
+
+  
+  public onCommentsClosed(e: any) {
+    this.eventService.TriggerButtonClick('Watch', `CommentsClose - ${this.projectId}`);
+    this.showCommentSection = false;
   }
 
   public onPublishClicked(e: any) {
@@ -272,5 +285,28 @@ export class WatchComponent implements OnInit, OnDestroy {
 
   public onShowHelp() {
     this.dialog.open(WatchGuideComponent);
+  }
+
+  public onCommentsClicked(e: any) {
+    this.eventService.TriggerButtonClick('Watch', `Comments - ${this.projectId}`);
+    this.loadingComments = true;
+
+    this.commentService.GetComments(this.projectId).then((res) => {
+      this.showCommentSection = true;
+
+      // Hack because monaco editor needs a resize event to consider the comment section
+      setTimeout(() => {
+        window.dispatchEvent(new Event('resize'));
+      }, 1);
+
+      if (!res) {
+        this.errorServer.HandleError('CommentsWatch', `Error loading comments`);
+        return;
+      }
+    }).catch((err) => {
+      this.errorServer.HandleError('CommentsWatch', `${err}`);
+    }).finally(() => {
+      this.loadingComments = false;
+    });
   }
 }

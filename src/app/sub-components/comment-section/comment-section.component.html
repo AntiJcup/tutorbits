@@ -1,0 +1,15 @@
+<div class="container">
+    <div *ngFor="let comment of comments">
+        <app-comment>test</app-comment>
+    </div>
+    <app-create-comment [targetId]="targetId" [commentService]="commentService" *ngIf="addingComment">
+
+    </app-create-comment>
+    <button class="closeBtn" color="secondary" mat-mini-fab (click)="onCloseClicked()">
+        <mat-icon>chevron_right</mat-icon>
+    </button>
+    <button class="addCommentBtn" color="secondary" mat-raised-button (click)="onAddComment()">
+        <mat-icon>post_add</mat-icon>
+        <span>Add Comment</span>
+    </button>
+</div>

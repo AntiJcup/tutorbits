@@ -20,13 +20,18 @@
     </mat-spinner>
   </div>
   <div class="controlsContainer">
-    <app-saving-button (click)="onDownloadClicked($event)" text="Download Project" icon="cloud_download"
-      [saving]="downloading" savingText="Downloading..." matTooltip="Save project as zip">
+    <app-saving-button (click)="onCommentsClicked($event)" text="Comments" icon="comment" [saving]="loadingComments"
+      savingText="Loading..." matTooltip="Shows Comment Section">
+    </app-saving-button>
+  </div>
+  <div class="controlsContainer" id="downloadButtonContainer">
+    <app-saving-button (click)="onDownloadClicked($event)" text="Download" icon="cloud_download" [saving]="downloading"
+      savingText="Downloading..." matTooltip="Save project as zip">
     </app-saving-button>
   </div>
   <div class="controlsContainer">
-    <app-saving-button text="Edit in Sandbox" icon="move_to_inbox"
-      [saving]="false" savingText="" matTooltip="Copies finished project to sandbox for customization" [matMenuTriggerFor]="sandboxMenu">
+    <app-saving-button text="Edit in Sandbox" icon="move_to_inbox" [saving]="false" savingText=""
+      matTooltip="Copies finished project to sandbox for customization" [matMenuTriggerFor]="sandboxMenu">
     </app-saving-button>
     <mat-menu #sandboxMenu="matMenu">
       <button mat-menu-item (click)="onCopyToSandboxClicked($event, true)">New Window</button>
@@ -52,14 +57,16 @@
     </app-playback-file-tree>
   </div>
   <div class="editorContainer" fxLayout fxLayoutGap="5px">
-    <app-editor-place-holder class="placeHolder">
-    </app-editor-place-holder>
     <app-resource-viewer class="resourceViewer">
     </app-resource-viewer>
     <app-playback-editor class="recordingEditor" (codeInitialized)="onCodeInitialized($event)">
     </app-playback-editor>
-    <app-preview class="preview" (closeClicked)="onCloseClicked($event)">
+    <app-preview class="preview" (closeClicked)="onPreviewClosed($event)">
     </app-preview>
+    <div class="commentSection" *ngIf="showCommentSection">
+      <app-comment-section [comments]="comments" [targetId]="projectId" (closeClicked)="onCommentsClosed($event);"
+        [commentService]="commentService"></app-comment-section>
+    </div>
   </div>
 </div>
 <app-playback-mouse></app-playback-mouse>

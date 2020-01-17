@@ -7,6 +7,8 @@ import { Router } from '@angular/router';
 import { IErrorService } from 'src/app/services/abstract/IErrorService';
 import { ILogService } from 'src/app/services/abstract/ILogService';
 import { ITitleService } from 'src/app/services/abstract/ITitleService';
+import { ResponseWrapper } from 'src/app/services/abstract/IModelApiService';
+import { ViewTutorial } from 'src/app/models/tutorial/view-tutorial';
 
 @Component({
   templateUrl: './create-tutorial.component.html',
@@ -99,7 +101,7 @@ export class CreateTutorialComponent implements OnInit, OnDestroy {
 
     const createModel = JSON.parse(JSON.stringify(model)) as CreateTutorial;
     createModel.ThumbnailData = null;
-    this.tutorialService.Create(createModel).then((e) => {
+    this.tutorialService.Create(createModel).then((e: ResponseWrapper<ViewTutorial>) => {
       this.logServer.LogToConsole('CreateTutorial', e);
       if (e.error != null) {
         this.loading = false;
