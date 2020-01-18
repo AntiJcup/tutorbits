@@ -294,6 +294,9 @@ export class WatchComponent implements OnInit, OnDestroy {
   }
 
   public onCommentsClicked(e: any) {
+    if (this.showCommentSection) {
+      return;
+    }
     this.eventService.TriggerButtonClick('Watch', `Comments - ${this.projectId}`);
     this.loadingComments = true;
 
