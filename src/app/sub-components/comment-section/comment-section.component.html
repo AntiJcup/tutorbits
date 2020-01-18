@@ -11,7 +11,7 @@
     <button class="closeBtn" color="secondary" mat-mini-fab (click)="onCloseClicked()">
         <mat-icon>chevron_right</mat-icon>
     </button>
-    <button class="addCommentBtn" color="secondary" mat-raised-button (click)="onAddComment()">
+    <button class="addCommentBtn" color="secondary" mat-raised-button (click)="onAddComment()" [disabled]="!loggedIn">
         <mat-icon>post_add</mat-icon>
         <span>Add Comment</span>
     </button>

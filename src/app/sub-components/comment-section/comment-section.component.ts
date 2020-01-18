@@ -1,6 +1,7 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { ViewComment } from 'src/app/models/comment/view-comment';
 import { TutorBitsBaseCommentService } from 'src/app/services/abstract/tutor-bits-base-comment.service';
+import { IAuthService } from 'src/app/services/abstract/IAuthService';
 
 @Component({
   selector: 'app-comment-section',
@@ -21,10 +22,12 @@ export class CommentSectionComponent implements OnInit {
   public closeClicked = new EventEmitter();
 
   public addingComment = false;
+  public loggedIn = false;
 
-  constructor() { }
+  constructor(private auth: IAuthService) { }
 
   ngOnInit() {
+    this.loggedIn = this.auth.IsLoggedIn();
   }
 
   onCloseClicked() {
