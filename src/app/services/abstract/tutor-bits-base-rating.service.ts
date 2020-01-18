@@ -22,5 +22,17 @@ export abstract class TutorBitsBaseRatingService extends TutorBitsBaseModelApiSe
 
     return (await response.json()) as number;
   }
+
+  public async GetYourRatingForTarget(targetId: string): Promise<ViewRating> {
+    const response = await this.apiService.generateRequest()
+      .Get(`${this.basePath}/GetYourScoreForTarget?targetId=${targetId}`,
+        await this.GetAuthHeaders());
+
+    if (!response.ok) {
+      throw new Error('Failed retrieving your score');
+    }
+
+    return (await response.json()) as ViewRating;
+  }
 }
 
