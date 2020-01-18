@@ -4,4 +4,5 @@ export interface ViewComment {
     body: string;
     owner: string;
     status: string;
+    dateCreated: number;
 }
