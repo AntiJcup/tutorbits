@@ -17,7 +17,7 @@ import { ViewTutorial } from 'src/app/models/tutorial/view-tutorial';
 export class CreateTutorialComponent implements OnInit, OnDestroy {
   loading = false;
   form = new FormGroup({});
-  model: CreateTutorial = { Title: null, Description: null, Language: null, ThumbnailData: null, Category: 'Tutorial' };
+  model: CreateTutorial = { Title: null, Description: null, Topic: null, ThumbnailData: null, Category: 'Tutorial' };
   fields: FormlyFieldConfig[] = [];
 
   constructor(
@@ -53,10 +53,10 @@ export class CreateTutorialComponent implements OnInit, OnDestroy {
           }
         },
         {
-          key: 'Language',
+          key: 'Topic',
           type: 'select',
           templateOptions: {
-            label: 'Language',
+            label: 'Topic',
             required: true,
             options: tutorialTypeOptions
           }

@@ -225,7 +225,7 @@ export class WatchComponent implements OnInit, OnDestroy {
     this.previewComponent.ClosePreview();
   }
 
-  
+
   public onCommentsClosed(e: any) {
     this.eventService.TriggerButtonClick('Watch', `CommentsClose - ${this.projectId}`);
     this.showCommentSection = false;
@@ -291,7 +291,7 @@ export class WatchComponent implements OnInit, OnDestroy {
     this.eventService.TriggerButtonClick('Watch', `Comments - ${this.projectId}`);
     this.loadingComments = true;
 
-    this.commentService.GetComments(this.projectId).then((res) => {
+    this.commentService.GetComments(this.projectId).then((res: ViewComment[]) => {
       this.showCommentSection = true;
 
       // Hack because monaco editor needs a resize event to consider the comment section
@@ -303,6 +303,8 @@ export class WatchComponent implements OnInit, OnDestroy {
         this.errorServer.HandleError('CommentsWatch', `Error loading comments`);
         return;
       }
+
+      this.comments = res;
     }).catch((err) => {
       this.errorServer.HandleError('CommentsWatch', `${err}`);
     }).finally(() => {

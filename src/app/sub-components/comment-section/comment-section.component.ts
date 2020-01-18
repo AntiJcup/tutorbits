@@ -9,7 +9,7 @@ import { TutorBitsBaseCommentService } from 'src/app/services/abstract/tutor-bit
 })
 export class CommentSectionComponent implements OnInit {
   @Input()
-  public comments: ViewComment[];
+  public comments: ViewComment[] = [];
 
   @Input()
   public targetId: string;
@@ -35,7 +35,10 @@ export class CommentSectionComponent implements OnInit {
     this.addingComment = true;
   }
 
-  onAddedComment(e: any) {
+  onCommentAdded(e: ViewComment) {
     this.addingComment = false;
+
+    // Add to viewcomments
+    this.comments.push(e);
   }
 }

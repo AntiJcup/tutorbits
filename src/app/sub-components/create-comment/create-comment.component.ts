@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, NgZone } from '@angular/core';
+import { Component, OnInit, Input, NgZone, EventEmitter, Output } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { FormlyFieldConfig } from '@ngx-formly/core';
 import { CreateComment } from 'src/app/models/comment/create-comment';
@@ -20,6 +20,9 @@ export class CreateCommentComponent implements OnInit {
 
   @Input()
   public commentService: TutorBitsBaseCommentService;
+
+  @Output()
+  public commentAdded = new EventEmitter();
 
   loading = false;
 
@@ -58,6 +61,8 @@ export class CreateCommentComponent implements OnInit {
       if (res.error) {
         this.errorServer.HandleError('CreateError', JSON.stringify(res.error));
       }
+
+      this.commentAdded.next(res.data as ViewComment);
     }).catch((err) => {
       this.errorServer.HandleError('CreateError', err);
     }).finally(() => {

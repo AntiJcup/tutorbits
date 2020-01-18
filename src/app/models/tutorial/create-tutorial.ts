@@ -1,6 +1,6 @@
 export interface CreateTutorial {
     Title: string;
-    Language: string;
+    Topic: string;
     Description: string;
     ThumbnailData: FileList;
     Category: string;
