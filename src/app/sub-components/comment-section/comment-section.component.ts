@@ -2,7 +2,6 @@ import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { ViewComment } from 'src/app/models/comment/view-comment';
 import { TutorBitsBaseCommentService } from 'src/app/services/abstract/tutor-bits-base-comment.service';
 import { IAuthService } from 'src/app/services/abstract/IAuthService';
-import { IEventService } from 'src/app/services/abstract/IEventService';
 import { IErrorService } from 'src/app/services/abstract/IErrorService';
 
 @Component({
@@ -29,7 +28,6 @@ export class CommentSectionComponent implements OnInit {
 
   constructor(
     private auth: IAuthService,
-    private eventService: IEventService,
     private errorServer: IErrorService) { }
 
   ngOnInit() {
@@ -42,13 +40,13 @@ export class CommentSectionComponent implements OnInit {
       }, 1);
 
       if (!res) {
-        this.errorServer.HandleError('CommentsWatch', `Error loading comments`);
+        this.errorServer.HandleError('CommentsSection', `Error loading comments`);
         return;
       }
 
       this.comments = res;
     }).catch((err) => {
-      this.errorServer.HandleError('CommentsWatch', `${err}`);
+      this.errorServer.HandleError('CommentsSection', `${err}`);
     }).finally(() => {
       this.loading = false;
     });

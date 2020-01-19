@@ -20,9 +20,9 @@
     </mat-spinner>
   </div>
   <div class="controlsContainer">
-    <app-saving-button (click)="onCommentsClicked($event)" [text]="commentsBtnText" icon="comment" [saving]="loadingComments"
-      savingText="Loading..." matTooltip="Shows Comment Section">
-    </app-saving-button>
+    <app-comments-button (click)="onCommentsClicked($event)" matTooltip="Shows Comment Section"
+      [commentService]="commentService" [targetId]="projectId">
+    </app-comments-button>
   </div>
   <div class="controlsContainer" id="downloadButtonContainer">
     <app-saving-button (click)="onDownloadClicked($event)" text="Download" icon="cloud_download" [saving]="downloading"

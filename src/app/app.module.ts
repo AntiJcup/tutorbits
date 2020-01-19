@@ -95,6 +95,7 @@ import { TutorBitsAnswerCommentRatingService, TutorBitsConcreteAnswerCommentRati
 import { CommentSectionComponent } from './sub-components/comment-section/comment-section.component';
 import { CommentComponent } from './sub-components/comment/comment.component';
 import { CreateCommentComponent } from './sub-components/create-comment/create-comment.component';
+import { CommentButtonComponent } from './sub-components/comments-button/comments-button.component';
 
 const appRoutes: Routes = [
   {
@@ -237,7 +238,8 @@ const appRoutes: Routes = [
     PlayButtonHintComponent,
     CommentSectionComponent,
     CommentComponent,
-    CreateCommentComponent
+    CreateCommentComponent,
+    CommentButtonComponent
   ],
   imports: [
     BrowserModule,
