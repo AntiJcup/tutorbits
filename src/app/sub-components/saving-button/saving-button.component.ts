@@ -5,7 +5,7 @@ import { Component, OnInit, Input } from '@angular/core';
   templateUrl: './saving-button.component.html',
   styleUrls: ['./saving-button.component.sass']
 })
-export class SavingButtonComponent implements OnInit {
+export class SavingButtonComponent {
   @Input() saving = false;
   @Input() icon: string;
   @Input() text: string;
@@ -13,8 +13,5 @@ export class SavingButtonComponent implements OnInit {
   @Input() savingText = 'Saving';
 
   constructor() { }
-
-  ngOnInit() {
-  }
 
 }

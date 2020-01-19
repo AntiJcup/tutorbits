@@ -119,10 +119,6 @@ export class WatchComponent implements OnInit, OnDestroy {
       this.dialog.open(WatchGuideComponent);
       this.dataService.SetShownWatchHelp(true);
     }
-
-    this.commentService.GetCommentCount(this.projectId).then((count) => {
-      this.commentsBtnText = `Comments (${count})`;
-    });
   }
 
   ngOnDestroy(): void {
