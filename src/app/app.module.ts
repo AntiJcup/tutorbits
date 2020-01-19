@@ -96,6 +96,7 @@ import { CommentSectionComponent } from './sub-components/comment-section/commen
 import { CommentComponent } from './sub-components/comment/comment.component';
 import { CreateCommentComponent } from './sub-components/create-comment/create-comment.component';
 import { CommentButtonComponent } from './sub-components/comments-button/comments-button.component';
+import { RatingComponent } from './sub-components/rating/rating.component';
 
 const appRoutes: Routes = [
   {
@@ -239,7 +240,8 @@ const appRoutes: Routes = [
     CommentSectionComponent,
     CommentComponent,
     CreateCommentComponent,
-    CommentButtonComponent
+    CommentButtonComponent,
+    RatingComponent
   ],
   imports: [
     BrowserModule,
