@@ -8,4 +8,5 @@ export interface ViewTutorial {
     thumbnailUrl: string;
     durationMS: number;
     category: string;
+    score: number;
 }

@@ -42,7 +42,12 @@ export class RatingComponent implements OnInit {
         targetId: this.targetId
       } as CreateRating;
 
-      this.ratingService.Create(createModel).then().catch((err) => {
+      this.ratingService.Create(createModel).then((res) => {
+        if (res.error) {
+          this.errorServer.HandleError('Rating', `Upvote Create`);
+        }
+        this.rating = res.data as ViewRating;
+      }).catch((err) => {
         this.errorServer.HandleError('Rating', `Upvote Update ${err}`);
       });
       this.score += 1;
@@ -67,7 +72,12 @@ export class RatingComponent implements OnInit {
         targetId: this.targetId
       } as CreateRating;
 
-      this.ratingService.Create(createModel).then().catch((err) => {
+      this.ratingService.Create(createModel).then((res) => {
+        if (res.error) {
+          this.errorServer.HandleError('Rating', `Downvote Create`);
+        }
+        this.rating = res.data as ViewRating;
+      }).catch((err) => {
         this.errorServer.HandleError('Rating', `Downvote Create ${err}`);
       });
       this.score -= 1;
