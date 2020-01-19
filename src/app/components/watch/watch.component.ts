@@ -27,6 +27,7 @@ import { IDataService } from 'src/app/services/abstract/IDataService';
 import { Meta } from '@angular/platform-browser';
 import { TutorBitsTutorialCommentService } from 'src/app/services/tutorial/tutor-bits-tutorial-comment.service';
 import { ViewComment } from 'src/app/models/comment/view-comment';
+import { TutorBitsTutorialRatingService } from 'src/app/services/tutorial/tutor-bits-tutorial-rating.service';
 
 @Component({
   templateUrl: './watch.component.html',
@@ -91,7 +92,8 @@ export class WatchComponent implements OnInit, OnDestroy {
     public dialog: MatDialog,
     private dataService: IDataService,
     private metaService: Meta,
-    private commentService: TutorBitsTutorialCommentService) {
+    private commentService: TutorBitsTutorialCommentService, // Dont remove these component use them
+    private ratingService: TutorBitsTutorialRatingService) {
     this.projectId = this.route.snapshot.paramMap.get('projectId');
     this.title = this.route.snapshot.paramMap.get('title');
     this.publishMode = this.route.snapshot.queryParamMap.get('publish') === 'true';

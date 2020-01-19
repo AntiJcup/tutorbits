@@ -1,6 +1,9 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { TutorBitsBaseRatingService } from 'src/app/services/abstract/tutor-bits-base-rating.service';
 import { IErrorService } from 'src/app/services/abstract/IErrorService';
+import { ViewRating } from 'src/app/models/rating/view-rating';
+import { CreateRating } from 'src/app/models/rating/create-rating';
+import { UpdateRating } from 'src/app/models/rating/update-rating';
 
 @Component({
   selector: 'app-rating',
@@ -13,7 +16,8 @@ export class RatingComponent implements OnInit {
   @Input() showControls = false;
 
   public loading = true;
-  private score = 1;
+  private score = 0;
+  private rating: ViewRating = null;
 
   constructor(private errorServer: IErrorService) { }
 
@@ -25,6 +29,60 @@ export class RatingComponent implements OnInit {
     }).finally(() => {
       this.loading = false;
     });
+
+    this.ratingService.GetYourRatingForTarget(this.targetId).then((rating) => {
+      this.rating = rating;
+    });
+  }
+
+  public onUpvoteClicked(e: any) {
+    if (!this.rating) {
+      const createModel = {
+        score: 1,
+        targetId: this.targetId
+      } as CreateRating;
+
+      this.ratingService.Create(createModel).then().catch((err) => {
+        this.errorServer.HandleError('Rating', `Upvote Update ${err}`);
+      });
+      this.score += 1;
+    } else if (this.rating.score !== 1) {
+      const updateModel = {
+        score: 1,
+        targetId: this.targetId,
+        id: this.rating.id
+      } as UpdateRating;
+
+      this.ratingService.Update(updateModel).then().catch((err) => {
+        this.errorServer.HandleError('Rating', `Updvote Update ${err}`);
+      });
+      this.score += 2;
+    }
+  }
+
+  public onDownvoteClicked(e: any) {
+    if (!this.rating) {
+      const createModel = {
+        score: -1,
+        targetId: this.targetId
+      } as CreateRating;
+
+      this.ratingService.Create(createModel).then().catch((err) => {
+        this.errorServer.HandleError('Rating', `Downvote Create ${err}`);
+      });
+      this.score -= 1;
+    } else if (this.rating.score !== -1) {
+      const updateModel = {
+        score: -1,
+        targetId: this.targetId,
+        id: this.rating.id
+      } as UpdateRating;
+
+      this.ratingService.Update(updateModel).then().catch((err) => {
+        this.errorServer.HandleError('Rating', `Downvote Update ${err}`);
+      });
+      this.score -= 2;
+    }
   }
 
 }

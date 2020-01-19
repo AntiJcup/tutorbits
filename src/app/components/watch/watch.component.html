@@ -20,6 +20,10 @@
     </mat-spinner>
   </div>
   <div class="controlsContainer">
+    <app-rating [ratingService]="ratingService" [targetId]="projectId">
+    </app-rating>
+  </div>
+  <div class="controlsContainer">
     <app-comments-button (click)="onCommentsClicked($event)" matTooltip="Shows Comment Section"
       [commentService]="commentService" [targetId]="projectId">
     </app-comments-button>
