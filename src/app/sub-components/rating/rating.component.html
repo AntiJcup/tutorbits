@@ -1,5 +1,5 @@
 <div class="container">
-    <div class="controlsContainer">
+    <div class="controlsContainer" *ngIf="showControls && loggedIn">
         <button mat-icon-button (click)="onUpvoteClicked($event)">
             <mat-icon>arrow_upward</mat-icon>
         </button>
@@ -7,5 +7,5 @@
             <mat-icon>arrow_downward</mat-icon>
         </button>
     </div>
-    <div class="scoreContainer">{{score}}</div>
+    <div class="scoreContainer">Score: {{score}}</div>
 </div>

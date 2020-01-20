@@ -4,6 +4,7 @@ import { IErrorService } from 'src/app/services/abstract/IErrorService';
 import { ViewRating } from 'src/app/models/rating/view-rating';
 import { CreateRating } from 'src/app/models/rating/create-rating';
 import { UpdateRating } from 'src/app/models/rating/update-rating';
+import { IAuthService } from 'src/app/services/abstract/IAuthService';
 
 @Component({
   selector: 'app-rating',
@@ -18,10 +19,14 @@ export class RatingComponent implements OnInit {
   public loading = true;
   private score = 0;
   private rating: ViewRating = null;
+  private loggedIn = false;
 
-  constructor(private errorServer: IErrorService) { }
+  constructor(
+    private auth: IAuthService,
+    private errorServer: IErrorService) { }
 
   ngOnInit() {
+    this.loggedIn = this.auth.IsLoggedIn();
     this.ratingService.GetScore(this.targetId).then((score) => {
       this.score = score;
     }).catch((err) => {
