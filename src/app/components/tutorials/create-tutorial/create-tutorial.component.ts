@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy, NgZone } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { FormlyFieldConfig } from '@ngx-formly/core';
 import { CreateTutorial } from 'src/app/models/tutorial/create-tutorial';
+import { CreateThumbnail } from 'src/app/models/thumbnail/create-thumbnail';
 import { TutorBitsTutorialService } from 'src/app/services/tutorial/tutor-bits-tutorial.service';
 import { Router } from '@angular/router';
 import { IErrorService } from 'src/app/services/abstract/IErrorService';
@@ -9,6 +10,7 @@ import { ILogService } from 'src/app/services/abstract/ILogService';
 import { ITitleService } from 'src/app/services/abstract/ITitleService';
 import { ResponseWrapper } from 'src/app/services/abstract/IModelApiService';
 import { ViewTutorial } from 'src/app/models/tutorial/view-tutorial';
+import { TutorBitsThumbnailService } from 'src/app/services/thumbnail/tutor-bits-thumbnail.service';
 
 @Component({
   templateUrl: './create-tutorial.component.html',
@@ -22,6 +24,7 @@ export class CreateTutorialComponent implements OnInit, OnDestroy {
 
   constructor(
     private tutorialService: TutorBitsTutorialService,
+    private thumbnailService: TutorBitsThumbnailService,
     private router: Router,
     private errorServer: IErrorService,
     private logServer: ILogService,
@@ -99,21 +102,21 @@ export class CreateTutorialComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const createModel = JSON.parse(JSON.stringify(model)) as CreateTutorial;
-    createModel.ThumbnailData = null;
-    this.tutorialService.Create(createModel).then((e: ResponseWrapper<ViewTutorial>) => {
-      this.logServer.LogToConsole('CreateTutorial', e);
-      if (e.error != null) {
+    const createThumb = {
+      thumbnail: model.ThumbnailData[0]
+    } as CreateThumbnail;
+
+    this.thumbnailService.Create(createThumb).then(async () => {
+      const createModel = JSON.parse(JSON.stringify(model)) as CreateTutorial;
+      createModel.ThumbnailData = null;
+      const res: ResponseWrapper<ViewTutorial> = await this.tutorialService.Create(createModel);
+      this.logServer.LogToConsole('CreateTutorial', res);
+      if (res.error != null) {
         this.loading = false;
-        this.errorServer.HandleError('CreateError', JSON.stringify(e.error));
+        this.errorServer.HandleError('CreateError', JSON.stringify(res.error));
       } else {
-        this.tutorialService.UploadThumbnail(model.ThumbnailData[0], e.data.id).then(() => {
-          this.loading = false;
-          this.router.navigate([`record/${e.data.id}`]);
-        }).catch((err) => {
-          this.errorServer.HandleError('ThumbnailError', err);
-          this.loading = false;
-        });
+        this.loading = false;
+        this.router.navigate([`record/${res.data.id}`]);
       }
     }).catch((e) => {
       this.errorServer.HandleError('CreateError', e);

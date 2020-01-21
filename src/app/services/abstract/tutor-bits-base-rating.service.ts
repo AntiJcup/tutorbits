@@ -1,4 +1,4 @@
-import { TutorBitsBaseModelApiService } from './tutor-bits-base-model-api.service';
+import { TutorBitsBaseModelApiService, HandlerType } from './tutor-bits-base-model-api.service';
 import { IAPIService } from './IAPIService';
 import { IAuthService } from './IAuthService';
 import { Status } from './IModelApiService';
@@ -14,7 +14,7 @@ export abstract class TutorBitsBaseRatingService extends TutorBitsBaseModelApiSe
   public async GetScore(targetId: string, status: Status = Status.Active): Promise<number> {
     const response = await this.apiService.generateRequest()
       .Get(`${this.basePath}/GetScoreForTarget?state=${Status[status]}&targetId=${targetId}`,
-        await this.GetHeaders());
+        await this.GetHeaders(HandlerType.Get));
 
     if (!response.ok) {
       throw new Error('Failed retrieving score');
@@ -26,7 +26,7 @@ export abstract class TutorBitsBaseRatingService extends TutorBitsBaseModelApiSe
   public async GetYourRatingForTarget(targetId: string): Promise<ViewRating> {
     const response = await this.apiService.generateRequest()
       .Get(`${this.basePath}/GetYourScoreForTarget?targetId=${targetId}`,
-        await this.GetAuthHeaders());
+        await this.GetAuthHeaders(HandlerType.Get));
 
     if (!response.ok) {
       throw new Error('Failed retrieving your score');

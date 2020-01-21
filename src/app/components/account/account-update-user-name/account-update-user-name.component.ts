@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { UpdateAccountUserName } from 'src/app/models/tutorial/update-account-user-name';
+import { UpdateAccountUserName } from 'src/app/models/user/update-account-user-name';
 import { FormlyFieldConfig } from '@ngx-formly/core';
 import { TutorBitsAccountService } from 'src/app/services/user/tutor-bits-account.service';
 import { FormGroup } from '@angular/forms';

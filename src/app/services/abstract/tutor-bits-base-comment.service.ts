@@ -1,4 +1,4 @@
-import { TutorBitsBaseModelApiService } from './tutor-bits-base-model-api.service';
+import { TutorBitsBaseModelApiService, HandlerType } from './tutor-bits-base-model-api.service';
 import { IAPIService } from './IAPIService';
 import { IAuthService } from './IAuthService';
 import { ViewComment } from '../../models/comment/view-comment';
@@ -14,7 +14,7 @@ export abstract class TutorBitsBaseCommentService extends TutorBitsBaseModelApiS
   public async GetComments(targetId: string, status: Status = Status.Active, take: number = null, skip: number = null): Promise<ViewComment[]> {
     const response = await this.apiService.generateRequest()
       .Get(`${this.basePath}/GetCommentsForTarget?state=${Status[status]}&targetId=${targetId}${take === null ? '' : `&take=${take}`}${skip === null ? '' : `&skip=${skip}`}`,
-        await this.GetHeaders());
+        await this.GetHeaders(HandlerType.Get));
 
     if (!response.ok) {
       throw new Error('Failed retrieving comments');
@@ -26,7 +26,7 @@ export abstract class TutorBitsBaseCommentService extends TutorBitsBaseModelApiS
   public async GetCommentCount(targetId: string, status: Status = Status.Active): Promise<number> {
     const response = await this.apiService.generateRequest()
       .Get(`${this.basePath}/GetCountForTarget?state=${Status[status]}&targetId=${targetId}`,
-        await this.GetHeaders());
+        await this.GetHeaders(HandlerType.Get));
 
     if (!response.ok) {
       throw new Error('Failed retrieving comment count');

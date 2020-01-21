@@ -97,6 +97,7 @@ import { CommentComponent } from './sub-components/comment/comment.component';
 import { CreateCommentComponent } from './sub-components/create-comment/create-comment.component';
 import { CommentButtonComponent } from './sub-components/comments-button/comments-button.component';
 import { RatingComponent } from './sub-components/rating/rating.component';
+import { TutorBitsConcreteThumbnailService, TutorBitsThumbnailService } from './services/thumbnail/tutor-bits-thumbnail.service';
 
 const appRoutes: Routes = [
   {
@@ -292,6 +293,7 @@ const appRoutes: Routes = [
     { provide: TutorBitsQuestionCommentRatingService, useClass: TutorBitsConcreteQuestionCommentRatingService },
     { provide: TutorBitsAnswerRatingService, useClass: TutorBitsConcreteAnswerRatingService },
     { provide: TutorBitsAnswerCommentRatingService, useClass: TutorBitsConcreteAnswerCommentRatingService },
+    { provide: TutorBitsThumbnailService, useClass: TutorBitsConcreteThumbnailService },
   ],
   bootstrap: [AppComponent],
   entryComponents: [WatchGuideComponent]

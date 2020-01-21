@@ -1,6 +1,6 @@
 import { ViewTutorial } from '../../models/tutorial/view-tutorial';
 import { CreateTutorial } from '../../models/tutorial/create-tutorial';
-import { TutorBitsBaseModelApiService } from '../abstract/tutor-bits-base-model-api.service';
+import { TutorBitsBaseModelApiService, HandlerType } from '../abstract/tutor-bits-base-model-api.service';
 import { IAPIService } from '../abstract/IAPIService';
 import { Injectable } from '@angular/core';
 import { IAuthService } from '../abstract/IAuthService';
@@ -13,7 +13,6 @@ export abstract class TutorBitsTutorialService extends TutorBitsBaseModelApiServ
     super(apiService, auth);
   }
 
-  public abstract async UploadThumbnail(thumbnail: File, tutorialId: string): Promise<void>;
   public abstract async Publish(tutorialId: string): Promise<boolean>;
   public abstract async GetTutorialTopics(): Promise<string[]>;
 }
@@ -26,25 +25,16 @@ export class TutorBitsConcreteTutorialService extends TutorBitsTutorialService {
     super(apiService, auth);
   }
 
-  public async UploadThumbnail(thumbnail: File, tutorialId: string): Promise<void> {
-    const response = await this.apiService.generateRequest()
-      .Post(`api/Thumbnail/Upload?tutorialId=${tutorialId}`, await FileUtils.FileToBlob(thumbnail), await this.GetAuthHeaders());
-
-    if (!response.ok) {
-      throw new Error('Failed uploading thumbnail');
-    }
-  }
-
   public async Publish(tutorialId: string): Promise<boolean> {
     const response = await this.apiService.generateRequest()
-      .Post(`${this.basePath}/Publish?tutorialId=${tutorialId}`, null, await this.GetAuthHeaders());
+      .Post(`${this.basePath}/Publish?tutorialId=${tutorialId}`, null, await this.GetAuthHeaders(HandlerType.Update));
 
     return response.ok;
   }
 
   public async GetTutorialTopics(): Promise<string[]> {
     const response = await this.apiService.generateRequest()
-      .Get(`${this.basePath}/GetTutorialTopics`, await this.GetAuthHeaders());
+      .Get(`${this.basePath}/GetProgrammingTopics`, await this.GetHeaders(HandlerType.Get));
 
     if (!response.ok) {
       throw new Error(`Failed getting tutorial types: ${response.status}`);

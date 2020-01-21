@@ -1,4 +1,4 @@
-import { TutorBitsBaseModelApiService } from '../abstract/tutor-bits-base-model-api.service';
+import { TutorBitsBaseModelApiService, HandlerType } from '../abstract/tutor-bits-base-model-api.service';
 import { IAPIService } from '../abstract/IAPIService';
 import { Injectable } from '@angular/core';
 import { IAuthService } from '../abstract/IAuthService';
@@ -27,7 +27,7 @@ export class TutorBitsConcreteAccountService extends TutorBitsAccountService {
 
   public async Login(): Promise<ViewAccount> {
     const response = await this.apiService.generateRequest()
-      .Get(`api/Account/Login`, await this.GetAuthHeaders());
+      .Get(`api/Account/Login`, await this.GetAuthHeaders(HandlerType.Update));
 
     if (!response.ok) {
       throw new Error(`Failed logging in - ${response.statusText}`);
