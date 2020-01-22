@@ -29,7 +29,7 @@ export class TutorBitsAuthService extends IAuthService {
   };
   private token: JWT;
   private tokenObs: BehaviorSubject<JWT> = new BehaviorSubject(this.token);
-  private refreshLookAheadMilliseconds = 1000 * 60 * 58;
+  private refreshLookAheadMilliseconds = 1000 * 60 * 5;
 
   public async getToken(): Promise<JWT> {
     await this.RefreshToken();

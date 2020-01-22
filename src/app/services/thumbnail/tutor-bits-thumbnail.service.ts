@@ -16,8 +16,7 @@ export abstract class TutorBitsThumbnailService extends TutorBitsBaseModelApiSer
 @Injectable()
 export class TutorBitsConcreteThumbnailService extends TutorBitsThumbnailService {
   protected readonly basePath = `api/Thumbnail`;
-  private multipartHeaders = {
-    //'Content-Type': 'multipart/form-data'
+  private multipartHeaders = { // Excluded any header as it auto adds it with the form data
   };
 
   protected async GetHeaders(handlerType: HandlerType): Promise<{ [key: string]: any }> {

@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild, ElementRef, NgZone, OnDestroy } from '@angular/core';
-import { OnlineProjectLoader, OnlineTransactionLoader } from 'shared/Tracer/lib/ts/OnlineTransaction';
+import { OnlineProjectLoader, OnlineTransactionReader } from 'shared/Tracer/lib/ts/OnlineTransaction';
 import { environment } from 'src/environments/environment';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PlaybackEditorComponent } from 'src/app/sub-components/playback-editor/playback-editor.component';
@@ -28,6 +28,7 @@ import { Meta } from '@angular/platform-browser';
 import { TutorBitsTutorialCommentService } from 'src/app/services/tutorial/tutor-bits-tutorial-comment.service';
 import { ViewComment } from 'src/app/models/comment/view-comment';
 import { TutorBitsTutorialRatingService } from 'src/app/services/tutorial/tutor-bits-tutorial-rating.service';
+import { IVideoService } from 'src/app/services/abstract/IVideoService';
 
 @Component({
   templateUrl: './watch.component.html',
@@ -35,15 +36,16 @@ import { TutorBitsTutorialRatingService } from 'src/app/services/tutorial/tutor-
 })
 
 export class WatchComponent implements OnInit, OnDestroy {
-  public projectId: string;
+  public tutorialId: string;
+  tutorial: ViewTutorial;
   public title: string;
   public started = false;
+  codeInitialized = false;
   requestInfo: ApiHttpRequestInfo = {
     host: environment.apiHost,
     credentials: undefined,
     headers: {},
   };
-  requestObj: ApiHttpRequest = new ApiHttpRequest(this.requestInfo);
 
   @ViewChild(PlaybackFileTreeComponent, { static: true }) playbackTreeComponent: PlaybackFileTreeComponent;
   @ViewChild(PlaybackEditorComponent, { static: true }) playbackEditor: PlaybackEditorComponent;
@@ -85,16 +87,15 @@ export class WatchComponent implements OnInit, OnDestroy {
     private zone: NgZone,
     private tutorialService: TutorBitsTutorialService,
     private projectService: ITracerProjectService,
+    private videoService: IVideoService,
     private errorServer: IErrorService,
     private logServer: ILogService,
     private eventService: IEventService,
     private titleService: ITitleService,
     public dialog: MatDialog,
     private dataService: IDataService,
-    private metaService: Meta,
-    private commentService: TutorBitsTutorialCommentService, // Dont remove these component use them
-    private ratingService: TutorBitsTutorialRatingService) {
-    this.projectId = this.route.snapshot.paramMap.get('projectId');
+    private metaService: Meta) {
+    this.tutorialId = this.route.snapshot.paramMap.get('tutorialId');
     this.title = this.route.snapshot.paramMap.get('title');
     this.publishMode = this.route.snapshot.queryParamMap.get('publish') === 'true';
 
@@ -104,17 +105,26 @@ export class WatchComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    const requestObj = new ApiHttpRequest(this.requestInfo);
-    this.videoPlayer = new VidPlayer(new OnlineStreamLoader(this.projectId, requestObj,
-      this.publishMode ? Guid.create().toString() : 'play'), this.playbackVideo.nativeElement);
-    this.videoPlayer.Load().then().catch((e) => {
-      this.errorServer.HandleError(`VideoError`, e);
-    });
-
-    this.tutorialService.Get(this.projectId).then((tutorial: ViewTutorial) => {
+    this.tutorialService.Get(this.tutorialId).then(async (tutorial: ViewTutorial) => {
       this.titleService.SetTitle(`${tutorial.title} - ${tutorial.topic} Tutorial - TutorBits`);
       this.metaService.updateTag({ name: 'description', content: `TutotorBits Tutorial - ${tutorial.title}: ${tutorial.description}` },
         'name=\'description\'');
+      this.tutorial = tutorial;
+
+      if (this.codeInitialized) {
+        this.onReady();
+      }
+
+      this.videoPlayer = new VidPlayer(
+        this.videoService,
+        this.playbackVideo.nativeElement,
+        this.tutorial.videoId,
+        this.publishMode ? Guid.create().toString() : 'play');
+      try {
+        await this.videoPlayer.Load();
+      } catch (e) {
+        this.errorServer.HandleError(`VideoError`, e);
+      }
     });
 
     if (!this.dataService.GetShownWatchHelp()) {
@@ -140,7 +150,7 @@ export class WatchComponent implements OnInit, OnDestroy {
     }
   }
 
-  onCodeInitialized(playbackEditor: PlaybackEditorComponent) {
+  onReady() {
     // If publish mode make sure not to cache!
     this.codePlayer = new MonacoPlayer(
       this.playbackEditor,
@@ -149,9 +159,11 @@ export class WatchComponent implements OnInit, OnDestroy {
       this.playbackMouseComponent,
       this.previewComponent,
       this.logServer,
-      new OnlineProjectLoader(this.requestObj, this.publishMode ? Guid.create().toString() : 'play'),
-      new OnlineTransactionLoader(this.requestObj, this.publishMode ? Guid.create().toString() : 'play'),
-      this.projectId);
+      this.projectService,
+      this.projectService,
+      this.tutorial.projectId,
+      null,
+      this.publishMode ? Guid.create().toString() : 'play');
 
     this.onLoadStartSub = this.codePlayer.loadStart.subscribe((event) => {
       this.loadingReferences++;
@@ -171,6 +183,13 @@ export class WatchComponent implements OnInit, OnDestroy {
     }).catch((e) => {
       this.errorServer.HandleError(`CodeError`, e);
     });
+  }
+
+  onCodeInitialized(playbackEditor: PlaybackEditorComponent) {
+    this.codeInitialized = true;
+    if (this.tutorial) {
+      this.onReady();
+    }
   }
 
   paceKeeperLoop() {
@@ -216,29 +235,29 @@ export class WatchComponent implements OnInit, OnDestroy {
   }
 
   public onPreviewClicked(e: string) {
-    this.eventService.TriggerButtonClick('Watch', `Preview - ${this.projectId} - ${e}`);
+    this.eventService.TriggerButtonClick('Watch', `Preview - ${this.tutorialId} - ${e}`);
     const previewPos = Math.min(Math.round(this.codePlayer.position), this.codePlayer.duration);
-    this.previewComponent.LoadPreview(this.projectId, previewPos, e).then()
+    this.previewComponent.LoadPreview(this.tutorial.projectId, previewPos, e).then()
       .catch((err) => {
         this.errorServer.HandleError(`PreviewError`, err);
       });
   }
 
   public onPreviewClosed(e: any) {
-    this.eventService.TriggerButtonClick('Watch', `PreviewClose - ${this.projectId}`);
+    this.eventService.TriggerButtonClick('Watch', `PreviewClose - ${this.tutorialId}`);
     this.previewComponent.ClosePreview();
   }
 
 
   public onCommentsClosed(e: any) {
-    this.eventService.TriggerButtonClick('Watch', `CommentsClose - ${this.projectId}`);
+    this.eventService.TriggerButtonClick('Watch', `CommentsClose - ${this.tutorialId}`);
     this.showCommentSection = false;
   }
 
   public onPublishClicked(e: any) {
-    this.eventService.TriggerButtonClick('Watch', `Publish - ${this.projectId}`);
+    this.eventService.TriggerButtonClick('Watch', `Publish - ${this.tutorialId}`);
     this.publishing = true;
-    this.tutorialService.Publish(this.projectId).then((res) => {
+    this.tutorialService.Publish(this.tutorialId).then((res) => {
       if (!res) {
         this.errorServer.HandleError('FinishError', 'Failed To Save Try Again');
       } else {
@@ -254,18 +273,18 @@ export class WatchComponent implements OnInit, OnDestroy {
   }
 
   public onBackClicked(e: any) {
-    this.eventService.TriggerButtonClick('Watch', `Back - ${this.projectId}`);
+    this.eventService.TriggerButtonClick('Watch', `Back - ${this.tutorialId}`);
     if (!confirm('Are you sure you want to start over?')) {
       return;
     }
 
-    this.router.navigate([`record/${this.projectId}`], { queryParams: { back: 'true' } });
+    this.router.navigate([`record/${this.tutorialId}`], { queryParams: { back: 'true' } });
   }
 
   public onDownloadClicked(e: any) {
-    this.eventService.TriggerButtonClick('Watch', `Download - ${this.projectId}`);
+    this.eventService.TriggerButtonClick('Watch', `Download - ${this.tutorialId}`);
     this.downloading = true;
-    this.projectService.DownloadProject(this.projectId).then((res) => {
+    this.projectService.DownloadProject(this.tutorial.projectId).then((res) => {
       if (!res) {
         this.errorServer.HandleError('DownloadProject', `Error downloading project`);
         return;
@@ -278,12 +297,12 @@ export class WatchComponent implements OnInit, OnDestroy {
   }
 
   public onCopyToSandboxClicked(e: any, newWindow: boolean) {
-    this.eventService.TriggerButtonClick('Watch', `Sandbox - ${this.projectId}`);
+    this.eventService.TriggerButtonClick('Watch', `Sandbox - ${this.tutorialId}`);
     // this.router.navigate([`sandbox/${this.projectId}`]);
     if (newWindow) {
-      window.open(`sandbox/${this.projectId}`, 'Sandbox', 'height=720,width=1080');
+      window.open(`sandbox/${this.tutorial.projectId}`, 'Sandbox', 'height=720,width=1080');
     } else {
-      window.open(`sandbox/${this.projectId}`);
+      window.open(`sandbox/${this.tutorial.projectId}`);
     }
   }
 
@@ -295,7 +314,7 @@ export class WatchComponent implements OnInit, OnDestroy {
     if (this.showCommentSection) {
       return;
     }
-    this.eventService.TriggerButtonClick('Watch', `Comments - ${this.projectId}`);
+    this.eventService.TriggerButtonClick('Watch', `Comments - ${this.tutorialId}`);
     this.showCommentSection = true;
   }
 }

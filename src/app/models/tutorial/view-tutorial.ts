@@ -9,4 +9,6 @@ export interface ViewTutorial {
     durationMS: number;
     category: string;
     score: number;
+    projectId: string;
+    videoId: string;
 }

@@ -4,4 +4,7 @@ export interface CreateTutorial {
     Description: string;
     ThumbnailData: FileList;
     Category: string;
+    ThumbnailId: string;
+    ProjectId: string;
+    VideoId: string;
 }

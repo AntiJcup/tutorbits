@@ -1,4 +1,4 @@
-import { StreamWriter } from './StreamWriter';
+import { IStreamWriter } from './IStreamWriter';
 import { sleep } from './Common';
 
 
@@ -28,7 +28,7 @@ export class StreamRecorder {
 
     constructor(
         protected stream: MediaStream,
-        protected writer: StreamWriter,
+        protected writer: IStreamWriter,
         protected settings: StreamRecorderSettings,
         protected projectId: string) {
         this.mediaRecorder = new MediaRecorder(stream);

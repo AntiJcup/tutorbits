@@ -1,11 +1,10 @@
 import { ApiHttpRequest } from 'shared/web/lib/ts/ApiHttpRequest';
-import { StreamWriter } from './StreamWriter';
+import { IStreamWriter } from './IStreamWriter';
 import { Part } from './StreamRecorder';
 import { TutorBitsErrorService } from 'src/app/services/logging/tutor-bits-error.service';
 
-export class OnlineStreamWriter extends StreamWriter {
+export class OnlineStreamWriter implements IStreamWriter {
     constructor(protected requestor: ApiHttpRequest) {
-        super();
     }
 
     public async StartUpload(projectId: string): Promise<string> {

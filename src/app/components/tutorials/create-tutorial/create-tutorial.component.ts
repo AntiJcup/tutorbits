@@ -11,6 +11,13 @@ import { ITitleService } from 'src/app/services/abstract/ITitleService';
 import { ResponseWrapper } from 'src/app/services/abstract/IModelApiService';
 import { ViewTutorial } from 'src/app/models/tutorial/view-tutorial';
 import { TutorBitsThumbnailService } from 'src/app/services/thumbnail/tutor-bits-thumbnail.service';
+import { ViewProject } from 'src/app/models/project/view-project';
+import { TutorBitsTracerProjectService } from 'src/app/services/project/tutor-bits-tracer-project.service';
+import { CreateProject } from 'src/app/models/project/create-project';
+import { ViewVideo } from 'src/app/models/video/view-video';
+import { ITracerProjectService } from 'src/app/services/abstract/ITracerProjectService';
+import { IVideoService } from 'src/app/services/abstract/IVideoService';
+import { CreateVideo } from 'src/app/models/video/create-video';
 
 @Component({
   templateUrl: './create-tutorial.component.html',
@@ -19,12 +26,23 @@ import { TutorBitsThumbnailService } from 'src/app/services/thumbnail/tutor-bits
 export class CreateTutorialComponent implements OnInit, OnDestroy {
   loading = false;
   form = new FormGroup({});
-  model: CreateTutorial = { Title: null, Description: null, Topic: null, ThumbnailData: null, Category: 'Tutorial' };
+  model: CreateTutorial = {
+    Title: null,
+    Description: null,
+    Topic: null,
+    ThumbnailData: null,
+    Category: 'Tutorial',
+    ThumbnailId: null,
+    ProjectId: null,
+    VideoId: null
+  };
   fields: FormlyFieldConfig[] = [];
 
   constructor(
     private tutorialService: TutorBitsTutorialService,
     private thumbnailService: TutorBitsThumbnailService,
+    private projectService: ITracerProjectService,
+    private videoService: IVideoService,
     private router: Router,
     private errorServer: IErrorService,
     private logServer: ILogService,
@@ -106,17 +124,47 @@ export class CreateTutorialComponent implements OnInit, OnDestroy {
       thumbnail: model.ThumbnailData[0]
     } as CreateThumbnail;
 
-    this.thumbnailService.Create(createThumb).then(async () => {
-      const createModel = JSON.parse(JSON.stringify(model)) as CreateTutorial;
-      createModel.ThumbnailData = null;
-      const res: ResponseWrapper<ViewTutorial> = await this.tutorialService.Create(createModel);
-      this.logServer.LogToConsole('CreateTutorial', res);
-      if (res.error != null) {
+    this.thumbnailService.Create(createThumb).then(async (thumbnailResponse) => {
+      if (thumbnailResponse.error) {
         this.loading = false;
-        this.errorServer.HandleError('CreateError', JSON.stringify(res.error));
+        this.errorServer.HandleError('CreateError', JSON.stringify(thumbnailResponse.error));
+        return;
+      }
+
+      const createProjectModel = {
+      } as CreateProject;
+      const projectResponse: ResponseWrapper<ViewProject> = await this.projectService.Create(createProjectModel);
+
+      if (projectResponse.error) {
+        this.loading = false;
+        this.errorServer.HandleError('CreateError', JSON.stringify(projectResponse.error));
+        return;
+      }
+
+      const createVideoModel = {
+      } as CreateVideo;
+      const videoResponse: ResponseWrapper<ViewVideo> = await this.videoService.Create(createVideoModel);
+
+      if (videoResponse.error) {
+        this.loading = false;
+        this.errorServer.HandleError('CreateError', JSON.stringify(videoResponse.error));
+        return;
+      }
+
+      const createTutorialModel = JSON.parse(JSON.stringify(model)) as CreateTutorial;
+      createTutorialModel.VideoId = videoResponse.data.id;
+      createTutorialModel.ProjectId = projectResponse.data.id;
+      createTutorialModel.ThumbnailId = thumbnailResponse.data.id;
+      createTutorialModel.ThumbnailData = null;
+      const tutorialResponse: ResponseWrapper<ViewTutorial> = await this.tutorialService.Create(createTutorialModel);
+
+      this.logServer.LogToConsole('CreateTutorial', tutorialResponse);
+      if (tutorialResponse.error != null) {
+        this.loading = false;
+        this.errorServer.HandleError('CreateError', JSON.stringify(tutorialResponse.error));
       } else {
         this.loading = false;
-        this.router.navigate([`record/${res.data.id}`]);
+        this.router.navigate([`record/${tutorialResponse.data.id}`]);
       }
     }).catch((e) => {
       this.errorServer.HandleError('CreateError', e);

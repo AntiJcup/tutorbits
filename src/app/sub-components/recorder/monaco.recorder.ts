@@ -1,9 +1,9 @@
 import { TraceTransactionLog } from 'shared/Tracer/models/ts/Tracer_pb';
 import { editor, IDisposable, IScrollEvent } from 'monaco-editor';
 import { TransactionRecorder } from 'shared/Tracer/lib/ts/TransactionRecorder';
-import { TransactionWriter } from 'shared/Tracer/lib/ts/TransactionWriter';
-import { ProjectLoader } from 'shared/Tracer/lib/ts/ProjectLoader';
-import { ProjectWriter } from 'shared/Tracer/lib/ts/ProjectWriter';
+import { ITransactionWriter } from 'shared/Tracer/lib/ts/ITransactionWriter';
+import { IProjectReader } from 'shared/Tracer/lib/ts/IProjectReader';
+import { IProjectWriter } from 'shared/Tracer/lib/ts/IProjectWriter';
 import { NodeSelectedEvent, NodeCreatedEvent, NodeRenamedEvent, NodeRemovedEvent, NodeMovedEvent, Tree } from 'ng2-tree';
 import { Subscription } from 'rxjs';
 import { MonacoEditorComponent } from '../editor/monaco-editor.component';
@@ -54,13 +54,14 @@ export class MonacoRecorder extends TransactionRecorder {
         protected errorServer: IErrorService,
         protected resourceAuth: boolean,
         projectId: string,
-        projectLoader: ProjectLoader,
-        projectWriter: ProjectWriter,
-        transactionWriter: TransactionWriter,
+        projectLoader: IProjectReader,
+        projectWriter: IProjectWriter,
+        transactionWriter: ITransactionWriter,
         protected projectService: ITracerProjectService,
         protected trackNonFile: boolean,
-        transactionLogs?: TraceTransactionLog[]) {
-        super(projectId, projectLoader, projectWriter, transactionWriter, transactionLogs);
+        transactionLogs?: TraceTransactionLog[],
+        cacheBuster?: string) {
+        super(projectId, projectLoader, projectWriter, transactionWriter, cacheBuster, transactionLogs);
 
         this.nodeSelectedListener = this.fileTreeComponent.treeComponent.nodeSelected.subscribe((e: NodeSelectedEvent) => {
             this.OnNodeSelected(e);

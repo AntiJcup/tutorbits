@@ -7,7 +7,6 @@ import { TutorBitsBaseCommentService } from 'src/app/services/abstract/tutor-bit
 import { ILogService } from 'src/app/services/abstract/ILogService';
 import { ResponseWrapper } from 'src/app/services/abstract/IModelApiService';
 import { ViewComment } from 'src/app/models/comment/view-comment';
-import { RSA_NO_PADDING } from 'constants';
 
 @Component({
   selector: 'app-create-comment',

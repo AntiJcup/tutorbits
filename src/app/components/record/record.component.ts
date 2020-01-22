@@ -8,33 +8,31 @@ import { RecordingFileTreeComponent } from 'src/app/sub-components/recording-fil
 import { ApiHttpRequestInfo, ApiHttpRequest } from 'shared/web/lib/ts/ApiHttpRequest';
 import { RecordingWebCamComponent } from 'src/app/sub-components/recording-web-cam/recording-web-cam.component';
 import { WebCamRecorder } from 'src/app/sub-components/recorder/webcam.recorder';
-import { OnlinePreviewGenerator } from 'shared/Tracer/lib/ts/OnlinePreviewGenerator';
 import { TutorBitsTutorialService } from 'src/app/services/tutorial/tutor-bits-tutorial.service';
 import { IErrorService } from 'src/app/services/abstract/IErrorService';
 import { ILogService } from 'src/app/services/abstract/ILogService';
-import { ITracerProjectService } from 'src/app/services/abstract/ITracerProjectService';
-import { ITracerTransactionService } from 'src/app/services/abstract/ITracerTransactionService';
-import { IVideoRecordingService } from 'src/app/services/abstract/IVideoRecordingService';
-import { FileUploadData } from 'src/app/sub-components/file-tree/ng2-file-tree.component';
+import { IVideoService } from 'src/app/services/abstract/IVideoService';
 import { ResourceViewerComponent } from 'src/app/sub-components/resource-viewer/resource-viewer.component';
-import { IPreviewService } from 'src/app/services/abstract/IPreviewService';
 import { Observable } from 'rxjs';
 import { ComponentCanDeactivate } from 'src/app/services/guards/tutor-bits-pending-changes-guard.service';
 import { IEventService } from 'src/app/services/abstract/IEventService';
 import { PreviewComponent } from 'src/app/sub-components/preview/preview.component';
 import { ITitleService } from 'src/app/services/abstract/ITitleService';
 import { ViewTutorial } from 'src/app/models/tutorial/view-tutorial';
+import { ITracerProjectService } from 'src/app/services/abstract/ITracerProjectService';
 
 @Component({
   templateUrl: './record.component.html',
   styleUrls: ['./record.component.sass']
 })
 export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivate {
-  public projectId: string;
+  public tutorialId: string;
+  tutorial: ViewTutorial;
   public recording = false;
   hasRecorded = false;
   saving = false;
   canRecord = false;
+  streamInitialized = false;
   finishRecording = false;
   loadingRecording = false;
   timeout = 1000 * 60 * 15;
@@ -65,19 +63,20 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
     private route: ActivatedRoute,
     private errorServer: IErrorService,
     private logServer: ILogService,
-    private tracerProjectService: ITracerProjectService,
-    private tracerTransactionService: ITracerTransactionService,
-    private videoRecordingService: IVideoRecordingService,
+    private projectService: ITracerProjectService,
+    private videoRecordingService: IVideoService,
     private eventService: IEventService,
     private tutorialService: TutorBitsTutorialService,
     private titleService: ITitleService) {
-    this.projectId = this.route.snapshot.paramMap.get('projectId');
+    this.tutorialId = this.route.snapshot.paramMap.get('tutorialId');
     this.hasRecorded = this.route.snapshot.queryParamMap.get('back') === 'true';
   }
 
   ngOnInit(): void {
-    this.tutorialService.Get(this.projectId).then((tutorial: ViewTutorial) => {
+    this.tutorialService.Get(this.tutorialId).then((tutorial: ViewTutorial) => {
       this.titleService.SetTitle(`Recording: ${tutorial.title}`);
+      this.tutorial = tutorial;
+      this.canRecord = this.streamInitialized;
     });
   }
 
@@ -99,10 +98,10 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
       this.errorServer.ClearError();
     }
     this.logServer.LogToConsole('Record', webCam.stream);
-    this.canRecord = true;
-    this.webCamRecorder = new WebCamRecorder(this.recordingWebCam, this.videoRecordingService, this.projectId);
-    this.webCamRecorder.Initialize().then(() => {
-    });
+    this.streamInitialized = true;
+    this.canRecord = !!this.tutorial;
+    this.webCamRecorder = new WebCamRecorder(this.recordingWebCam, this.videoRecordingService, this.tutorialId);
+    this.webCamRecorder.Initialize().then();
   }
 
   onStreamError(e: any) {
@@ -116,25 +115,16 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
   }
 
   startRecording(): void {
-    this.codeRecorder.DeleteProject(this.projectId).then(() => {
-      this.codeRecorder.New().then(() => {
-        this.webCamRecorder.StartRecording().then(() => {
-          this.loadingRecording = false;
-          this.hasRecorded = true;
-          this.codeRecorder.StartRecording();
-          this.recordingTreeComponent.allowEdit(true);
-          this.recordingEditor.AllowEdits(true);
-          this.recording = true;
-        }).catch((err) => {
-          this.errorServer.HandleError('LoadingError', err);
-          this.loadingRecording = false;
-          this.recording = false;
-        });
-      }).catch((err) => {
-        this.errorServer.HandleError('LoadingError', err);
-        this.loadingRecording = false;
-        this.recording = false;
-      });
+    this.codeRecorder.ResetProject(this.tutorial.projectId).then(async () => {
+      await this.codeRecorder.Load();
+      this.codeRecorder.Reset();
+      await this.webCamRecorder.StartRecording();
+      this.loadingRecording = false;
+      this.hasRecorded = true;
+      this.codeRecorder.StartRecording();
+      this.recordingTreeComponent.allowEdit(true);
+      this.recordingEditor.AllowEdits(true);
+      this.recording = true;
     });
   }
 
@@ -147,7 +137,7 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
   }
 
   onRecordingStateChanged(recording: boolean) {
-    this.eventService.TriggerButtonClick('Record', `Record - ${this.projectId}`);
+    this.eventService.TriggerButtonClick('Record', `Record - ${this.tutorialId}`);
     if (this.timeoutWarningTimer) {
       clearTimeout(this.timeoutWarningTimer);
       this.timeoutWarningTimer = null;
@@ -178,9 +168,8 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
         this.timeoutWarningTimer = null;
       }, this.timeoutWarning);
 
-      this.webCamRecorder = new WebCamRecorder(this.recordingWebCam, this.videoRecordingService, this.projectId);
-      this.webCamRecorder.Initialize().then(() => {
-      });
+      this.webCamRecorder = new WebCamRecorder(this.recordingWebCam, this.videoRecordingService, this.tutorial.videoId);
+      this.webCamRecorder.Initialize().then();
 
       this.loadingRecording = true;
       this.codeRecorder = new MonacoRecorder(
@@ -191,14 +180,14 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
         this.logServer,
         this.errorServer,
         true, /* resourceAuth */
-        this.projectId,
-        new OnlineProjectLoader(this.requestObj),
-        this.tracerProjectService,
-        this.tracerTransactionService,
-        this.tracerProjectService,
+        this.tutorial.projectId,
+        this.projectService,
+        this.projectService,
+        this.projectService,
+        this.projectService,
         true);
 
-      this.codeRecorder.LoadProject(this.projectId).then((proj) => {
+      this.codeRecorder.LoadProject(this.tutorial.projectId).then((proj) => {
         if (proj.getDuration() > 0 && !confirm('Are you sure you want to start the recording over?')) {
           this.loadingRecording = false;
           this.recording = false;
@@ -230,14 +219,14 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
   }
 
   public onCloseClicked(e: any) {
-    this.eventService.TriggerButtonClick('Record', `PreviewClose - ${this.projectId}`);
+    this.eventService.TriggerButtonClick('Record', `PreviewClose - ${this.tutorialId}`);
     this.previewComponent.ClosePreview();
   }
 
   public onPreviewClicked(e: string) {
-    this.eventService.TriggerButtonClick('Record', `Preview - ${this.projectId} - ${e}`);
+    this.eventService.TriggerButtonClick('Record', `Preview - ${this.tutorialId} - ${e}`);
     const previewPos = Math.round(this.codeRecorder.position);
-    this.previewComponent.GeneratePreview(this.projectId, previewPos, e, this.codeRecorder.logs)
+    this.previewComponent.GeneratePreview(this.tutorial.projectId, previewPos, e, this.codeRecorder.logs)
       .then()
       .catch((err) => {
         this.errorServer.HandleError('PreviewError', err);
@@ -245,9 +234,9 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
   }
 
   onFinishClicked() {
-    this.eventService.TriggerButtonClick('Record', `Finish - ${this.projectId}`);
+    this.eventService.TriggerButtonClick('Record', `Finish - ${this.tutorialId}`);
     this.finishRecording = true;
-    this.router.navigate([`watch/${this.projectId}`], { queryParams: { publish: 'true' } });
+    this.router.navigate([`watch/${this.tutorialId}`], { queryParams: { publish: 'true' } });
   }
 
   @HostListener('window:beforeunload')

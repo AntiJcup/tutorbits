@@ -49,10 +49,7 @@ import { TutorBitsDataService } from './services/storage/tutor-bits-persist.serv
 import { LogoutComponent } from './components/logout/logout.component';
 import { TutorBitsTracerProjectService } from './services/project/tutor-bits-tracer-project.service';
 import { ITracerProjectService } from './services/abstract/ITracerProjectService';
-import { ITracerTransactionService } from './services/abstract/ITracerTransactionService';
-import { TutorBitsTracerTransactionService } from './services/project/tutor-bits-tracer-transaction.service';
-import { IVideoRecordingService } from './services/abstract/IVideoRecordingService';
-import { TutorBitsVideoRecordingService } from './services/project/tutor-bits-video-recording.service';
+import { IVideoService } from './services/abstract/IVideoService';
 import { TimerComponent } from './sub-components/timer/timer.component';
 import { FormlyFieldFileComponent } from './sub-components/formly/formly-field-file/formly-field-file.component';
 import { FileValueAccessorDirective } from './sub-components/formly/file-value-accessor.directive';
@@ -98,6 +95,7 @@ import { CreateCommentComponent } from './sub-components/create-comment/create-c
 import { CommentButtonComponent } from './sub-components/comments-button/comments-button.component';
 import { RatingComponent } from './sub-components/rating/rating.component';
 import { TutorBitsConcreteThumbnailService, TutorBitsThumbnailService } from './services/thumbnail/tutor-bits-thumbnail.service';
+import { TutorBitsVideoService } from './services/video/tutor-bits-video.service';
 
 const appRoutes: Routes = [
   {
@@ -111,19 +109,19 @@ const appRoutes: Routes = [
     data: { title: 'Sorry' }
   },
   {
-    path: 'watch/:projectId',
+    path: 'watch/:tutorialId',
     component: WatchComponent,
     data: { title: 'Watch' },
     canActivate: [TutorBitsMobileGuardService]
   },
   {
-    path: 'watch/:projectId/:title',
+    path: 'watch/:tutorialId/:title',
     component: WatchComponent,
     data: { title: 'Watch' },
     canActivate: [TutorBitsMobileGuardService]
   },
   {
-    path: 'record/:projectId',
+    path: 'record/:tutorialId',
     component: RecordComponent,
     data: { title: 'Record' },
     canActivate: [TutorBitsAuthGuardService, TutorBitsMobileGuardService],
@@ -277,8 +275,7 @@ const appRoutes: Routes = [
     { provide: TutorBitsTutorialService, useClass: TutorBitsConcreteTutorialService },
     { provide: TutorBitsAccountService, useClass: TutorBitsConcreteAccountService },
     { provide: ITracerProjectService, useClass: TutorBitsTracerProjectService },
-    { provide: ITracerTransactionService, useClass: TutorBitsTracerTransactionService },
-    { provide: IVideoRecordingService, useClass: TutorBitsVideoRecordingService },
+    { provide: IVideoService, useClass: TutorBitsVideoService },
     { provide: IPreviewService, useClass: TutorBitsPreviewService },
     { provide: IUserApiService, useClass: TutorBitsUserApiService },
     { provide: ITitleService, useClass: TutorBitsTitleService },

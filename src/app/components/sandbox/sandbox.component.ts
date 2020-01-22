@@ -59,13 +59,7 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate {
   }
 
   ngOnInit(): void {
-    if (this.loadProjectId) {
-      this.tutorialService.Get(this.loadProjectId).then((tutorial: ViewTutorial) => {
-        this.titleService.SetTitle(`Sandbox of ${tutorial.title}`);
-      });
-    } else {
-      this.titleService.SetTitle(`Sandbox`);
-    }
+    this.titleService.SetTitle(`Sandbox`);
   }
 
   onCodeInitialized(recordingEditor: RecordingEditorComponent) {
@@ -104,13 +98,12 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate {
       this.tracerProjectService,
       false /* ignore non file operations */);
 
-    this.codeRecorder.DeleteProject(this.projectId).then(() => {
-      this.codeRecorder.New().then(() => {
-        this.codeRecorder.StartRecording();
-        this.logServer.LogToConsole('SandboxComponent', 'Ready to edit');
-        this.zone.runTask(() => {
-          this.loading = false;
-        });
+    this.codeRecorder.ResetProject(this.projectId).then(async () => {
+      await this.codeRecorder.New();
+      this.codeRecorder.StartRecording();
+      this.logServer.LogToConsole('SandboxComponent', 'Ready to edit');
+      this.zone.runTask(() => {
+        this.loading = false;
       });
     });
   }
