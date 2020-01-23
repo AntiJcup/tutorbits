@@ -69,5 +69,4 @@ export class TutorBitsVideoService extends IVideoService {
 
     return `${await response.json()}${cacheBuster === null ? '' : `?cb=${cacheBuster}`}`;
   }
-
 }

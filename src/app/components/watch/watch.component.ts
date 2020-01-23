@@ -29,6 +29,7 @@ import { TutorBitsTutorialCommentService } from 'src/app/services/tutorial/tutor
 import { ViewComment } from 'src/app/models/comment/view-comment';
 import { TutorBitsTutorialRatingService } from 'src/app/services/tutorial/tutor-bits-tutorial-rating.service';
 import { IVideoService } from 'src/app/services/abstract/IVideoService';
+import { Status } from 'src/app/services/abstract/IModelApiService';
 
 @Component({
   templateUrl: './watch.component.html',
@@ -94,7 +95,9 @@ export class WatchComponent implements OnInit, OnDestroy {
     private titleService: ITitleService,
     public dialog: MatDialog,
     private dataService: IDataService,
-    private metaService: Meta) {
+    private metaService: Meta,
+    private commentService: TutorBitsTutorialCommentService, // Dont remove these component use them
+    private ratingService: TutorBitsTutorialRatingService) {
     this.tutorialId = this.route.snapshot.paramMap.get('tutorialId');
     this.title = this.route.snapshot.paramMap.get('title');
     this.publishMode = this.route.snapshot.queryParamMap.get('publish') === 'true';
@@ -257,10 +260,18 @@ export class WatchComponent implements OnInit, OnDestroy {
   public onPublishClicked(e: any) {
     this.eventService.TriggerButtonClick('Watch', `Publish - ${this.tutorialId}`);
     this.publishing = true;
-    this.tutorialService.Publish(this.tutorialId).then((res) => {
+    this.videoService.UpdateStatus(this.tutorial.videoId, Status.Active).then(async (res) => {
       if (!res) {
         this.errorServer.HandleError('FinishError', 'Failed To Save Try Again');
       } else {
+        const projectStatusUpdateRes = await this.projectService.UpdateStatus(this.tutorial.projectId, Status.Active);
+        if (!projectStatusUpdateRes) {
+          this.errorServer.HandleError('FinishError', 'Failed To Save Try Again');
+        }
+        const publishRes = await this.tutorialService.Publish(this.tutorialId);
+        if (!publishRes) {
+          this.errorServer.HandleError('FinishError', 'Failed To Save Try Again');
+        }
         this.zone.runTask(() => {
           this.publishMode = false;
         });

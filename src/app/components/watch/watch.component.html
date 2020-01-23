@@ -20,12 +20,12 @@
     </mat-spinner>
   </div>
   <div class="controlsContainer">
-    <app-rating [ratingService]="ratingService" [targetId]="projectId" [showControls]="true">
+    <app-rating [ratingService]="ratingService" [targetId]="tutorialId" [showControls]="true">
     </app-rating>
   </div>
   <div class="controlsContainer">
     <app-comments-button (click)="onCommentsClicked($event)" matTooltip="Shows Comment Section"
-      [commentService]="commentService" [targetId]="projectId">
+      [commentService]="commentService" [targetId]="tutorialId">
     </app-comments-button>
   </div>
   <div class="controlsContainer" id="downloadButtonContainer">

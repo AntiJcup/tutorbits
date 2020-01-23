@@ -11,9 +11,9 @@ export abstract class IVideoService
     implements IStreamWriter, IStreamLoader {
 
 
-    public async abstract StartUpload(projectId: string): Promise<string>;
-    public async abstract ContinueUpload(projectId: string, recordingId: string, data: Blob, part: number, last: boolean): Promise<string>;
-    public async abstract FinishUpload(projectId: string, recordingId: string, parts: Array<Part>): Promise<boolean>;
-    public async abstract CheckStatus(projectId: string): Promise<string>;
+    public async abstract StartUpload(videoId: string): Promise<string>;
+    public async abstract ContinueUpload(videoId: string, recordingId: string, data: Blob, part: number, last: boolean): Promise<string>;
+    public async abstract FinishUpload(videoId: string, recordingId: string, parts: Array<Part>): Promise<boolean>;
+    public async abstract CheckStatus(videoId: string): Promise<string>;
     public async abstract GetVideoStreamUrl(videoId: string, cacheBuster?: string): Promise<string>;
 }
