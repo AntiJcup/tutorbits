@@ -69,4 +69,11 @@ export class TutorBitsVideoService extends IVideoService {
 
     return `${await response.json()}${cacheBuster === null ? '' : `?cb=${cacheBuster}`}`;
   }
+
+  public async Publish(videoId: string): Promise<boolean> {
+    const response = await this.apiService.generateRequest()
+      .Post(`${this.basePath}/Publish?videoId=${videoId}`, null, await this.GetAuthHeaders(HandlerType.Update));
+
+    return response.ok;
+  }
 }

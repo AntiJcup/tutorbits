@@ -16,4 +16,6 @@ export abstract class IVideoService
     public async abstract FinishUpload(videoId: string, recordingId: string, parts: Array<Part>): Promise<boolean>;
     public async abstract CheckStatus(videoId: string): Promise<string>;
     public async abstract GetVideoStreamUrl(videoId: string, cacheBuster?: string): Promise<string>;
+
+    public abstract async Publish(videoId: string): Promise<boolean>;
 }

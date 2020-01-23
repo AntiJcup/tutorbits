@@ -33,4 +33,6 @@ export abstract class ITracerProjectService
     public async abstract GetPartitionsForRange(project: TraceProject, startTime: number, endTime: number, cacheBuster: string): Promise<{ [partition: string]: string; }>;
 
     public async abstract GetTransactionLog(project: TraceProject, partition: string, cacheBuster: string): Promise<TraceTransactionLog>;
+
+    public abstract async Publish(projectId: string): Promise<boolean>;
 }

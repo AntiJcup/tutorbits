@@ -154,4 +154,11 @@ export class TutorBitsTracerProjectService extends ITracerProjectService {
 
     return TraceTransactionLog.deserializeBinary(new Uint8Array(await response.arrayBuffer()));
   }
+
+  public async Publish(projectId: string): Promise<boolean> {
+    const response = await this.apiService.generateRequest()
+      .Post(`${this.basePath}/Publish?projectId=${projectId}`, null, await this.GetAuthHeaders(HandlerType.Update));
+
+    return response.ok;
+  }
 }

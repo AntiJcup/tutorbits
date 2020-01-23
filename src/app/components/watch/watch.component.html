@@ -68,7 +68,7 @@
     <app-preview class="preview" (closeClicked)="onPreviewClosed($event)">
     </app-preview>
     <div class="commentSection" *ngIf="showCommentSection">
-      <app-comment-section [comments]="comments" [targetId]="projectId" (closeClicked)="onCommentsClosed($event);"
+      <app-comment-section [comments]="comments" [targetId]="tutorialId" (closeClicked)="onCommentsClosed($event);"
         [commentService]="commentService"></app-comment-section>
     </div>
   </div>

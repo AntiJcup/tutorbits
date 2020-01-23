@@ -260,11 +260,11 @@ export class WatchComponent implements OnInit, OnDestroy {
   public onPublishClicked(e: any) {
     this.eventService.TriggerButtonClick('Watch', `Publish - ${this.tutorialId}`);
     this.publishing = true;
-    this.videoService.UpdateStatus(this.tutorial.videoId, Status.Active).then(async (res) => {
+    this.videoService.Publish(this.tutorial.videoId).then(async (res) => {
       if (!res) {
         this.errorServer.HandleError('FinishError', 'Failed To Save Try Again');
       } else {
-        const projectStatusUpdateRes = await this.projectService.UpdateStatus(this.tutorial.projectId, Status.Active);
+        const projectStatusUpdateRes = await this.projectService.Publish(this.tutorial.projectId);
         if (!projectStatusUpdateRes) {
           this.errorServer.HandleError('FinishError', 'Failed To Save Try Again');
         }
