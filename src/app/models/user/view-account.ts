@@ -1,5 +1,5 @@
 export interface ViewAccount {
-    Id: string;
+    id: string;
     userId: string;
     email: string;
     nickName: string;

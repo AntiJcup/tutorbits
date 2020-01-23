@@ -96,8 +96,8 @@ export class WatchComponent implements OnInit, OnDestroy {
     public dialog: MatDialog,
     private dataService: IDataService,
     private metaService: Meta,
-    private commentService: TutorBitsTutorialCommentService, // Dont remove these component use them
-    private ratingService: TutorBitsTutorialRatingService) {
+    public commentService: TutorBitsTutorialCommentService, // Dont remove these components use them
+    public ratingService: TutorBitsTutorialRatingService) {
     this.tutorialId = this.route.snapshot.paramMap.get('tutorialId');
     this.title = this.route.snapshot.paramMap.get('title');
     this.publishMode = this.route.snapshot.queryParamMap.get('publish') === 'true';

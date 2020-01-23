@@ -15,7 +15,7 @@ export class CommentButtonComponent implements OnInit {
 
   public loading = true;
 
-  private text = 'Comments';
+  public text = 'Comments';
 
   constructor(private errorServer: IErrorService) { }
 

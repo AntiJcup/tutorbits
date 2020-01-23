@@ -17,9 +17,9 @@ export class RatingComponent implements OnInit {
   @Input() showControls = false;
 
   public loading = true;
-  private score = 0;
+  public score = 0;
   private rating: ViewRating = null;
-  private loggedIn = false;
+  public loggedIn = false;
 
   constructor(
     private auth: IAuthService,
