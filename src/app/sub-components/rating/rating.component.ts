@@ -63,7 +63,12 @@ export class RatingComponent implements OnInit {
         id: this.rating.id
       } as UpdateRating;
 
-      this.ratingService.Update(updateModel).then().catch((err) => {
+      this.ratingService.Update(updateModel).then((res) => {
+        if (res.error) {
+          this.errorServer.HandleError('Rating', `Updvote Update ${res.error}`);
+        }
+        this.rating = res.data as ViewRating;
+      }).catch((err) => {
         this.errorServer.HandleError('Rating', `Updvote Update ${err}`);
       });
       this.score += 2;
@@ -93,7 +98,12 @@ export class RatingComponent implements OnInit {
         id: this.rating.id
       } as UpdateRating;
 
-      this.ratingService.Update(updateModel).then().catch((err) => {
+      this.ratingService.Update(updateModel).then((res) => {
+        if (res.error) {
+          this.errorServer.HandleError('Rating', `Downvote Update ${res.error}`);
+        }
+        this.rating = res.data as ViewRating;
+      }).catch((err) => {
         this.errorServer.HandleError('Rating', `Downvote Update ${err}`);
       });
       this.score -= 2;
