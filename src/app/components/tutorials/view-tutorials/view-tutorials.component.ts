@@ -26,14 +26,16 @@ export class ViewTutorialsComponent implements OnInit, OnDestroy {
     private titleService: ITitleService,
     private metaService: Meta) { }
 
-  ngOnInit() {
+  async ngOnInit() {
     this.titleService.SetTitle('TutorBits - Gallery');
     this.metaService.updateTag({
       name: 'description',
       content: `TutorBits - Home to a better programming tutorial experience. Watch as programmers write code, interact, and test the code as they write it.`
     },
       'name=\'description\'');
-    this.tutorialsService.GetAll().then((tutorials) => {
+
+    try {
+      const tutorials = await this.tutorialsService.GetAll();
       this.tutorials = tutorials;
       this.logServer.LogToConsole('ViewTutorials', tutorials.length);
       this.tutorials.forEach(element => {
@@ -49,11 +51,10 @@ export class ViewTutorialsComponent implements OnInit, OnDestroy {
       });
 
       this.tutorialTypes.push(this.allKey);
-    }).catch((e) => {
+    } catch (e) {
       this.errorServer.HandleError('ViewTutorials', e);
-    }).finally(() => {
-      this.loading = false;
-    });
+    }
+    this.loading = false;
   }
 
   onTutorialCardClick(e: any, tutorial: ViewTutorial) {

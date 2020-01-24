@@ -27,18 +27,19 @@ export class FileUtils {
         const inputEle = document.createElement('input');
         inputEle.type = 'file';
         inputEle.hidden = true;
-        inputEle.onchange = (e) => {
+        inputEle.onchange = async (e) => {
             const file = inputEle.files[0];
-            FileUtils.FileToBlob(file).then((blob: Blob) => {
+            try {
+                const blob: Blob = await FileUtils.FileToBlob(file);
                 finishCallback({
                     name: file.name,
                     data: blob
                 } as FileData);
-            }).catch((err) => {
+            } catch (err) {
                 errorCallback(err);
-            }).finally(() => {
-                document.body.removeChild(inputEle);
-            });
+            }
+
+            document.body.removeChild(inputEle);
         };
         document.body.appendChild(inputEle);
         inputEle.click();

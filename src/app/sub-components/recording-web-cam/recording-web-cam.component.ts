@@ -22,8 +22,8 @@ export class RecordingWebCamComponent implements OnInit, OnDestroy {
   };
   constructor() { }
 
-  ngOnInit(): void {
-    this.getUserMedia();
+  async ngOnInit() {
+    await this.getUserMedia();
   }
 
   ngOnDestroy(): void {
@@ -39,11 +39,12 @@ export class RecordingWebCamComponent implements OnInit, OnDestroy {
     }
   }
 
-  getUserMedia() {
-    navigator.mediaDevices.getUserMedia({
-      video: { aspectRatio: 1620 / 1080 },
-      audio: true
-    }).then((stream: MediaStream) => {
+  async getUserMedia() {
+    try {
+      const stream: MediaStream = await navigator.mediaDevices.getUserMedia({
+        video: { aspectRatio: 1620 / 1080 },
+        audio: true
+      });
       if (this.intervalHandle) {
         clearInterval(this.intervalHandle);
         this.intervalHandle = null;
@@ -59,14 +60,14 @@ export class RecordingWebCamComponent implements OnInit, OnDestroy {
       this.stream.getTracks()[0].onended = (ev: MediaStreamTrackEvent) => {
         this.onWebCamEnded(ev);
       };
-    }).catch((e) => {
+    } catch (e) {
       this.streamError.next(e);
       if (!this.intervalHandle) {
-        this.intervalHandle = setInterval(() => {
-          this.getUserMedia();
+        this.intervalHandle = setInterval(async () => {
+          await this.getUserMedia();
         }, 3000);
       }
-    });
+    }
   }
 
   onWebCamEnded(e: MediaStreamTrackEvent) {

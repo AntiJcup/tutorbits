@@ -49,10 +49,11 @@ export class CreateTutorialComponent implements OnInit, OnDestroy {
     private zone: NgZone,
     private titleService: ITitleService) { }
 
-  ngOnInit() {
+  async ngOnInit() {
     this.titleService.SetTitle('Create Tutorial');
     this.loading = true;
-    this.tutorialService.GetTutorialTopics().then((tutorialTypes) => {
+    try {
+      const tutorialTypes = await this.tutorialService.GetTutorialTopics()
       const tutorialTypeOptions = [];
       tutorialTypes.forEach(element => {
         tutorialTypeOptions.push({
@@ -102,15 +103,15 @@ export class CreateTutorialComponent implements OnInit, OnDestroy {
         }];
       });
       this.loading = false;
-    }).catch((err) => {
+    } catch (err) {
       this.errorServer.HandleError('CreateInitializeError', err);
-    });
+    }
   }
 
   ngOnDestroy(): void {
   }
 
-  submit(model: CreateTutorial) {
+  async submit(model: CreateTutorial) {
     this.logServer.LogToConsole('CreateTutorial', model);
     this.loading = true;
 
@@ -124,7 +125,8 @@ export class CreateTutorialComponent implements OnInit, OnDestroy {
       thumbnail: model.ThumbnailData[0]
     } as CreateThumbnail;
 
-    this.thumbnailService.Create(createThumb).then(async (thumbnailResponse) => {
+    try {
+      const thumbnailResponse = await this.thumbnailService.Create(createThumb);
       if (thumbnailResponse.error) {
         this.loading = false;
         this.errorServer.HandleError('CreateError', JSON.stringify(thumbnailResponse.error));
@@ -166,9 +168,9 @@ export class CreateTutorialComponent implements OnInit, OnDestroy {
         this.loading = false;
         this.router.navigate([`record/${tutorialResponse.data.id}`]);
       }
-    }).catch((e) => {
+    } catch (e) {
       this.errorServer.HandleError('CreateError', e);
       this.loading = false;
-    });
+    }
   }
 }

@@ -319,7 +319,7 @@ export abstract class NG2FileTreeComponent {
     return selectedNode;
   }
 
-  public onNewFolderClicked(e: MouseEvent) {
+  public async onNewFolderClicked(e: MouseEvent) {
     this.eventService.TriggerButtonClick('FileTree', 'FolderCreate');
     const selectedNode = this.GetSelectedBranch();
     const selectedNodeController = this.treeComponent.getControllerByNodeId(selectedNode.id);
@@ -329,14 +329,13 @@ export abstract class NG2FileTreeComponent {
       children: []
     } as TreeModel;
 
-    selectedNodeController.addChildAsync(newNodeModel).then((newNode) => {
-      const newNodeController = this.treeComponent.getControllerByNodeId(newNode.id);
-      newNodeController.rename('Untitled_Folder');
-      newNodeController.startRenaming();
-    });
+    const newNode = await selectedNodeController.addChildAsync(newNodeModel);
+    const newNodeController = this.treeComponent.getControllerByNodeId(newNode.id);
+    newNodeController.rename('Untitled_Folder');
+    newNodeController.startRenaming();
   }
 
-  public onNewFileClicked(e: MouseEvent) {
+  public async onNewFileClicked(e: MouseEvent) {
     this.eventService.TriggerButtonClick('FileTree', 'FileCreate');
     const selectedNode = this.GetSelectedBranch();
     const selectedNodeController = this.treeComponent.getControllerByNodeId(selectedNode.id);
@@ -346,31 +345,28 @@ export abstract class NG2FileTreeComponent {
       type: ResourceType.code
     } as TutorBitsTreeModel;
 
-    selectedNodeController.addChildAsync(newNodeModel).then((newNode) => {
-      const newNodeController = this.treeComponent.getControllerByNodeId(newNode.id);
-      newNodeController.rename('Untitled_File');
-      newNodeController.startRenaming();
+    const newNode = await selectedNodeController.addChildAsync(newNodeModel)
+    const newNodeController = this.treeComponent.getControllerByNodeId(newNode.id);
+    newNodeController.rename('Untitled_File');
+    newNodeController.startRenaming();
 
-      this.internalFiles[this.getPathForNode(newNode)] = newNode.node;
-    });
+    this.internalFiles[this.getPathForNode(newNode)] = newNode.node;
   }
 
-  public onUploadFileClicked(e: MouseEvent) {
+  public async onUploadFileClicked(e: MouseEvent) {
     this.eventService.TriggerButtonClick('FileTree', 'UploadFileStart');
-    FileUtils.SelectFile().then((fileData: FileData) => {
-      // Update path to be relative to selected branch
-      // const selectedBranch = this.GetSelectedBranch();
-      // const selectedBranchPath = this.getPathForNode(selectedBranch);
-      // fileData.name = selectedBranchPath + '/' + fileData.name;
-
-      this.fileUploaded.next({
-        fileData,
-        target: this.GetSelectedBranch()
-      } as FileUploadData);
-    });
+    const fileData: FileData = await FileUtils.SelectFile();
+    // Update path to be relative to selected branch
+    // const selectedBranch = this.GetSelectedBranch();
+    // const selectedBranchPath = this.getPathForNode(selectedBranch);
+    // fileData.name = selectedBranchPath + '/' + fileData.name;
+    this.fileUploaded.next({
+      fileData,
+      target: this.GetSelectedBranch()
+    } as FileUploadData);
   }
 
-  public addResourceNode(nodePath: string, resourceId: string, nodeName: string) {
+  public async addResourceNode(nodePath: string, resourceId: string, nodeName: string) {
     this.eventService.TriggerButtonClick('FileTree', 'UploadFileFinish');
     const selectedNode = this.findNodeByPath(this.treeComponent.tree, nodePath);
     const selectedNodeController = this.treeComponent.getControllerByNodeId(selectedNode.id);
@@ -381,10 +377,9 @@ export abstract class NG2FileTreeComponent {
       type: ResourceType.asset
     } as TutorBitsTreeModel;
 
-    selectedNodeController.addChildAsync(newNodeModel).then((newNode) => {
-      const newNodeController = this.treeComponent.getControllerByNodeId(newNode.id);
-      newNodeController.rename(nodeName);
-    });
+    const newNode = await selectedNodeController.addChildAsync(newNodeModel)
+    const newNodeController = this.treeComponent.getControllerByNodeId(newNode.id);
+    newNodeController.rename(nodeName);
   }
 
   public onNodeRenamed(e: NodeRenamedEvent) {

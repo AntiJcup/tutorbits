@@ -50,8 +50,8 @@ export class TutorBitsAuthService extends IAuthService {
 
     const timeOut = Math.max(1, (this.token.expire_date - (new Date()).valueOf()) - this.refreshLookAheadMilliseconds);
 
-    setTimeout(() => {
-      this.RefreshToken().then();
+    setTimeout(async () => {
+      await this.RefreshToken();
     }, timeOut);
   }
 

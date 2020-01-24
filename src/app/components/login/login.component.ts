@@ -23,24 +23,22 @@ export class LoginComponent implements OnInit {
     private logger: ILogService,
     protected router: Router) { }
 
-  ngOnInit() {
+  async ngOnInit() {
     const code: string = this.route.snapshot.queryParamMap.get('code');
-    this.authService.AuthenticateToken(code).then((a) => {
-      this.accountService.Login().then((account) => {
-        this.logger.LogToConsole('LoginComponent', `Logged in ${JSON.stringify(account)}`);
-        const newRoute = this.dataService.GetCurrentRoute();
-        this.dataService.SetCurrentRoute(null);
-        if (newRoute) {
-          this.router.navigate([newRoute]);
-        } else {
-          this.router.navigate(['home']);
-        }
-      }).catch((err) => {
-        this.errorServer.HandleError('LoginError', err);
-      });;
-    }).catch((err) => {
+    try {
+      await this.authService.AuthenticateToken(code);
+      const account = this.accountService.Login();
+      this.logger.LogToConsole('LoginComponent', `Logged in ${JSON.stringify(account)}`);
+      const newRoute = this.dataService.GetCurrentRoute();
+      this.dataService.SetCurrentRoute(null);
+      if (newRoute) {
+        this.router.navigate([newRoute]);
+      } else {
+        this.router.navigate(['home']);
+      }
+    } catch (err) {
       this.errorServer.HandleError('LoginError', err);
-    });
+    }
   }
 
 }

@@ -30,10 +30,11 @@ export class CommentSectionComponent implements OnInit {
     private auth: IAuthService,
     private errorServer: IErrorService) { }
 
-  ngOnInit() {
+  async ngOnInit() {
     this.loggedIn = this.auth.IsLoggedIn();
 
-    this.commentService.GetComments(this.targetId).then((res: ViewComment[]) => {
+    try {
+      const res: ViewComment[] = await this.commentService.GetComments(this.targetId)
       // Hack because monaco editor needs a resize event to consider the comment section
       setTimeout(() => {
         window.dispatchEvent(new Event('resize'));
@@ -45,11 +46,10 @@ export class CommentSectionComponent implements OnInit {
       }
 
       this.comments = res;
-    }).catch((err) => {
+    } catch (err) {
       this.errorServer.HandleError('CommentsSection', `${err}`);
-    }).finally(() => {
-      this.loading = false;
-    });
+    }
+    this.loading = false;
   }
 
   onCloseClicked() {

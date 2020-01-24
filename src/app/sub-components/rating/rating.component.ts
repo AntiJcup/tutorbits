@@ -25,36 +25,39 @@ export class RatingComponent implements OnInit {
     private auth: IAuthService,
     private errorServer: IErrorService) { }
 
-  ngOnInit() {
+  async ngOnInit() {
     this.loggedIn = this.auth.IsLoggedIn();
-    this.ratingService.GetScore(this.targetId).then((score) => {
-      this.score = score;
-    }).catch((err) => {
-      this.errorServer.HandleError('Rating', `Error loading score`);
-    }).finally(() => {
-      this.loading = false;
-    });
 
-    this.ratingService.GetYourRatingForTarget(this.targetId).then((rating) => {
-      this.rating = rating;
-    });
+    try {
+      this.score = await this.ratingService.GetScore(this.targetId);
+    } catch (err) {
+      this.errorServer.HandleError('Rating', `Error loading score`);
+    }
+
+    try {
+      this.rating = await this.ratingService.GetYourRatingForTarget(this.targetId);
+    } catch (err) {
+      this.errorServer.HandleError('Rating', `Error loading rating`);
+    }
+    this.loading = false;
   }
 
-  public onUpvoteClicked(e: any) {
+  public async onUpvoteClicked(e: any) {
     if (!this.rating) {
       const createModel = {
         score: 1,
         targetId: this.targetId
       } as CreateRating;
 
-      this.ratingService.Create(createModel).then((res) => {
+      try {
+        const res = await this.ratingService.Create(createModel)
         if (res.error) {
           this.errorServer.HandleError('Rating', `Upvote Create`);
         }
         this.rating = res.data as ViewRating;
-      }).catch((err) => {
+      } catch (err) {
         this.errorServer.HandleError('Rating', `Upvote Update ${err}`);
-      });
+      }
       this.score += 1;
     } else if (this.rating.score !== 1) {
       const updateModel = {
@@ -63,33 +66,35 @@ export class RatingComponent implements OnInit {
         id: this.rating.id
       } as UpdateRating;
 
-      this.ratingService.Update(updateModel).then((res) => {
+      try {
+        const res = await this.ratingService.Update(updateModel)
         if (res.error) {
           this.errorServer.HandleError('Rating', `Updvote Update ${res.error}`);
         }
         this.rating = res.data as ViewRating;
-      }).catch((err) => {
+      } catch (err) {
         this.errorServer.HandleError('Rating', `Updvote Update ${err}`);
-      });
+      }
       this.score += 2;
     }
   }
 
-  public onDownvoteClicked(e: any) {
+  public async onDownvoteClicked(e: any) {
     if (!this.rating) {
       const createModel = {
         score: -1,
         targetId: this.targetId
       } as CreateRating;
 
-      this.ratingService.Create(createModel).then((res) => {
+      try {
+        const res = await this.ratingService.Create(createModel)
         if (res.error) {
           this.errorServer.HandleError('Rating', `Downvote Create`);
         }
         this.rating = res.data as ViewRating;
-      }).catch((err) => {
+      } catch (err) {
         this.errorServer.HandleError('Rating', `Downvote Create ${err}`);
-      });
+      }
       this.score -= 1;
     } else if (this.rating.score !== -1) {
       const updateModel = {
@@ -98,14 +103,15 @@ export class RatingComponent implements OnInit {
         id: this.rating.id
       } as UpdateRating;
 
-      this.ratingService.Update(updateModel).then((res) => {
+      try {
+        const res = await this.ratingService.Update(updateModel);
         if (res.error) {
           this.errorServer.HandleError('Rating', `Downvote Update ${res.error}`);
         }
         this.rating = res.data as ViewRating;
-      }).catch((err) => {
+      } catch (err) {
         this.errorServer.HandleError('Rating', `Downvote Update ${err}`);
-      });
+      }
       this.score -= 2;
     }
   }

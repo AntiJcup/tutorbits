@@ -1,26 +1,24 @@
 import { Component, OnInit, ViewChild, NgZone, HostListener } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { environment } from 'src/environments/environment';
 import { MonacoRecorder } from 'src/app/sub-components/recorder/monaco.recorder';
 import { RecordingEditorComponent } from 'src/app/sub-components/recording-editor/recording-editor.component';
 import { RecordingFileTreeComponent } from 'src/app/sub-components/recording-file-tree/recording-file-tree.component';
 import { ApiHttpRequestInfo, ApiHttpRequest } from 'shared/web/lib/ts/ApiHttpRequest';
-import { OnlinePreviewGenerator } from 'shared/Tracer/lib/ts/OnlinePreviewGenerator';
-import { LocalTransactionWriter, LocalProjectWriter, LocalProjectLoader } from 'shared/Tracer/lib/ts/LocalTransaction';
+import { LocalTransactionWriter, LocalProjectWriter, LocalProjectLoader, LocalTransactionReader } from 'shared/Tracer/lib/ts/LocalTransaction';
 import { Guid } from 'guid-typescript';
 import { IErrorService } from 'src/app/services/abstract/IErrorService';
 import { ILogService } from 'src/app/services/abstract/ILogService';
 import { ITracerProjectService } from 'src/app/services/abstract/ITracerProjectService';
-import { FileUploadData, PropogateTreeOptions } from 'src/app/sub-components/file-tree/ng2-file-tree.component';
+import { PropogateTreeOptions } from 'src/app/sub-components/file-tree/ng2-file-tree.component';
 import { ResourceViewerComponent } from 'src/app/sub-components/resource-viewer/resource-viewer.component';
 import { IPreviewService } from 'src/app/services/abstract/IPreviewService';
 import { ComponentCanDeactivate } from 'src/app/services/guards/tutor-bits-pending-changes-guard.service';
 import { Observable } from 'rxjs';
 import { IEventService } from 'src/app/services/abstract/IEventService';
 import { PreviewComponent } from 'src/app/sub-components/preview/preview.component';
-import { ViewTutorial } from 'src/app/models/tutorial/view-tutorial';
-import { TutorBitsTutorialService } from 'src/app/services/tutorial/tutor-bits-tutorial.service';
 import { ITitleService } from 'src/app/services/abstract/ITitleService';
+import { TransactionLoader } from 'shared/Tracer/lib/ts/TransactionLoader';
 
 @Component({
   templateUrl: './sandbox.component.html',
@@ -53,7 +51,7 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate {
     private tracerProjectService: ITracerProjectService,
     private errorServer: IErrorService,
     private eventService: IEventService,
-    private tutorialService: TutorBitsTutorialService,
+    private previewService: IPreviewService,
     private titleService: ITitleService) {
     this.loadProjectId = this.route.snapshot.paramMap.get('projectId');
   }
@@ -62,50 +60,53 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate {
     this.titleService.SetTitle(`Sandbox`);
   }
 
-  onCodeInitialized(recordingEditor: RecordingEditorComponent) {
+  async onCodeInitialized(recordingEditor: RecordingEditorComponent) {
     if (this.loadProjectId) {
-      this.Load().then(() => {
+      try {
+        await this.Load();
         this.startEditing();
-      }).catch((err) => {
+      } catch (err) {
         this.errorServer.HandleError('SandboxComponent', `${err}`);
-      }).finally(() => {
-        this.loadingProject = false;
-      });
+      }
+      this.loadingProject = false;
     } else {
       this.recordingTreeComponent.allowEdit(true);
-      this.startEditing();
+      await this.startEditing();
     }
   }
 
-  startEditing(): void {
-    this.recordingEditor.AllowEdits(true);
-    this.recordingTreeComponent.allowEdit(true);
+  async startEditing() {
+    try {
+      this.recordingEditor.AllowEdits(true);
+      this.recordingTreeComponent.allowEdit(true);
 
-    this.recordingTreeComponent.selectNodeByPath(this.recordingTreeComponent.treeComponent.tree, '/project');
+      this.recordingTreeComponent.selectNodeByPath(this.recordingTreeComponent.treeComponent.tree, '/project');
 
-    this.codeRecorder = new MonacoRecorder(
-      this.recordingEditor,
-      this.recordingTreeComponent,
-      this.resourceViewerComponent,
-      this.previewComponent,
-      this.logServer,
-      this.errorServer,
-      false, /* resourceAuth */
-      this.projectId,
-      new LocalProjectLoader(),
-      new LocalProjectWriter(),
-      new LocalTransactionWriter(),
-      this.tracerProjectService,
-      false /* ignore non file operations */);
+      this.codeRecorder = new MonacoRecorder(
+        this.recordingEditor,
+        this.recordingTreeComponent,
+        this.resourceViewerComponent,
+        this.previewComponent,
+        this.logServer,
+        this.errorServer,
+        false, /* resourceAuth */
+        this.projectId,
+        new LocalProjectLoader(),
+        new LocalProjectWriter(),
+        new LocalTransactionWriter(),
+        this.tracerProjectService,
+        false /* ignore non file operations */);
 
-    this.codeRecorder.ResetProject(this.projectId).then(async () => {
+      await this.codeRecorder.ResetProject(this.projectId);
       await this.codeRecorder.New();
       this.codeRecorder.StartRecording();
-      this.logServer.LogToConsole('SandboxComponent', 'Ready to edit');
+      this.logServer.LogToConsole('Sandbox', 'Ready to edit');
       this.zone.runTask(() => {
         this.loading = false;
       });
-    });
+    } catch (e) {
+      this.errorServer.HandleError('Sandbox', `${e}`);
+    }
   }
 
   public onCloseClicked(e: any) {
@@ -113,14 +114,14 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate {
     this.previewComponent.ClosePreview();
   }
 
-  public onPreviewClicked(e: string) {
+  public async onPreviewClicked(e: string) {
     this.eventService.TriggerButtonClick('Sandbox', `Preview - ${this.projectId} - ${e}`);
     const previewPos = Math.round(this.codeRecorder.position);
-    this.previewComponent.GeneratePreview(this.projectId, previewPos, e, this.codeRecorder.logs, this.loadProjectId)
-      .then()
-      .catch((err) => {
-        this.errorServer.HandleError('PreviewError', err);
-      })
+    try {
+      await this.previewComponent.GeneratePreview(this.projectId, previewPos, e, this.codeRecorder.logs, this.loadProjectId);
+    } catch (err) {
+      this.errorServer.HandleError('PreviewError', err);
+    }
   }
 
   public async Load(): Promise<void> {
@@ -138,21 +139,26 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate {
     });
   }
 
-  public onDownloadClicked(e: any) {
+  public async onDownloadClicked(e: any) {
     this.eventService.TriggerButtonClick('Preview', `Download - ${this.projectId}`);
     this.downloading = true;
-    const previewGenerator = new OnlinePreviewGenerator(this.requestObj);
     const previewPos = Math.round(this.codeRecorder.position);
-    previewGenerator.DownloadPreview(this.projectId, previewPos, this.codeRecorder.logs, this.loadProjectId).then()
-      .catch((err) => {
-        this.errorServer.HandleError(`DownloadError`, err);
-      }).finally(() => {
-        this.downloading = false;
-      });
+    try {
+      await this.previewService.DownloadPreview(this.projectId, previewPos, this.codeRecorder.logs, this.loadProjectId);
+    } catch (err) {
+      this.errorServer.HandleError(`DownloadError`, err);
+    }
+    this.downloading = false;
   }
 
-  public onPublishToExampleClicked(e: any) {
-    this.eventService.TriggerButtonClick('Preview', `PublishExample - ${this.projectId}`);
+  public async onSaveClicked(e: any) {
+    this.eventService.TriggerButtonClick('Preview', `SaveProject - ${this.projectId}`);
+
+    const transactionLoader = new TransactionLoader(new LocalTransactionReader());
+    const currentPos = Math.round(this.codeRecorder.position);
+    const projectLoader = new LocalProjectLoader();
+    const project = await projectLoader.GetProject(this.projectId);
+    transactionLoader.GetTransactionLogs(project, 0, currentPos);
   }
 
   @HostListener('window:beforeunload')

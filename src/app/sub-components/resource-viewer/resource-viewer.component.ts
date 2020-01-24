@@ -21,7 +21,7 @@ export class ResourceViewerComponent implements OnInit {
   @Input()
   set Resource(resource: ResourceData) {
     this.internalResource = resource;
-    this.evaluateResourceType();
+    this.evaluateResourceType().then();
   }
 
   get Resource(): ResourceData {
@@ -33,7 +33,7 @@ export class ResourceViewerComponent implements OnInit {
   ngOnInit() {
   }
 
-  public evaluateResourceType() {
+  public async evaluateResourceType() {
     this.resourceName = null;
     this.imageUrl = null;
 
@@ -42,7 +42,8 @@ export class ResourceViewerComponent implements OnInit {
     }
 
     if (this.Resource.fileName.endsWith('.png') || this.Resource.fileName.endsWith('.jpg')) {
-      this.projectService.GetResource(this.Resource.projectId, this.Resource.resourceId).then((url) => {
+      try {
+        const url = await this.projectService.GetResource(this.Resource.projectId, this.Resource.resourceId);
         if (!url) {
           this.errorServer.HandleError('ResourceViewerComponent', `Url was null`);
           return;
@@ -54,7 +55,9 @@ export class ResourceViewerComponent implements OnInit {
 
         this.resourceName = this.Resource.fileName;
         this.imageUrl = url;
-      });
+      } catch (e) {
+        this.errorServer.HandleError('ResourceViewerComponent', `Failed retrieving resource`);
+      }
     }
   }
 

@@ -72,12 +72,15 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
     this.hasRecorded = this.route.snapshot.queryParamMap.get('back') === 'true';
   }
 
-  ngOnInit(): void {
-    this.tutorialService.Get(this.tutorialId).then((tutorial: ViewTutorial) => {
+  async ngOnInit() {
+    try {
+      const tutorial: ViewTutorial = await this.tutorialService.Get(this.tutorialId);
       this.titleService.SetTitle(`Recording: ${tutorial.title}`);
       this.tutorial = tutorial;
       this.canRecord = this.streamInitialized;
-    });
+    } catch (e) {
+      this.errorServer.HandleError('Record', e);
+    }
   }
 
   ngOnDestroy(): void {
@@ -92,7 +95,7 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
     }
   }
 
-  onStreamInitialized(webCam: RecordingWebCamComponent) {
+  async onStreamInitialized(webCam: RecordingWebCamComponent) {
     if (this.streamErrored) {
       this.streamErrored = false;
       this.errorServer.ClearError();
@@ -101,7 +104,7 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
     this.streamInitialized = true;
     this.canRecord = !!this.tutorial;
     this.webCamRecorder = new WebCamRecorder(this.recordingWebCam, this.videoRecordingService, this.tutorialId);
-    this.webCamRecorder.Initialize().then();
+    await this.webCamRecorder.Initialize();
   }
 
   onStreamError(e: any) {
@@ -114,19 +117,6 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
     this.recordingTreeComponent.selectNodeByPath(this.recordingTreeComponent.treeComponent.tree, '/project');
   }
 
-  startRecording(): void {
-    this.codeRecorder.ResetProject(this.tutorial.projectId).then(async () => {
-      await this.codeRecorder.Load();
-      this.codeRecorder.Reset();
-      await this.webCamRecorder.StartRecording();
-      this.loadingRecording = false;
-      this.hasRecorded = true;
-      this.codeRecorder.StartRecording();
-      this.recordingTreeComponent.allowEdit(true);
-      this.recordingEditor.AllowEdits(true);
-      this.recording = true;
-    });
-  }
 
   resetState() {
     this.recordingTreeComponent.treeComponent.treeModel = this.recordingTreeComponent.tree;
@@ -136,8 +126,100 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
     this.recordingEditor.currentFilePath = '';
   }
 
-  onRecordingStateChanged(recording: boolean) {
-    this.eventService.TriggerButtonClick('Record', `Record - ${this.tutorialId}`);
+  async StartRecording() {
+    if (this.hasRecorded) {
+      if (!confirm('Are you sure you want to start the recording over?')) {
+        return;
+      }
+
+      this.resetState();
+    }
+
+    this.timeoutTimer = setTimeout(() => {
+      this.errorServer.HandleError('Timeout', 'Max time reached ending recording');
+      this.onRecordingStateChanged(false);
+      this.timeoutTimer = null;
+    }, this.timeout);
+
+    this.timeoutWarningTimer = setTimeout(() => {
+      this.errorServer.HandleError('TimeoutWarning', 'You are about to reach max recording time. Please wrap up stream within 5 minutes');
+      this.timeoutWarningTimer = null;
+    }, this.timeoutWarning);
+
+    this.webCamRecorder = new WebCamRecorder(this.recordingWebCam, this.videoRecordingService, this.tutorial.videoId);
+    try {
+      await this.webCamRecorder.Initialize();
+    } catch (e) {
+      this.errorServer.HandleError('Record', `Failed loading video recorder ${e}`);
+      return;
+    }
+
+    this.loadingRecording = true;
+    this.codeRecorder = new MonacoRecorder(
+      this.recordingEditor,
+      this.recordingTreeComponent,
+      this.resourceViewerComponent,
+      this.previewComponent,
+      this.logServer,
+      this.errorServer,
+      true, /* resourceAuth */
+      this.tutorial.projectId,
+      this.projectService,
+      this.projectService,
+      this.projectService,
+      this.projectService,
+      true);
+
+    try {
+      const proj = await this.codeRecorder.LoadProject(this.tutorial.projectId);
+      if (proj.getDuration() > 0 && !confirm('Are you sure you want to start the recording over?')) {
+        this.loadingRecording = false;
+        this.recording = false;
+        this.hasRecorded = true;
+        return;
+      }
+
+    } catch (e) {
+      this.errorServer.HandleError('Record', `Failed loading project ${e}`);
+      return;
+    }
+
+    try {
+      await this.codeRecorder.ResetProject(this.tutorial.projectId);
+      await this.codeRecorder.Load();
+      this.codeRecorder.Reset();
+      await this.webCamRecorder.StartRecording();
+      this.loadingRecording = false;
+      this.hasRecorded = true;
+      this.codeRecorder.StartRecording();
+      this.recordingTreeComponent.allowEdit(true);
+      this.recordingEditor.AllowEdits(true);
+      this.recording = true;
+    } catch (e) {
+      this.errorServer.HandleError('Record', `Failed start record ${e}`);
+    }
+  }
+
+  async StopRecording() {
+    this.recording = false;
+    this.recordingTreeComponent.allowEdit(false);
+    this.recordingEditor.AllowEdits(false);
+    this.saving = true;
+    try {
+      await Promise.all([
+        this.webCamRecorder.FinishRecording(),
+        this.codeRecorder.StopRecording()
+      ]);
+      this.logServer.LogToConsole('Record', 'Finished recording');
+    } catch (e) {
+      this.errorServer.HandleError('Record', `Failed saving recording ${e}`);
+      this.hasRecorded = false;
+      this.resetState();
+    }
+    this.saving = false;
+  }
+
+  resetTimeoutTimers() {
     if (this.timeoutWarningTimer) {
       clearTimeout(this.timeoutWarningTimer);
       this.timeoutWarningTimer = null;
@@ -147,74 +229,16 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
       clearTimeout(this.timeoutTimer);
       this.timeoutTimer = null;
     }
+  }
+
+  async onRecordingStateChanged(recording: boolean) {
+    this.eventService.TriggerButtonClick('Record', `Record - ${this.tutorialId}`);
+    this.resetTimeoutTimers();
 
     if (recording) {
-      if (this.hasRecorded) {
-        if (!confirm('Are you sure you want to start the recording over?')) {
-          return;
-        }
-
-        this.resetState();
-      }
-
-      this.timeoutTimer = setTimeout(() => {
-        this.errorServer.HandleError('Timeout', 'Max time reached ending recording');
-        this.onRecordingStateChanged(false);
-        this.timeoutTimer = null;
-      }, this.timeout);
-
-      this.timeoutWarningTimer = setTimeout(() => {
-        this.errorServer.HandleError('TimeoutWarning', 'You are about to reach max recording time. Please wrap up stream within 5 minutes');
-        this.timeoutWarningTimer = null;
-      }, this.timeoutWarning);
-
-      this.webCamRecorder = new WebCamRecorder(this.recordingWebCam, this.videoRecordingService, this.tutorial.videoId);
-      this.webCamRecorder.Initialize().then();
-
-      this.loadingRecording = true;
-      this.codeRecorder = new MonacoRecorder(
-        this.recordingEditor,
-        this.recordingTreeComponent,
-        this.resourceViewerComponent,
-        this.previewComponent,
-        this.logServer,
-        this.errorServer,
-        true, /* resourceAuth */
-        this.tutorial.projectId,
-        this.projectService,
-        this.projectService,
-        this.projectService,
-        this.projectService,
-        true);
-
-      this.codeRecorder.LoadProject(this.tutorial.projectId).then((proj) => {
-        if (proj.getDuration() > 0 && !confirm('Are you sure you want to start the recording over?')) {
-          this.loadingRecording = false;
-          this.recording = false;
-          this.hasRecorded = true;
-          return;
-        }
-        this.startRecording();
-      }).catch((e) => {
-        this.startRecording();
-      });
-
+      await this.StartRecording();
     } else {
-      this.recording = false;
-      this.recordingTreeComponent.allowEdit(false);
-      this.recordingEditor.AllowEdits(false);
-      this.saving = true;
-      Promise.all([this.webCamRecorder.FinishRecording(),
-      this.codeRecorder.StopRecording()
-      ]).then(() => {
-        this.logServer.LogToConsole('Record', 'Finished recording');
-      }).catch((e) => {
-        this.errorServer.HandleError('Record', `Failed saving recording ${e}`);
-        this.hasRecorded = false;
-        this.resetState();
-      }).finally(() => {
-        this.saving = false;
-      });
+      await this.StopRecording();
     }
   }
 
@@ -223,14 +247,14 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
     this.previewComponent.ClosePreview();
   }
 
-  public onPreviewClicked(e: string) {
+  public async onPreviewClicked(e: string) {
     this.eventService.TriggerButtonClick('Record', `Preview - ${this.tutorialId} - ${e}`);
     const previewPos = Math.round(this.codeRecorder.position);
-    this.previewComponent.GeneratePreview(this.tutorial.projectId, previewPos, e, this.codeRecorder.logs)
-      .then()
-      .catch((err) => {
-        this.errorServer.HandleError('PreviewError', err);
-      });
+    try {
+      await this.previewComponent.GeneratePreview(this.tutorial.projectId, previewPos, e, this.codeRecorder.logs);
+    } catch (err) {
+      this.errorServer.HandleError('PreviewError', err);
+    }
   }
 
   onFinishClicked() {

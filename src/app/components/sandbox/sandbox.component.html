@@ -4,11 +4,11 @@
       icon="cloud_download" [saving]="downloading" savingText="Downloading..." matTooltip="Save project as zip">
     </app-saving-button>
   </div>
-  <!-- <div class="controlsContainer">
-    <app-saving-button *ngIf="!loading" (click)="onPublishToExampleClicked($event)" text="Publish as Example"
+  <div class="controlsContainer">
+    <app-saving-button *ngIf="!loading" (click)="onSaveClicked($event)" text="Save Project"
       icon="open_in_browser" [saving]="false" savingText="">
     </app-saving-button>
-  </div> -->
+  </div>
   <mat-spinner color="accent" [diameter]="26" class="loading-spinner" *ngIf="loading">
   </mat-spinner>
 </div>

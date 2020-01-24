@@ -22,16 +22,17 @@ export class MyTutorialsComponent implements OnInit {
     private logServer: ILogService,
     private titleService: ITitleService) { }
 
-  ngOnInit() {
+  async ngOnInit() {
     this.titleService.SetTitle('My Tutorials');
-    this.tutorialsService.GetAllByOwner().then((tutorials) => {
+    try {
+      const tutorials = await this.tutorialsService.GetAllByOwner()
       this.tutorials = tutorials;
       this.logServer.LogToConsole('MyTutorialsComponent', tutorials.length);
-    }).catch((e) => {
+    } catch (e) {
       this.errorServer.HandleError('MyTutorialsComponent', e);
-    }).finally(() => {
-      this.loading = false;
-    });
+    }
+
+    this.loading = false;
   }
 
   onTutorialCardClick(e: any, tutorial: ViewTutorial) {
@@ -39,15 +40,16 @@ export class MyTutorialsComponent implements OnInit {
     this.router.navigate([`watch/${tutorial.id}`]);
   }
 
-  onDeleteClicked(e: DeleteTutorialEvent) {
+  async onDeleteClicked(e: DeleteTutorialEvent) {
     if (!confirm('Are you sure you want to delete this tutorial?')) {
       return;
     }
-    this.tutorialsService.Delete(e.tutorial.id).then(() => {
 
-    }).catch((err) => {
+    try {
+      await this.tutorialsService.Delete(e.tutorial.id);
+    } catch (err) {
       this.errorServer.HandleError('MyTutorialsComponent', `Failed deleting tutorial: ${err}`);
-    });
+    }
 
     const index = this.tutorials.indexOf(e.tutorial);
     if (index === -1) {

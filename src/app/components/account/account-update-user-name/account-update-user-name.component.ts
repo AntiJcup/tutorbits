@@ -52,16 +52,17 @@ export class AccountUpdateUserNameComponent implements OnInit {
     this.accountId = this.route.snapshot.paramMap.get('accountId');
   }
 
-  submit(model: UpdateAccountUserName) {
+  async submit(model: UpdateAccountUserName) {
     this.logServer.LogToConsole('AccountUpdateUserName', model);
     this.loading = true;
 
-    this.accountService.UpdateNickName(model.userName, this.accountId).then((a) => {
+    try {
+      await this.accountService.UpdateNickName(model.userName, this.accountId);
       this.router.navigate(['myaccount']);
-    }).catch((err) => {
+    } catch (err) {
       this.errorServer.HandleError('AccountUpdateUserName', `${err}`);
-    }).finally(() => {
-      this.loading = false;
-    });
+    }
+
+    this.loading = false;
   }
 }

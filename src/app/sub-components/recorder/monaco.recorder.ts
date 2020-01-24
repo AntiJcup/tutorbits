@@ -437,10 +437,11 @@ export class MonacoRecorder extends TransactionRecorder {
         this.TriggerDelayedSave();
     }
 
-    public onFileUploaded(e: FileUploadData) {
+    public async onFileUploaded(e: FileUploadData) {
         this.logging.LogToConsole('MonacoRecorder', `onFileUploaded ${JSON.stringify(e.fileData)}`);
 
-        this.projectService.UploadResource(this.id, e.fileData.name, e.fileData.data, this.resourceAuth).then((resourceId: string) => {
+        try {
+            const resourceId: string = await this.projectService.UploadResource(this.id, e.fileData.name, e.fileData.data, this.resourceAuth)
             if (!resourceId) {
                 this.errorServer.HandleError(`UploadResourceError`, `resourceId is null`);
                 return;
@@ -452,9 +453,9 @@ export class MonacoRecorder extends TransactionRecorder {
             this.timeOffset = Date.now() - this.start;
             this.UploadFile(this.timeOffset, this.fileTreeComponent.fileSelected, newFilePath, resourceId);
             this.TriggerDelayedSave();
-        }).catch((err) => {
+        } catch (err) {
             this.errorServer.HandleError(`UploadResourceError`, `${err}`);
-        });
+        }
     }
 
     public onMouseMoved(e: MouseEvent) {
@@ -498,14 +499,19 @@ export class MonacoRecorder extends TransactionRecorder {
         if (this.delayTimer) {
             return;
         }
-        this.delayTimer = setTimeout(() => {
+        this.delayTimer = setTimeout(async () => {
             this.delayTimer = null;
             if (!this.recording) {
                 return;
             }
-            this.timeOffset = Date.now() - this.start;
-            this.GetTransactionLogByTimeOffset(this.timeOffset); // call this trigger new partition before save maybe
-            this.SaveTransactionLogs().then();
+
+            await this.Save();
         }, this.project.getPartitionSize());
+    }
+
+    public async Save() {
+        this.timeOffset = Date.now() - this.start;
+        this.GetTransactionLogByTimeOffset(this.timeOffset); // call this trigger new partition before save maybe
+        await this.SaveTransactionLogs();
     }
 }

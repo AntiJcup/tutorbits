@@ -107,8 +107,14 @@ export class WatchComponent implements OnInit, OnDestroy {
     }
   }
 
-  ngOnInit(): void {
-    this.tutorialService.Get(this.tutorialId).then(async (tutorial: ViewTutorial) => {
+  async ngOnInit() {
+    if (!this.dataService.GetShownWatchHelp()) {
+      this.dialog.open(WatchGuideComponent);
+      this.dataService.SetShownWatchHelp(true);
+    }
+
+    try {
+      const tutorial = await this.tutorialService.Get(this.tutorialId);
       this.titleService.SetTitle(`${tutorial.title} - ${tutorial.topic} Tutorial - TutorBits`);
       this.metaService.updateTag({ name: 'description', content: `TutotorBits Tutorial - ${tutorial.title}: ${tutorial.description}` },
         'name=\'description\'');
@@ -128,11 +134,8 @@ export class WatchComponent implements OnInit, OnDestroy {
       } catch (e) {
         this.errorServer.HandleError(`VideoError`, e);
       }
-    });
-
-    if (!this.dataService.GetShownWatchHelp()) {
-      this.dialog.open(WatchGuideComponent);
-      this.dataService.SetShownWatchHelp(true);
+    } catch (e) {
+      this.errorServer.HandleError(`Watch`, e);
     }
   }
 
@@ -153,7 +156,7 @@ export class WatchComponent implements OnInit, OnDestroy {
     }
   }
 
-  onReady() {
+  async onReady() {
     // If publish mode make sure not to cache!
     this.codePlayer = new MonacoPlayer(
       this.playbackEditor,
@@ -176,22 +179,23 @@ export class WatchComponent implements OnInit, OnDestroy {
       this.loadingReferences--;
     });
 
-    this.codePlayer.Load().then(() => {
+    try {
+      await this.codePlayer.Load();
       this.codePlayer.Play();
       this.playbackVideo.nativeElement.volume = 0.5;
       // this.playbackVideo.nativeElement.play();
       this.paceKeeperInterval = setInterval(() => {
         this.paceKeeperLoop();
       }, this.paceKeeperCheckSpeedMS);
-    }).catch((e) => {
+    } catch (e) {
       this.errorServer.HandleError(`CodeError`, e);
-    });
+    }
   }
 
-  onCodeInitialized(playbackEditor: PlaybackEditorComponent) {
+  async onCodeInitialized(playbackEditor: PlaybackEditorComponent) {
     this.codeInitialized = true;
     if (this.tutorial) {
-      this.onReady();
+      await this.onReady();
     }
   }
 
@@ -237,13 +241,14 @@ export class WatchComponent implements OnInit, OnDestroy {
     this.lastVideoTime = currentVideoTime;
   }
 
-  public onPreviewClicked(e: string) {
+  public async onPreviewClicked(e: string) {
     this.eventService.TriggerButtonClick('Watch', `Preview - ${this.tutorialId} - ${e}`);
     const previewPos = Math.min(Math.round(this.codePlayer.position), this.codePlayer.duration);
-    this.previewComponent.LoadPreview(this.tutorial.projectId, previewPos, e).then()
-      .catch((err) => {
-        this.errorServer.HandleError(`PreviewError`, err);
-      });
+    try {
+      await this.previewComponent.LoadPreview(this.tutorial.projectId, previewPos, e);
+    } catch (err) {
+      this.errorServer.HandleError(`PreviewError`, err);
+    }
   }
 
   public onPreviewClosed(e: any) {
@@ -257,10 +262,11 @@ export class WatchComponent implements OnInit, OnDestroy {
     this.showCommentSection = false;
   }
 
-  public onPublishClicked(e: any) {
+  public async onPublishClicked(e: any) {
     this.eventService.TriggerButtonClick('Watch', `Publish - ${this.tutorialId}`);
     this.publishing = true;
-    this.videoService.Publish(this.tutorial.videoId).then(async (res) => {
+    try {
+      const res = await this.videoService.Publish(this.tutorial.videoId);
       if (!res) {
         this.errorServer.HandleError('FinishError', 'Failed To Save Try Again');
       } else {
@@ -276,11 +282,11 @@ export class WatchComponent implements OnInit, OnDestroy {
           this.publishMode = false;
         });
       }
-    }).catch((err) => {
+    } catch (err) {
       this.errorServer.HandleError('FinishError', err);
-    }).finally(() => {
-      this.publishing = false;
-    });
+    }
+
+    this.publishing = false;
   }
 
   public onBackClicked(e: any) {
@@ -292,19 +298,19 @@ export class WatchComponent implements OnInit, OnDestroy {
     this.router.navigate([`record/${this.tutorialId}`], { queryParams: { back: 'true' } });
   }
 
-  public onDownloadClicked(e: any) {
+  public async onDownloadClicked(e: any) {
     this.eventService.TriggerButtonClick('Watch', `Download - ${this.tutorialId}`);
     this.downloading = true;
-    this.projectService.DownloadProject(this.tutorial.projectId).then((res) => {
+    try {
+      const res = await this.projectService.DownloadProject(this.tutorial.projectId);
       if (!res) {
         this.errorServer.HandleError('DownloadProject', `Error downloading project`);
         return;
       }
-    }).catch((err) => {
+    } catch (err) {
       this.errorServer.HandleError('DownloadProject', `${err}`);
-    }).finally(() => {
-      this.downloading = false;
-    });
+    }
+    this.downloading = false;
   }
 
   public onCopyToSandboxClicked(e: any, newWindow: boolean) {

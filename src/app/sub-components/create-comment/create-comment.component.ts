@@ -51,22 +51,23 @@ export class CreateCommentComponent implements OnInit {
   ngOnInit() {
   }
 
-  submit(model: CreateComment) {
+  async submit(model: CreateComment) {
     model.targetId = this.targetId;
     this.logServer.LogToConsole('CreateComment', model);
     this.loading = true;
 
-    this.commentService.Create(model).then((res: ResponseWrapper<ViewComment>) => {
+    try {
+      const res: ResponseWrapper<ViewComment> = await this.commentService.Create(model)
       if (res.error) {
         this.errorServer.HandleError('CreateError', JSON.stringify(res.error));
       }
 
       this.commentAdded.next(res.data as ViewComment);
-    }).catch((err) => {
+    } catch (err) {
       this.errorServer.HandleError('CreateError', err);
-    }).finally(() => {
-      this.loading = false;
-    });
+    }
+
+    this.loading = false;
   }
 
 }

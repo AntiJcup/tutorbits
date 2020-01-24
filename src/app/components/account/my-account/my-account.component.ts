@@ -21,15 +21,16 @@ export class MyAccountComponent implements OnInit {
     private logServer: ILogService,
     private titleService: ITitleService) { }
 
-  ngOnInit() {
+  async ngOnInit() {
     this.titleService.SetTitle('Account');
-    this.accountService.GetAccountInformation().then((account: ViewAccount) => {
-      this.account = account;
-    }).catch((err) => {
+
+    try {
+      this.account = await this.accountService.GetAccountInformation();
+    } catch (err) {
       this.errorServer.HandleError('MyAccountComponent', `${err}`);
-    }).finally(() => {
-      this.loading = false;
-    });
+    }
+
+    this.loading = false;
   }
 
 }

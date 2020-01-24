@@ -19,13 +19,14 @@ export class CommentButtonComponent implements OnInit {
 
   constructor(private errorServer: IErrorService) { }
 
-  ngOnInit() {
-    this.commentService.GetCommentCount(this.targetId).then((count) => {
+  async ngOnInit() {
+    try {
+      const count = await this.commentService.GetCommentCount(this.targetId);
       this.text = `Comments (${count})`;
-    }).catch((err) => {
+    } catch (err) {
       this.errorServer.HandleError('CommentsButton', `Error loading comment count`);
-    }).finally(() => {
-      this.loading = false;
-    });
+    }
+    
+    this.loading = false;
   }
 }
