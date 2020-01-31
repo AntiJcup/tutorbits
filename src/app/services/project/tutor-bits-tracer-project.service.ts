@@ -7,6 +7,7 @@ import { TraceTransactionLog, TraceProject } from 'shared/Tracer/models/ts/Trace
 import { CreateProject } from 'src/app/models/project/create-project';
 import { HandlerType } from '../abstract/tutor-bits-base-model-api.service';
 import { ViewProject } from 'src/app/models/project/view-project';
+import { ProjectType } from 'src/app/models/project/project-type';
 
 @Injectable()
 export class TutorBitsTracerProjectService extends ITracerProjectService {
@@ -160,5 +161,20 @@ export class TutorBitsTracerProjectService extends ITracerProjectService {
       .Post(`${this.basePath}/Publish?projectId=${projectId}`, null, await this.GetAuthHeaders(HandlerType.Update));
 
     return response.ok;
+  }
+
+  public ValidateProjectType(projectType: string): boolean {
+    return ProjectType[projectType] !== undefined;
+  }
+
+  public async GetProjectTypes(): Promise<string[]> {
+    const response = await this.apiService.generateRequest()
+      .Get(`${this.basePath}/GetProjectTypes`, await this.GetHeaders(HandlerType.Get));
+
+    if (!response.ok) {
+      throw new Error(`Failed getting tutorial types: ${response.status}`);
+    }
+
+    return await response.json();
   }
 }

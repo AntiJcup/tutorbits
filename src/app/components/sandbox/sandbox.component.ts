@@ -1,10 +1,8 @@
 import { Component, OnInit, ViewChild, NgZone, HostListener } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { environment } from 'src/environments/environment';
 import { MonacoRecorder } from 'src/app/sub-components/recorder/monaco.recorder';
 import { RecordingEditorComponent } from 'src/app/sub-components/recording-editor/recording-editor.component';
 import { RecordingFileTreeComponent } from 'src/app/sub-components/recording-file-tree/recording-file-tree.component';
-import { ApiHttpRequestInfo, ApiHttpRequest } from 'shared/web/lib/ts/ApiHttpRequest';
 import { LocalTransactionWriter, LocalProjectWriter, LocalProjectLoader, LocalTransactionReader } from 'shared/Tracer/lib/ts/LocalTransaction';
 import { Guid } from 'guid-typescript';
 import { IErrorService } from 'src/app/services/abstract/IErrorService';
@@ -19,6 +17,8 @@ import { IEventService } from 'src/app/services/abstract/IEventService';
 import { PreviewComponent } from 'src/app/sub-components/preview/preview.component';
 import { ITitleService } from 'src/app/services/abstract/ITitleService';
 import { TransactionLoader } from 'shared/Tracer/lib/ts/TransactionLoader';
+import { ViewProject } from 'src/app/models/project/view-project';
+import { CreateProject } from 'src/app/models/project/create-project';
 
 @Component({
   templateUrl: './sandbox.component.html',
@@ -33,16 +33,15 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate {
   @ViewChild(PreviewComponent, { static: true }) previewComponent: PreviewComponent;
 
   codeRecorder: MonacoRecorder;
-  requestInfo: ApiHttpRequestInfo = {
-    host: environment.apiHost,
-    credentials: undefined,
-    headers: {},
-  };
-  requestObj = new ApiHttpRequest(this.requestInfo);
+
   loadProjectId: string;
+  projectType: string;
+
   loadingProject = false;
   downloading = false;
   loading = true;
+
+  savedProject: ViewProject;
 
   constructor(
     private zone: NgZone,
@@ -53,6 +52,7 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate {
     private eventService: IEventService,
     private previewService: IPreviewService,
     private titleService: ITitleService) {
+    this.projectType = this.route.snapshot.paramMap.get('projectType');
     this.loadProjectId = this.route.snapshot.paramMap.get('projectId');
   }
 
@@ -61,6 +61,11 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate {
   }
 
   async onCodeInitialized(recordingEditor: RecordingEditorComponent) {
+    if (!this.projectType || !this.tracerProjectService.ValidateProjectType(this.projectType)) {
+      this.errorServer.HandleError('SandboxComponent', `invalid project type ${this.projectType}`);
+      return;
+    }
+
     if (this.loadProjectId) {
       try {
         await this.Load();
@@ -157,8 +162,39 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate {
     const transactionLoader = new TransactionLoader(new LocalTransactionReader());
     const currentPos = Math.round(this.codeRecorder.position);
     const projectLoader = new LocalProjectLoader();
-    const project = await projectLoader.GetProject(this.projectId);
-    transactionLoader.GetTransactionLogs(project, 0, currentPos);
+
+
+    try {
+      await this.codeRecorder.Save();
+      const project = await projectLoader.GetProject(this.projectId);
+      const transactionLogs = await transactionLoader.GetTransactionLogs(project, 0, currentPos);
+
+      if (transactionLogs.length <= 0) {
+        this.errorServer.HandleError(`SaveError`, 'Nothing to save');
+        return;
+      }
+
+      if (this.savedProject == null) {
+        const res = await this.tracerProjectService.Create({
+          projectType: this.projectType
+        } as CreateProject);
+        if (res.error) {
+          this.errorServer.HandleError(`SaveError`, res.error);
+          return;
+        }
+        this.savedProject = res.data;
+      }
+
+      for (const log of transactionLogs) {
+        const buffer = log.serializeBinary();
+        const logRes = await this.tracerProjectService.WriteTransactionLog(log, buffer, this.savedProject.id);
+        if (logRes) {
+          this.errorServer.HandleError(`SaveError`, 'Failed saving project');
+        }
+      }
+    } catch (e) {
+      this.errorServer.HandleError(`SaveError`, e);
+    }
   }
 
   @HostListener('window:beforeunload')

@@ -96,6 +96,7 @@ import { CommentButtonComponent } from './sub-components/comments-button/comment
 import { RatingComponent } from './sub-components/rating/rating.component';
 import { TutorBitsConcreteThumbnailService, TutorBitsThumbnailService } from './services/thumbnail/tutor-bits-thumbnail.service';
 import { TutorBitsVideoService } from './services/video/tutor-bits-video.service';
+import { CreateSandboxComponent } from './components/create-sandbox/create-sandbox.component';
 
 const appRoutes: Routes = [
   {
@@ -128,14 +129,20 @@ const appRoutes: Routes = [
     canDeactivate: [TutorBitsPendingChangesGuardService]
   },
   {
-    path: 'sandbox',
+    path: 'create/sandbox',
+    component: CreateSandboxComponent,
+    data: { title: 'Create Sandbox' },
+    canActivate: [TutorBitsMobileGuardService]
+  },
+  {
+    path: 'sandbox/:projectType',
     component: SandboxComponent,
     data: { title: 'New Sandbox' },
     canActivate: [TutorBitsMobileGuardService],
     canDeactivate: [TutorBitsPendingChangesGuardService]
   },
   {
-    path: 'sandbox/:projectId',
+    path: 'sandbox/:projectType/:projectId',
     component: SandboxComponent,
     data: { title: 'Sandbox' },
     canActivate: [TutorBitsMobileGuardService],
@@ -240,7 +247,8 @@ const appRoutes: Routes = [
     CommentComponent,
     CreateCommentComponent,
     CommentButtonComponent,
-    RatingComponent
+    RatingComponent,
+    CreateSandboxComponent
   ],
   imports: [
     BrowserModule,

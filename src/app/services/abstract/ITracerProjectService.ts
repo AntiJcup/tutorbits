@@ -34,5 +34,9 @@ export abstract class ITracerProjectService
 
     public async abstract GetTransactionLog(project: TraceProject, partition: string, cacheBuster: string): Promise<TraceTransactionLog>;
 
-    public abstract async Publish(projectId: string): Promise<boolean>;
+    public async abstract Publish(projectId: string): Promise<boolean>;
+
+    public abstract ValidateProjectType(projectType: string): boolean;
+
+    public async abstract GetProjectTypes(): Promise<string[]>;
 }

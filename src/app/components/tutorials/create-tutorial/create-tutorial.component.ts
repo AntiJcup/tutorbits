@@ -18,6 +18,7 @@ import { ViewVideo } from 'src/app/models/video/view-video';
 import { ITracerProjectService } from 'src/app/services/abstract/ITracerProjectService';
 import { IVideoService } from 'src/app/services/abstract/IVideoService';
 import { CreateVideo } from 'src/app/models/video/create-video';
+import { CreateTutorialForm } from 'src/app/models/tutorial/create-tutorial-form';
 
 @Component({
   templateUrl: './create-tutorial.component.html',
@@ -26,15 +27,12 @@ import { CreateVideo } from 'src/app/models/video/create-video';
 export class CreateTutorialComponent implements OnInit, OnDestroy {
   loading = false;
   form = new FormGroup({});
-  model: CreateTutorial = {
+  model: CreateTutorialForm = {
     Title: null,
     Description: null,
     Topic: null,
     ThumbnailData: null,
-    Category: 'Tutorial',
-    ThumbnailId: null,
-    ProjectId: null,
-    VideoId: null
+    ProjectType: null
   };
   fields: FormlyFieldConfig[] = [];
 
@@ -53,10 +51,19 @@ export class CreateTutorialComponent implements OnInit, OnDestroy {
     this.titleService.SetTitle('Create Tutorial');
     this.loading = true;
     try {
-      const tutorialTypes = await this.tutorialService.GetTutorialTopics()
+      const tutorialTypes = await this.tutorialService.GetTutorialTopics();
       const tutorialTypeOptions = [];
       tutorialTypes.forEach(element => {
         tutorialTypeOptions.push({
+          label: element,
+          value: element
+        });
+      });
+
+      const projectTypes = await this.projectService.GetProjectTypes();
+      const projectTypeOptions = [];
+      projectTypes.forEach(element => {
+        projectTypeOptions.push({
           label: element,
           value: element
         });
@@ -100,6 +107,15 @@ export class CreateTutorialComponent implements OnInit, OnDestroy {
             required: true,
             description: 'Upload Thumbnail'
           }
+        },
+        {
+          key: 'projectType',
+          type: 'select',
+          templateOptions: {
+            label: 'Type',
+            required: true,
+            options: projectTypeOptions
+          }
         }];
       });
       this.loading = false;
@@ -111,7 +127,7 @@ export class CreateTutorialComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
   }
 
-  async submit(model: CreateTutorial) {
+  async submit(model: CreateTutorialForm) {
     this.logServer.LogToConsole('CreateTutorial', model);
     this.loading = true;
 
@@ -134,6 +150,7 @@ export class CreateTutorialComponent implements OnInit, OnDestroy {
       }
 
       const createProjectModel = {
+        projectType: model.ProjectType
       } as CreateProject;
       const projectResponse: ResponseWrapper<ViewProject> = await this.projectService.Create(createProjectModel);
 
@@ -153,11 +170,10 @@ export class CreateTutorialComponent implements OnInit, OnDestroy {
         return;
       }
 
-      const createTutorialModel = JSON.parse(JSON.stringify(model)) as CreateTutorial;
+      const createTutorialModel = this.tutorialService.ConvertForm(model);
       createTutorialModel.VideoId = videoResponse.data.id;
       createTutorialModel.ProjectId = projectResponse.data.id;
       createTutorialModel.ThumbnailId = thumbnailResponse.data.id;
-      createTutorialModel.ThumbnailData = null;
       const tutorialResponse: ResponseWrapper<ViewTutorial> = await this.tutorialService.Create(createTutorialModel);
 
       this.logServer.LogToConsole('CreateTutorial', tutorialResponse);

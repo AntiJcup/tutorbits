@@ -441,7 +441,8 @@ export class MonacoRecorder extends TransactionRecorder {
         this.logging.LogToConsole('MonacoRecorder', `onFileUploaded ${JSON.stringify(e.fileData)}`);
 
         try {
-            const resourceId: string = await this.projectService.UploadResource(this.id, e.fileData.name, e.fileData.data, this.resourceAuth)
+            const resourceId: string =
+                await this.projectService.UploadResource(this.id, e.fileData.name, e.fileData.data, this.resourceAuth);
             if (!resourceId) {
                 this.errorServer.HandleError(`UploadResourceError`, `resourceId is null`);
                 return;

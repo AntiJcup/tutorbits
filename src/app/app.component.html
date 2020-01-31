@@ -25,7 +25,7 @@
           </button>
           <mat-menu #appCreateMenu="matMenu">
             <a [routerLink]="[ '/create/tutorial' ]" mat-menu-item *ngIf="allowCreate">Tutorial</a>
-            <a [routerLink]="[ '/sandbox' ]" mat-menu-item>Sandbox</a>
+            <a [routerLink]="[ '/create/sandbox' ]" mat-menu-item>Sandbox</a>
           </mat-menu>
           <button mat-menu-item [matMenuTriggerFor]="appTutorialMenu">
             <mat-icon class="icon">assignment</mat-icon>
@@ -78,7 +78,7 @@
             </button>
             <mat-menu #appCreateMenu="matMenu">
               <a [routerLink]="[ '/create/tutorial' ]" mat-menu-item *ngIf="allowCreate">Tutorial</a>
-              <a [routerLink]="[ '/sandbox' ]" mat-menu-item>Sandbox</a>
+              <a [routerLink]="[ '/create/sandbox' ]" mat-menu-item>Sandbox</a>
             </mat-menu>
           </li>
           <li>

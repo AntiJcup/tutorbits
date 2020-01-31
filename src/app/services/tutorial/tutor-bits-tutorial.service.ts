@@ -6,6 +6,7 @@ import { Injectable } from '@angular/core';
 import { IAuthService } from '../abstract/IAuthService';
 import { FileUtils } from 'shared/web/lib/ts/FileUtils';
 import { UpdateTutorial } from '../../models/tutorial/update-tutorial';
+import { CreateTutorialForm } from 'src/app/models/tutorial/create-tutorial-form';
 
 // Import this as your service so tests can override it
 export abstract class TutorBitsTutorialService extends TutorBitsBaseModelApiService<CreateTutorial, UpdateTutorial, ViewTutorial> {
@@ -15,6 +16,7 @@ export abstract class TutorBitsTutorialService extends TutorBitsBaseModelApiServ
 
   public abstract async Publish(tutorialId: string): Promise<boolean>;
   public abstract async GetTutorialTopics(): Promise<string[]>;
+  public abstract ConvertForm(createTutorialForm: CreateTutorialForm): CreateTutorial;
 }
 
 @Injectable()
@@ -41,5 +43,13 @@ export class TutorBitsConcreteTutorialService extends TutorBitsTutorialService {
     }
 
     return await response.json();
+  }
+
+  public ConvertForm(createTutorialForm: CreateTutorialForm): CreateTutorial {
+    return {
+      Title: createTutorialForm.Title,
+      Topic: createTutorialForm.Topic,
+      Description: createTutorialForm.Description,
+    } as CreateTutorial;
   }
 }
