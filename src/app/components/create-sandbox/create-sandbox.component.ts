@@ -46,7 +46,7 @@ export class CreateSandboxComponent implements OnInit, OnDestroy {
           key: 'projectType',
           type: 'select',
           templateOptions: {
-            label: 'Type',
+            label: 'Project Type',
             required: true,
             options: projectTypeOptions
           }

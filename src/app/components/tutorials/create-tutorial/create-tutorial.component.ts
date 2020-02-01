@@ -85,9 +85,18 @@ export class CreateTutorialComponent implements OnInit, OnDestroy {
           key: 'Topic',
           type: 'select',
           templateOptions: {
-            label: 'Topic',
+            label: 'Tutorial Topic',
             required: true,
             options: tutorialTypeOptions
+          }
+        },
+        {
+          key: 'projectType',
+          type: 'select',
+          templateOptions: {
+            label: 'Project Type',
+            required: true,
+            options: projectTypeOptions
           }
         },
         {
@@ -106,15 +115,6 @@ export class CreateTutorialComponent implements OnInit, OnDestroy {
           templateOptions: {
             required: true,
             description: 'Upload Thumbnail'
-          }
-        },
-        {
-          key: 'projectType',
-          type: 'select',
-          templateOptions: {
-            label: 'Type',
-            required: true,
-            options: projectTypeOptions
           }
         }];
       });
