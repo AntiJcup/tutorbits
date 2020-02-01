@@ -91,7 +91,7 @@ export class CreateTutorialComponent implements OnInit, OnDestroy {
           }
         },
         {
-          key: 'projectType',
+          key: 'ProjectType',
           type: 'select',
           templateOptions: {
             label: 'Project Type',
