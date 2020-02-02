@@ -1,0 +1,13 @@
+<mat-card class="example-card">
+    <mat-card-header>
+        <mat-card-title [innerText]="example.title" matTooltip="{{example.title}}"></mat-card-title>
+        <mat-card-subtitle [innerText]="exampleSubTitle"></mat-card-subtitle>
+    </mat-card-header>
+    <img class="thumbnail" mat-card-image [src]="example.thumbnailUrl" alt="Placeholder Image">
+    <mat-card-content>
+        <p [innerText]="example.description" matTooltip="{{example.description}}">
+        </p>
+    </mat-card-content>
+    <mat-card-actions>
+    </mat-card-actions>
+</mat-card>

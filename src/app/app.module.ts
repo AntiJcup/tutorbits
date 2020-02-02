@@ -97,6 +97,15 @@ import { RatingComponent } from './sub-components/rating/rating.component';
 import { TutorBitsConcreteThumbnailService, TutorBitsThumbnailService } from './services/thumbnail/tutor-bits-thumbnail.service';
 import { TutorBitsVideoService } from './services/video/tutor-bits-video.service';
 import { CreateSandboxComponent } from './components/create-sandbox/create-sandbox.component';
+import { TutorBitsExampleService, TutorBitsConcreteExampleService } from './services/example/tutor-bits-example.service';
+import { TutorBitsExampleCommentService, TutorBitsConcreteExampleCommentService } from './services/example/tutor-bits-example-comment.service';
+import { TutorBitsExampleRatingService, TutorBitsConcreteExampleRatingService } from './services/example/tutor-bits-example-rating.service';
+import { TutorBitsExampleCommentRatingService, TutorBitsConcreteExampleCommentRatingService } from './services/example/tutor-bits-example-comment-rating.service';
+import { MyExamplesComponent } from './components/examples/my-examples/my-examples.component';
+import { EditExampleCardComponent } from './sub-components/edit-example-card/edit-example-card.component';
+import { ViewExamplesComponent } from './components/examples/view-examples/view-examples.component';
+import { ExampleCardComponent } from './sub-components/example-card/example-card.component';
+import { CreateExampleComponent } from './components/examples/create-example/create-example.component';
 
 const appRoutes: Routes = [
   {
@@ -147,6 +156,12 @@ const appRoutes: Routes = [
     data: { title: 'Sandbox' },
     canActivate: [TutorBitsMobileGuardService],
     canDeactivate: [TutorBitsPendingChangesGuardService]
+  },
+  {
+    path: 'create/example/:projectId',
+    component: CreateExampleComponent,
+    data: { title: 'Create Example' },
+    canActivate: [TutorBitsAuthGuardService, TutorBitsMobileGuardService]
   },
   {
     path: 'create/tutorial',
@@ -248,7 +263,12 @@ const appRoutes: Routes = [
     CreateCommentComponent,
     CommentButtonComponent,
     RatingComponent,
-    CreateSandboxComponent
+    CreateSandboxComponent,
+    MyExamplesComponent,
+    EditExampleCardComponent,
+    ViewExamplesComponent,
+    ExampleCardComponent,
+    CreateExampleComponent,
   ],
   imports: [
     BrowserModule,
@@ -299,6 +319,10 @@ const appRoutes: Routes = [
     { provide: TutorBitsAnswerRatingService, useClass: TutorBitsConcreteAnswerRatingService },
     { provide: TutorBitsAnswerCommentRatingService, useClass: TutorBitsConcreteAnswerCommentRatingService },
     { provide: TutorBitsThumbnailService, useClass: TutorBitsConcreteThumbnailService },
+    { provide: TutorBitsExampleService, useClass: TutorBitsConcreteExampleService },
+    { provide: TutorBitsExampleCommentService, useClass: TutorBitsConcreteExampleCommentService },
+    { provide: TutorBitsExampleRatingService, useClass: TutorBitsConcreteExampleRatingService },
+    { provide: TutorBitsExampleCommentRatingService, useClass: TutorBitsConcreteExampleCommentRatingService },
   ],
   bootstrap: [AppComponent],
   entryComponents: [WatchGuideComponent]

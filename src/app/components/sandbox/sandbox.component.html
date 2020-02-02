@@ -5,7 +5,7 @@
     </app-saving-button>
   </div>
   <div class="controlsContainer">
-    <app-saving-button *ngIf="!loading" (click)="onSaveClicked($event)" text="Save Project"
+    <app-saving-button *ngIf="!loading && isLoggedIn" (click)="onPublish($event)" text="Publish Example"
       icon="open_in_browser" [saving]="false" savingText="">
     </app-saving-button>
   </div>

@@ -1,0 +1,17 @@
+<div class="example-row-container">
+    <div class="example-row-container-padding">
+        <div class="example-row" *ngFor="let typeKey of exampleTypes">
+            <h3>{{typeKey}}</h3>
+            <div class="example-card-container" fxLayout fxLayoutGap="5px">
+                <a *ngFor="let example of examplesByType[typeKey]"
+                    [routerLink]="[ '/watch', example.id, example.title ]"
+                    (click)="onExampleCardClick($event, example)">
+                    <app-example-card [example]="example">
+                    </app-example-card>
+                </a>
+            </div>
+        </div>
+    </div>
+    <mat-spinner [diameter]="64" class="loading-spinner" *ngIf="loading">
+    </mat-spinner>
+</div>

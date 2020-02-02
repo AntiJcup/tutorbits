@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild, NgZone, HostListener } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { MonacoRecorder, MonacoRecorderSettings } from 'src/app/sub-components/recorder/monaco.recorder';
 import { RecordingEditorComponent } from 'src/app/sub-components/recording-editor/recording-editor.component';
 import { RecordingFileTreeComponent } from 'src/app/sub-components/recording-file-tree/recording-file-tree.component';
@@ -43,12 +43,14 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate {
   loadingProject = false;
   downloading = false;
   loading = true;
+  isLoggedIn = false;
 
   savedProject: ViewProject;
 
   constructor(
     private zone: NgZone,
     private route: ActivatedRoute,
+    private router: Router,
     private logServer: ILogService,
     private projectService: ITracerProjectService,
     private errorServer: IErrorService,
@@ -59,6 +61,8 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate {
     this.projectType = this.route.snapshot.paramMap.get('projectType');
     this.projectId = this.route.snapshot.paramMap.get('projectId');
     this.loadProjectId = this.route.snapshot.paramMap.get('baseProjectId');
+
+    this.isLoggedIn = this.authService.IsLoggedIn();
   }
 
   ngOnInit(): void {
@@ -92,7 +96,6 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate {
 
       this.recordingTreeComponent.selectNodeByPath(this.recordingTreeComponent.treeComponent.tree, '/project');
 
-      const isLoggedIn = this.authService.IsLoggedIn();
 
       this.codeRecorder = new MonacoRecorder(
         this.recordingEditor,
@@ -103,9 +106,9 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate {
         this.errorServer,
         false, /* resourceAuth */
         this.projectId,
-        isLoggedIn ? this.projectService : new LocalProjectLoader(), // Only save project updates if logged in
-        isLoggedIn ? this.projectService : new LocalProjectWriter(), // Only save project updates if logged in
-        isLoggedIn ? this.projectService : new LocalTransactionWriter(), // Only save project updates if logged in
+        this.isLoggedIn ? this.projectService : new LocalProjectLoader(), // Only save project updates if logged in
+        this.isLoggedIn ? this.projectService : new LocalProjectWriter(), // Only save project updates if logged in
+        this.isLoggedIn ? this.projectService : new LocalTransactionWriter(), // Only save project updates if logged in
         this.projectService,
         false, /* ignore non file operations */
         loadedTransactionLogs,
@@ -117,7 +120,7 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate {
 
       //await this.codeRecorder.ResetProject(this.projectId);
       // Load if logged in since it is already created on the server
-      isLoggedIn ? await this.codeRecorder.Load() : await this.codeRecorder.New();
+      this.isLoggedIn ? await this.codeRecorder.Load() : await this.codeRecorder.New();
       this.codeRecorder.StartRecording();
       this.logServer.LogToConsole('Sandbox', 'Ready to edit');
       this.zone.runTask(() => {
@@ -220,44 +223,15 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate {
     this.downloading = false;
   }
 
-  public async onSaveClicked(e: any) {
-    this.eventService.TriggerButtonClick('Preview', `SaveProject - ${this.projectId}`);
-
-    const transactionLoader = new TransactionLoader(new LocalTransactionReader());
-    const currentPos = Math.round(this.codeRecorder.position);
-    const projectLoader = new LocalProjectLoader();
+  public async onPublish(e: any) {
+    this.eventService.TriggerButtonClick('Preview', `PublishProject - ${this.projectId}`);
 
 
     try {
       await this.codeRecorder.Save();
-      const project = await projectLoader.GetProject(this.projectId);
-      const transactionLogs = await transactionLoader.GetTransactionLogs(project, 0, currentPos);
-
-      if (transactionLogs.length <= 0) {
-        this.errorServer.HandleError(`SaveError`, 'Nothing to save');
-        return;
-      }
-
-      if (this.savedProject == null) {
-        const res = await this.projectService.Create({
-          projectType: this.projectType
-        } as CreateProject);
-        if (res.error) {
-          this.errorServer.HandleError(`SaveError`, res.error);
-          return;
-        }
-        this.savedProject = res.data;
-      }
-
-      for (const log of transactionLogs) {
-        const buffer = log.serializeBinary();
-        const logRes = await this.projectService.WriteTransactionLog(log, buffer, this.savedProject.id);
-        if (logRes) {
-          this.errorServer.HandleError(`SaveError`, 'Failed saving project');
-        }
-      }
+      this.router.navigate([`create/example/${this.projectId}`]);
     } catch (e) {
-      this.errorServer.HandleError(`SaveError`, e);
+      this.errorServer.HandleError(`Sandbox`, e);
     }
   }
 

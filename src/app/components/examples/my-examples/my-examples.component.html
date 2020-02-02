@@ -1,0 +1,6 @@
+<div class="example-card-container" fxLayout fxLayoutGap="5px">
+    <app-edit-example-card *ngFor="let example of examples" [example]="example"
+        (click)="onExampleCardClick($event, example)" (DeleteClick)="onDeleteClicked($event)"></app-edit-example-card>
+    <mat-spinner [diameter]="64" class="loading-spinner" *ngIf="loading">
+    </mat-spinner>
+</div>
