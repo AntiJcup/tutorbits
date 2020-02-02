@@ -160,56 +160,52 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate {
 
   public async LoadProject(): Promise<void> {
     this.loadingProject = true;
-    const isLoggedIn = this.authService.IsLoggedIn();
 
-    if (isLoggedIn) {
-      const codePlayer = new MonacoPlayer(
-        this.recordingEditor,
-        this.recordingTreeComponent,
-        this.resourceViewerComponent,
-        null, // mouse component
-        this.previewComponent,
-        this.logServer,
-        this.projectService,
-        this.projectService,
-        this.projectId,
-        null, // Use default settings
-        Guid.create().toString());
+    const codePlayer = new MonacoPlayer(
+      this.recordingEditor,
+      this.recordingTreeComponent,
+      this.resourceViewerComponent,
+      null, // mouse component
+      this.previewComponent,
+      this.logServer,
+      this.projectService,
+      this.projectService,
+      this.projectId,
+      null, // Use default settings
+      Guid.create().toString());
 
-      try {
-        await codePlayer.Load();
-        if (codePlayer.duration === 0) {
-          await this.startEditing([]);
+    try {
+      await codePlayer.Load();
+      if (codePlayer.duration === 0) {
+        await this.startEditing([]);
+        return;
+      }
+      let loadingReferences = 0;
+      const startedLoadingSub = codePlayer.loadStart.subscribe((event) => {
+        loadingReferences++;
+      });
+
+      const finishedLoadingSub = codePlayer.loadComplete.subscribe(async () => {
+        if (--loadingReferences > 0 || codePlayer.isBuffering) {
           return;
         }
-        let loadingReferences = 0;
-        const startedLoadingSub = codePlayer.loadStart.subscribe((event) => {
-          loadingReferences++;
-        });
+        while (!codePlayer.isCaughtUp) {
+          codePlayer.SetPostionPct(1);
+        }
+        await this.startEditing(codePlayer.GetLoadedTransactionLogs());
+        finishedLoadingSub.unsubscribe();
+        startedLoadingSub.unsubscribe();
+      });
 
-        const finishedLoadingSub = codePlayer.loadComplete.subscribe(async () => {
-          if (--loadingReferences > 0 || codePlayer.isBuffering) {
-            return;
-          }
-          while (!codePlayer.isCaughtUp) {
-            codePlayer.SetPostionPct(1);
-          }
-          await this.startEditing(codePlayer.GetLoadedTransactionLogs());
-          finishedLoadingSub.unsubscribe();
-          startedLoadingSub.unsubscribe();
-        });
-
-        codePlayer.Play();
-        codePlayer.SetPostionPct(1);
-      } catch (e) {
-        this.errorServer.HandleError(`CodeError`, e);
-      }
-
-      codePlayer.Dispose();
-      this.recordingEditor.AllowEdits(true);
-    } else {
-      await this.startEditing([]);
+      codePlayer.Play();
+      codePlayer.SetPostionPct(1);
+    } catch (e) {
+      this.errorServer.HandleError(`CodeError`, e);
     }
+
+    codePlayer.Dispose();
+    this.recordingEditor.AllowEdits(true);
+
   }
 
   public async onDownloadClicked(e: any) {
