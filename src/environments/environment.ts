@@ -17,7 +17,8 @@ export const environment = {
   mouseAccurracyMS: 100,
   scrollAccurracyMS: 0,
   envName: 'default',
-  allowCreate: true
+  allowCreate: true,
+  defaultVideoVolume: 0.5
 };
 
 /*

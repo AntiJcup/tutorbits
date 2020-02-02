@@ -25,11 +25,11 @@
 
     sourceIframe.src = source;
 
-    console.log('Loading script');
+    console.log('INTERNAL - Loading script');
     fetch(source).then((response) => {
-        console.log('Loaded script');
+        console.log('INTERNAL - Loaded script');
         response.text().then((t) => {
-            console.log('Executing script');
+            console.log('INTERNAL - Executing script');
             try {
                 eval(t);
             } catch (e) {

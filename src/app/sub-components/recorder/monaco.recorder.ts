@@ -15,6 +15,11 @@ import { ResourceViewerComponent, ResourceData } from '../resource-viewer/resour
 import { environment } from 'src/environments/environment';
 import { PreviewComponent } from '../preview/preview.component';
 
+export interface MonacoRecorderSettings {
+    overrideSaveSpeed?: number;
+    saveUnfinishedPartitions?: boolean;
+}
+
 export class MonacoRecorder extends TransactionRecorder {
 
     private fileChangeListener: IDisposable = null;
@@ -60,18 +65,23 @@ export class MonacoRecorder extends TransactionRecorder {
         protected projectService: ITracerProjectService,
         protected trackNonFile: boolean,
         transactionLogs?: TraceTransactionLog[],
-        cacheBuster?: string) {
+        cacheBuster?: string,
+        private settings?: MonacoRecorderSettings) {
         super(projectId, projectLoader, projectWriter, transactionWriter, cacheBuster, transactionLogs);
 
         this.nodeSelectedListener = this.fileTreeComponent.treeComponent.nodeSelected.subscribe((e: NodeSelectedEvent) => {
             this.OnNodeSelected(e);
         });
+
+        if (!this.settings) {
+            this.settings = {} as MonacoRecorderSettings;
+        }
     }
 
     public StartRecording(): void {
         this.logging.LogToConsole('MonacoRecorder', `Started Recording`);
         this.recording = true;
-        this.start = Date.now();
+        this.start = Date.now() - this.project.getDuration();
         this.timeOffset = Date.now() - this.start;
         const textEditorModel = this.codeComponent.codeEditor.getModel() as editor.ITextModel;
         this.codeComponent.UpdateCacheForCurrentFile();
@@ -507,12 +517,12 @@ export class MonacoRecorder extends TransactionRecorder {
             }
 
             await this.Save();
-        }, this.project.getPartitionSize());
+        }, !!this.settings.overrideSaveSpeed ? this.settings.overrideSaveSpeed : this.project.getPartitionSize());
     }
 
     public async Save() {
         this.timeOffset = Date.now() - this.start;
         this.GetTransactionLogByTimeOffset(this.timeOffset); // call this trigger new partition before save maybe
-        await this.SaveTransactionLogs();
+        await this.SaveTransactionLogs(!!this.settings.saveUnfinishedPartitions);
     }
 }

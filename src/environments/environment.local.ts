@@ -13,5 +13,6 @@ export const environment = {
   mouseAccurracyMS: 100,
   scrollAccurracyMS: 0,
   envName: 'local',
-  allowCreate: true
+  allowCreate: true,
+  defaultVideoVolume: 0.5
 };

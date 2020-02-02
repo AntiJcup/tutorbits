@@ -129,6 +129,7 @@ export class MonacoPlayer extends TransactionPlayer {
                     break;
                 case TraceTransaction.TraceTransactionType.MOSUEMOVE:
                     const mouseMoveData = transaction.getMouseMove();
+                    if (!this.playbackMouseComponent) { break; }
                     this.playbackMouseComponent.Move(mouseMoveData.getX(), mouseMoveData.getY());
                     break;
                 case TraceTransaction.TraceTransactionType.UPLOADFILE:

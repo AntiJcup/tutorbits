@@ -168,7 +168,7 @@ export class WatchComponent implements OnInit, OnDestroy {
       this.projectService,
       this.projectService,
       this.tutorial.projectId,
-      null,
+      null, // Use default settings
       this.publishMode ? Guid.create().toString() : 'play');
 
     this.onLoadStartSub = this.codePlayer.loadStart.subscribe((event) => {
@@ -182,8 +182,7 @@ export class WatchComponent implements OnInit, OnDestroy {
     try {
       await this.codePlayer.Load();
       this.codePlayer.Play();
-      this.playbackVideo.nativeElement.volume = 0.5;
-      // this.playbackVideo.nativeElement.play();
+      this.playbackVideo.nativeElement.volume = environment.defaultVideoVolume;
       this.paceKeeperInterval = setInterval(() => {
         this.paceKeeperLoop();
       }, this.paceKeeperCheckSpeedMS);

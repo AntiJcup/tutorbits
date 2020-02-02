@@ -10,10 +10,10 @@ import { EditorModule } from './sub-components/editor/editor.module';
 import { VideoPlayerModule } from './sub-components/video-player/video-player.module';
 import { FileTreeModule } from './sub-components/file-tree/file-tree.module';
 import { HttpClientModule } from '@angular/common/http';
-import { WatchComponent } from './components/watch/watch.component';
+import { WatchComponent } from './components/tutorials/watch/watch.component';
 import { Routes, RouterModule } from '@angular/router';
 import { HomeComponent } from './components/home/home.component';
-import { RecordComponent } from './components/record/record.component';
+import { RecordComponent } from './components/tutorials/record/record.component';
 import { PlaybackEditorComponent } from './sub-components/playback-editor/playback-editor.component';
 import { RecordingEditorComponent } from './sub-components/recording-editor/recording-editor.component';
 import { RecordingFileTreeComponent } from './sub-components/recording-file-tree/recording-file-tree.component';
@@ -135,14 +135,14 @@ const appRoutes: Routes = [
     canActivate: [TutorBitsMobileGuardService]
   },
   {
-    path: 'sandbox/:projectType',
+    path: 'sandbox/:projectType/:projectId',
     component: SandboxComponent,
     data: { title: 'New Sandbox' },
     canActivate: [TutorBitsMobileGuardService],
     canDeactivate: [TutorBitsPendingChangesGuardService]
   },
   {
-    path: 'sandbox/:projectType/:projectId',
+    path: 'sandbox/:projectType/:projectId/:baseProjectId',
     component: SandboxComponent,
     data: { title: 'Sandbox' },
     canActivate: [TutorBitsMobileGuardService],

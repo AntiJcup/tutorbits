@@ -7,6 +7,9 @@ import { ILogService } from 'src/app/services/abstract/ILogService';
 import { ITitleService } from 'src/app/services/abstract/ITitleService';
 import { CreateProject } from 'src/app/models/project/create-project';
 import { ITracerProjectService } from 'src/app/services/abstract/ITracerProjectService';
+import { IAuthService } from 'src/app/services/abstract/IAuthService';
+import { ViewProject } from 'src/app/models/project/view-project';
+import { Guid } from 'guid-typescript';
 
 @Component({
   templateUrl: './create-sandbox.component.html',
@@ -26,7 +29,8 @@ export class CreateSandboxComponent implements OnInit, OnDestroy {
     private errorServer: IErrorService,
     private logServer: ILogService,
     private zone: NgZone,
-    private titleService: ITitleService) { }
+    private titleService: ITitleService,
+    private authService: IAuthService) { }
 
   async ngOnInit() {
     this.titleService.SetTitle('Create Sandbox');
@@ -54,7 +58,7 @@ export class CreateSandboxComponent implements OnInit, OnDestroy {
       });
       this.loading = false;
     } catch (err) {
-      this.errorServer.HandleError('CreateInitializeError', err);
+      this.errorServer.HandleError('CreateSandbox', err);
     }
   }
 
@@ -65,6 +69,27 @@ export class CreateSandboxComponent implements OnInit, OnDestroy {
     this.logServer.LogToConsole('CreateTutorial', model);
     this.loading = true;
 
-    this.router.navigate([`sandbox/${model.projectType.toLowerCase()}`]); // Lower case this so the url is cleaner
+    const isLoggedIn = this.authService.IsLoggedIn();
+    let newProjectId: string;
+    if (isLoggedIn) {
+      try {
+        const createRes = await this.projectService.Create({
+          projectType: model.projectType
+        } as CreateProject);
+
+        if (createRes.error) {
+          this.errorServer.HandleError('CreateSandbox', createRes.error);
+        }
+
+        const createdProject: ViewProject = createRes.data;
+        newProjectId = createdProject.id;
+      } catch (err) {
+        this.errorServer.HandleError('CreateSandbox', err);
+      }
+    } else {
+      newProjectId = Guid.create().toString();
+    }
+    
+    this.router.navigate([`sandbox/${model.projectType.toLowerCase()}/${newProjectId}`]); // Lower case this so the url is cleaner
   }
 }
