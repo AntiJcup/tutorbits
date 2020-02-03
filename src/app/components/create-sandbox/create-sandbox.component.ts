@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, NgZone } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { FormlyFieldConfig } from '@ngx-formly/core';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { IErrorService } from 'src/app/services/abstract/IErrorService';
 import { ILogService } from 'src/app/services/abstract/ILogService';
 import { ITitleService } from 'src/app/services/abstract/ITitleService';
@@ -22,15 +22,19 @@ export class CreateSandboxComponent implements OnInit, OnDestroy {
     projectType: null
   };
   fields: FormlyFieldConfig[] = [];
+  loadProjectId: string;
 
   constructor(
     private projectService: ITracerProjectService,
     private router: Router,
+    private route: ActivatedRoute,
     private errorServer: IErrorService,
     private logServer: ILogService,
     private zone: NgZone,
     private titleService: ITitleService,
-    private authService: IAuthService) { }
+    private authService: IAuthService) {
+    this.loadProjectId = this.route.snapshot.paramMap.get('baseProjectId');
+  }
 
   async ngOnInit() {
     this.titleService.SetTitle('Create Sandbox');
@@ -56,6 +60,19 @@ export class CreateSandboxComponent implements OnInit, OnDestroy {
           }
         }];
       });
+
+      if (this.loadProjectId !== null) {
+        const baseProject = await this.projectService.Get(this.loadProjectId);
+        if (baseProject == null) {
+          throw new Error('invalid base project');
+        }
+
+        await this.submit({
+          projectType: baseProject.type
+        } as CreateProject);
+        return;
+      }
+
       this.loading = false;
     } catch (err) {
       this.errorServer.HandleError('CreateSandbox', err);
@@ -89,7 +106,11 @@ export class CreateSandboxComponent implements OnInit, OnDestroy {
     } else {
       newProjectId = Guid.create().toString();
     }
-    
-    this.router.navigate([`sandbox/${model.projectType.toLowerCase()}/${newProjectId}`]); // Lower case this so the url is cleaner
+
+    if (this.loadProjectId === null) {
+      this.router.navigate([`sandbox/${model.projectType}/${newProjectId}`]);
+    } else {
+      this.router.navigate([`sandbox/${model.projectType}/${newProjectId}/${this.loadProjectId}`]);
+    }
   }
 }

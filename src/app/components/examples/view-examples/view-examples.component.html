@@ -4,7 +4,7 @@
             <h3>{{typeKey}}</h3>
             <div class="example-card-container" fxLayout fxLayoutGap="5px">
                 <a *ngFor="let example of examplesByType[typeKey]"
-                    [routerLink]="[ '/watch', example.id, example.title ]"
+                    [routerLink]="[ '/create/sandbox', example.projectId ]"
                     (click)="onExampleCardClick($event, example)">
                     <app-example-card [example]="example">
                     </app-example-card>

@@ -4,4 +4,5 @@ export interface ViewProject {
     status: string;
     url: string;
     durationMS: string;
+    type: string;
 }

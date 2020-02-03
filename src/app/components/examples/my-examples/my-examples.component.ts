@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, NgZone } from '@angular/core';
 import { ViewExample } from 'src/app/models/example/view-example';
 import { Router } from '@angular/router';
 import { TutorBitsExampleService } from 'src/app/services/example/tutor-bits-example.service';
@@ -20,13 +20,16 @@ export class MyExamplesComponent implements OnInit {
     private examplesService: TutorBitsExampleService,
     private errorServer: IErrorService,
     private logServer: ILogService,
-    private titleService: ITitleService) { }
+    private titleService: ITitleService,
+    private zone: NgZone) { }
 
   async ngOnInit() {
     this.titleService.SetTitle('My Examples');
     try {
-      const examples = await this.examplesService.GetAllByOwner()
-      this.examples = examples;
+      const examples = await this.examplesService.GetAllByOwner();
+      this.zone.runTask(() => {
+        this.examples = examples;
+      });
       this.logServer.LogToConsole('MyExamplesComponent', examples.length);
     } catch (e) {
       this.errorServer.HandleError('MyExamplesComponent', e);
@@ -37,7 +40,7 @@ export class MyExamplesComponent implements OnInit {
 
   onExampleCardClick(e: any, example: ViewExample) {
     this.logServer.LogToConsole('MyExamplesComponent', 'card clicked', example);
-    this.router.navigate([`example/${example.id}`]);
+    this.router.navigate([`create/sandbox/${example.projectId}`]);
   }
 
   async onDeleteClicked(e: DeleteExampleEvent) {

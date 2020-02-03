@@ -144,6 +144,12 @@ const appRoutes: Routes = [
     canActivate: [TutorBitsMobileGuardService]
   },
   {
+    path: 'create/sandbox/:baseProjectId',
+    component: CreateSandboxComponent,
+    data: { title: 'Create Sandbox' },
+    canActivate: [TutorBitsMobileGuardService]
+  },
+  {
     path: 'sandbox/:projectType/:projectId',
     component: SandboxComponent,
     data: { title: 'New Sandbox' },

@@ -9,7 +9,8 @@
         </p>
     </mat-card-content>
     <mat-card-actions>
-        <a mat-icon-button *ngIf="example.status === 'Inactive'" [routerLink]="['/record', this.example.id]" [queryParams]="{back:'true'}">
+        <a mat-icon-button *ngIf="example.status === 'Inactive'"
+            [routerLink]="['/sandbox', this.example.projectType, this.example.projectId]" [queryParams]="{back:'true'}">
             <mat-icon class="icon">edit</mat-icon>
         </a>
         <button mat-icon-button (click)="onDeleteClicked($event)">

@@ -9,4 +9,5 @@ export interface ViewExample {
     category: string;
     score: number;
     projectId: string;
+    projectType: string;
 }

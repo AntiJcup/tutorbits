@@ -5,8 +5,8 @@
     </app-saving-button>
   </div>
   <div class="controlsContainer">
-    <app-saving-button *ngIf="!loading && isLoggedIn" (click)="onPublish($event)" text="Publish Example"
-      icon="open_in_browser" [saving]="false" savingText="">
+    <app-saving-button *ngIf="!loading && isLoggedIn && !loadProjectId" (click)="onPublish($event)"
+      text="Publish Example" icon="open_in_browser" [saving]="false" savingText="">
     </app-saving-button>
   </div>
   <mat-spinner color="accent" [diameter]="26" class="loading-spinner" *ngIf="loading">

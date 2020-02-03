@@ -1,3 +1,3 @@
 export enum ProjectType {
-    website = 0
+    Website = 0
 }

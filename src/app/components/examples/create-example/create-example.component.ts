@@ -157,8 +157,18 @@ export class CreateExampleComponent implements OnInit, OnDestroy {
         this.loading = false;
         this.errorServer.HandleError('CreateError', JSON.stringify(exampleResponse.error));
       } else {
-        this.loading = false;
-        this.router.navigate([`sandbox/${this.projectId}`]);
+        if (await this.projectService.Publish(this.projectId)) {
+          if (await this.exampleService.Publish(exampleResponse.data.id)) {
+            this.loading = false;
+            this.router.navigate([`create/sandbox/${this.projectId}`]);
+          } else {
+            this.loading = false;
+            this.errorServer.HandleError('CreateError', `Failed publishing example`);
+          }
+        } else {
+          this.errorServer.HandleError('CreateError', `Failed publishing project`);
+          this.loading = false;
+        }
       }
     } catch (e) {
       this.errorServer.HandleError('CreateError', e);

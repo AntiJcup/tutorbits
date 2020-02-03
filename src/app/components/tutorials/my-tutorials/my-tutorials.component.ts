@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, NgZone } from '@angular/core';
 import { ViewTutorial } from 'src/app/models/tutorial/view-tutorial';
 import { Router } from '@angular/router';
 import { TutorBitsTutorialService } from 'src/app/services/tutorial/tutor-bits-tutorial.service';
@@ -20,13 +20,17 @@ export class MyTutorialsComponent implements OnInit {
     private tutorialsService: TutorBitsTutorialService,
     private errorServer: IErrorService,
     private logServer: ILogService,
-    private titleService: ITitleService) { }
+    private titleService: ITitleService,
+    private zone: NgZone) { }
 
   async ngOnInit() {
     this.titleService.SetTitle('My Tutorials');
     try {
-      const tutorials = await this.tutorialsService.GetAllByOwner()
-      this.tutorials = tutorials;
+      const tutorials = await this.tutorialsService.GetAllByOwner();
+
+      this.zone.runTask(() => {
+        this.tutorials = tutorials;
+      });
       this.logServer.LogToConsole('MyTutorialsComponent', tutorials.length);
     } catch (e) {
       this.errorServer.HandleError('MyTutorialsComponent', e);
