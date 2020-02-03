@@ -34,6 +34,13 @@
           <mat-menu #appTutorialMenu="matMenu">
             <a [routerLink]="[ '/tutorials' ]" mat-menu-item>All</a>
           </mat-menu>
+          <button mat-menu-item [matMenuTriggerFor]="appExampleMenu">
+            <mat-icon class="icon">assignment</mat-icon>
+            <span class="label">Examples</span>
+          </button>
+          <mat-menu #appExampleMenu="matMenu">
+            <a [routerLink]="[ '/examples' ]" mat-menu-item>All</a>
+          </mat-menu>
           <a *ngIf="!loggedIn" [href]="loginUrl" mat-menu-item>
             <mat-icon class="icon">input</mat-icon>
             <span class="label">Login</span>
@@ -44,12 +51,13 @@
           </button>
           <mat-menu #accountMenu="matMenu">
             <a mat-menu-item [routerLink]="[ '/mytutorials' ]">My Tutorials</a>
+            <a mat-menu-item [routerLink]="[ '/myexamples' ]">My Examples</a>
             <a mat-menu-item [routerLink]="[ '/myaccount' ]">My Account</a>
             <a mat-menu-item [href]="logoutUrl">Logout</a>
           </mat-menu>
           <button mat-menu-item [matMenuTriggerFor]="appExtraMenu">
-              <mat-icon class="icon">reorder</mat-icon>
-              <span class="label">Other</span>
+            <mat-icon class="icon">reorder</mat-icon>
+            <span class="label">Other</span>
           </button>
           <mat-menu #appExtraMenu="matMenu">
             <a [routerLink]="[ '/contact' ]" mat-menu-item>Contact Us</a>
@@ -90,6 +98,15 @@
               <a [routerLink]="[ '/tutorials' ]" mat-menu-item>All</a>
             </mat-menu>
           </li>
+          <li>
+            <button mat-menu-item [matMenuTriggerFor]="appExampleMenu">
+              <mat-icon class="icon">assignment</mat-icon>
+              <span class="label">Examples</span>
+            </button>
+            <mat-menu #appExampleMenu="matMenu">
+              <a [routerLink]="[ '/examples' ]" mat-menu-item>All</a>
+            </mat-menu>
+          </li>
           <a *ngIf="!loggedIn" [href]="loginUrl" mat-menu-item>
             <mat-icon class="icon">input</mat-icon>
             <span class="label">Login</span>
@@ -101,6 +118,7 @@
             </button>
             <mat-menu #accountMenu="matMenu">
               <a mat-menu-item [routerLink]="[ '/mytutorials' ]">My Tutorials</a>
+              <a mat-menu-item [routerLink]="[ '/myexamples' ]">My Examples</a>
               <a mat-menu-item [routerLink]="[ '/myaccount' ]">My Account</a>
               <a mat-menu-item [href]="logoutUrl">Logout</a>
             </mat-menu>

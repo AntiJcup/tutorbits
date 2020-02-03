@@ -40,7 +40,6 @@ export class CreateExampleComponent implements OnInit, OnDestroy {
     private exampleService: TutorBitsExampleService,
     private thumbnailService: TutorBitsThumbnailService,
     private projectService: ITracerProjectService,
-    private videoService: IVideoService,
     private router: Router,
     private errorServer: IErrorService,
     private logServer: ILogService,
@@ -145,16 +144,6 @@ export class CreateExampleComponent implements OnInit, OnDestroy {
       if (thumbnailResponse.error) {
         this.loading = false;
         this.errorServer.HandleError('CreateError', JSON.stringify(thumbnailResponse.error));
-        return;
-      }
-
-      const createVideoModel = {
-      } as CreateVideo;
-      const videoResponse: ResponseWrapper<ViewVideo> = await this.videoService.Create(createVideoModel);
-
-      if (videoResponse.error) {
-        this.loading = false;
-        this.errorServer.HandleError('CreateError', JSON.stringify(videoResponse.error));
         return;
       }
 

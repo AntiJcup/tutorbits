@@ -182,6 +182,18 @@ const appRoutes: Routes = [
     canActivate: [TutorBitsAuthGuardService]
   },
   {
+    path: 'examples',
+    component: ViewExamplesComponent,
+    data: { title: 'Examples' },
+    canActivate: []
+  },
+  {
+    path: 'myexamples',
+    component: MyExamplesComponent,
+    data: { title: 'My Examples' },
+    canActivate: [TutorBitsAuthGuardService]
+  },
+  {
     path: 'myaccount',
     component: MyAccountComponent,
     data: { title: 'My Account' },
