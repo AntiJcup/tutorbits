@@ -1,0 +1,17 @@
+<div class="question-row-container">
+    <div class="question-row-container-padding">
+        <div class="question-row" *ngFor="let typeKey of questionTypes">
+            <h3>{{typeKey}}</h3>
+            <div class="question-card-container" fxLayout fxLayoutGap="5px">
+                <a *ngFor="let question of questionsByType[typeKey]"
+                    [routerLink]="[ '/watch', question.id, question.title ]"
+                    (click)="onQuestionCardClick($event, question)">
+                    <app-question-card [question]="question">
+                    </app-question-card>
+                </a>
+            </div>
+        </div>
+    </div>
+    <mat-spinner [diameter]="64" class="loading-spinner" *ngIf="loading">
+    </mat-spinner>
+</div>

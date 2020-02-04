@@ -4,7 +4,6 @@ import { TutorBitsBaseModelApiService, HandlerType } from '../abstract/tutor-bit
 import { IAPIService } from '../abstract/IAPIService';
 import { Injectable } from '@angular/core';
 import { IAuthService } from '../abstract/IAuthService';
-import { FileUtils } from 'shared/web/lib/ts/FileUtils';
 import { UpdateTutorial } from '../../models/tutorial/update-tutorial';
 import { CreateTutorialForm } from 'src/app/models/tutorial/create-tutorial-form';
 

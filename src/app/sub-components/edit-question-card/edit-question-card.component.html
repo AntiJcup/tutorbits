@@ -1,0 +1,19 @@
+<mat-card class="question-card">
+    <mat-card-header>
+        <mat-card-title [innerText]="question.title"></mat-card-title>
+        <mat-card-subtitle [innerText]="questionSubTitle"></mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+        <p [innerText]="question.description">
+        </p>
+    </mat-card-content>
+    <mat-card-actions>
+        <a mat-icon-button *ngIf="question.status === 'Inactive'"
+            [routerLink]="['/sandbox', this.question.projectType, this.question.projectId]" [queryParams]="{back:'true'}">
+            <mat-icon class="icon">edit</mat-icon>
+        </a>
+        <button mat-icon-button (click)="onDeleteClicked($event)">
+            <mat-icon class="icon">delete</mat-icon>
+        </button>
+    </mat-card-actions>
+</mat-card>

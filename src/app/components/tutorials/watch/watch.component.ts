@@ -191,6 +191,7 @@ export class WatchComponent implements OnInit, OnDestroy {
     }
   }
 
+  // Starting point as monaco will call this when loaded
   async onCodeInitialized(playbackEditor: PlaybackEditorComponent) {
     this.codeInitialized = true;
     if (this.tutorial) {

@@ -41,6 +41,15 @@
           <mat-menu #appExampleMenu="matMenu">
             <a [routerLink]="[ '/examples' ]" mat-menu-item>All</a>
           </mat-menu>
+          <button mat-menu-item [matMenuTriggerFor]="appQuestionsMenu">
+            <mat-icon class="icon">question_answer</mat-icon>
+            <span class="label">Questions</span>
+          </button>
+          <mat-menu #appQuestionsMenu="matMenu">
+            <a [routerLink]="[ '/create/question' ]" mat-menu-item>Ask Question</a>
+            <mat-divider></mat-divider>
+            <a [routerLink]="[ '/questions' ]" mat-menu-item>All</a>
+          </mat-menu>
           <a *ngIf="!loggedIn" [href]="loginUrl" mat-menu-item>
             <mat-icon class="icon">input</mat-icon>
             <span class="label">Login</span>
@@ -52,6 +61,7 @@
           <mat-menu #accountMenu="matMenu">
             <a mat-menu-item [routerLink]="[ '/mytutorials' ]">My Tutorials</a>
             <a mat-menu-item [routerLink]="[ '/myexamples' ]">My Examples</a>
+            <a mat-menu-item [routerLink]="[ '/myquestions' ]">My Questions</a>
             <a mat-menu-item [routerLink]="[ '/myaccount' ]">My Account</a>
             <a mat-menu-item [href]="logoutUrl">Logout</a>
           </mat-menu>
@@ -107,6 +117,15 @@
               <a [routerLink]="[ '/examples' ]" mat-menu-item>All</a>
             </mat-menu>
           </li>
+          <button mat-menu-item [matMenuTriggerFor]="appQuestionsMenu">
+            <mat-icon class="icon">question_answer</mat-icon>
+            <span class="label">Questions</span>
+          </button>
+          <mat-menu #appQuestionsMenu="matMenu">
+            <a [routerLink]="[ '/create/question' ]" mat-menu-item>Ask Question</a>
+            <mat-divider></mat-divider>
+            <a [routerLink]="[ '/questions' ]" mat-menu-item>All</a>
+          </mat-menu>
           <a *ngIf="!loggedIn" [href]="loginUrl" mat-menu-item>
             <mat-icon class="icon">input</mat-icon>
             <span class="label">Login</span>
@@ -119,6 +138,7 @@
             <mat-menu #accountMenu="matMenu">
               <a mat-menu-item [routerLink]="[ '/mytutorials' ]">My Tutorials</a>
               <a mat-menu-item [routerLink]="[ '/myexamples' ]">My Examples</a>
+              <a mat-menu-item [routerLink]="[ '/myquestions' ]">My Questions</a>
               <a mat-menu-item [routerLink]="[ '/myaccount' ]">My Account</a>
               <a mat-menu-item [href]="logoutUrl">Logout</a>
             </mat-menu>

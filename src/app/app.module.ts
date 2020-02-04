@@ -106,6 +106,13 @@ import { EditExampleCardComponent } from './sub-components/edit-example-card/edi
 import { ViewExamplesComponent } from './components/examples/view-examples/view-examples.component';
 import { ExampleCardComponent } from './sub-components/example-card/example-card.component';
 import { CreateExampleComponent } from './components/examples/create-example/create-example.component';
+import { ViewQuestionComponent } from './components/questions/view-question/view-question.component';
+import { TutorBitsQuestionService, TutorBitsConcreteQuestionService } from './services/question/tutor-bits-question.service';
+import { ViewQuestionsComponent } from './components/questions/view-questions/view-questions.component';
+import { MyQuestionsComponent } from './components/questions/my-questions/my-questions.component';
+import { QuestionCardComponent } from './sub-components/question-card/question-card.component';
+import { EditQuestionCardComponent } from './sub-components/edit-question-card/edit-question-card.component';
+import { CreateQuestionComponent } from './components/questions/create-question/create-question.component';
 
 const appRoutes: Routes = [
   {
@@ -189,6 +196,12 @@ const appRoutes: Routes = [
     canActivate: [TutorBitsAuthGuardService, TutorBitsMobileGuardService]
   },
   {
+    path: 'create/question',
+    component: CreateQuestionComponent,
+    data: { title: 'Create Question' },
+    canActivate: [TutorBitsAuthGuardService, TutorBitsMobileGuardService]
+  },
+  {
     path: 'tutorials',
     component: ViewTutorialsComponent,
     data: { title: 'Tutorials' },
@@ -210,6 +223,18 @@ const appRoutes: Routes = [
     path: 'myexamples',
     component: MyExamplesComponent,
     data: { title: 'My Examples' },
+    canActivate: [TutorBitsAuthGuardService]
+  },
+  {
+    path: 'questions',
+    component: ViewQuestionsComponent,
+    data: { title: 'Questions' },
+    canActivate: []
+  },
+  {
+    path: 'myquestions',
+    component: MyQuestionsComponent,
+    data: { title: 'My Questions' },
     canActivate: [TutorBitsAuthGuardService]
   },
   {
@@ -266,9 +291,11 @@ const appRoutes: Routes = [
     RecordingControlsComponent,
     PreviewComponent,
     CreateTutorialComponent,
-    SubmitButtonComponent,
     ViewTutorialsComponent,
     TutorialCardComponent,
+    MyTutorialsComponent,
+    EditTutorialCardComponent,
+    SubmitButtonComponent,
     SavingButtonComponent,
     EditorPlaceHolderComponent,
     LoginComponent,
@@ -279,8 +306,6 @@ const appRoutes: Routes = [
     PrivacyComponent,
     TermsComponent,
     ResourceViewerComponent,
-    MyTutorialsComponent,
-    EditTutorialCardComponent,
     MyAccountComponent,
     AccountUpdateUserNameComponent,
     BlogCardComponent,
@@ -300,6 +325,12 @@ const appRoutes: Routes = [
     ViewExamplesComponent,
     ExampleCardComponent,
     CreateExampleComponent,
+    CreateQuestionComponent,
+    ViewQuestionsComponent,
+    MyQuestionsComponent,
+    ViewQuestionComponent,
+    QuestionCardComponent,
+    EditQuestionCardComponent,
   ],
   imports: [
     BrowserModule,
@@ -345,6 +376,7 @@ const appRoutes: Routes = [
     { provide: TutorBitsAnswerCommentService, useClass: TutorBitsConcreteAnswerCommentService },
     { provide: TutorBitsTutorialRatingService, useClass: TutorBitsConcreteTutorialRatingService },
     { provide: TutorBitsTutorialCommentRatingService, useClass: TutorBitsConcreteTutorialCommentRatingService },
+    { provide: TutorBitsQuestionService, useClass: TutorBitsConcreteQuestionService },
     { provide: TutorBitsQuestionRatingService, useClass: TutorBitsConcreteQuestionRatingService },
     { provide: TutorBitsQuestionCommentRatingService, useClass: TutorBitsConcreteQuestionCommentRatingService },
     { provide: TutorBitsAnswerRatingService, useClass: TutorBitsConcreteAnswerRatingService },

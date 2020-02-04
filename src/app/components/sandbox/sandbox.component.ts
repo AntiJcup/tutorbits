@@ -89,6 +89,7 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate {
   async ngOnInit(): Promise<void> {
   }
 
+  // Starting point as monaco will call this when loaded
   async onCodeInitialized(recordingEditor: RecordingEditorComponent) {
     if (!this.projectType || !this.projectService.ValidateProjectType(this.projectType)) {
       this.errorServer.HandleError('SandboxComponent', `invalid project type ${this.projectType}`);
