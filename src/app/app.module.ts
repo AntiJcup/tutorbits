@@ -150,6 +150,12 @@ const appRoutes: Routes = [
     canActivate: [TutorBitsMobileGuardService]
   },
   {
+    path: 'create/sandbox/:baseProjectId/:exampleId/:title',
+    component: CreateSandboxComponent,
+    data: { title: 'Create Sandbox' },
+    canActivate: [TutorBitsMobileGuardService]
+  },
+  {
     path: 'sandbox/:projectType/:projectId',
     component: SandboxComponent,
     data: { title: 'New Sandbox' },
@@ -158,6 +164,13 @@ const appRoutes: Routes = [
   },
   {
     path: 'sandbox/:projectType/:projectId/:baseProjectId',
+    component: SandboxComponent,
+    data: { title: 'Sandbox' },
+    canActivate: [TutorBitsMobileGuardService],
+    canDeactivate: [TutorBitsPendingChangesGuardService]
+  },
+  {
+    path: 'sandbox/:projectType/:projectId/:baseProjectId/:exampleId/:title',
     component: SandboxComponent,
     data: { title: 'Sandbox' },
     canActivate: [TutorBitsMobileGuardService],

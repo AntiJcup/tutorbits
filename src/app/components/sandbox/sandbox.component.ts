@@ -47,6 +47,9 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate {
 
   savedProject: ViewProject;
 
+  exampleId: string;
+  title: string;
+
   constructor(
     private zone: NgZone,
     private route: ActivatedRoute,
@@ -62,11 +65,19 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate {
     this.projectId = this.route.snapshot.paramMap.get('projectId');
     this.loadProjectId = this.route.snapshot.paramMap.get('baseProjectId');
 
+    this.exampleId = this.route.snapshot.paramMap.get('exampleId');
+    this.title = this.route.snapshot.paramMap.get('title');
+
     this.isLoggedIn = this.authService.IsLoggedIn();
+
+    if (this.title === null) {
+      this.titleService.SetTitle(`Sandbox`);
+    } else {
+      this.titleService.SetTitle(this.title + ' - Example');
+    }
   }
 
-  ngOnInit(): void {
-    this.titleService.SetTitle(`Sandbox`);
+  async ngOnInit(): Promise<void> {
   }
 
   async onCodeInitialized(recordingEditor: RecordingEditorComponent) {
@@ -118,7 +129,6 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate {
           saveUnfinishedPartitions: true
         } as MonacoRecorderSettings);
 
-      //await this.codeRecorder.ResetProject(this.projectId);
       // Load if logged in since it is already created on the server
       this.isLoggedIn ? await this.codeRecorder.Load() : await this.codeRecorder.New();
       this.codeRecorder.StartRecording();

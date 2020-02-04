@@ -40,7 +40,7 @@ export class MyExamplesComponent implements OnInit {
 
   onExampleCardClick(e: any, example: ViewExample) {
     this.logServer.LogToConsole('MyExamplesComponent', 'card clicked', example);
-    this.router.navigate([`create/sandbox/${example.projectId}`]);
+    this.router.navigate([`create/sandbox/${example.projectId}/${example.id}/${example.title}`]);
   }
 
   async onDeleteClicked(e: DeleteExampleEvent) {

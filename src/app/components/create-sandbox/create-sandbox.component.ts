@@ -23,6 +23,8 @@ export class CreateSandboxComponent implements OnInit, OnDestroy {
   };
   fields: FormlyFieldConfig[] = [];
   loadProjectId: string;
+  loadExampleId: string;
+  loadTitle: string;
 
   constructor(
     private projectService: ITracerProjectService,
@@ -34,6 +36,8 @@ export class CreateSandboxComponent implements OnInit, OnDestroy {
     private titleService: ITitleService,
     private authService: IAuthService) {
     this.loadProjectId = this.route.snapshot.paramMap.get('baseProjectId');
+    this.loadExampleId = this.route.snapshot.paramMap.get('exampleId');
+    this.loadTitle = this.route.snapshot.paramMap.get('title');
   }
 
   async ngOnInit() {
@@ -109,8 +113,10 @@ export class CreateSandboxComponent implements OnInit, OnDestroy {
 
     if (this.loadProjectId === null) {
       this.router.navigate([`sandbox/${model.projectType}/${newProjectId}`]);
-    } else {
+    } else if (this.loadExampleId === null) {
       this.router.navigate([`sandbox/${model.projectType}/${newProjectId}/${this.loadProjectId}`]);
+    } else {
+      this.router.navigate([`sandbox/${model.projectType}/${newProjectId}/${this.loadProjectId}/${this.loadExampleId}/${this.loadTitle}`]);
     }
   }
 }
