@@ -1,5 +1,14 @@
 <div class="controls">
   <div class="controlsContainer">
+    <app-rating [ratingService]="ratingService" [targetId]="exampleId" [showControls]="true" *ngIf="exampleId">
+    </app-rating>
+  </div>
+  <div class="controlsContainer">
+    <app-comments-button (click)="onCommentsClicked($event)" matTooltip="Shows Comment Section"
+      [commentService]="commentService" [targetId]="exampleId" *ngIf="exampleId">
+    </app-comments-button>
+  </div>
+  <div class="controlsContainer">
     <app-saving-button *ngIf="!loading" (click)="onDownloadClicked($event)" text="Download Project"
       icon="cloud_download" [saving]="downloading" savingText="Downloading..." matTooltip="Save project as zip">
     </app-saving-button>
@@ -9,8 +18,10 @@
       text="Publish Example" icon="open_in_browser" [saving]="false" savingText="">
     </app-saving-button>
   </div>
-  <mat-spinner color="accent" [diameter]="26" class="loading-spinner" *ngIf="loading">
-  </mat-spinner>
+  <div class="controlsContainer">
+    <mat-spinner color="accent" [diameter]="26" class="loading-spinner" *ngIf="loading">
+    </mat-spinner>
+  </div>
 </div>
 <div fxLayout fxLayoutGap="5px" class="tutorialContainer">
   <div class="sideBar">
@@ -24,5 +35,9 @@
     </app-recording-editor>
     <app-preview class="preview" (closeClicked)="onCloseClicked($event)">
     </app-preview>
+    <div class="commentSection" *ngIf="showCommentSection">
+      <app-comment-section [comments]="comments" [targetId]="exampleId" (closeClicked)="onCommentsClosed($event);"
+        [commentService]="commentService"></app-comment-section>
+    </div>
   </div>
 </div>

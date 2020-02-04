@@ -23,6 +23,9 @@ import { ITracerProjectService } from 'src/app/services/abstract/ITracerProjectS
 import { MonacoPlayer } from 'src/app/sub-components/player/monaco.player';
 import { TransactionPlayerSettings } from 'shared/Tracer/lib/ts/TransactionPlayer';
 import { TraceTransactionLogs, TraceTransactionLog } from 'shared/Tracer/models/ts/Tracer_pb';
+import { ViewComment } from 'src/app/models/comment/view-comment';
+import { TutorBitsExampleCommentService } from 'src/app/services/example/tutor-bits-example-comment.service';
+import { TutorBitsExampleRatingService } from 'src/app/services/example/tutor-bits-example-rating.service';
 
 @Component({
   templateUrl: './sandbox.component.html',
@@ -50,6 +53,10 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate {
   exampleId: string;
   title: string;
 
+  loadingComments = false;
+  comments: ViewComment[];
+  showCommentSection = false;
+
   constructor(
     private zone: NgZone,
     private route: ActivatedRoute,
@@ -60,7 +67,9 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate {
     private eventService: IEventService,
     private previewService: IPreviewService,
     private titleService: ITitleService,
-    private authService: IAuthService) {
+    private authService: IAuthService,
+    public commentService: TutorBitsExampleCommentService, // Dont remove these components use them
+    public ratingService: TutorBitsExampleRatingService) {
     this.projectType = this.route.snapshot.paramMap.get('projectType');
     this.projectId = this.route.snapshot.paramMap.get('projectId');
     this.loadProjectId = this.route.snapshot.paramMap.get('baseProjectId');
@@ -251,5 +260,18 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate {
     // returning true will navigate without confirmation
     // returning false will show a confirm dialog before navigating away
     return !(this.codeRecorder && this.codeRecorder.hasChanged);
+  }
+
+  public onCommentsClicked(e: any) {
+    if (this.showCommentSection) {
+      return;
+    }
+    this.eventService.TriggerButtonClick('Watch', `Comments - ${this.exampleId}`);
+    this.showCommentSection = true;
+  }
+
+  public onCommentsClosed(e: any) {
+    this.eventService.TriggerButtonClick('Watch', `CommentsClose - ${this.exampleId}`);
+    this.showCommentSection = false;
   }
 }

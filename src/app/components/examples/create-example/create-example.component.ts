@@ -160,7 +160,7 @@ export class CreateExampleComponent implements OnInit, OnDestroy {
         if (await this.projectService.Publish(this.projectId)) {
           if (await this.exampleService.Publish(exampleResponse.data.id)) {
             this.loading = false;
-            this.router.navigate([`create/sandbox/${this.projectId}`]);
+            this.router.navigate([`create/sandbox/${this.projectId}/${exampleResponse.data.id}/${exampleResponse.data.title}`]);
           } else {
             this.loading = false;
             this.errorServer.HandleError('CreateError', `Failed publishing example`);
