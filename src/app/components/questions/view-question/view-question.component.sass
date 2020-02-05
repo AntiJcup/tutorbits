@@ -1,5 +1,6 @@
 .question-card
-    padding-bottom: 20px 
+    padding-bottom: 10px 
+    
     mat-card-content
         padding: 20px
         margin-left: 10px
@@ -15,6 +16,7 @@
 
 .answer-card
     margin-bottom: 15px
+    
     mat-card-content
         padding: 25px
         padding-top: 15px
@@ -51,14 +53,16 @@
     max-width: 150px
     margin-left: 20px
     height: 32px
-    display: inline
+    margin-top: 10px
+    position: relative
     float: left
 
 .comments
     max-width: 200px
     margin-left: 10px
+    margin-top: 10px
     height: 32px
-    display: inline
+    position: relative
     float: left
 
 mat-card-actions
@@ -66,26 +70,31 @@ mat-card-actions
     height: 32px
 
 :host ::ng-deep app-comments-button
-  height: 32px
-  line-height: 32px
-  .mat-menu-item
-    height: 26px
-    line-height: 26px
+    height: 32px
+    line-height: 32px
+    .mat-menu-item
+        height: 26px
+        line-height: 26px
 
 .commentSection
-  display: flex
-  min-width: 400px
-  height: 99%
-  background-color: rgba(0,0,0,.15)
-  app-comment-section
-    width: 100%
+    display: flex
+    min-width: 400px
+    height: 99%
+    background-color: rgba(0,0,0,.15)
+    app-comment-section
+        width: 100%
     
 .container
-  display: flex
-  flex-direction: column
-  flex-wrap: nowrap
-  justify-content: flex-start
-  align-items: stretch
-  align-content: stretch
-  overflow: hidden
-  height: 100%
+    display: flex
+    flex-direction: column
+    flex-wrap: nowrap
+    justify-content: flex-start
+    align-items: stretch
+    align-content: stretch
+    overflow: hidden
+    height: 100%
+
+mat-divider
+    padding-top: 10px
+    display: block
+    clear: both

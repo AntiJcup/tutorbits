@@ -3,6 +3,7 @@
         <div class="answerBody">{{answer.body}}</div>
     </div>
     <div class="answerDate">{{answerDate}}</div>
+    <mat-divider></mat-divider>
     <div class="rating">
         <app-rating [ratingService]="ratingService" [targetId]="answer.id" [showControls]="true" [score]="answer.score"
             *ngIf="answer">
