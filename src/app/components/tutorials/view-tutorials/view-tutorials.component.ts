@@ -27,7 +27,7 @@ export class ViewTutorialsComponent implements OnInit, OnDestroy {
     private metaService: Meta) { }
 
   async ngOnInit() {
-    this.titleService.SetTitle('TutorBits - Gallery');
+    this.titleService.SetTitle('TutorBits - Tutorials');
     this.metaService.updateTag({
       name: 'description',
       content: `TutorBits - Home to a better programming tutorial experience. Watch as programmers write code, interact, and test the code as they write it.`

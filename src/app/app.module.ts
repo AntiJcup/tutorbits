@@ -1,7 +1,5 @@
 import { BrowserModule } from '@angular/platform-browser';
-import { NgModule, NgZone } from '@angular/core';
-
-import { AppRoutingModule } from './app-routing.module';
+import { NgModule } from '@angular/core';
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MaterialModule } from './sub-components/material/material-module';
@@ -113,6 +111,8 @@ import { MyQuestionsComponent } from './components/questions/my-questions/my-que
 import { QuestionCardComponent } from './sub-components/question-card/question-card.component';
 import { EditQuestionCardComponent } from './sub-components/edit-question-card/edit-question-card.component';
 import { CreateQuestionComponent } from './components/questions/create-question/create-question.component';
+import { AnswerComponent } from './sub-components/answer/answer.component';
+import { CreateAnswerComponent } from './sub-components/create-answer/create-answer.component';
 
 const appRoutes: Routes = [
   {
@@ -124,6 +124,24 @@ const appRoutes: Routes = [
     path: 'mobilenotsupported',
     component: MobileNotSupportedComponent,
     data: { title: 'Sorry' }
+  },
+  {
+    path: 'create/tutorial',
+    component: CreateTutorialComponent,
+    data: { title: 'Create Tutorial' },
+    canActivate: [TutorBitsAuthGuardService, TutorBitsMobileGuardService]
+  },
+  {
+    path: 'tutorials',
+    component: ViewTutorialsComponent,
+    data: { title: 'Tutorials' },
+    canActivate: []
+  },
+  {
+    path: 'mytutorials',
+    component: MyTutorialsComponent,
+    data: { title: 'My Tutorials' },
+    canActivate: [TutorBitsAuthGuardService]
   },
   {
     path: 'watch/:tutorialId',
@@ -143,6 +161,48 @@ const appRoutes: Routes = [
     data: { title: 'Record' },
     canActivate: [TutorBitsAuthGuardService, TutorBitsMobileGuardService],
     canDeactivate: [TutorBitsPendingChangesGuardService]
+  },
+  {
+    path: 'create/question',
+    component: CreateQuestionComponent,
+    data: { title: 'Create Question' },
+    canActivate: [TutorBitsAuthGuardService, TutorBitsMobileGuardService]
+  },
+  {
+    path: 'question/:questionId',
+    component: ViewQuestionComponent,
+    data: { title: 'Question' },
+    canActivate: [TutorBitsMobileGuardService]
+  },
+  {
+    path: 'questions',
+    component: ViewQuestionsComponent,
+    data: { title: 'Questions' },
+    canActivate: []
+  },
+  {
+    path: 'myquestions',
+    component: MyQuestionsComponent,
+    data: { title: 'My Questions' },
+    canActivate: [TutorBitsAuthGuardService]
+  },
+  {
+    path: 'create/example/:projectId',
+    component: CreateExampleComponent,
+    data: { title: 'Create Example' },
+    canActivate: [TutorBitsAuthGuardService, TutorBitsMobileGuardService]
+  },
+  {
+    path: 'examples',
+    component: ViewExamplesComponent,
+    data: { title: 'Examples' },
+    canActivate: []
+  },
+  {
+    path: 'myexamples',
+    component: MyExamplesComponent,
+    data: { title: 'My Examples' },
+    canActivate: [TutorBitsAuthGuardService]
   },
   {
     path: 'create/sandbox',
@@ -182,60 +242,6 @@ const appRoutes: Routes = [
     data: { title: 'Sandbox' },
     canActivate: [TutorBitsMobileGuardService],
     canDeactivate: [TutorBitsPendingChangesGuardService]
-  },
-  {
-    path: 'create/example/:projectId',
-    component: CreateExampleComponent,
-    data: { title: 'Create Example' },
-    canActivate: [TutorBitsAuthGuardService, TutorBitsMobileGuardService]
-  },
-  {
-    path: 'create/tutorial',
-    component: CreateTutorialComponent,
-    data: { title: 'Create Tutorial' },
-    canActivate: [TutorBitsAuthGuardService, TutorBitsMobileGuardService]
-  },
-  {
-    path: 'create/question',
-    component: CreateQuestionComponent,
-    data: { title: 'Create Question' },
-    canActivate: [TutorBitsAuthGuardService, TutorBitsMobileGuardService]
-  },
-  {
-    path: 'tutorials',
-    component: ViewTutorialsComponent,
-    data: { title: 'Tutorials' },
-    canActivate: []
-  },
-  {
-    path: 'mytutorials',
-    component: MyTutorialsComponent,
-    data: { title: 'My Tutorials' },
-    canActivate: [TutorBitsAuthGuardService]
-  },
-  {
-    path: 'examples',
-    component: ViewExamplesComponent,
-    data: { title: 'Examples' },
-    canActivate: []
-  },
-  {
-    path: 'myexamples',
-    component: MyExamplesComponent,
-    data: { title: 'My Examples' },
-    canActivate: [TutorBitsAuthGuardService]
-  },
-  {
-    path: 'questions',
-    component: ViewQuestionsComponent,
-    data: { title: 'Questions' },
-    canActivate: []
-  },
-  {
-    path: 'myquestions',
-    component: MyQuestionsComponent,
-    data: { title: 'My Questions' },
-    canActivate: [TutorBitsAuthGuardService]
   },
   {
     path: 'myaccount',
@@ -331,6 +337,8 @@ const appRoutes: Routes = [
     ViewQuestionComponent,
     QuestionCardComponent,
     EditQuestionCardComponent,
+    AnswerComponent,
+    CreateAnswerComponent,
   ],
   imports: [
     BrowserModule,

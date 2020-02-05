@@ -1,10 +1,9 @@
-export interface ViewQuestion {
+export interface ViewAnswer {
     id: string;
     title: string;
-    topic: string;
-    description: string;
+    body: string;
     owner: string;
+    ownerId: string;
     status: string;
-    score: number;
     dateCreated: number;
 }

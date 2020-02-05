@@ -1,44 +1,44 @@
 import { Component, OnInit, Input, NgZone, EventEmitter, Output } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { FormlyFieldConfig } from '@ngx-formly/core';
-import { CreateComment } from 'src/app/models/comment/create-comment';
+import { CreateAnswer } from 'src/app/models/answer/create-answer';
 import { IErrorService } from 'src/app/services/abstract/IErrorService';
-import { TutorBitsBaseCommentService } from 'src/app/services/abstract/tutor-bits-base-comment.service';
 import { ILogService } from 'src/app/services/abstract/ILogService';
 import { ResponseWrapper } from 'src/app/services/abstract/IModelApiService';
-import { ViewComment } from 'src/app/models/comment/view-comment';
+import { ViewAnswer } from 'src/app/models/answer/view-answer';
+import { TutorBitsAnswerService } from 'src/app/services/question/tutor-bits-answer.service';
 
 @Component({
-  selector: 'app-create-comment',
-  templateUrl: './create-comment.component.html',
-  styleUrls: ['./create-comment.component.sass']
+  selector: 'app-create-answer',
+  templateUrl: './create-answer.component.html',
+  styleUrls: ['./create-answer.component.sass']
 })
-export class CreateCommentComponent implements OnInit {
+export class CreateAnswerComponent implements OnInit {
   @Input()
   public targetId: string;
 
   @Input()
-  public commentService: TutorBitsBaseCommentService;
+  public answerService: TutorBitsAnswerService;
 
   @Output()
-  public commentAdded = new EventEmitter();
+  public answerAdded = new EventEmitter();
 
   loading = false;
 
   form = new FormGroup({});
-  model: CreateComment = { title: 'comment', body: null, targetId: this.targetId };
+  model: CreateAnswer = { title: 'answer', body: null, targetId: this.targetId };
   fields: FormlyFieldConfig[] = [
     {
       model: this.model,
       key: 'body',
       type: 'textarea',
       templateOptions: {
-        label: 'Comment',
-        placeholder: 'Your comment here',
+        label: 'Answer',
+        placeholder: 'Your answer here',
         required: true,
         minLength: 1,
         maxLength: 1028,
-        rows: 4
+        rows: 8
       }
     }
   ];
@@ -51,18 +51,18 @@ export class CreateCommentComponent implements OnInit {
   ngOnInit() {
   }
 
-  async submit(model: CreateComment) {
+  async submit(model: CreateAnswer) {
     model.targetId = this.targetId;
-    this.logServer.LogToConsole('CreateComment', model);
+    this.logServer.LogToConsole('CreateAnswer', model);
     this.loading = true;
 
     try {
-      const res: ResponseWrapper<ViewComment> = await this.commentService.Create(model)
+      const res: ResponseWrapper<ViewAnswer> = await this.answerService.Create(model)
       if (res.error) {
         this.errorServer.HandleError('CreateError', JSON.stringify(res.error));
       }
 
-      this.commentAdded.next(res.data as ViewComment);
+      this.answerAdded.next(res.data as ViewAnswer);
     } catch (err) {
       this.errorServer.HandleError('CreateError', err);
     }

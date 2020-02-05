@@ -101,7 +101,7 @@ export class CreateQuestionComponent implements OnInit, OnDestroy {
         this.errorServer.HandleError('CreateError', JSON.stringify(questionResponse.error));
       } else {
         this.loading = false;
-        this.router.navigate([`view/question/${questionResponse.data.id}`]);
+        this.router.navigate([`question/${questionResponse.data.id}`]);
       }
     } catch (e) {
       this.errorServer.HandleError('CreateError', e);
