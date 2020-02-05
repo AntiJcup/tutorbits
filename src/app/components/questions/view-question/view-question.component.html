@@ -1,33 +1,46 @@
 <div class="controls">
     <div class="controlsContainer">
-        <app-rating [ratingService]="ratingService" [targetId]="exampleId" [showControls]="true" *ngIf="exampleId">
-        </app-rating>
-    </div>
-    <div class="controlsContainer">
         <mat-spinner color="accent" [diameter]="26" class="loading-spinner" *ngIf="loading">
         </mat-spinner>
     </div>
 </div>
-<div class="questionContainer">
-    <mat-card class="question-card" *ngIf="question">
-        <mat-card-header>
-            <mat-card-title [innerText]="question.title" matTooltip="{{question.title}}"></mat-card-title>
-        </mat-card-header>
-        <div class="question-details">Asked by: {{question.owner}} - On: {{askedDate}}</div>
-        <mat-card-content>
-            <p [innerText]="question.description">
-            </p>
-        </mat-card-content>
-        <mat-card-actions>
-        </mat-card-actions>
-    </mat-card>
-    <h3 class="answersHeader">Answers:</h3>
-    <button mat-raised-button class="answerButton" (click)="onWriteAnswerClick($event)" *ngIf="showWriteAnswer">Write
-        Answer</button>
-    <div class="answerContainer">
-        <app-create-answer [targetId]="questionId" [answerService]="answerService" *ngIf="addingAnswer"
-            (answerAdded)="onAnswerAdded($event)"></app-create-answer>
-        <app-answer class="answer-card" *ngFor="let answer of answers" [answer]="answer">
-        </app-answer>
+<div fxLayout fxLayoutGap="5px" class="container">
+    <div class="questionContainer">
+        <mat-card class="question-card" *ngIf="question">
+            <mat-card-header>
+                <mat-card-title [innerText]="question.title" matTooltip="{{question.title}}"></mat-card-title>
+            </mat-card-header>
+            <div class="question-details">Asked by: {{question.owner}} - On: {{askedDate}}</div>
+            <mat-card-content>
+                <p [innerText]="question.description">
+                </p>
+            </mat-card-content>
+            <mat-card-actions>
+                <div class="rating">
+                    <app-rating [ratingService]="ratingService" [targetId]="questionId" [showControls]="true"
+                        *ngIf="questionId">
+                    </app-rating>
+                </div>
+                <div class="comments">
+                    <app-comments-button (click)="onCommentsClicked($event)" matTooltip="Shows Comment Section"
+                        [commentService]="commentService" [targetId]="questionId">
+                    </app-comments-button>
+                </div>
+            </mat-card-actions>
+        </mat-card>
+        <h3 class="answersHeader">Answers:</h3>
+        <button mat-raised-button class="answerButton" (click)="onWriteAnswerClick($event)"
+            *ngIf="showWriteAnswer">Write
+            Answer</button>
+        <div class="answerContainer">
+            <app-create-answer [targetId]="questionId" [answerService]="answerService" *ngIf="addingAnswer"
+                (answerAdded)="onAnswerAdded($event)"></app-create-answer>
+            <app-answer class="answer-card" *ngFor="let answer of answers" [answer]="answer">
+            </app-answer>
+        </div>
+    </div>
+    <div class="commentSection" *ngIf="showCommentSection">
+        <app-comment-section [comments]="comments" [targetId]="questionId" (closeClicked)="onCommentsClosed($event);"
+            [commentService]="commentService"></app-comment-section>
     </div>
 </div>

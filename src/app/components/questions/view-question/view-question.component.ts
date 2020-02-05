@@ -26,6 +26,8 @@ export class ViewQuestionComponent implements OnInit {
   public answers: ViewComment[];
   public addingAnswer = false;
   private currentUserId: string;
+  public showCommentSection = false;
+  public comments: ViewComment[];
 
   constructor(
     private route: ActivatedRoute,
@@ -88,5 +90,18 @@ export class ViewQuestionComponent implements OnInit {
 
     // Add to viewcomments
     this.answers.push(e);
+  }
+
+  public onCommentsClicked(e: any) {
+    if (this.showCommentSection) {
+      return;
+    }
+    this.eventService.TriggerButtonClick('Question', `Comments - ${this.questionId}`);
+    this.showCommentSection = true;
+  }
+
+  public onCommentsClosed(e: any) {
+    this.eventService.TriggerButtonClick('Question', `CommentsClose - ${this.questionId}`);
+    this.showCommentSection = false;
   }
 }
