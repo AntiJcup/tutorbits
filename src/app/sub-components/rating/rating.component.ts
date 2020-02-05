@@ -17,7 +17,7 @@ export class RatingComponent implements OnInit {
   @Input() showControls = false;
 
   public loading = true;
-  public score = 0;
+  @Input() score = -1; // -1 implies that the comonent needs to load the score itself
   private rating: ViewRating = null;
   public loggedIn = false;
 
@@ -29,7 +29,9 @@ export class RatingComponent implements OnInit {
     this.loggedIn = this.auth.IsLoggedIn();
 
     try {
-      this.score = await this.ratingService.GetScore(this.targetId);
+      if (this.score === -1) {
+        this.score = await this.ratingService.GetScore(this.targetId);
+      }
     } catch (err) {
       this.errorServer.HandleError('Rating', `Error loading score`);
     }

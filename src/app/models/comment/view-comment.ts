@@ -6,4 +6,5 @@ export interface ViewComment {
     ownerId: string;
     status: string;
     dateCreated: number;
+    score: number; // May be null based on comment type
 }

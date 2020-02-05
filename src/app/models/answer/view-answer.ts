@@ -6,4 +6,5 @@ export interface ViewAnswer {
     ownerId: string;
     status: string;
     dateCreated: number;
+    score: number;
 }

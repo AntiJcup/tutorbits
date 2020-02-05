@@ -18,7 +18,7 @@
             <mat-card-actions>
                 <div class="rating">
                     <app-rating [ratingService]="ratingService" [targetId]="questionId" [showControls]="true"
-                        *ngIf="questionId">
+                        [score]="question.score" *ngIf="question">
                     </app-rating>
                 </div>
                 <div class="comments">

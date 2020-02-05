@@ -3,4 +3,9 @@
         <div class="answerBody">{{answer.body}}</div>
     </div>
     <div class="answerDate">{{answerDate}}</div>
+    <div class="rating">
+        <app-rating [ratingService]="ratingService" [targetId]="answer.id" [showControls]="true" [score]="answer.score"
+            *ngIf="answer">
+        </app-rating>
+    </div>
 </div>
