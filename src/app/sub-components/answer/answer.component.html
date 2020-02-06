@@ -12,7 +12,7 @@
         </div>
         <div class="comments">
             <app-comments-button (click)="onCommentsClicked($event)" matTooltip="Shows Comment Section"
-                [commentService]="commentService" [targetId]="answer.id">
+                [commentService]="commentService" [targetId]="answer.id" [class.focused]="commentsFocused">
             </app-comments-button>
         </div>
     </div>

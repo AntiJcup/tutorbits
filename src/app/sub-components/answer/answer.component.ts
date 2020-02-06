@@ -13,6 +13,9 @@ export class AnswerComponent implements OnInit {
   @Input()
   public answer: ViewAnswer;
 
+  @Input()
+  public commentsFocused = true;
+
   @Output()
   public commentsClicked: EventEmitter<void> = new EventEmitter<void>();
 

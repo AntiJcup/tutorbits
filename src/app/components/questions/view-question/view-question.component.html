@@ -24,7 +24,7 @@
                 </div>
                 <div class="comments">
                     <app-comments-button (click)="onCommentsClicked($event)" matTooltip="Shows Comment Section"
-                        [commentService]="commentService" [targetId]="questionId">
+                        [commentService]="commentService" [targetId]="questionId" [class.focused]="showCommentSection">
                     </app-comments-button>
                 </div>
             </mat-card-actions>
@@ -36,7 +36,8 @@
         <div class="answerContainer">
             <app-create-answer [targetId]="questionId" [answerService]="answerService" *ngIf="addingAnswer"
                 (answerAdded)="onAnswerAdded($event)"></app-create-answer>
-            <app-answer class="answer-card" *ngFor="let answer of answers" [answer]="answer" (commentsClicked)="onAnswerCommentsClicked($event, answer.id)">
+            <app-answer class="answer-card" *ngFor="let answer of answers" [answer]="answer" (commentsClicked)="onAnswerCommentsClicked($event, answer.id)"
+            [commentsFocused] = "answer.id == targetAnswerId && showAnswerCommentSection">
             </app-answer>
         </div>
     </div>
