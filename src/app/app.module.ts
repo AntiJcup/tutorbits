@@ -175,6 +175,12 @@ const appRoutes: Routes = [
     canActivate: [TutorBitsMobileGuardService]
   },
   {
+    path: 'question/:questionId/:questionTitle/:questionTopic',
+    component: ViewQuestionComponent,
+    data: { title: 'Question' },
+    canActivate: [TutorBitsMobileGuardService]
+  },
+  {
     path: 'questions',
     component: ViewQuestionsComponent,
     data: { title: 'Questions' },

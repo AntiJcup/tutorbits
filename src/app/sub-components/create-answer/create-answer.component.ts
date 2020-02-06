@@ -38,7 +38,7 @@ export class CreateAnswerComponent implements OnInit {
         required: true,
         minLength: 1,
         maxLength: 1028,
-        rows: 8
+        rows: 12
       }
     }
   ];

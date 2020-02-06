@@ -22,6 +22,8 @@ import { TutorBitsAnswerCommentService } from 'src/app/services/question/tutor-b
 })
 export class ViewQuestionComponent implements OnInit {
   public questionId: string;
+  public questionTopic: string;
+  public questionTitle: string;
   public loading = true;
   public question: ViewQuestion;
   public answers: ViewComment[];
@@ -47,8 +49,14 @@ export class ViewQuestionComponent implements OnInit {
     public answerCommentService: TutorBitsAnswerCommentService
   ) {
     this.questionId = this.route.snapshot.paramMap.get('questionId');
-    this.titleService.SetTitle('Question');
+    this.questionTitle = this.route.snapshot.paramMap.get('questionTitle');
+    this.questionTopic = this.route.snapshot.paramMap.get('questionTopic');
 
+    if (!this.questionTitle) {
+      this.titleService.SetTitle('Question');
+    } else {
+      this.titleService.SetTitle(`${this.questionTitle} - ${this.questionTopic} Question`);
+    }
   }
 
   async ngOnInit() {

@@ -41,7 +41,7 @@ export class MyQuestionsComponent implements OnInit {
 
   onQuestionCardClick(e: any, question: ViewQuestion) {
     this.logServer.LogToConsole('MyQuestionsComponent', 'card clicked', question);
-    this.router.navigate([`watch/${question.id}`]);
+    this.router.navigate([`question/${question.id}/${question.title}/${question.topic}`]);
   }
 
   async onDeleteClicked(e: DeleteQuestionEvent) {

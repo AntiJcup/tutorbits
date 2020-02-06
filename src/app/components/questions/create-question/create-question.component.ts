@@ -54,7 +54,7 @@ export class CreateQuestionComponent implements OnInit, OnDestroy {
             placeholder: 'Enter Question',
             required: true,
             minLength: 4,
-            maxLength: 64
+            maxLength: 256
           }
         },
         {
@@ -74,7 +74,7 @@ export class CreateQuestionComponent implements OnInit, OnDestroy {
             placeholder: 'Enter Question Description',
             required: true,
             maxLength: 1028,
-            rows: 4
+            rows: 12
           }
         }];
       });
