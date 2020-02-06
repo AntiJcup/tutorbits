@@ -1,12 +1,14 @@
 <div class="question-row-container">
     <h3>Questions:</h3>
-    <div class="question-card-container">
-        <a *ngFor="let question of questionsByType['All']"
-            [routerLink]="[ '/question', question.id, question.title, question.topic ]"
-            (click)="onQuestionCardClick($event, question)" class="card">
-            <app-question-card [question]="question" >
-            </app-question-card>
-        </a>
+    <div class="container">
+        <div class="question-card-container">
+            <a *ngFor="let question of questionsByType['All']"
+                [routerLink]="[ '/question', question.id, question.title, question.topic ]"
+                (click)="onQuestionCardClick($event, question)" class="card">
+                <app-question-card [question]="question">
+                </app-question-card>
+            </a>
+        </div>
     </div>
     <mat-spinner [diameter]="64" class="loading-spinner" *ngIf="loading">
     </mat-spinner>
