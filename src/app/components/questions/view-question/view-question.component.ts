@@ -14,6 +14,7 @@ import { TutorBitsAnswerService } from 'src/app/services/question/tutor-bits-ans
 import { IAuthService } from 'src/app/services/abstract/IAuthService';
 import { TutorBitsAccountService } from 'src/app/services/user/tutor-bits-account.service';
 import { ViewComment } from 'src/app/models/comment/view-comment';
+import { TutorBitsAnswerCommentService } from 'src/app/services/question/tutor-bits-answer-comment.service';
 
 @Component({
   templateUrl: './view-question.component.html',
@@ -28,6 +29,8 @@ export class ViewQuestionComponent implements OnInit {
   private currentUserId: string;
   public showCommentSection = false;
   public comments: ViewComment[];
+  public targetAnswerId: string;
+  public showAnswerCommentSection = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -40,7 +43,8 @@ export class ViewQuestionComponent implements OnInit {
     private authService: IAuthService,
     private accountService: TutorBitsAccountService,
     public commentService: TutorBitsQuestionCommentService, // Dont remove these components use them
-    public ratingService: TutorBitsQuestionRatingService
+    public ratingService: TutorBitsQuestionRatingService,
+    public answerCommentService: TutorBitsAnswerCommentService
   ) {
     this.questionId = this.route.snapshot.paramMap.get('questionId');
     this.titleService.SetTitle('Question');
@@ -93,6 +97,7 @@ export class ViewQuestionComponent implements OnInit {
   }
 
   public onCommentsClicked(e: any) {
+    this.showAnswerCommentSection = false;
     if (this.showCommentSection) {
       return;
     }
@@ -103,5 +108,21 @@ export class ViewQuestionComponent implements OnInit {
   public onCommentsClosed(e: any) {
     this.eventService.TriggerButtonClick('Question', `CommentsClose - ${this.questionId}`);
     this.showCommentSection = false;
+  }
+
+  public onAnswerCommentsClicked(e: any, answerId: string) {
+    this.showCommentSection = false;
+    if (this.showAnswerCommentSection && this.targetAnswerId === answerId) {
+      return;
+    }
+
+    this.targetAnswerId = answerId;
+    this.eventService.TriggerButtonClick('Question', `Answer Comments - ${this.targetAnswerId}`);
+    this.showAnswerCommentSection = true;
+  }
+
+  public onAnswerCommentsClosed(e: any) {
+    this.eventService.TriggerButtonClick('Question', `Answer CommentsClose - ${this.targetAnswerId}`);
+    this.showAnswerCommentSection = false;
   }
 }

@@ -36,12 +36,16 @@
         <div class="answerContainer">
             <app-create-answer [targetId]="questionId" [answerService]="answerService" *ngIf="addingAnswer"
                 (answerAdded)="onAnswerAdded($event)"></app-create-answer>
-            <app-answer class="answer-card" *ngFor="let answer of answers" [answer]="answer">
+            <app-answer class="answer-card" *ngFor="let answer of answers" [answer]="answer" (commentsClicked)="onAnswerCommentsClicked($event, answer.id)">
             </app-answer>
         </div>
     </div>
     <div class="commentSection" *ngIf="showCommentSection">
         <app-comment-section [comments]="comments" [targetId]="questionId" (closeClicked)="onCommentsClosed($event);"
             [commentService]="commentService"></app-comment-section>
+    </div>
+    <div class="commentSection" *ngIf="showAnswerCommentSection">
+        <app-comment-section [comments]="comments" [targetId]="targetAnswerId" (closeClicked)="onAnswerCommentsClosed($event);"
+            [commentService]="answerCommentService"></app-comment-section>
     </div>
 </div>

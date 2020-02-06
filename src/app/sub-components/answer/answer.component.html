@@ -4,10 +4,17 @@
     </div>
     <div class="answerDate">{{answerDate}}</div>
     <mat-divider></mat-divider>
-    <div class="rating">
-        <app-rating [ratingService]="ratingService" [targetId]="answer.id" [showControls]="true" [score]="answer.score"
-            *ngIf="answer">
-        </app-rating>
+    <div class="controls">
+        <div class="rating">
+            <app-rating [ratingService]="ratingService" [targetId]="answer.id" [showControls]="true"
+                [score]="answer.score" *ngIf="answer">
+            </app-rating>
+        </div>
+        <div class="comments">
+            <app-comments-button (click)="onCommentsClicked($event)" matTooltip="Shows Comment Section"
+                [commentService]="commentService" [targetId]="answer.id">
+            </app-comments-button>
+        </div>
     </div>
     <mat-divider></mat-divider>
 </div>
