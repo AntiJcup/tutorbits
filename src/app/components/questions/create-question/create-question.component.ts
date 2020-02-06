@@ -80,7 +80,7 @@ export class CreateQuestionComponent implements OnInit, OnDestroy {
       });
       this.loading = false;
     } catch (err) {
-      this.errorServer.HandleError('CreateInitializeError', err);
+      this.errorServer.HandleError('CreateQuestionComponent', err);
     }
   }
 
@@ -88,23 +88,26 @@ export class CreateQuestionComponent implements OnInit, OnDestroy {
   }
 
   async submit(model: CreateQuestionForm) {
-    this.logServer.LogToConsole('CreateQuestion', model);
+    this.logServer.LogToConsole('CreateQuestionComponent', model);
     this.loading = true;
 
     try {
       const createQuestionModel = this.questionService.ConvertForm(model);
       const questionResponse: ResponseWrapper<ViewQuestion> = await this.questionService.Create(createQuestionModel);
 
-      this.logServer.LogToConsole('CreateQuestion', questionResponse);
+      this.logServer.LogToConsole('CreateQuestionComponent', questionResponse);
       if (questionResponse.error != null) {
         this.loading = false;
-        this.errorServer.HandleError('CreateError', JSON.stringify(questionResponse.error));
-      } else {
+        this.errorServer.HandleError('CreateQuestionComponent', JSON.stringify(questionResponse.error));
+      } else if (await this.questionService.Publish(questionResponse.data.id)) {
         this.loading = false;
         this.router.navigate([`question/${questionResponse.data.id}`]);
+      } else {
+        this.loading = false;
+        this.errorServer.HandleError('CreateQuestionComponent', 'Error publishing');
       }
     } catch (e) {
-      this.errorServer.HandleError('CreateError', e);
+      this.errorServer.HandleError('CreateQuestionComponent', e);
       this.loading = false;
     }
   }
