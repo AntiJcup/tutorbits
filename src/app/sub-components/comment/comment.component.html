@@ -1,6 +1,6 @@
 <div class="commentContainer">
     <div><span class="commentOwner">{{comment.owner}}:</span>
-        <div class="commentBody">{{comment.body}}</div>
+        <div class="commentBody" [innerText]="comment.body"></div>
     </div>
     <div class="commentDate">{{commentDate}}</div>
 </div>

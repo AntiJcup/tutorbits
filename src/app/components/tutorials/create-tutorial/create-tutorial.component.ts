@@ -106,7 +106,8 @@ export class CreateTutorialComponent implements OnInit, OnDestroy {
             label: 'Description',
             placeholder: 'Enter Tutorial Description',
             required: true,
-            maxLength: 1028
+            maxLength: 1028,
+            rows: 8
           }
         },
         {
