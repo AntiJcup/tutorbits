@@ -1,6 +1,9 @@
-<div class="question-card-container" fxLayout fxLayoutGap="5px">
+<div class="container">
+<div class="question-card-container">
     <app-edit-question-card *ngFor="let question of questions" [question]="question"
-        (click)="onQuestionCardClick($event, question)" (DeleteClick)="onDeleteClicked($event)"></app-edit-question-card>
-    <mat-spinner [diameter]="64" class="loading-spinner" *ngIf="loading">
-    </mat-spinner>
+        (click)="onQuestionCardClick($event, question)" (DeleteClick)="onDeleteClicked($event)" class="card">
+    </app-edit-question-card>
 </div>
+</div>
+<mat-spinner [diameter]="64" class="loading-spinner" *ngIf="loading">
+</mat-spinner>

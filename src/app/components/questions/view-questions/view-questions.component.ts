@@ -6,6 +6,7 @@ import { IErrorService } from 'src/app/services/abstract/IErrorService';
 import { ILogService } from 'src/app/services/abstract/ILogService';
 import { ITitleService } from 'src/app/services/abstract/ITitleService';
 import { Meta } from '@angular/platform-browser';
+import { DeleteQuestionEvent } from 'src/app/sub-components/edit-question-card/edit-question-card.component';
 
 @Component({
   templateUrl: './view-questions.component.html',
@@ -63,5 +64,25 @@ export class ViewQuestionsComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.metaService.removeTag('name=\'description\'');
+  }
+
+  async onDeleteClicked(e: DeleteQuestionEvent) {
+    if (!confirm('Are you sure you want to delete this question?')) {
+      return;
+    }
+
+    try {
+      await this.questionsService.Delete(e.question.id);
+    } catch (err) {
+      this.errorServer.HandleError('ViewQuestionsComponent', `Failed deleting tutorial: ${err}`);
+    }
+
+    const index = this.questions.indexOf(e.question);
+    if (index === -1) {
+      this.errorServer.HandleError('ViewQuestionsComponent', `Failed removing tutorial card, doesn't exist`);
+      return;
+    }
+
+    this.questions.splice(index, 1);
   }
 }
