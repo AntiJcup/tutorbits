@@ -37,7 +37,7 @@ export class ViewQuestionComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private questionService: TutorBitsQuestionService,
-    private answerService: TutorBitsAnswerService,
+    public answerService: TutorBitsAnswerService,
     private errorServer: IErrorService,
     private eventService: IEventService,
     private logServer: ILogService,
