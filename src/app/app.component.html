@@ -117,15 +117,17 @@
               <a [routerLink]="[ '/examples' ]" mat-menu-item>All</a>
             </mat-menu>
           </li>
-          <button mat-menu-item [matMenuTriggerFor]="appQuestionsMenu">
-            <mat-icon class="icon">question_answer</mat-icon>
-            <span class="label">Questions</span>
-          </button>
-          <mat-menu #appQuestionsMenu="matMenu">
-            <a [routerLink]="[ '/create/question' ]" mat-menu-item>Ask Question</a>
-            <mat-divider></mat-divider>
-            <a [routerLink]="[ '/questions' ]" mat-menu-item>All</a>
-          </mat-menu>
+          <li>
+            <button mat-menu-item [matMenuTriggerFor]="appQuestionsMenu">
+              <mat-icon class="icon">question_answer</mat-icon>
+              <span class="label">Questions</span>
+            </button>
+            <mat-menu #appQuestionsMenu="matMenu">
+              <a [routerLink]="[ '/create/question' ]" mat-menu-item>Ask Question</a>
+              <mat-divider></mat-divider>
+              <a [routerLink]="[ '/questions' ]" mat-menu-item>All</a>
+            </mat-menu>
+          </li>
           <a *ngIf="!loggedIn" [href]="loginUrl" mat-menu-item>
             <mat-icon class="icon">input</mat-icon>
             <span class="label">Login</span>
