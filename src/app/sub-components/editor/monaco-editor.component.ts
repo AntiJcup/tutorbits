@@ -1,5 +1,5 @@
 import { Output, EventEmitter, OnDestroy } from '@angular/core';
-import { editor } from 'monaco-editor';
+import { editor, IDisposable } from 'monaco-editor';
 import { ILogService } from 'src/app/services/abstract/ILogService';
 
 export abstract class MonacoEditorComponent implements OnDestroy {
@@ -13,7 +13,7 @@ export abstract class MonacoEditorComponent implements OnDestroy {
 
   public editorOptions = { theme: 'vs-dark', language: 'javascript' };
   public startingCode = '';
-  protected fileCache: { [fileName: string]: string } = {};
+  protected fileEditors: { [fileName: string]: editor.ITextModel } = {};
   private filePath: string;
   private ignoreNext = false;
   public visible = false;
@@ -72,55 +72,63 @@ export abstract class MonacoEditorComponent implements OnDestroy {
       this.Show(true);
     }
 
-    monaco.editor.setModelLanguage(this.codeEditor.getModel(), this.GetLanguageByPath(this.filePath));
-
     // Switch contents based on file name
-    const cache = this.GetCacheForCurrentFile();
+    let cache = this.GetCacheForCurrentFile();
     if (!cache) {
+      cache = this.GenerateNewEditorModel(path, '');
       this.logServer.LogToConsole('MonacoEditor', `failed to find cache for: ${path}`);
-      this.ignoreNext = true;
-      this.codeEditor.setValue('');
-      return;
     }
 
     this.ignoreNext = true;
-    this.codeEditor.setValue(cache);
+    this.codeEditor.setModel(cache);
+    monaco.editor.setModelLanguage(this.codeEditor.getModel(), this.GetLanguageByPath(this.filePath));
   }
 
   public ClearCacheForFile(path: string) {
     this.logServer.LogToConsole('MonacoEditor', `ClearCacheForFile: ${path}`);
-    delete this.fileCache[path];
+    delete this.fileEditors[path];
   }
 
   public ClearCacheForFolder(path: string) {
     this.logServer.LogToConsole('MonacoEditor', `ClearCacheForFolder: ${path}`);
-    for (const key of Object.keys(this.fileCache)) {
+    for (const key of Object.keys(this.fileEditors)) {
       if (key.startsWith(path)) {
-        delete this.fileCache[key];
+        this.ClearCacheForFile(key);
       }
     }
   }
 
   public UpdateCacheForFile(path: string, data: string) {
     this.logServer.LogToConsole('MonacoEditor', `UpdateCacheForCurrentFile: ${path}`);
-    this.fileCache[path] = data;
+
+    if (!this.fileEditors[path]) {
+      const fileModel = this.GenerateNewEditorModel(path, data);
+      this.fileEditors[path] = fileModel;
+    } else {
+      this.fileEditors[path].setValue(data);
+    }
+  }
+
+  public UpdateModelForFile(path: string, model: editor.ITextModel) {
+    this.logServer.LogToConsole('MonacoEditor', `UpdateCacheForCurrentFile: ${path}`);
+    this.fileEditors[path] = model;
   }
 
   public UpdateCacheForCurrentFile(): void {
     this.logServer.LogToConsole('MonacoEditor', `UpdateCacheForCurrentFile: ${this.filePath}`);
-    const textModel = this.codeEditor.getModel() as editor.ITextModel;
-    const clone = textModel.getValue();
-    this.fileCache[this.filePath] = clone;
+
+    const textModel = this.codeEditor.getModel();
+    this.UpdateModelForFile(this.filePath, textModel);
   }
 
-  public GetCacheForCurrentFile(): string {
-    this.logServer.LogToConsole('MonacoEditor', `CacheVersion: ${this.fileCache[this.filePath]}`);
-
+  public GetCacheForCurrentFile(): editor.ITextModel {
     return this.GetCacheForFileName(this.filePath);
   }
 
-  public GetCacheForFileName(path: string): string {
-    return this.fileCache[path];
+  public GetCacheForFileName(path: string): editor.ITextModel {
+    this.logServer.LogToConsole('MonacoEditor', `CacheVersion: ${this.fileEditors[path]}`);
+
+    return this.fileEditors[path];
   }
 
   public Show(show: boolean) {
@@ -141,9 +149,19 @@ export abstract class MonacoEditorComponent implements OnDestroy {
     } else if (path.endsWith('.css')) {
       return 'css';
     }
+
+    return '';
   }
 
   public PropogateEditor(files: { [path: string]: string }): void {
-    this.fileCache = files;
+    for (const filePath of Object.keys(files)) {
+      const fileData = files[filePath];
+      const fileModel = this.GenerateNewEditorModel(filePath, fileData);
+      this.fileEditors[filePath] = fileModel;
+    }
+  }
+
+  public GenerateNewEditorModel(path: string, data: string = ''): editor.ITextModel {
+    return monaco.editor.createModel(data, this.GetLanguageByPath(path));
   }
 }

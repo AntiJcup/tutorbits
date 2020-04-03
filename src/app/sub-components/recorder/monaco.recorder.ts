@@ -83,9 +83,7 @@ export class MonacoRecorder extends TransactionRecorder {
         this.recording = true;
         this.start = Date.now() - this.project.getDuration();
         this.timeOffset = Date.now() - this.start;
-        const textEditorModel = this.codeComponent.codeEditor.getModel() as editor.ITextModel;
-        this.codeComponent.UpdateCacheForCurrentFile();
-        this.fileChangeListener = textEditorModel.onDidChangeContent((e: editor.IModelContentChangedEvent) => {
+        this.fileChangeListener = this.codeComponent.codeEditor.onDidChangeModelContent((e: editor.IModelContentChangedEvent) => {
             this.OnFileModified(e);
         });
 
@@ -186,7 +184,10 @@ export class MonacoRecorder extends TransactionRecorder {
             this.logging.LogToConsole('MonacoRecorder', `OnFileModified change count: ${change}`);
             const previousData = change.rangeLength <= 0 ?
                 undefined :
-                this.codeComponent.GetCacheForCurrentFile().substring(change.rangeOffset, change.rangeOffset + change.rangeLength);
+                this.codeComponent
+                    .GetCacheForCurrentFile()
+                    .getValue()
+                    .substring(change.rangeOffset, change.rangeOffset + change.rangeLength);
             this.logging.LogToConsole('MonacoRecorder', `OnFileModified Previous File Data: ${previousData}`);
             this.timeOffset = Date.now() - this.start;
             const transaction = this.ModifyFile(this.timeOffset, this.codeComponent.currentFilePath, change.rangeOffset,
@@ -386,7 +387,7 @@ export class MonacoRecorder extends TransactionRecorder {
 
         const nodePath = this.fileTreeComponent.getPathForNode(e.node);
         this.timeOffset = Date.now() - this.start;
-        this.DeleteFile(this.timeOffset, nodePath, this.codeComponent.GetCacheForFileName(nodePath), e.node.isBranch());
+        this.DeleteFile(this.timeOffset, nodePath, this.codeComponent.GetCacheForFileName(nodePath).getValue(), e.node.isBranch());
 
         switch (this.fileTreeComponent.GetNodeType(e.node)) {
             case ResourceType.code:

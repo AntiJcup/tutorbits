@@ -31,10 +31,10 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
   public recording = false;
   hasRecorded = false;
   saving = false;
-  canRecord = false;
   streamInitialized = false;
   finishRecording = false;
   loadingRecording = false;
+  editorInitialized = false;
   timeout = 1000 * 60 * 15;
   timeoutWarning = this.timeout - (1000 * 60 * 2);
   confirmMessage = 'WARNING: You will lose your current recording if you navigate away!';
@@ -72,12 +72,15 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
     this.hasRecorded = this.route.snapshot.queryParamMap.get('back') === 'true';
   }
 
+  public get canRecord(): boolean {
+    return this.streamInitialized && this.editorInitialized && !!this.tutorial;
+  }
+
   async ngOnInit() {
     try {
       const tutorial: ViewTutorial = await this.tutorialService.Get(this.tutorialId);
       this.titleService.SetTitle(`Recording: ${tutorial.title}`);
       this.tutorial = tutorial;
-      this.canRecord = this.streamInitialized;
     } catch (e) {
       this.errorServer.HandleError('Record', e);
     }
@@ -102,7 +105,6 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
     }
     this.logServer.LogToConsole('Record', webCam.stream);
     this.streamInitialized = true;
-    this.canRecord = !!this.tutorial;
     this.webCamRecorder = new WebCamRecorder(this.recordingWebCam, this.videoRecordingService, this.tutorialId);
     await this.webCamRecorder.Initialize();
   }
@@ -115,6 +117,7 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
   onCodeInitialized(recordingEditor: RecordingEditorComponent) {
     this.recordingEditor.AllowEdits(false);
     this.recordingTreeComponent.selectNodeByPath(this.recordingTreeComponent.treeComponent.tree, '/project');
+    this.editorInitialized = true;
   }
 
 
