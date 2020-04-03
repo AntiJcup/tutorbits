@@ -10,6 +10,7 @@ import { ITracerProjectService } from 'src/app/services/abstract/ITracerProjectS
 import { IAuthService } from 'src/app/services/abstract/IAuthService';
 import { ViewProject } from 'src/app/models/project/view-project';
 import { Guid } from 'guid-typescript';
+import { LocalProjectWriter } from 'shared/Tracer/lib/ts/LocalTransaction';
 
 @Component({
   templateUrl: './create-sandbox.component.html',
@@ -109,6 +110,7 @@ export class CreateSandboxComponent implements OnInit, OnDestroy {
       }
     } else {
       newProjectId = Guid.create().toString();
+      await (new LocalProjectWriter()).CreateProject(newProjectId);
     }
 
     if (this.loadProjectId === null) {

@@ -191,8 +191,8 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate {
       null, // mouse component
       this.previewComponent,
       this.logServer,
-      this.projectService,
-      this.projectService,
+      this.isLoggedIn ? this.projectService : new LocalProjectLoader(), // Only save project updates if logged in
+      this.isLoggedIn ? this.projectService : new LocalTransactionReader(), // Only save project updates if logged in
       this.projectId,
       null, // Use default settings
       Guid.create().toString());
