@@ -310,11 +310,11 @@ export class MonacoRecorder extends TransactionRecorder {
             }
         }
 
-        let oldFileData = null;
+        let oldFileData: string = null;
         switch (this.fileTreeComponent.GetNodeType(e.node)) {
             case ResourceType.code:
                 if (!e.node.isBranch()) {
-                    oldFileData = this.codeComponent.GetCacheForFileName(oldFileName);
+                    oldFileData = this.codeComponent.GetCacheForFileName(oldFileName).getValue();
                     this.codeComponent.ClearCacheForFile(oldFileName);
                     this.codeComponent.currentFilePath = '';
                     this.codeComponent.UpdateCacheForFile(newFileName, oldFileData);
@@ -349,12 +349,12 @@ export class MonacoRecorder extends TransactionRecorder {
             }
         }
 
-        let oldFileData = null;
+        let oldFileData: string = null;
 
         switch (this.fileTreeComponent.GetNodeType(node)) {
             case ResourceType.code:
                 if (!node.isBranch()) {
-                    oldFileData = this.codeComponent.GetCacheForFileName(oldFileName);
+                    oldFileData = this.codeComponent.GetCacheForFileName(oldFileName).getValue();
                     this.codeComponent.ClearCacheForFile(oldFileName);
                     this.codeComponent.currentFilePath = '';
                     this.codeComponent.UpdateCacheForFile(newFileName, oldFileData);
@@ -424,12 +424,12 @@ export class MonacoRecorder extends TransactionRecorder {
             }
         }
 
-        let oldFileData = null;
+        let oldFileData: string = null;
 
         switch (this.fileTreeComponent.GetNodeType(e.node)) {
             case ResourceType.code:
                 if (!e.node.isBranch()) {
-                    oldFileData = this.codeComponent.GetCacheForFileName(oldFileName);
+                    oldFileData = this.codeComponent.GetCacheForFileName(oldFileName).getValue();
                     this.codeComponent.ClearCacheForFile(oldFileName);
                     this.codeComponent.currentFilePath = '';
                     this.codeComponent.UpdateCacheForFile(newFileName, oldFileData);

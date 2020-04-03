@@ -168,7 +168,7 @@ export abstract class NG2FileTreeComponent {
           }, 1);
           return;
         } else {
-          throw new Error('Node not found');
+          throw new Error(`Node not found ${path}`);
         }
       }
       const controller = this.treeComponent.getControllerByNodeId(foundNode.id);
@@ -178,7 +178,7 @@ export abstract class NG2FileTreeComponent {
             this.selectNodeByPath(node, path, false);
           }, 1);
         } else {
-          throw new Error('Node missing controller');
+          throw new Error(`Node missing controller ${path}`);
         }
       }
       controller.select();
