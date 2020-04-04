@@ -6,7 +6,13 @@ export class TutorBitsStorageService extends IStorageService {
   constructor() { super(); }
 
   public GetItem(key: string): any {
-    return JSON.parse(localStorage[key]);
+    const localStorageItem = localStorage[key];
+
+    if (typeof (localStorageItem) === 'undefined') {
+      return null;
+    }
+
+    return JSON.parse(localStorageItem);
   }
 
   public SetItem(key: string, item: any): void {
