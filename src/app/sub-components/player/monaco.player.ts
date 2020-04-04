@@ -1,6 +1,5 @@
 import { TransactionPlayer, TransactionPlayerSettings } from 'shared/Tracer/lib/ts/TransactionPlayer';
 import { TraceTransaction } from 'shared/Tracer/models/ts/Tracer_pb';
-import { editor } from 'monaco-editor';
 import { IProjectReader } from 'shared/Tracer/lib/ts/IProjectReader';
 import { MonacoEditorComponent } from '../editor/monaco-editor.component';
 import { NG2FileTreeComponent, ResourceType, TutorBitsTreeModel } from '../file-tree/ng2-file-tree.component';
@@ -94,7 +93,7 @@ export class MonacoPlayer extends TransactionPlayer {
 
     protected HandleTransaction(transaction: TraceTransaction, undo?: boolean): void {
         try {
-            const edits: editor.IIdentifiedSingleEditOperation[] = [];
+            const edits: monaco.editor.IIdentifiedSingleEditOperation[] = [];
             this.logServer.LogToConsole('MonacoPlayer', JSON.stringify(transaction.toObject()));
             switch (transaction.getType()) {
                 case TraceTransaction.TraceTransactionType.CUSTOMACTION:
@@ -199,12 +198,12 @@ export class MonacoPlayer extends TransactionPlayer {
                     break;
                 case TraceTransaction.TraceTransactionType.MODIFYFILE:
                     this.codeComponent.currentFilePath = transaction.getFilePath();
-                    const editorModel = this.codeComponent.codeEditor.getModel() as editor.ITextModel;
+                    const editorModel = this.codeComponent.codeEditor.getModel() as monaco.editor.ITextModel;
                     const startPos = editorModel.getPositionAt(transaction.getModifyFile().getOffsetStart());
                     const endPos = editorModel.getPositionAt(transaction.getModifyFile().getOffsetEnd());
                     const data = transaction.getModifyFile().getData();
 
-                    let newEdit: editor.IIdentifiedSingleEditOperation = null;
+                    let newEdit: monaco.editor.IIdentifiedSingleEditOperation = null;
                     if (!undo) {
                         newEdit = {
                             range: new monaco.Range(

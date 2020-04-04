@@ -1,19 +1,18 @@
 import { Output, EventEmitter, OnDestroy } from '@angular/core';
-import { editor, IDisposable } from 'monaco-editor';
 import { ILogService } from 'src/app/services/abstract/ILogService';
 
 export abstract class MonacoEditorComponent implements OnDestroy {
 
-  private static editOptions: editor.IEditorOptions = {
+  private static editOptions: monaco.editor.IEditorOptions = {
     readOnly: false
   };
-  private static readOnlyOptions: editor.IEditorOptions = {
+  private static readOnlyOptions: monaco.editor.IEditorOptions = {
     readOnly: true
   };
 
   public editorOptions = { theme: 'vs-dark', language: 'javascript' };
   public startingCode = '';
-  protected fileEditors: { [fileName: string]: editor.ITextModel } = {};
+  protected fileEditors: { [fileName: string]: monaco.editor.ITextModel } = {};
   private filePath: string;
   private ignoreNext = false;
   public visible = false;
@@ -26,7 +25,7 @@ export abstract class MonacoEditorComponent implements OnDestroy {
     return res;
   }
 
-  public codeEditor: editor.ICodeEditor;
+  public codeEditor: monaco.editor.ICodeEditor;
   private windowCallback: (e: UIEvent) => any;
 
   @Output() codeInitialized = new EventEmitter<MonacoEditorComponent>();
@@ -46,8 +45,8 @@ export abstract class MonacoEditorComponent implements OnDestroy {
     this.codeEditor.layout({ width: window.innerWidth - 810, height: window.innerHeight });
   }
 
-  editorOnInit(codeEditor: editor.IEditor) {
-    this.codeEditor = codeEditor as editor.ICodeEditor;
+  editorOnInit(codeEditor: monaco.editor.IEditor) {
+    this.codeEditor = codeEditor as monaco.editor.ICodeEditor;
     if (!this.filePath || this.filePath === '') {
       this.Show(false);
     }
@@ -108,7 +107,7 @@ export abstract class MonacoEditorComponent implements OnDestroy {
     }
   }
 
-  public UpdateModelForFile(path: string, model: editor.ITextModel) {
+  public UpdateModelForFile(path: string, model: monaco.editor.ITextModel) {
     this.logServer.LogToConsole('MonacoEditor', `UpdateCacheForCurrentFile: ${path}`);
     this.fileEditors[path] = model;
   }
@@ -120,11 +119,11 @@ export abstract class MonacoEditorComponent implements OnDestroy {
     this.UpdateModelForFile(this.filePath, textModel);
   }
 
-  public GetCacheForCurrentFile(): editor.ITextModel {
+  public GetCacheForCurrentFile(): monaco.editor.ITextModel {
     return this.GetCacheForFileName(this.filePath);
   }
 
-  public GetCacheForFileName(path: string): editor.ITextModel {
+  public GetCacheForFileName(path: string): monaco.editor.ITextModel {
     this.logServer.LogToConsole('MonacoEditor', `CacheVersion: ${this.fileEditors[path]}`);
 
     return this.fileEditors[path];
@@ -136,7 +135,7 @@ export abstract class MonacoEditorComponent implements OnDestroy {
 
   public AllowEdits(edit: boolean): void {
     this.codeEditor.updateOptions(edit ? MonacoEditorComponent.editOptions : MonacoEditorComponent.readOnlyOptions);
-    const editorModel = this.codeEditor.getModel() as editor.ITextModel;
+    const editorModel = this.codeEditor.getModel() as monaco.editor.ITextModel;
     editorModel.pushEOL(monaco.editor.EndOfLineSequence.CRLF);
   }
 
@@ -160,7 +159,7 @@ export abstract class MonacoEditorComponent implements OnDestroy {
     }
   }
 
-  public GenerateNewEditorModel(path: string, data: string = ''): editor.ITextModel {
+  public GenerateNewEditorModel(path: string, data: string = ''): monaco.editor.ITextModel {
     return monaco.editor.createModel(data, this.GetLanguageByPath(path));
   }
 }

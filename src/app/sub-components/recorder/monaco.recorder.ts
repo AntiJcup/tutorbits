@@ -1,5 +1,4 @@
 import { TraceTransactionLog } from 'shared/Tracer/models/ts/Tracer_pb';
-import { editor, IDisposable, IScrollEvent } from 'monaco-editor';
 import { TransactionRecorder } from 'shared/Tracer/lib/ts/TransactionRecorder';
 import { ITransactionWriter } from 'shared/Tracer/lib/ts/ITransactionWriter';
 import { IProjectReader } from 'shared/Tracer/lib/ts/IProjectReader';
@@ -22,8 +21,8 @@ export interface MonacoRecorderSettings {
 
 export class MonacoRecorder extends TransactionRecorder {
 
-    private fileChangeListener: IDisposable = null;
-    private scrollChangeListener: IDisposable = null;
+    private fileChangeListener: monaco.IDisposable = null;
+    private scrollChangeListener: monaco.IDisposable = null;
 
     private nodeSelectedListener: Subscription = null;
     private nodeCreatedListener: Subscription = null;
@@ -83,7 +82,7 @@ export class MonacoRecorder extends TransactionRecorder {
         this.recording = true;
         this.start = Date.now() - this.project.getDuration();
         this.timeOffset = Date.now() - this.start;
-        this.fileChangeListener = this.codeComponent.codeEditor.onDidChangeModelContent((e: editor.IModelContentChangedEvent) => {
+        this.fileChangeListener = this.codeComponent.codeEditor.onDidChangeModelContent((e: monaco.editor.IModelContentChangedEvent) => {
             this.OnFileModified(e);
         });
 
@@ -113,7 +112,7 @@ export class MonacoRecorder extends TransactionRecorder {
             };
             window.addEventListener('mousemove', this.mouseMoveCallbackWrapper);
 
-            this.scrollChangeListener = this.codeComponent.codeEditor.onDidScrollChange((e: IScrollEvent) => {
+            this.scrollChangeListener = this.codeComponent.codeEditor.onDidScrollChange((e: monaco.IScrollEvent) => {
                 this.onScrolled(e);
             });
 
@@ -173,7 +172,7 @@ export class MonacoRecorder extends TransactionRecorder {
         return await this.SaveTransactionLogs(true);
     }
 
-    protected OnFileModified(e: editor.IModelContentChangedEvent): void {
+    protected OnFileModified(e: monaco.editor.IModelContentChangedEvent): void {
         this.logging.LogToConsole('MonacoRecorder', `OnFileModified ${JSON.stringify(e)}`);
         if (this.codeComponent.ignoreNextEvent) { // Handles expected edits that shouldnt be tracked
             this.logging.LogToConsole('MonacoRecorder', `OnFileModified Ignoring ${e}`);
@@ -481,7 +480,7 @@ export class MonacoRecorder extends TransactionRecorder {
         this.TriggerDelayedSave();
     }
 
-    public onScrolled(e: IScrollEvent) {
+    public onScrolled(e: monaco.IScrollEvent) {
         this.timeOffset = Date.now() - this.start;
         if (this.timeOffset - this.lastScrollTrackOffset < environment.scrollAccurracyMS) {
             return;

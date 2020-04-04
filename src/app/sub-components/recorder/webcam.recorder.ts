@@ -1,4 +1,3 @@
-import { editor } from 'monaco-editor';
 import { StreamRecorder, StreamRecorderSettings } from 'shared/media/lib/ts/StreamRecorder';
 import { IStreamWriter } from 'shared/media/lib/ts/IStreamWriter';
 import { RecordingWebCamComponent } from '../recording-web-cam/recording-web-cam.component';
