@@ -1,5 +1,5 @@
 export const environment = {
-  production: true,
+  production: false,
   apiHost: 'https://api-staging.tutorbits.com',
   // tslint:disable-next-line: max-line-length
   loginUrl: 'https://login.tutorbits.com/oauth2/authorize?client_id=60bttusi8qioo53pfnqtgqcn4s&response_type=code&scope=email+openid+aws.cognito.signin.user.admin&redirect_uri=https://www-staging.tutorbits.com/login',
