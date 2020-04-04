@@ -79,7 +79,6 @@ export abstract class MonacoEditorComponent implements OnDestroy {
       this.logServer.LogToConsole('MonacoEditor', `failed to find cache for: ${path}`);
     }
 
-    this.ignoreNext = true;
     this.codeEditor.setModel(cache);
     monaco.editor.setModelLanguage(this.codeEditor.getModel(), this.GetLanguageByPath(this.filePath));
   }
