@@ -212,12 +212,19 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate {
         if (--loadingReferences > 0 || codePlayer.isBuffering) {
           return;
         }
-        while (!codePlayer.isCaughtUp) {
-          codePlayer.SetPostionPct(1);
+
+        codePlayer.SetPostionPct(1);
+        if (codePlayer.isCaughtUp) {
+          await this.startEditing(codePlayer.GetLoadedTransactionLogs());
+          finishedLoadingSub.unsubscribe();
+          startedLoadingSub.unsubscribe();
+        } else {
+          codePlayer.caughtUp.subscribe(async () => {
+            await this.startEditing(codePlayer.GetLoadedTransactionLogs());
+            finishedLoadingSub.unsubscribe();
+            startedLoadingSub.unsubscribe();
+          });
         }
-        await this.startEditing(codePlayer.GetLoadedTransactionLogs());
-        finishedLoadingSub.unsubscribe();
-        startedLoadingSub.unsubscribe();
       });
 
       codePlayer.Play();

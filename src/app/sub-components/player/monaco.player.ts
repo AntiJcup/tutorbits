@@ -22,10 +22,15 @@ export interface LoadCompleteEvent {
     loadPosition: number;
 }
 
+export interface OnCaughtUpEvent {
+
+}
+
 export class MonacoPlayer extends TransactionPlayer {
     private nodeSelectedListener: Subscription = null;
     public loadStart: EventEmitter<LoadStartEvent> = new EventEmitter<LoadStartEvent>();
     public loadComplete: EventEmitter<LoadCompleteEvent> = new EventEmitter<LoadCompleteEvent>();
+    public caughtUp: EventEmitter<OnCaughtUpEvent> = new EventEmitter<OnCaughtUpEvent>();
 
     constructor(
         protected codeComponent: MonacoEditorComponent,
@@ -255,5 +260,9 @@ export class MonacoPlayer extends TransactionPlayer {
 
     protected onLoadComplete(): void {
         this.loadComplete.emit({ playPosition: this.position, loadPosition: this.loadPosition });
+    }
+
+    protected onCaughtUp(): void {
+        this.caughtUp.emit({});
     }
 }
