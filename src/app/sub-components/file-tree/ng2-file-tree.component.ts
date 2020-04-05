@@ -12,10 +12,9 @@ import {
   NodeRenamedEvent,
   TreeController,
   NodeRemovedEvent
-} from 'ng2-tree';
+} from 'shared/Ng2-Tree';
 import { ILogService } from 'src/app/services/abstract/ILogService';
 import { FileUtils, FileData } from 'shared/web/lib/ts/FileUtils';
-import { TreeService } from 'ng2-tree/src/tree.service';
 import { IEventService } from 'src/app/services/abstract/IEventService';
 import { Guid } from 'guid-typescript';
 
@@ -63,7 +62,6 @@ export abstract class NG2FileTreeComponent {
   constructor(
     private zone: NgZone,
     private logServer: ILogService,
-    private treeService: TreeService,
     private eventService: IEventService,
     protected myElement: ElementRef) { }
 

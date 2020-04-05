@@ -1,3 +1,6 @@
 [submodule "shared/Tracer"]
 	path = shared/Tracer
 	url = https://github.com/AntiJcup/Tracer.git
+[submodule "shared/Ng2-Tree"]
+	path = shared/Ng2-Tree
+	url = https://github.com/AntiJcup/ng2-tree.git

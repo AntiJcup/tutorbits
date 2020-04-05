@@ -3,7 +3,7 @@ import { TraceTransaction } from 'shared/Tracer/models/ts/Tracer_pb';
 import { IProjectReader } from 'shared/Tracer/lib/ts/IProjectReader';
 import { MonacoEditorComponent } from '../editor/monaco-editor.component';
 import { NG2FileTreeComponent, ResourceType, TutorBitsTreeModel } from '../file-tree/ng2-file-tree.component';
-import { NodeSelectedEvent } from 'ng2-tree';
+import { NodeSelectedEvent } from 'shared/Ng2-Tree';
 import { Subscription } from 'rxjs';
 import { ILogService } from 'src/app/services/abstract/ILogService';
 import { ResourceViewerComponent, ResourceData } from '../resource-viewer/resource-viewer.component';
