@@ -37,15 +37,22 @@ body
 
 tree-internal
     .tree
-        .node-value
-            padding: 1px
-            &::after
-                display: none
-                height: 0px
-                width: 0px
-            &:hover
-                background-color: #424242
-                border-radius: 3px
+        div
+            input
+                color: #c4c4c4 !important
+                background-color: #3b3b3b
+                border-width: 0px
+                &:hover
+                    background-color: #3b3b3b !important
+            .node-value
+                padding: 1px
+                &::after
+                    display: none
+                    height: 0px
+                    width: 0px
+                &:hover
+                    background-color: #424242
+                    border-radius: 3px
 
         .node-selected
             padding: 1px
