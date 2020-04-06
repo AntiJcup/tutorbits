@@ -133,7 +133,7 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate {
         this.projectService,
         false, /* ignore non file operations */
         loadedTransactionLogs,
-        null,
+        Guid.create().toString(),
         {
           overrideSaveSpeed: 5000,
           saveUnfinishedPartitions: true
@@ -219,10 +219,14 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate {
           finishedLoadingSub.unsubscribe();
           startedLoadingSub.unsubscribe();
         } else {
+          const waitInterval = setInterval(() => {
+            codePlayer.SetPostionPct(1);
+          }, 1000);
           codePlayer.caughtUp.subscribe(async () => {
             await this.startEditing(codePlayer.GetLoadedTransactionLogs());
             finishedLoadingSub.unsubscribe();
             startedLoadingSub.unsubscribe();
+            clearInterval(waitInterval);
           });
         }
       });
