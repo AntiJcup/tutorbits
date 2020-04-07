@@ -1,0 +1,12 @@
+diff --git a/node_modules/ngx-monaco-editor/lib/monaco.d.ts b/node_modules/ngx-monaco-editor/lib/monaco.d.ts
+index 948aba9..41ba4fd 100644
+--- a/node_modules/ngx-monaco-editor/lib/monaco.d.ts
++++ b/node_modules/ngx-monaco-editor/lib/monaco.d.ts
+@@ -3852,6 +3852,7 @@ declare namespace monaco.editor {
+      * A rich code editor.
+      */
+     export interface ICodeEditor extends IEditor {
++        _codeEditorService: any;
+         /**
+          * An event emitted when the content of the current model has changed.
+          * @event

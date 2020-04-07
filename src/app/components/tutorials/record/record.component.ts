@@ -20,6 +20,7 @@ import { PreviewComponent } from 'src/app/sub-components/preview/preview.compone
 import { ITitleService } from 'src/app/services/abstract/ITitleService';
 import { ViewTutorial } from 'src/app/models/tutorial/view-tutorial';
 import { ITracerProjectService } from 'src/app/services/abstract/ITracerProjectService';
+import { GoToDefinitionEvent } from 'src/app/sub-components/editor/monaco-editor.component';
 
 @Component({
   templateUrl: './record.component.html',
@@ -59,6 +60,7 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
   timeoutTimer: any;
 
   constructor(
+    private zone: NgZone,
     private router: Router,
     private route: ActivatedRoute,
     private errorServer: IErrorService,
@@ -120,6 +122,15 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
     this.editorInitialized = true;
   }
 
+  onGoToDefinition(event: GoToDefinitionEvent) {
+    this.logServer.LogToConsole(JSON.stringify(event));
+
+    this.recordingTreeComponent.selectNodeByPath(this.recordingTreeComponent.treeComponent.tree, event.path);
+    this.zone.runTask(() => {
+      this.recordingEditor.codeEditor.focus();
+      this.recordingEditor.codeEditor.setPosition(event.offset);
+    });
+  }
 
   resetState() {
     this.recordingTreeComponent.treeComponent.treeModel = this.recordingTreeComponent.tree;

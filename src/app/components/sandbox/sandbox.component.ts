@@ -26,6 +26,7 @@ import { TraceTransactionLogs, TraceTransactionLog } from 'shared/Tracer/models/
 import { ViewComment } from 'src/app/models/comment/view-comment';
 import { TutorBitsExampleCommentService } from 'src/app/services/example/tutor-bits-example-comment.service';
 import { TutorBitsExampleRatingService } from 'src/app/services/example/tutor-bits-example-rating.service';
+import { GoToDefinitionEvent } from 'src/app/sub-components/editor/monaco-editor.component';
 
 @Component({
   templateUrl: './sandbox.component.html',
@@ -108,6 +109,16 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate {
       this.recordingTreeComponent.allowEdit(true);
       await this.LoadProject();
     }
+  }
+
+  onGoToDefinition(event: GoToDefinitionEvent) {
+    this.logServer.LogToConsole(JSON.stringify(event));
+
+    this.recordingTreeComponent.selectNodeByPath(this.recordingTreeComponent.treeComponent.tree, event.path);
+    this.zone.runTask(() => {
+      this.recordingEditor.codeEditor.focus();
+      this.recordingEditor.codeEditor.setPosition(event.offset);
+    });
   }
 
   async startEditing(loadedTransactionLogs: TraceTransactionLog[]) {

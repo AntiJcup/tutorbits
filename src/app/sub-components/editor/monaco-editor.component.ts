@@ -1,8 +1,12 @@
 import { Output, EventEmitter, OnDestroy } from '@angular/core';
 import { ILogService } from 'src/app/services/abstract/ILogService';
 
-export abstract class MonacoEditorComponent implements OnDestroy {
+export interface GoToDefinitionEvent {
+  path: string;
+  offset: monaco.Position;
+}
 
+export abstract class MonacoEditorComponent implements OnDestroy {
   private static editOptions: monaco.editor.IEditorOptions = {
     readOnly: false
   };
@@ -10,7 +14,9 @@ export abstract class MonacoEditorComponent implements OnDestroy {
     readOnly: true
   };
 
-  public editorOptions = { theme: 'vs-dark', language: 'javascript' };
+  public editorOptions = {
+    theme: 'vs-dark', language: 'javascript'
+  };
   public startingCode = '';
   protected fileEditors: { [fileName: string]: monaco.editor.ITextModel } = {};
   private filePath: string;
@@ -29,6 +35,7 @@ export abstract class MonacoEditorComponent implements OnDestroy {
   private windowCallback: (e: UIEvent) => any;
 
   @Output() codeInitialized = new EventEmitter<MonacoEditorComponent>();
+  @Output() gotoDefinition = new EventEmitter<GoToDefinitionEvent>();
 
   constructor(protected logServer: ILogService) {
     this.windowCallback = (e: UIEvent) => {
@@ -51,6 +58,14 @@ export abstract class MonacoEditorComponent implements OnDestroy {
       this.Show(false);
     }
     this.codeInitialized.emit(this);
+
+    // Hack to capture go to definition requests
+    const codeEditorService = this.codeEditor._codeEditorService;
+    codeEditorService.openCodeEditor = ({resource, options}) => {
+      const file = resource.path;
+      const range: monaco.Range = options.selection;
+      this.gotoDefinition.emit({path: file, offset: new monaco.Position(range.startLineNumber, range.startColumn)} as GoToDefinitionEvent);
+    };
   }
 
   public get currentFilePath() {
@@ -160,6 +175,6 @@ export abstract class MonacoEditorComponent implements OnDestroy {
   }
 
   public GenerateNewEditorModel(path: string, data: string = ''): monaco.editor.ITextModel {
-    return monaco.editor.createModel(data, this.GetLanguageByPath(path));
+    return monaco.editor.createModel(data, this.GetLanguageByPath(path), monaco.Uri.file(path));
   }
 }

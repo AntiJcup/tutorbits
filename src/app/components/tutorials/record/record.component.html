@@ -12,7 +12,7 @@
     <div class="editorContainer" fxLayout fxLayoutGap="5px">
         <app-resource-viewer class="resourceViewer">
         </app-resource-viewer>
-        <app-recording-editor class="recordingEditor" (codeInitialized)="onCodeInitialized($event)">
+        <app-recording-editor class="recordingEditor" (codeInitialized)="onCodeInitialized($event)"  (gotoDefinition)="onGoToDefinition($event)">
         </app-recording-editor>
         <app-preview class="preview" (closeClicked)="onCloseClicked($event)" >
         </app-preview>

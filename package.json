@@ -11,7 +11,8 @@
     "buildProd": "ng build --prod",
     "test": "ng test",
     "lint": "ng lint",
-    "e2e": "ng e2e"
+    "e2e": "ng e2e",
+    "postinstall": "patch-package"
   },
   "private": true,
   "dependencies": {
@@ -39,6 +40,7 @@
     "ngx-device-detector": "^1.4.1",
     "ngx-monaco-editor": "^8.1.1",
     "ngx-webcam": "^0.2.6",
+    "patch-package": "^6.2.2",
     "rxjs": "~6.4.0",
     "rxjs-compat": "^6.5.5",
     "tslib": "^1.11.1",
