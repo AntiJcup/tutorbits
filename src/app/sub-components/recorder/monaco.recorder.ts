@@ -181,10 +181,10 @@ export class MonacoRecorder extends TransactionRecorder {
         this.logging.LogToConsole('MonacoRecorder', `OnFileModified change count: ${e.changes.length}`);
         for (const change of e.changes) {
             this.logging.LogToConsole('MonacoRecorder', `OnFileModified change count: ${change}`);
-            const previousData = change.rangeLength <= 0 ?
+            const previousCache = this.codeComponent.GetCacheForCurrentFile();
+            const previousData = change.rangeLength <= 0 || !previousCache ?
                 undefined :
-                this.codeComponent
-                    .GetCacheForCurrentFile()
+                previousCache
                     .getValue()
                     .substring(change.rangeOffset, change.rangeOffset + change.rangeLength);
             this.logging.LogToConsole('MonacoRecorder', `OnFileModified Previous File Data: ${previousData}`);

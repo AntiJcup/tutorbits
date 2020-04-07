@@ -61,10 +61,11 @@ export abstract class MonacoEditorComponent implements OnDestroy {
 
     // Hack to capture go to definition requests
     const codeEditorService = this.codeEditor._codeEditorService;
-    codeEditorService.openCodeEditor = ({resource, options}) => {
+    codeEditorService.openCodeEditor = ({ resource, options }) => {
       const file = resource.path;
       const range: monaco.Range = options.selection;
-      this.gotoDefinition.emit({path: file, offset: new monaco.Position(range.startLineNumber, range.startColumn)} as GoToDefinitionEvent);
+      this.gotoDefinition.emit(
+        { path: file, offset: new monaco.Position(range.startLineNumber, range.startColumn) } as GoToDefinitionEvent);
     };
   }
 
@@ -82,6 +83,7 @@ export abstract class MonacoEditorComponent implements OnDestroy {
 
     if (!this.filePath || this.filePath === '') {
       this.Show(false);
+      return;
     } else {
       this.Show(true);
     }
@@ -99,6 +101,7 @@ export abstract class MonacoEditorComponent implements OnDestroy {
 
   public ClearCacheForFile(path: string) {
     this.logServer.LogToConsole('MonacoEditor', `ClearCacheForFile: ${path}`);
+    this.fileEditors[path].dispose();
     delete this.fileEditors[path];
   }
 
@@ -175,6 +178,7 @@ export abstract class MonacoEditorComponent implements OnDestroy {
   }
 
   public GenerateNewEditorModel(path: string, data: string = ''): monaco.editor.ITextModel {
+    this.logServer.LogToConsole('editor', `Generating new model: ${path}`);
     return monaco.editor.createModel(data, this.GetLanguageByPath(path), monaco.Uri.file(path));
   }
 }
