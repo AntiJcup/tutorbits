@@ -82,7 +82,9 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
     try {
       const tutorial: ViewTutorial = await this.tutorialService.Get(this.tutorialId);
       this.titleService.SetTitle(`Recording: ${tutorial.title}`);
-      this.tutorial = tutorial;
+      this.zone.runTask(() => {
+        this.tutorial = tutorial;
+      });
     } catch (e) {
       this.errorServer.HandleError('Record', e);
     }
@@ -106,7 +108,9 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
       this.errorServer.ClearError();
     }
     this.logServer.LogToConsole('Record', webCam.stream);
-    this.streamInitialized = true;
+    this.zone.runTask(() => {
+      this.streamInitialized = true;
+    });
     this.webCamRecorder = new WebCamRecorder(this.recordingWebCam, this.videoRecordingService, this.tutorialId);
     await this.webCamRecorder.Initialize();
   }
@@ -119,7 +123,9 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
   onCodeInitialized(recordingEditor: RecordingEditorComponent) {
     this.recordingEditor.AllowEdits(false);
     this.recordingTreeComponent.selectNodeByPath(this.recordingTreeComponent.treeComponent.tree, '/project');
-    this.editorInitialized = true;
+    this.zone.runTask(() => {
+      this.editorInitialized = true;
+    });
   }
 
   onGoToDefinition(event: GoToDefinitionEvent) {
