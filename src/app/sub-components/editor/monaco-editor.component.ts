@@ -111,6 +111,9 @@ export abstract class MonacoEditorComponent implements OnDestroy {
 
   public ClearCacheForFile(path: string) {
     this.logServer.LogToConsole('MonacoEditor', `ClearCacheForFile: ${path}`);
+    if (!this.fileEditors[path]) {
+      return;
+    }
     this.fileEditors[path].dispose();
     delete this.fileEditors[path];
   }

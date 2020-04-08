@@ -127,6 +127,9 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate {
       this.recordingTreeComponent.allowEdit(true);
 
       this.recordingTreeComponent.selectNodeByPath(this.recordingTreeComponent.treeComponent.tree, '/project');
+      setTimeout(() => {
+        this.recordingTreeComponent.expandNodeByPath(this.recordingTreeComponent.treeComponent.tree, '/project');
+      }, 100);
 
 
       this.codeRecorder = new MonacoRecorder(

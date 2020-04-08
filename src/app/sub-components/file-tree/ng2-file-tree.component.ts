@@ -183,6 +183,35 @@ export abstract class NG2FileTreeComponent {
     });
   }
 
+  public expandNodeByPath(node: Tree, path: string, retry: boolean = true) {
+    this.logServer.LogToConsole('FileTree', `Expanding node: ${path}`);
+    this.selectedPath = path;
+    this.zone.runTask(() => {
+      const foundNode = this.findNodeByPath(node, path);
+      if (!foundNode) {
+        if (retry) {
+          setTimeout(() => {
+            this.expandNodeByPath(node, path, false);
+          }, 1);
+          return;
+        } else {
+          throw new Error(`Node not found ${path}`);
+        }
+      }
+      const controller = this.treeComponent.getControllerByNodeId(foundNode.id);
+      if (controller == null) {
+        if (retry) {
+          setTimeout(() => {
+            this.expandNodeByPath(node, path, false);
+          }, 1);
+        } else {
+          throw new Error(`Node missing controller ${path}`);
+        }
+      }
+      controller.expand();
+    });
+  }
+
   public addNodeByPath(path: string, isBranch: boolean, childModel: TutorBitsTreeModel = { value: '' }): void {
     this.zone.runTask(() => {
       if (path.endsWith('/') && !isBranch) {
