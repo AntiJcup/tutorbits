@@ -280,6 +280,7 @@ export class WatchComponent implements OnInit, OnDestroy {
         }
         this.zone.runTask(() => {
           this.publishMode = false;
+          this.router.navigate([`watch/${this.tutorialId}`]);
         });
       }
     } catch (err) {
