@@ -52,7 +52,17 @@ export abstract class MonacoEditorComponent implements OnDestroy {
     this.codeEditor.layout({ width: window.innerWidth - 810, height: window.innerHeight });
   }
 
+  clearPreviousModels() {
+    for (const model of monaco.editor.getModels()) {
+      if (model.isDisposed()) {
+        continue;
+      }
+      model.dispose();
+    }
+  }
+
   editorOnInit(codeEditor: monaco.editor.IEditor) {
+    this.clearPreviousModels();
     this.codeEditor = codeEditor as monaco.editor.ICodeEditor;
     if (!this.filePath || this.filePath === '') {
       this.Show(false);
