@@ -76,6 +76,10 @@ export abstract class NG2FileTreeComponent {
     }
     this.selectedPath = this.folderSelected = this.getPathForNode(event.node);
 
+    if (event.node.parent.isRoot()) { // No collapsing root level nodes
+      return;
+    }
+
     if (!test.isCollapsed()) {
       test.collapse();
     } else {
@@ -352,13 +356,13 @@ export abstract class NG2FileTreeComponent {
     const selectedNodeController = this.treeComponent.getControllerByNodeId(selectedNode.id);
 
     const newNodeModel = {
-      value: 'Untitled_Folder',
+      value: 'untitled_folder',
       children: []
     } as TreeModel;
 
     const newNode = await selectedNodeController.addChildAsync(newNodeModel);
     const newNodeController = this.treeComponent.getControllerByNodeId(newNode.id);
-    newNodeController.rename('Untitled_Folder');
+    newNodeController.rename('untitled_folder');
     newNodeController.startRenaming();
   }
 
@@ -368,13 +372,13 @@ export abstract class NG2FileTreeComponent {
     const selectedNodeController = this.treeComponent.getControllerByNodeId(selectedNode.id);
 
     const newNodeModel = {
-      value: 'Untitled_File',
+      value: 'untitled_file',
       type: ResourceType.code
     } as TutorBitsTreeModel;
 
     const newNode = await selectedNodeController.addChildAsync(newNodeModel)
     const newNodeController = this.treeComponent.getControllerByNodeId(newNode.id);
-    newNodeController.rename('Untitled_File');
+    newNodeController.rename('untitled_file');
     newNodeController.startRenaming();
 
     this.internalFiles[this.getPathForNode(newNode)] = newNode.node;
@@ -474,7 +478,12 @@ export abstract class NG2FileTreeComponent {
     const childTree = this.CreateChildTree(splitPath.slice(1).join('/'), tmodel, options, cache, cacheName);
     if (childTree !== null) {
       if (model.children) {
-        model.children.push(childTree);
+        const exists = model.children.find((c) => {
+          return c.value === childTree.value;
+        });
+        if (!exists) {
+          model.children.push(childTree);
+        }
       } else {
         model.children = [childTree];
       }

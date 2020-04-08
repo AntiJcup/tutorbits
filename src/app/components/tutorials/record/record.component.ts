@@ -215,9 +215,6 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
       this.recordingTreeComponent.allowEdit(true);
       this.recordingEditor.AllowEdits(true);
       this.recording = true;
-      setTimeout(() => {
-        this.recordingTreeComponent.expandNodeByPath(this.recordingTreeComponent.treeComponent.tree, '/project');
-      });
     } catch (e) {
       this.errorServer.HandleError('Record', `Failed start record ${e}`);
     }
