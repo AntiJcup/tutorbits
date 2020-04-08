@@ -154,6 +154,9 @@ export abstract class MonacoEditorComponent implements OnDestroy {
   public AllowEdits(edit: boolean): void {
     this.codeEditor.updateOptions(edit ? MonacoEditorComponent.editOptions : MonacoEditorComponent.readOnlyOptions);
     const editorModel = this.codeEditor.getModel() as monaco.editor.ITextModel;
+    if (!editorModel) {
+      return;
+    }
     editorModel.pushEOL(monaco.editor.EndOfLineSequence.CRLF);
   }
 
