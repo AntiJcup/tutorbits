@@ -22,7 +22,7 @@ export class CommentButtonComponent implements OnInit {
   async ngOnInit() {
     try {
       const count = await this.commentService.GetCommentCount(this.targetId);
-      this.text = `Comments (${count})`;
+      this.text = `Comments: ${count}`;
     } catch (err) {
       this.errorServer.HandleError('CommentsButton', `Error loading comment count`);
     }
