@@ -66,6 +66,7 @@ export abstract class NG2FileTreeComponent {
     protected myElement: ElementRef) { }
 
   public nodeSelected(event: NodeSelectedEvent) {
+    this.logServer.LogToConsole('FileTree', event);
     const test = this.treeComponent.getControllerByNodeId(event.node.id);
     this.fileSelected = null;
     this.folderSelected = null;
@@ -85,7 +86,6 @@ export abstract class NG2FileTreeComponent {
     } else {
       test.expand();
     }
-    this.logServer.LogToConsole('FileTree', event);
   }
 
   public getPathForNode(e: Tree) {
@@ -183,6 +183,7 @@ export abstract class NG2FileTreeComponent {
           throw new Error(`Node missing controller ${path}`);
         }
       }
+      this.logServer.LogToConsole('FileTree', `Selecting found node: ${path}`);
       controller.select();
     });
   }
