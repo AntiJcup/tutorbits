@@ -23,11 +23,22 @@ export class TutorialCardComponent implements OnInit {
     if (minutes < 10) { minutesStr = '0' + minutesStr; }
     if (seconds < 10) { secondsStr = '0' + secondsStr; }
 
-    return hoursStr + ':' + minutesStr + ':' + secondsStr;
+    let output = '';
+    if (hoursStr !== '00') {
+      output += hoursStr + ':';
+    }
+
+    output += minutesStr + ':';
+    output += secondsStr + '';
+    return output;
   }
 
   get tutorialSubTitle(): string {
-    return `${this.tutorial.score} - ${this.tutorial.owner} - ${this.tutorial.topic} - ${this.tutorialDuration} - ${new Date(this.tutorial.dateCreated).toLocaleDateString()}`;
+    return `${this.tutorial.score} - ${this.tutorial.owner} - ${this.tutorial.topic}`;
+  }
+
+  get tutorialCreatedDate(): string {
+    return new Date(this.tutorial.dateCreated).toLocaleDateString();
   }
 
   constructor() { }

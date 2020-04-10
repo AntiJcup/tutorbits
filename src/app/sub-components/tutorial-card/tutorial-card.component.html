@@ -4,6 +4,8 @@
         <mat-card-subtitle [innerText]="tutorialSubTitle"></mat-card-subtitle>
     </mat-card-header>
     <img class="thumbnail" mat-card-image [src]="tutorial.thumbnailUrl" alt="Placeholder Image">
+    <span class="duration">{{tutorialDuration}}</span>
+    <span class="created">{{tutorialCreatedDate}}</span>
     <mat-card-content>
         <p [innerText]="tutorial.description" matTooltip="{{tutorial.description}}">
         </p>
