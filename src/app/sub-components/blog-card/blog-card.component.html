@@ -1,7 +1,7 @@
 <mat-card class="blog-card">
     <mat-card-header>
         <mat-card-title [innerText]="article.title"></mat-card-title>
-        <mat-card-subtitle>Author - {{article.owner}}</mat-card-subtitle>
+        <mat-card-subtitle>Author - {{article.owner}} - {{article.dateCreated}}</mat-card-subtitle>
     </mat-card-header>
     <mat-card-content>
         <p [innerText]="article.body">
