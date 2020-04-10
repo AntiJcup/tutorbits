@@ -34,7 +34,7 @@ export class TutorialCardComponent implements OnInit {
   }
 
   get tutorialSubTitle(): string {
-    return `${this.tutorial.score} - ${this.tutorial.owner} - ${this.tutorial.topic}`;
+    return `${this.tutorial.owner} - ${this.tutorial.topic}`;
   }
 
   get tutorialCreatedDate(): string {

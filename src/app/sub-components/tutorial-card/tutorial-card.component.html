@@ -6,6 +6,7 @@
     <img class="thumbnail" mat-card-image [src]="tutorial.thumbnailUrl" alt="Placeholder Image">
     <span class="duration">{{tutorialDuration}}</span>
     <span class="created">{{tutorialCreatedDate}}</span>
+    <span class="score">Votes: {{tutorial.score}}</span>
     <mat-card-content>
         <p [innerText]="tutorial.description" matTooltip="{{tutorial.description}}">
         </p>
