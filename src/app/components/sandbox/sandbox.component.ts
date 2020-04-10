@@ -27,6 +27,7 @@ import { ViewComment } from 'src/app/models/comment/view-comment';
 import { TutorBitsExampleCommentService } from 'src/app/services/example/tutor-bits-example-comment.service';
 import { TutorBitsExampleRatingService } from 'src/app/services/example/tutor-bits-example-rating.service';
 import { GoToDefinitionEvent } from 'src/app/sub-components/editor/monaco-editor.component';
+import { Meta } from '@angular/platform-browser';
 
 @Component({
   templateUrl: './sandbox.component.html',
@@ -71,6 +72,7 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate, OnDestr
     private previewService: IPreviewService,
     private titleService: ITitleService,
     private authService: IAuthService,
+    private metaService: Meta,
     public commentService: TutorBitsExampleCommentService, // Dont remove these components use them
     public ratingService: TutorBitsExampleRatingService) {
     this.projectType = this.route.snapshot.paramMap.get('projectType');
@@ -90,6 +92,9 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate, OnDestr
   }
 
   ngOnInit(): void {
+    this.metaService.updateTag({ name: 'description', content: `TutotorBits Sandbox` },
+      'name=\'description\'');
+
     this.selectFileSub = this.recordingTreeComponent.treeComponent.nodeSelected.subscribe(() => {
       this.eventService.TriggerButtonClick('Preview', `PreviewClose - ${this.projectId}`);
       this.previewComponent.ClosePreview();
@@ -97,6 +102,8 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate, OnDestr
   }
 
   ngOnDestroy(): void {
+    this.metaService.removeTag('name=\'description\'');
+
     if (this.selectFileSub) {
       this.selectFileSub.unsubscribe();
     }
