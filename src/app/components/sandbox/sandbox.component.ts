@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, NgZone, HostListener } from '@angular/core';
+import { Component, OnInit, ViewChild, NgZone, HostListener, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MonacoRecorder, MonacoRecorderSettings } from 'src/app/sub-components/recorder/monaco.recorder';
 import { RecordingEditorComponent } from 'src/app/sub-components/recording-editor/recording-editor.component';
@@ -11,7 +11,7 @@ import { PropogateTreeOptions } from 'src/app/sub-components/file-tree/ng2-file-
 import { ResourceViewerComponent } from 'src/app/sub-components/resource-viewer/resource-viewer.component';
 import { IPreviewService } from 'src/app/services/abstract/IPreviewService';
 import { ComponentCanDeactivate } from 'src/app/services/guards/tutor-bits-pending-changes-guard.service';
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { IEventService } from 'src/app/services/abstract/IEventService';
 import { PreviewComponent } from 'src/app/sub-components/preview/preview.component';
 import { ITitleService } from 'src/app/services/abstract/ITitleService';
@@ -32,7 +32,7 @@ import { GoToDefinitionEvent } from 'src/app/sub-components/editor/monaco-editor
   templateUrl: './sandbox.component.html',
   styleUrls: ['./sandbox.component.sass']
 })
-export class SandboxComponent implements OnInit, ComponentCanDeactivate {
+export class SandboxComponent implements OnInit, ComponentCanDeactivate, OnDestroy {
   public projectId: string;
   @ViewChild(RecordingFileTreeComponent, { static: true }) recordingTreeComponent: RecordingFileTreeComponent;
   @ViewChild(RecordingEditorComponent, { static: true }) recordingEditor: RecordingEditorComponent;
@@ -57,6 +57,8 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate {
   loadingComments = false;
   comments: ViewComment[];
   showCommentSection = false;
+
+  selectFileSub: Subscription;
 
   constructor(
     private zone: NgZone,
@@ -87,7 +89,17 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate {
     }
   }
 
-  async ngOnInit(): Promise<void> {
+  ngOnInit(): void {
+    this.selectFileSub = this.recordingTreeComponent.treeComponent.nodeSelected.subscribe(() => {
+      this.eventService.TriggerButtonClick('Preview', `PreviewClose - ${this.projectId}`);
+      this.previewComponent.ClosePreview();
+    });
+  }
+
+  ngOnDestroy(): void {
+    if (this.selectFileSub) {
+      this.selectFileSub.unsubscribe();
+    }
   }
 
   // Starting point as monaco will call this when loaded

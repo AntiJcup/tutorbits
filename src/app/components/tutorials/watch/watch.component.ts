@@ -82,6 +82,8 @@ export class WatchComponent implements OnInit, OnDestroy {
   private onLoadStartSub: Subscription;
   private onLoadCompleteSub: Subscription;
 
+  selectFileSub: Subscription;
+
   constructor(
     private router: Router,
     private route: ActivatedRoute,
@@ -108,6 +110,11 @@ export class WatchComponent implements OnInit, OnDestroy {
   }
 
   async ngOnInit() {
+    this.selectFileSub = this.playbackTreeComponent.treeComponent.nodeSelected.subscribe(() => {
+      this.eventService.TriggerButtonClick('Record', `PreviewClose - ${this.tutorialId}`);
+      this.previewComponent.ClosePreview();
+    });
+
     if (!this.dataService.GetShownWatchHelp()) {
       this.dialog.open(WatchGuideComponent);
       this.dataService.SetShownWatchHelp(true);
@@ -142,6 +149,10 @@ export class WatchComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.metaService.removeTag('name=\'description\'');
     clearInterval(this.paceKeeperInterval);
+
+    if (this.selectFileSub) {
+      this.selectFileSub.unsubscribe();
+    }
 
     if (this.onLoadStartSub) {
       this.onLoadStartSub.unsubscribe();

@@ -13,7 +13,7 @@ import { IErrorService } from 'src/app/services/abstract/IErrorService';
 import { ILogService } from 'src/app/services/abstract/ILogService';
 import { IVideoService } from 'src/app/services/abstract/IVideoService';
 import { ResourceViewerComponent } from 'src/app/sub-components/resource-viewer/resource-viewer.component';
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { ComponentCanDeactivate } from 'src/app/services/guards/tutor-bits-pending-changes-guard.service';
 import { IEventService } from 'src/app/services/abstract/IEventService';
 import { PreviewComponent } from 'src/app/sub-components/preview/preview.component';
@@ -59,6 +59,8 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
   timeoutWarningTimer: any;
   timeoutTimer: any;
 
+  selectFileSub: Subscription;
+
   constructor(
     private zone: NgZone,
     private router: Router,
@@ -79,6 +81,11 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
   }
 
   async ngOnInit() {
+    this.selectFileSub = this.recordingTreeComponent.treeComponent.nodeSelected.subscribe(() => {
+      this.eventService.TriggerButtonClick('Record', `PreviewClose - ${this.tutorialId}`);
+      this.previewComponent.ClosePreview();
+    });
+
     try {
       const tutorial: ViewTutorial = await this.tutorialService.Get(this.tutorialId);
       this.titleService.SetTitle(`Recording: ${tutorial.title}`);
@@ -91,6 +98,10 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
   }
 
   ngOnDestroy(): void {
+    if (this.selectFileSub) {
+      this.selectFileSub.unsubscribe();
+    }
+
     if (this.timeoutWarningTimer) {
       clearTimeout(this.timeoutWarningTimer);
       this.timeoutWarningTimer = null;
