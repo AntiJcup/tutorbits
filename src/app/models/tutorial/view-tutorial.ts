@@ -11,4 +11,5 @@ export interface ViewTutorial {
     score: number;
     projectId: string;
     videoId: string;
+    dateCreated: string;
 }
