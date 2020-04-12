@@ -49,6 +49,7 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate, OnDestr
   downloading = false;
   loading = true;
   isLoggedIn = false;
+  publishing = false;
 
   savedProject: ViewProject;
 
@@ -285,7 +286,7 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate, OnDestr
 
   public async onPublish(e: any) {
     this.eventService.TriggerButtonClick('Preview', `PublishProject - ${this.projectId}`);
-
+    this.publishing = true;
 
     try {
       await this.codeRecorder.Save();
@@ -293,6 +294,8 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate, OnDestr
     } catch (e) {
       this.errorServer.HandleError(`Sandbox`, e);
     }
+
+    this.publishing = false;
   }
 
   @HostListener('window:beforeunload')
