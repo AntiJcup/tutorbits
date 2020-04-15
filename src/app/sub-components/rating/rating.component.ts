@@ -37,7 +37,9 @@ export class RatingComponent implements OnInit {
     }
 
     try {
-      this.rating = await this.ratingService.GetYourRatingForTarget(this.targetId);
+      if (this.loggedIn) {
+        this.rating = await this.ratingService.GetYourRatingForTarget(this.targetId);
+      }
     } catch (err) {
       this.errorServer.HandleError('Rating', `Error loading rating`);
     }
