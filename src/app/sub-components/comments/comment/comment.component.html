@@ -3,4 +3,7 @@
         <div class="commentBody" [innerText]="comment.body"></div>
     </div>
     <div class="commentDate">{{commentDate}}</div>
+    <div mat-icon-button *ngIf="owned">
+        edit
+    </div>
 </div>

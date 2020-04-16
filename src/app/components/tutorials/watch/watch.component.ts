@@ -2,11 +2,11 @@ import { Component, OnInit, ViewChild, ElementRef, NgZone, OnDestroy } from '@an
 import { OnlineProjectLoader, OnlineTransactionReader } from 'shared/Tracer/lib/ts/OnlineTransaction';
 import { environment } from 'src/environments/environment';
 import { ActivatedRoute, Router } from '@angular/router';
-import { PlaybackEditorComponent } from 'src/app/sub-components/playback-editor/playback-editor.component';
-import { PlaybackFileTreeComponent } from 'src/app/sub-components/playback-file-tree/playback-file-tree.component';
-import { MonacoPlayer } from 'src/app/sub-components/player/monaco.player';
+import { PlaybackEditorComponent } from 'src/app/sub-components/playing/playback-editor/playback-editor.component';
+import { PlaybackFileTreeComponent } from 'src/app/sub-components/playing/playback-file-tree/playback-file-tree.component';
+import { MonacoPlayer } from 'src/app/sub-components/playing/player/monaco.player';
 import { ApiHttpRequest, ApiHttpRequestInfo } from 'shared/web/lib/ts/ApiHttpRequest';
-import { VidPlayer } from 'src/app/sub-components/player/vid.player';
+import { VidPlayer } from 'src/app/sub-components/playing/player/vid.player';
 import { OnlineStreamLoader } from 'shared/media/lib/ts/OnlineStreamLoader';
 import { TransactionPlayerState } from 'shared/Tracer/lib/ts/TransactionPlayer';
 import { IErrorService } from 'src/app/services/abstract/IErrorService';
@@ -17,7 +17,7 @@ import { ITracerProjectService } from 'src/app/services/abstract/ITracerProjectS
 import { ResourceViewerComponent } from 'src/app/sub-components/resource-viewer/resource-viewer.component';
 import { Subscription } from 'rxjs';
 import { IEventService } from 'src/app/services/abstract/IEventService';
-import { PlaybackMouseComponent } from 'src/app/sub-components/playback-mouse/playback-mouse.component';
+import { PlaybackMouseComponent } from 'src/app/sub-components/playing/playback-mouse/playback-mouse.component';
 import { PreviewComponent } from 'src/app/sub-components/preview/preview.component';
 import { ITitleService } from 'src/app/services/abstract/ITitleService';
 import { ViewTutorial } from 'src/app/models/tutorial/view-tutorial';

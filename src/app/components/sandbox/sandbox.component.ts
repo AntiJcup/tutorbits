@@ -1,8 +1,8 @@
 import { Component, OnInit, ViewChild, NgZone, HostListener, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MonacoRecorder, MonacoRecorderSettings } from 'src/app/sub-components/recorder/monaco.recorder';
-import { RecordingEditorComponent } from 'src/app/sub-components/recording-editor/recording-editor.component';
-import { RecordingFileTreeComponent } from 'src/app/sub-components/recording-file-tree/recording-file-tree.component';
+import { MonacoRecorder, MonacoRecorderSettings } from 'src/app/sub-components/recording/recorder/monaco.recorder';
+import { RecordingEditorComponent } from 'src/app/sub-components/recording/recording-editor/recording-editor.component';
+import { RecordingFileTreeComponent } from 'src/app/sub-components/recording/recording-file-tree/recording-file-tree.component';
 import { LocalTransactionWriter, LocalProjectWriter, LocalProjectLoader, LocalTransactionReader } from 'shared/Tracer/lib/ts/LocalTransaction';
 import { Guid } from 'guid-typescript';
 import { IErrorService } from 'src/app/services/abstract/IErrorService';
@@ -20,13 +20,13 @@ import { ViewProject } from 'src/app/models/project/view-project';
 import { CreateProject } from 'src/app/models/project/create-project';
 import { IAuthService } from 'src/app/services/abstract/IAuthService';
 import { ITracerProjectService } from 'src/app/services/abstract/ITracerProjectService';
-import { MonacoPlayer } from 'src/app/sub-components/player/monaco.player';
+import { MonacoPlayer } from 'src/app/sub-components/playing/player/monaco.player';
 import { TransactionPlayerSettings } from 'shared/Tracer/lib/ts/TransactionPlayer';
 import { TraceTransactionLogs, TraceTransactionLog } from 'shared/Tracer/models/ts/Tracer_pb';
 import { ViewComment } from 'src/app/models/comment/view-comment';
 import { TutorBitsExampleCommentService } from 'src/app/services/example/tutor-bits-example-comment.service';
 import { TutorBitsExampleRatingService } from 'src/app/services/example/tutor-bits-example-rating.service';
-import { GoToDefinitionEvent } from 'src/app/sub-components/editor/monaco-editor.component';
+import { GoToDefinitionEvent } from 'src/app/sub-components/editors/editor/monaco-editor.component';
 import { Meta } from '@angular/platform-browser';
 
 @Component({

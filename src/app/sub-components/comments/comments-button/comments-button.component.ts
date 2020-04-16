@@ -1,5 +1,5 @@
 import { Component, OnInit, Input } from '@angular/core';
-import { SavingButtonComponent } from '../saving-button/saving-button.component';
+import { SavingButtonComponent } from '../../buttons/saving-button/saving-button.component';
 import { TutorBitsBaseCommentService } from 'src/app/services/abstract/tutor-bits-base-comment.service';
 import { IErrorService } from 'src/app/services/abstract/IErrorService';
 

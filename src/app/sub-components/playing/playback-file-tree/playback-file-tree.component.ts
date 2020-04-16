@@ -1,6 +1,6 @@
 import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { TreeModel, NodeMenuItem, NodeMenuItemAction } from 'shared/Ng2-Tree';
-import { NG2FileTreeComponent } from '../file-tree/ng2-file-tree.component';
+import { NG2FileTreeComponent } from '../../file-tree/ng2-file-tree.component';
 
 @Component({
   selector: 'app-playback-file-tree',

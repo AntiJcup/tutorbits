@@ -2,12 +2,12 @@ import { Component, OnInit, ViewChild, NgZone, OnDestroy, HostListener } from '@
 import { OnlineProjectLoader } from 'shared/Tracer/lib/ts/OnlineTransaction';
 import { ActivatedRoute, Router } from '@angular/router';
 import { environment } from 'src/environments/environment';
-import { MonacoRecorder } from 'src/app/sub-components/recorder/monaco.recorder';
-import { RecordingEditorComponent } from 'src/app/sub-components/recording-editor/recording-editor.component';
-import { RecordingFileTreeComponent } from 'src/app/sub-components/recording-file-tree/recording-file-tree.component';
+import { MonacoRecorder } from 'src/app/sub-components/recording/recorder/monaco.recorder';
+import { RecordingEditorComponent } from 'src/app/sub-components/recording/recording-editor/recording-editor.component';
+import { RecordingFileTreeComponent } from 'src/app/sub-components/recording/recording-file-tree/recording-file-tree.component';
 import { ApiHttpRequestInfo, ApiHttpRequest } from 'shared/web/lib/ts/ApiHttpRequest';
-import { RecordingWebCamComponent } from 'src/app/sub-components/recording-web-cam/recording-web-cam.component';
-import { WebCamRecorder } from 'src/app/sub-components/recorder/webcam.recorder';
+import { RecordingWebCamComponent } from 'src/app/sub-components/recording/recording-web-cam/recording-web-cam.component';
+import { WebCamRecorder } from 'src/app/sub-components/recording/recorder/webcam.recorder';
 import { TutorBitsTutorialService } from 'src/app/services/tutorial/tutor-bits-tutorial.service';
 import { IErrorService } from 'src/app/services/abstract/IErrorService';
 import { ILogService } from 'src/app/services/abstract/ILogService';
@@ -20,7 +20,7 @@ import { PreviewComponent } from 'src/app/sub-components/preview/preview.compone
 import { ITitleService } from 'src/app/services/abstract/ITitleService';
 import { ViewTutorial } from 'src/app/models/tutorial/view-tutorial';
 import { ITracerProjectService } from 'src/app/services/abstract/ITracerProjectService';
-import { GoToDefinitionEvent } from 'src/app/sub-components/editor/monaco-editor.component';
+import { GoToDefinitionEvent } from 'src/app/sub-components/editors/editor/monaco-editor.component';
 
 @Component({
   templateUrl: './record.component.html',

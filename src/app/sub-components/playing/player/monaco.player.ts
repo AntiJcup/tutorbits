@@ -1,15 +1,15 @@
 import { TransactionPlayer, TransactionPlayerSettings } from 'shared/Tracer/lib/ts/TransactionPlayer';
 import { TraceTransaction } from 'shared/Tracer/models/ts/Tracer_pb';
 import { IProjectReader } from 'shared/Tracer/lib/ts/IProjectReader';
-import { MonacoEditorComponent } from '../editor/monaco-editor.component';
-import { NG2FileTreeComponent, ResourceType, TutorBitsTreeModel } from '../file-tree/ng2-file-tree.component';
+import { MonacoEditorComponent } from '../../editors/editor/monaco-editor.component';
+import { NG2FileTreeComponent, ResourceType, TutorBitsTreeModel } from '../../file-tree/ng2-file-tree.component';
 import { NodeSelectedEvent } from 'shared/Ng2-Tree';
 import { Subscription } from 'rxjs';
 import { ILogService } from 'src/app/services/abstract/ILogService';
-import { ResourceViewerComponent, ResourceData } from '../resource-viewer/resource-viewer.component';
+import { ResourceViewerComponent, ResourceData } from '../../resource-viewer/resource-viewer.component';
 import { EventEmitter } from '@angular/core';
 import { PlaybackMouseComponent } from '../playback-mouse/playback-mouse.component';
-import { PreviewComponent } from '../preview/preview.component';
+import { PreviewComponent } from '../../preview/preview.component';
 import { ITransactionReader } from 'shared/Tracer/lib/ts/ITransactionReader';
 
 export interface LoadStartEvent {

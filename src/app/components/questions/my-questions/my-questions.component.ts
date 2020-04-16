@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { TutorBitsQuestionService } from 'src/app/services/question/tutor-bits-question.service';
 import { IErrorService } from 'src/app/services/abstract/IErrorService';
 import { ILogService } from 'src/app/services/abstract/ILogService';
-import { DeleteQuestionEvent } from 'src/app/sub-components/edit-question-card/edit-question-card.component';
+import { DeleteQuestionEvent } from 'src/app/sub-components/questions/edit-question-card/edit-question-card.component';
 import { ITitleService } from 'src/app/services/abstract/ITitleService';
 
 @Component({

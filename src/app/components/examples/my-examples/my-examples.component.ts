@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { TutorBitsExampleService } from 'src/app/services/example/tutor-bits-example.service';
 import { IErrorService } from 'src/app/services/abstract/IErrorService';
 import { ILogService } from 'src/app/services/abstract/ILogService';
-import { DeleteExampleEvent } from 'src/app/sub-components/edit-example-card/edit-example-card.component';
+import { DeleteExampleEvent } from 'src/app/sub-components/examples/edit-example-card/edit-example-card.component';
 import { ITitleService } from 'src/app/services/abstract/ITitleService';
 
 @Component({

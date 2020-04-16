@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
-import { MonacoEditorComponent } from '../editor/monaco-editor.component';
+import { MonacoEditorComponent } from '../../editors/editor/monaco-editor.component';
 import { ILogService } from 'src/app/services/abstract/ILogService';
 
 @Component({

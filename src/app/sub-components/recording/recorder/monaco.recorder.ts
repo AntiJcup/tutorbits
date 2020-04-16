@@ -5,14 +5,14 @@ import { IProjectReader } from 'shared/Tracer/lib/ts/IProjectReader';
 import { IProjectWriter } from 'shared/Tracer/lib/ts/IProjectWriter';
 import { NodeSelectedEvent, NodeCreatedEvent, NodeRenamedEvent, NodeRemovedEvent, NodeMovedEvent, Tree } from 'shared/Ng2-Tree';
 import { Subscription } from 'rxjs';
-import { MonacoEditorComponent } from '../editor/monaco-editor.component';
-import { NG2FileTreeComponent, ResourceType, FileUploadData, TutorBitsTreeModel } from '../file-tree/ng2-file-tree.component';
+import { MonacoEditorComponent } from '../../editors/editor/monaco-editor.component';
+import { NG2FileTreeComponent, ResourceType, FileUploadData, TutorBitsTreeModel } from '../../file-tree/ng2-file-tree.component';
 import { ILogService } from 'src/app/services/abstract/ILogService';
 import { IErrorService } from 'src/app/services/abstract/IErrorService';
 import { ITracerProjectService } from 'src/app/services/abstract/ITracerProjectService';
-import { ResourceViewerComponent, ResourceData } from '../resource-viewer/resource-viewer.component';
+import { ResourceViewerComponent, ResourceData } from '../../resource-viewer/resource-viewer.component';
 import { environment } from 'src/environments/environment';
-import { PreviewComponent } from '../preview/preview.component';
+import { PreviewComponent } from '../../preview/preview.component';
 
 export interface MonacoRecorderSettings {
     overrideSaveSpeed?: number;

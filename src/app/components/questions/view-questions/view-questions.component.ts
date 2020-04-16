@@ -6,7 +6,7 @@ import { IErrorService } from 'src/app/services/abstract/IErrorService';
 import { ILogService } from 'src/app/services/abstract/ILogService';
 import { ITitleService } from 'src/app/services/abstract/ITitleService';
 import { Meta } from '@angular/platform-browser';
-import { DeleteQuestionEvent } from 'src/app/sub-components/edit-question-card/edit-question-card.component';
+import { DeleteQuestionEvent } from 'src/app/sub-components/questions/edit-question-card/edit-question-card.component';
 
 @Component({
   templateUrl: './view-questions.component.html',

@@ -5,7 +5,7 @@
     </div>
     <div class="commentsHeader">Comments:</div>
     <div class="comments">
-        <app-comment *ngFor="let comment of comments" [comment]="comment"></app-comment>
+        <app-comment *ngFor="let comment of comments" [comment]="comment" [commentService]="commentService"></app-comment>
     </div>
 
     <button class="closeBtn" color="secondary" mat-mini-fab (click)="onCloseClicked()">
