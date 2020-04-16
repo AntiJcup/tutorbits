@@ -19,6 +19,7 @@ export class CommentComponent implements OnInit {
   public commentService: TutorBitsBaseCommentService;
 
   public owned = false;
+  public editing = false;
 
   public get commentDate(): string {
     return DateUtils.ConvertServerMSToLocal(this.comment.dateCreated).toLocaleString();
@@ -32,5 +33,18 @@ export class CommentComponent implements OnInit {
     }
 
     this.owned = this.comment.ownerId === (await this.account.GetAccountInformation()).id;
+  }
+
+  onEditClicked(e: any) {
+    this.editing = true;
+  }
+
+  onCommentUpdated(e: ViewComment) {
+    this.editing = false;
+    this.comment = e;
+  }
+
+  onCommentUpdateCancel(e: any) {
+    this.editing = false;
   }
 }

@@ -113,6 +113,7 @@ import { EditQuestionCardComponent } from './sub-components/questions/edit-quest
 import { CreateQuestionComponent } from './components/questions/create-question/create-question.component';
 import { AnswerComponent } from './sub-components/questions/answer/answer.component';
 import { CreateAnswerComponent } from './sub-components/questions/create-answer/create-answer.component';
+import { EditCommentComponent } from './sub-components/comments/edit-comment/edit-comment.component';
 
 const appRoutes: Routes = [
   {
@@ -345,6 +346,7 @@ const appRoutes: Routes = [
     EditQuestionCardComponent,
     AnswerComponent,
     CreateAnswerComponent,
+    EditCommentComponent
   ],
   imports: [
     BrowserModule,

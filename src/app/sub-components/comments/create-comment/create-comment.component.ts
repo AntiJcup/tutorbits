@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, NgZone, EventEmitter, Output } from '@angular/core';
+import { Component, OnInit, Input, EventEmitter, Output } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { FormlyFieldConfig } from '@ngx-formly/core';
 import { CreateComment } from 'src/app/models/comment/create-comment';
@@ -45,8 +45,7 @@ export class CreateCommentComponent implements OnInit {
 
   constructor(
     private errorServer: IErrorService,
-    private logServer: ILogService,
-    private zone: NgZone) { }
+    private logServer: ILogService) { }
 
   ngOnInit() {
   }

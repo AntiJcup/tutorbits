@@ -1,9 +1,10 @@
-<div class="commentContainer">
+<div class="commentContainer" *ngIf="!editing">
     <div><span class="commentOwner">{{comment.owner}}:</span>
         <div class="commentBody" [innerText]="comment.body"></div>
     </div>
     <div class="commentDate">{{commentDate}}</div>
-    <div mat-icon-button *ngIf="owned">
-        edit
-    </div>
+    <button class="editCommentBtn" mat-icon-button mat-raised-button *ngIf="owned" (click)="onEditClicked($event)">
+        <mat-icon class="icon">edit</mat-icon>
+    </button>
 </div>
+<app-edit-comment *ngIf="editing" [comment]="comment" [commentService]="commentService" (commentUpdated)="onCommentUpdated($event)" (commentUpdateCancel)="onCommentUpdateCancel($event)"></app-edit-comment>
