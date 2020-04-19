@@ -1,14 +1,8 @@
 import { Injectable } from '@angular/core';
-import { IRequestService } from './abstract/IRequestService';
-import { ICacheService } from './abstract/ICacheService';
+import { CacheOptions, ICacheService } from './abstract/ICacheService';
 import { Observable, defer, from } from 'rxjs';
 import { shareReplay } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
-
-export interface CacheOptions {
-  cacheDuration: number;
-  overrideCacheKey?: string;
-}
 
 @Injectable()
 export class TutorBitsCacheService extends ICacheService {
@@ -16,22 +10,21 @@ export class TutorBitsCacheService extends ICacheService {
     cacheDuration: environment.defaultCacheDurationMS
   };
 
-  private cache: Map<string, Observable<Response>> = new Map<string, Observable<Response>>();
+  private cache: Map<string, Observable<any>> = new Map<string, Observable<any>>();
 
-  constructor(private requestService: IRequestService) { super(); }
+  constructor() { super(); }
 
-  public async GetFullUrlCached(
-    url: string,
-    requestHeaders?: { [headerName: string]: string },
-    options: CacheOptions = this.defaultCacheOptions): Promise<Response> {
-    return this.GetCreateCacheEntry(url, () => defer(() => from(this.requestService.GetFullUrl(url, requestHeaders))), options);
+  public async CachePromise(
+    key: string,
+    createCallback: () => Promise<any>,
+    options: CacheOptions = this.defaultCacheOptions): Promise<any> {
+    return this.GetCreateCacheEntry(key, () => defer(() => from(createCallback())), options);
   }
 
-  public async GetCached(
-    path: string,
-    requestHeaders?: { [headerName: string]: string },
-    options: CacheOptions = this.defaultCacheOptions): Promise<Response> {
-    return this.GetCreateCacheEntry(path, () => defer(() => from(this.requestService.Get(path, requestHeaders))), options);
+  public async CacheFunc(
+    func: () => Promise<any>,
+    options: CacheOptions = this.defaultCacheOptions): Promise<any> {
+    return this.GetCreateCacheEntry(this.GenerateKeyFromFunction(func), () => defer(() => from(func())), options);
   }
 
   public ClearCache(): void {
@@ -42,20 +35,21 @@ export class TutorBitsCacheService extends ICacheService {
     this.cache.delete(key);
   }
 
-  public ClearCacheForPath(path: string): void {
-    this.ClearCacheForKey(path);
-  }
-
-  public ClearCacheForUrl(url: string): void {
-    this.ClearCacheForKey(url);
-  }
-
-  private GetCreateCacheEntry(key: string, createCallback: () => Observable<Response>, options: CacheOptions): Promise<Response> {
+  private GetCreateCacheEntry(key: string, createCallback: () => Observable<any>, options: CacheOptions): Promise<any> {
     if (!this.cache.has(key)) {
-      this.cache.set(key, createCallback().pipe(shareReplay(1, options.cacheDuration)));
+      const newCacheEntry = createCallback().pipe(
+        shareReplay(1));
+      this.cache.set(key, newCacheEntry);
+      setTimeout(() => {
+        this.ClearCacheForKey(key);
+      }, options.cacheDuration);
     }
 
     const cacheEntry: Observable<Response> = this.cache.get(key);
     return cacheEntry.toPromise();
+  }
+
+  private GenerateKeyFromFunction(func: () => Promise<any>) {
+    return func.name;
   }
 }

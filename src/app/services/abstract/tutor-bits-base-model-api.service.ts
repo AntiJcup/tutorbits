@@ -88,8 +88,8 @@ export abstract class TutorBitsBaseModelApiService<CreateModelT, UpdateModelT, V
   }
 
   public async GetAllByOwner(take: number = null, skip: number = null): Promise<ViewModelT[]> {
-    const response = await this.cache
-      .GetCached(`${this.basePath}/GetAllByOwner${take === null ? '' : `?take=${take}`}${skip === null ? '' : `${take === null ? '?' : '&'}skip=${skip}`}`,
+    const response = await this.requestService
+      .Get(`${this.basePath}/GetAllByOwner${take === null ? '' : `?take=${take}`}${skip === null ? '' : `${take === null ? '?' : '&'}skip=${skip}`}`,
         await this.GetAuthHeaders(HandlerType.GetOwner));
 
     if (!response.ok) {
