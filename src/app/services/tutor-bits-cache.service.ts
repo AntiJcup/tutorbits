@@ -14,17 +14,31 @@ export class TutorBitsCacheService extends ICacheService {
 
   constructor() { super(); }
 
-  public async CachePromise(
+  public async CachePromiseKey(
     key: string,
     createCallback: () => Promise<any>,
     options: CacheOptions = this.defaultCacheOptions): Promise<any> {
     return this.GetCreateCacheEntry(key, () => defer(() => from(createCallback())), options);
   }
 
+  // For best caching key results make sure to implement toString() functions for objects
+  // Do not call this on for functions that are shared on many instances of the same class
+  // Use CachFuncKey and define your own key to distinguish
   public async CacheFunc(
-    func: () => Promise<any>,
-    options: CacheOptions = this.defaultCacheOptions): Promise<any> {
-    return this.GetCreateCacheEntry(this.GenerateKeyFromFunction(func), () => defer(() => from(func())), options);
+    func: (...args: any[]) => Promise<any>,
+    target: any,
+    ...args: any[]): Promise<any> {
+    return this.GetCreateCacheEntry(
+      this.GenerateKeyFromFunction(func, target, args), () => defer(() => from(func.apply(target, args))), this.defaultCacheOptions);
+  }
+
+  public async CacheFuncKey(
+    key: string,
+    func: (...args: any[]) => Promise<any>,
+    target: any,
+    ...args: any[]): Promise<any> {
+    return this.GetCreateCacheEntry(
+      key, () => defer(() => from(func.apply(target, args))), this.defaultCacheOptions);
   }
 
   public ClearCache(): void {
@@ -49,7 +63,7 @@ export class TutorBitsCacheService extends ICacheService {
     return cacheEntry.toPromise();
   }
 
-  private GenerateKeyFromFunction(func: () => Promise<any>) {
-    return func.name;
+  private GenerateKeyFromFunction(func: () => Promise<any>, target: any, args: any[]) {
+    return `${typeof (target)}::${target.constructor.name}::${func.name}(${args.map((value: any, index: number, array: any[]) => `${typeof (value)}::${value.constructor.name}::${value}}`).join(',')})`;
   }
 }

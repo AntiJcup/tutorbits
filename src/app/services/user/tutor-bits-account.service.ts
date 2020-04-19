@@ -38,7 +38,7 @@ export class TutorBitsConcreteAccountService extends TutorBitsAccountService {
   }
 
   public async GetAccountInformation(): Promise<ViewAccount> {
-    const accounts = await this.cache.CacheFunc(this.GetAllByOwner.bind(this));
+    const accounts = await this.cache.CacheFunc(this.GetAllByOwner, this);
     if (accounts.length <= 0) {
       throw new Error(`Failed getting account information`);
     }

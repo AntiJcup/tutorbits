@@ -3,6 +3,7 @@ import { ViewComment } from 'src/app/models/comment/view-comment';
 import { TutorBitsBaseCommentService } from 'src/app/services/abstract/tutor-bits-base-comment.service';
 import { IAuthService } from 'src/app/services/abstract/IAuthService';
 import { IErrorService } from 'src/app/services/abstract/IErrorService';
+import { ICacheService } from 'src/app/services/abstract/ICacheService';
 
 @Component({
   selector: 'app-comment-section',
@@ -28,13 +29,14 @@ export class CommentSectionComponent implements OnInit {
 
   constructor(
     private auth: IAuthService,
-    private errorServer: IErrorService) { }
+    private errorServer: IErrorService,
+    private cache: ICacheService) { }
 
   async ngOnInit() {
     this.loggedIn = this.auth.IsLoggedIn();
 
     try {
-      const res: ViewComment[] = await this.commentService.GetComments(this.targetId)
+      const res: ViewComment[] = await this.cache.CacheFunc(this.commentService.GetComments, this.commentService, this.targetId);
       // Hack because monaco editor needs a resize event to consider the comment section
       setTimeout(() => {
         window.dispatchEvent(new Event('resize'));

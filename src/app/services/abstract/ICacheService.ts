@@ -7,13 +7,17 @@ export interface CacheOptions {
 }
 
 export abstract class ICacheService {
-    public abstract async CachePromise(
+    public abstract async CachePromiseKey(
         key: string,
         createCallback: () => Promise<any>,
         options?: CacheOptions): Promise<any>;
-        public abstract async CacheFunc(
-            func: () => Promise<any>,
-            options?: CacheOptions): Promise<any>;
+    public abstract async CacheFuncKey(
+        key: string,
+        func: (...args: any[]) => Promise<any>,
+        ...args: any[]): Promise<any>;
+    public abstract async CacheFunc(
+        func: (...args: any[]) => Promise<any>,
+        ...args: any[]): Promise<any>;
     public abstract ClearCache(): void;
     public abstract ClearCacheForKey(key: string): void;
 }
