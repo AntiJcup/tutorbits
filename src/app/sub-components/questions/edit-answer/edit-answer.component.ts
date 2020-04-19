@@ -1,24 +1,21 @@
 import { Component, OnInit, Input, NgZone, EventEmitter, Output } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { FormlyFieldConfig } from '@ngx-formly/core';
-import { UpdateComment } from 'src/app/models/comment/update-comment';
+import { UpdateAnswer } from 'src/app/models/answer/update-answer';
 import { IErrorService } from 'src/app/services/abstract/IErrorService';
-import { TutorBitsBaseCommentService } from 'src/app/services/abstract/tutor-bits-base-comment.service';
 import { ILogService } from 'src/app/services/abstract/ILogService';
 import { ResponseWrapper } from 'src/app/services/abstract/IModelApiService';
-import { ViewComment } from 'src/app/models/comment/view-comment';
+import { ViewAnswer } from 'src/app/models/answer/view-answer';
+import { TutorBitsAnswerService } from 'src/app/services/question/tutor-bits-answer.service';
 
 @Component({
-  selector: 'app-edit-comment',
-  templateUrl: './edit-comment.component.html',
-  styleUrls: ['./edit-comment.component.sass']
+  selector: 'app-edit-answer',
+  templateUrl: './edit-answer.component.html',
+  styleUrls: ['./edit-answer.component.sass']
 })
-export class EditCommentComponent implements OnInit {
+export class EditAnswerComponent implements OnInit {
   @Input()
-  public comment: ViewComment;
-
-  @Input()
-  public commentService: TutorBitsBaseCommentService;
+  public answer: ViewAnswer;
 
   @Output()
   public updated = new EventEmitter();
@@ -29,43 +26,44 @@ export class EditCommentComponent implements OnInit {
   loading = false;
 
   form = new FormGroup({});
-  model: UpdateComment = null;
+  model: UpdateAnswer;
   fields: FormlyFieldConfig[] = [];
 
   constructor(
     private errorServer: IErrorService,
-    private logServer: ILogService) { }
+    private logServer: ILogService,
+    private answerService: TutorBitsAnswerService) { }
 
   ngOnInit() {
-    this.model = { id: this.comment.id, title: 'comment', body: this.comment.body };
+    this.model = { id: this.answer.id, title: 'answer', body: this.answer.body };
 
     this.fields = [{
       model: this.model,
       key: 'body',
       type: 'textarea',
-      defaultValue: this.comment.body,
+      defaultValue: this.answer.body,
       templateOptions: {
-        label: 'Comment',
-        placeholder: 'Your comment here',
+        label: 'Answer',
+        placeholder: 'Your answer here',
         required: true,
         minLength: 1,
         maxLength: 1028,
-        rows: 4
+        rows: 12
       }
     }];
   }
 
-  async submit(model: UpdateComment) {
-    this.logServer.LogToConsole('EditComment', model);
+  async submit(model: UpdateAnswer) {
+    this.logServer.LogToConsole('EditAnswer', model);
     this.loading = true;
 
     try {
-      const res: ResponseWrapper<ViewComment> = await this.commentService.Update(model)
+      const res: ResponseWrapper<ViewAnswer> = await this.answerService.Update(model);
       if (res.error) {
         this.errorServer.HandleError('EditError', JSON.stringify(res.error));
       }
 
-      this.updated.next(res.data as ViewComment);
+      this.updated.next(res.data as ViewAnswer);
     } catch (err) {
       this.errorServer.HandleError('EditError', err);
     }

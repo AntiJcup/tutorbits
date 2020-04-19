@@ -116,6 +116,7 @@ import { CreateAnswerComponent } from './sub-components/questions/create-answer/
 import { EditCommentComponent } from './sub-components/comments/edit-comment/edit-comment.component';
 import { ICacheService } from './services/abstract/ICacheService';
 import { TutorBitsCacheService } from './services/tutor-bits-cache.service';
+import { EditAnswerComponent } from './sub-components/questions/edit-answer/edit-answer.component';
 
 const appRoutes: Routes = [
   {
@@ -348,7 +349,8 @@ const appRoutes: Routes = [
     EditQuestionCardComponent,
     AnswerComponent,
     CreateAnswerComponent,
-    EditCommentComponent
+    EditCommentComponent,
+    EditAnswerComponent
   ],
   imports: [
     BrowserModule,

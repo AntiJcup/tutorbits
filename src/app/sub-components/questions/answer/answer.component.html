@@ -1,4 +1,4 @@
-<div class="answerContainer">
+<div class="answerContainer" *ngIf="!editing">
     <div><span class="answerOwner">{{answer.owner}}:</span>
         <div class="answerBody" [innerText]="answer.body"></div>
     </div>
@@ -15,6 +15,11 @@
                 [commentService]="commentService" [targetId]="answer.id" [class.focused]="commentsFocused">
             </app-comments-button>
         </div>
+        <button class="editBtn" mat-icon-button *ngIf="owned" (click)="onEditClicked($event)">
+            <mat-icon class="icon">edit</mat-icon>
+        </button>
     </div>
     <mat-divider></mat-divider>
 </div>
+<app-edit-answer *ngIf="editing" [answer]="answer" (updated)="onUpdated($event)" (cancelled)="onUpdateCancel($event)">
+</app-edit-answer>

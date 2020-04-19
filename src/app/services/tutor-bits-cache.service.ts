@@ -49,6 +49,13 @@ export class TutorBitsCacheService extends ICacheService {
     this.cache.delete(key);
   }
 
+  public ClearCacheForFunc(
+    func: (...args: any[]) => Promise<any>,
+    target: any,
+    ...args: any[]) {
+    this.ClearCacheForKey(this.GenerateKeyFromFunction(func, target, [args]));
+  }
+
   private GetCreateCacheEntry(key: string, createCallback: () => Observable<any>, options: CacheOptions): Promise<any> {
     if (!this.cache.has(key)) {
       const newCacheEntry = createCallback().pipe(

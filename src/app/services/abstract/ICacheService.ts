@@ -20,4 +20,8 @@ export abstract class ICacheService {
         ...args: any[]): Promise<any>;
     public abstract ClearCache(): void;
     public abstract ClearCacheForKey(key: string): void;
+    public abstract ClearCacheForFunc(
+        func: (...args: any[]) => Promise<any>,
+        target: any,
+        ...args: any[]);
 }

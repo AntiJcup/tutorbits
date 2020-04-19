@@ -3,8 +3,8 @@
         <div class="commentBody" [innerText]="comment.body"></div>
     </div>
     <div class="commentDate">{{commentDate}}</div>
-    <button class="editCommentBtn" mat-icon-button mat-raised-button *ngIf="owned" (click)="onEditClicked($event)">
+    <button class="editBtn" mat-icon-button mat-raised-button *ngIf="owned" (click)="onEditClicked($event)">
         <mat-icon class="icon">edit</mat-icon>
     </button>
 </div>
-<app-edit-comment *ngIf="editing" [comment]="comment" [commentService]="commentService" (commentUpdated)="onCommentUpdated($event)" (commentUpdateCancel)="onCommentUpdateCancel($event)"></app-edit-comment>
+<app-edit-comment *ngIf="editing" [comment]="comment" [commentService]="commentService" (updated)="onCommentUpdated($event)" (cancelled)="onCommentUpdateCancel($event)"></app-edit-comment>

@@ -1,0 +1,9 @@
+<div class="formContainer">
+    <form [formGroup]="form" (ngSubmit)="submit(model)">
+        <formly-form [form]="form" [fields]="fields" [model]="model"></formly-form>
+        <app-submit-button [disabled]="!form.valid" [loading]="loading"></app-submit-button>
+        <button type="button" class="cancelButton" mat-icon-button mat-raised-button (click)="onCancelClicked($event)" [disabled]="loading">
+            <mat-icon class="icon">close</mat-icon>
+        </button>
+    </form>
+</div>

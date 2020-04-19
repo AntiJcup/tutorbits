@@ -57,7 +57,7 @@ export class CreateAnswerComponent implements OnInit {
     this.loading = true;
 
     try {
-      const res: ResponseWrapper<ViewAnswer> = await this.answerService.Create(model)
+      const res: ResponseWrapper<ViewAnswer> = await this.answerService.Create(model);
       if (res.error) {
         this.errorServer.HandleError('CreateError', JSON.stringify(res.error));
       }
