@@ -52,10 +52,10 @@ export class TutorBitsCacheService extends ICacheService {
 
   private GetCreateCacheEntry(key: string, createCallback: () => Observable<Response>, options: CacheOptions): Promise<Response> {
     if (!this.cache.has(key)) {
-      this.cache[key] = createCallback().pipe(shareReplay(1, options.cacheDuration));
+      this.cache.set(key, createCallback().pipe(shareReplay(1, options.cacheDuration)));
     }
 
-    const cacheEntry: Observable<Response> = this.cache[key];
+    const cacheEntry: Observable<Response> = this.cache.get(key);
     return cacheEntry.toPromise();
   }
 }
