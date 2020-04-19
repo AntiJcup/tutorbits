@@ -7,6 +7,7 @@ import { TutorBitsBaseCommentService } from 'src/app/services/abstract/tutor-bit
 import { ILogService } from 'src/app/services/abstract/ILogService';
 import { ResponseWrapper } from 'src/app/services/abstract/IModelApiService';
 import { ViewComment } from 'src/app/models/comment/view-comment';
+import { ICacheService } from 'src/app/services/abstract/ICacheService';
 
 @Component({
   selector: 'app-edit-comment',
@@ -34,7 +35,8 @@ export class EditCommentComponent implements OnInit {
 
   constructor(
     private errorServer: IErrorService,
-    private logServer: ILogService) { }
+    private logServer: ILogService,
+    private cache: ICacheService) { }
 
   ngOnInit() {
     this.model = { id: this.comment.id, title: 'comment', body: this.comment.body };
@@ -65,6 +67,7 @@ export class EditCommentComponent implements OnInit {
         this.errorServer.HandleError('EditError', JSON.stringify(res.error));
       }
 
+      this.cache.ClearCache();
       this.updated.next(res.data as ViewComment);
     } catch (err) {
       this.errorServer.HandleError('EditError', err);

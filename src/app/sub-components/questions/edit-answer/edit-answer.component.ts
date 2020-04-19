@@ -7,6 +7,7 @@ import { ILogService } from 'src/app/services/abstract/ILogService';
 import { ResponseWrapper } from 'src/app/services/abstract/IModelApiService';
 import { ViewAnswer } from 'src/app/models/answer/view-answer';
 import { TutorBitsAnswerService } from 'src/app/services/question/tutor-bits-answer.service';
+import { ICacheService } from 'src/app/services/abstract/ICacheService';
 
 @Component({
   selector: 'app-edit-answer',
@@ -32,7 +33,8 @@ export class EditAnswerComponent implements OnInit {
   constructor(
     private errorServer: IErrorService,
     private logServer: ILogService,
-    private answerService: TutorBitsAnswerService) { }
+    private answerService: TutorBitsAnswerService,
+    private cache: ICacheService) { }
 
   ngOnInit() {
     this.model = { id: this.answer.id, title: 'answer', body: this.answer.body };
@@ -63,6 +65,7 @@ export class EditAnswerComponent implements OnInit {
         this.errorServer.HandleError('EditError', JSON.stringify(res.error));
       }
 
+      this.cache.ClearCache();
       this.updated.next(res.data as ViewAnswer);
     } catch (err) {
       this.errorServer.HandleError('EditError', err);

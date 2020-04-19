@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, NgZone, EventEmitter, Output } from '@angular/core';
+import { Component, OnInit, Input, EventEmitter, Output } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { FormlyFieldConfig } from '@ngx-formly/core';
 import { CreateAnswer } from 'src/app/models/answer/create-answer';
@@ -7,6 +7,7 @@ import { ILogService } from 'src/app/services/abstract/ILogService';
 import { ResponseWrapper } from 'src/app/services/abstract/IModelApiService';
 import { ViewAnswer } from 'src/app/models/answer/view-answer';
 import { TutorBitsAnswerService } from 'src/app/services/question/tutor-bits-answer.service';
+import { ICacheService } from 'src/app/services/abstract/ICacheService';
 
 @Component({
   selector: 'app-create-answer',
@@ -46,7 +47,7 @@ export class CreateAnswerComponent implements OnInit {
   constructor(
     private errorServer: IErrorService,
     private logServer: ILogService,
-    private zone: NgZone) { }
+    private cache: ICacheService) { }
 
   ngOnInit() {
   }
@@ -62,6 +63,7 @@ export class CreateAnswerComponent implements OnInit {
         this.errorServer.HandleError('CreateError', JSON.stringify(res.error));
       }
 
+      this.cache.ClearCache();
       this.answerAdded.next(res.data as ViewAnswer);
     } catch (err) {
       this.errorServer.HandleError('CreateError', err);
