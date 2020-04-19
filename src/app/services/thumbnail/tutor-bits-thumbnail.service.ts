@@ -5,11 +5,12 @@ import { IAuthService } from '../abstract/IAuthService';
 import { CreateThumbnail } from 'src/app/models/thumbnail/create-thumbnail';
 import { UpdateThumbnail } from 'src/app/models/thumbnail/update-thumbnail';
 import { ViewThumbnail } from 'src/app/models/thumbnail/view-thumbnail';
+import { ICacheService } from '../abstract/ICacheService';
 
 // Import this as your service so tests can override it
 export abstract class TutorBitsThumbnailService extends TutorBitsBaseModelApiService<CreateThumbnail, UpdateThumbnail, ViewThumbnail> {
-  constructor(requestService: IRequestService, auth: IAuthService) {
-    super(requestService, auth);
+  constructor(requestService: IRequestService, auth: IAuthService, cache: ICacheService) {
+    super(requestService, auth, cache);
   }
 }
 
@@ -35,7 +36,7 @@ export class TutorBitsConcreteThumbnailService extends TutorBitsThumbnailService
     return formData;
   }
 
-  constructor(requestService: IRequestService, auth: IAuthService) {
-    super(requestService, auth);
+  constructor(requestService: IRequestService, auth: IAuthService, cache: ICacheService) {
+    super(requestService, auth, cache);
   }
 }

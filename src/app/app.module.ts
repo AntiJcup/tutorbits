@@ -114,6 +114,8 @@ import { CreateQuestionComponent } from './components/questions/create-question/
 import { AnswerComponent } from './sub-components/questions/answer/answer.component';
 import { CreateAnswerComponent } from './sub-components/questions/create-answer/create-answer.component';
 import { EditCommentComponent } from './sub-components/comments/edit-comment/edit-comment.component';
+import { ICacheService } from './services/abstract/ICacheService';
+import { TutorBitsCacheService } from './services/tutor-bits-cache.service';
 
 const appRoutes: Routes = [
   {
@@ -373,6 +375,7 @@ const appRoutes: Routes = [
   ],
   providers: [
     { provide: IRequestService, useClass: TutorBitsRequestService },
+    { provide: ICacheService, useClass: TutorBitsCacheService },
     { provide: IStorageService, useClass: TutorBitsStorageService },
     { provide: IDataService, useClass: TutorBitsDataService },
     { provide: IAuthService, useClass: TutorBitsAuthService },

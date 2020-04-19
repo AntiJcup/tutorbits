@@ -1,6 +1,7 @@
 import { IModelApiService, ResponseWrapper, Status } from './IModelApiService';
 import { IRequestService } from './IRequestService';
 import { IAuthService } from './IAuthService';
+import { ICacheService } from './ICacheService';
 
 export enum HandlerType {
   Create,
@@ -18,7 +19,7 @@ export abstract class TutorBitsBaseModelApiService<CreateModelT, UpdateModelT, V
     'Content-Type': 'application/json'
   };
 
-  constructor(protected requestService: IRequestService, protected auth: IAuthService) { }
+  constructor(protected requestService: IRequestService, protected auth: IAuthService, protected cache: ICacheService) { }
 
   protected async GetHeaders(handlerType: HandlerType): Promise<{ [key: string]: any }> {
     return { ...this.baseHeaders };
@@ -87,8 +88,8 @@ export abstract class TutorBitsBaseModelApiService<CreateModelT, UpdateModelT, V
   }
 
   public async GetAllByOwner(take: number = null, skip: number = null): Promise<ViewModelT[]> {
-    const response = await this.requestService
-      .Get(`${this.basePath}/GetAllByOwner${take === null ? '' : `?take=${take}`}${skip === null ? '' : `${take === null ? '?' : '&'}skip=${skip}`}`,
+    const response = await this.cache
+      .GetCached(`${this.basePath}/GetAllByOwner${take === null ? '' : `?take=${take}`}${skip === null ? '' : `${take === null ? '?' : '&'}skip=${skip}`}`,
         await this.GetAuthHeaders(HandlerType.GetOwner));
 
     if (!response.ok) {

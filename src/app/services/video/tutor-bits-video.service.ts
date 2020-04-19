@@ -4,14 +4,15 @@ import { Injectable } from '@angular/core';
 import { IAuthService } from '../abstract/IAuthService';
 import { Part } from 'shared/media/lib/ts/Common';
 import { IVideoService } from '../abstract/IVideoService';
+import { ICacheService } from '../abstract/ICacheService';
 
 
 @Injectable()
 export class TutorBitsVideoService extends IVideoService {
   protected readonly basePath = `api/Video`;
 
-  constructor(requestService: IRequestService, auth: IAuthService) {
-    super(requestService, auth);
+  constructor(requestService: IRequestService, auth: IAuthService, cache: ICacheService) {
+    super(requestService, auth, cache);
   }
 
   public async StartUpload(videoId: string): Promise<string> {

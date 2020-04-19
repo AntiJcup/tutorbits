@@ -5,10 +5,11 @@ import { Status } from './IModelApiService';
 import { CreateRating } from 'src/app/models/rating/create-rating';
 import { UpdateRating } from 'src/app/models/rating/update-rating';
 import { ViewRating } from 'src/app/models/rating/view-rating';
+import { ICacheService } from './ICacheService';
 
 export abstract class TutorBitsBaseRatingService extends TutorBitsBaseModelApiService<CreateRating, UpdateRating, ViewRating> {
-  constructor(requestService: IRequestService, auth: IAuthService) {
-    super(requestService, auth);
+  constructor(requestService: IRequestService, auth: IAuthService, cache: ICacheService) {
+    super(requestService, auth, cache);
   }
 
   public async GetScore(targetId: string, status: Status = Status.Active): Promise<number> {

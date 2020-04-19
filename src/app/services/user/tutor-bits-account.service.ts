@@ -5,11 +5,12 @@ import { IAuthService } from '../abstract/IAuthService';
 import { CreateAccount } from '../../models/user/create-account';
 import { ViewAccount } from '../../models/user/view-account';
 import { UpdateAccount } from '../../models/user/update-account';
+import { ICacheService } from '../abstract/ICacheService';
 
 // Import this as your service so tests can override it
 export abstract class TutorBitsAccountService extends TutorBitsBaseModelApiService<CreateAccount, UpdateAccount, ViewAccount> {
-  constructor(requestService: IRequestService, auth: IAuthService) {
-    super(requestService, auth);
+  constructor(requestService: IRequestService, auth: IAuthService, cache: ICacheService) {
+    super(requestService, auth, cache);
   }
 
   public abstract async Login(): Promise<ViewAccount>;
@@ -21,8 +22,8 @@ export abstract class TutorBitsAccountService extends TutorBitsBaseModelApiServi
 export class TutorBitsConcreteAccountService extends TutorBitsAccountService {
   protected readonly basePath = `api/Account`;
 
-  constructor(requestService: IRequestService, auth: IAuthService) {
-    super(requestService, auth);
+  constructor(requestService: IRequestService, auth: IAuthService, cache: ICacheService) {
+    super(requestService, auth, cache);
   }
 
   public async Login(): Promise<ViewAccount> {

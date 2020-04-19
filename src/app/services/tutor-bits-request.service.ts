@@ -23,34 +23,34 @@ export class TutorBitsRequestService extends IRequestService {
 
   public async GetFullUrl(url: string, requestHeaders?: { [headerName: string]: string }): Promise<Response> {
     return await fetch(url, this.generateRequestInfo('GET', null, requestHeaders));
-}
+  }
 
-public async Get(path: string, requestHeaders?: { [headerName: string]: string }): Promise<Response> {
+  public async Get(path: string, requestHeaders?: { [headerName: string]: string }): Promise<Response> {
     return await fetch(`${this.baseRequestInfo.host}/${path}`, this.generateRequestInfo('GET', null, requestHeaders));
-}
+  }
 
-public async Post(path: string, body?: any, requestHeaders?: { [headerName: string]: string }): Promise<Response> {
+  public async Post(path: string, body?: any, requestHeaders?: { [headerName: string]: string }): Promise<Response> {
     return await fetch(`${this.baseRequestInfo.host}/${path}`, this.generateRequestInfo('POST', body, requestHeaders));
-}
+  }
 
-public async PostFormFullUrl(
+  public async PostFormFullUrl(
     url: string,
     body: { [key: string]: any },
     requestHeaders?: { [headerName: string]: string }): Promise<Response> {
 
     const searchParams = Object.keys(body).map((key) => {
-        return encodeURIComponent(key) + '=' + encodeURIComponent(body[key]);
+      return encodeURIComponent(key) + '=' + encodeURIComponent(body[key]);
     }).join('&');
 
     return await fetch(`${url}`, this.generateRequestInfo('POST', searchParams, requestHeaders));
-}
+  }
 
-protected generateRequestInfo(requestMethod: string, requestBody?: any, requestHeaders?: { [headerName: string]: string }): any {
+  protected generateRequestInfo(requestMethod: string, requestBody?: any, requestHeaders?: { [headerName: string]: string }): any {
     return {
-        method: requestMethod,
-        credentials: this.baseRequestInfo.credentials,
-        headers: { ...this.baseRequestInfo.headers, ...requestHeaders }, // merge the dictionaries
-        body: requestBody
+      method: requestMethod,
+      credentials: this.baseRequestInfo.credentials,
+      headers: { ...this.baseRequestInfo.headers, ...requestHeaders }, // merge the dictionaries
+      body: requestBody
     };
-}
+  }
 }

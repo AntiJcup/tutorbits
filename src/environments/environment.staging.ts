@@ -14,5 +14,6 @@ export const environment = {
   scrollAccurracyMS: 0,
   envName: 'staging',
   allowCreate: true,
-  defaultVideoVolume: 0.5
+  defaultVideoVolume: 0.5,
+  defaultCacheDurationMS: 5000
 };

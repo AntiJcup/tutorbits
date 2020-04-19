@@ -8,6 +8,7 @@ import { CreateProject } from 'src/app/models/project/create-project';
 import { HandlerType } from '../abstract/tutor-bits-base-model-api.service';
 import { ViewProject } from 'src/app/models/project/view-project';
 import { ProjectType } from 'src/app/models/project/project-type';
+import { ICacheService } from '../abstract/ICacheService';
 
 @Injectable()
 export class TutorBitsTracerProjectService extends ITracerProjectService {
@@ -16,8 +17,8 @@ export class TutorBitsTracerProjectService extends ITracerProjectService {
     'Content-Type': 'application/json'
   };
 
-  constructor(protected requestService: IRequestService, protected auth: IAuthService, protected logging: ILogService) {
-    super(requestService, auth);
+  constructor(protected requestService: IRequestService, protected auth: IAuthService, protected logging: ILogService, cache: ICacheService) {
+    super(requestService, auth, cache);
   }
 
   public async CreateProject(id: string): Promise<boolean> {

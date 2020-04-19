@@ -6,11 +6,12 @@ import { Injectable } from '@angular/core';
 import { IAuthService } from '../abstract/IAuthService';
 import { UpdateQuestion } from '../../models/question/update-question';
 import { CreateQuestionForm } from 'src/app/models/question/create-question-form';
+import { ICacheService } from '../abstract/ICacheService';
 
 // Import this as your service so tests can override it
 export abstract class TutorBitsQuestionService extends TutorBitsBaseModelApiService<CreateQuestion, UpdateQuestion, ViewQuestion> {
-  constructor(requestService: IRequestService, auth: IAuthService) {
-    super(requestService, auth);
+  constructor(requestService: IRequestService, auth: IAuthService, cache: ICacheService) {
+    super(requestService, auth, cache);
   }
 
   public abstract async Publish(questionId: string): Promise<boolean>;
@@ -22,8 +23,8 @@ export abstract class TutorBitsQuestionService extends TutorBitsBaseModelApiServ
 export class TutorBitsConcreteQuestionService extends TutorBitsQuestionService {
   protected readonly basePath = `api/Question`;
 
-  constructor(requestService: IRequestService, auth: IAuthService) {
-    super(requestService, auth);
+  constructor(requestService: IRequestService, auth: IAuthService, cache: ICacheService) {
+    super(requestService, auth, cache);
   }
 
   public async Publish(questionId: string): Promise<boolean> {
