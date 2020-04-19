@@ -31,8 +31,8 @@ import { TutorialCardComponent } from './sub-components/tutorials/tutorial-card/
 import { SavingButtonComponent } from './sub-components/buttons/saving-button/saving-button.component';
 import { EditorPlaceHolderComponent } from './sub-components/editors/editor-place-holder/editor-place-holder.component';
 import { LoginComponent } from './components/login/login.component';
-import { IAPIService } from './services/abstract/IAPIService';
-import { TutorBitsApiService } from './services/tutor-bits-api.service';
+import { IRequestService } from './services/abstract/IRequestService';
+import { TutorBitsRequestService } from './services/tutor-bits-request.service';
 import { IAuthService } from './services/abstract/IAuthService';
 import { TutorBitsAuthService } from './services/user/tutor-bits-auth.service';
 import { ILogService } from './services/abstract/ILogService';
@@ -372,7 +372,7 @@ const appRoutes: Routes = [
     DeviceDetectorModule.forRoot()
   ],
   providers: [
-    { provide: IAPIService, useClass: TutorBitsApiService },
+    { provide: IRequestService, useClass: TutorBitsRequestService },
     { provide: IStorageService, useClass: TutorBitsStorageService },
     { provide: IDataService, useClass: TutorBitsDataService },
     { provide: IAuthService, useClass: TutorBitsAuthService },

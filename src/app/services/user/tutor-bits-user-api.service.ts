@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { IUserApiService } from '../abstract/IUserApiService';
 import { ViewUser } from '../../models/user/view-user';
-import { IAPIService } from '../abstract/IAPIService';
+import { IRequestService } from '../abstract/IRequestService';
 import { IAuthService } from '../abstract/IAuthService';
 
 @Injectable()
@@ -10,7 +10,7 @@ export class TutorBitsUserApiService extends IUserApiService {
     'Content-Type': 'application/json'
   };
 
-  constructor(protected apiService: IAPIService, protected auth: IAuthService) { super(); }
+  constructor(protected requestService: IRequestService, protected auth: IAuthService) { super(); }
 
   protected async GetHeaders(): Promise<{ [key: string]: any }> {
     return { ...this.baseHeaders };
@@ -21,7 +21,7 @@ export class TutorBitsUserApiService extends IUserApiService {
   }
 
   public async GetUserInfo(): Promise<ViewUser> {
-    const response = await this.apiService.generateRequest()
+    const response = await this.requestService
       .Get(`api/User/GetCurrentUser`, await this.GetAuthHeaders());
 
     if (!response.ok) {

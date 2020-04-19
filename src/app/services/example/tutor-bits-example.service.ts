@@ -1,7 +1,7 @@
 import { ViewExample } from '../../models/example/view-example';
 import { CreateExample } from '../../models/example/create-example';
 import { TutorBitsBaseModelApiService, HandlerType } from '../abstract/tutor-bits-base-model-api.service';
-import { IAPIService } from '../abstract/IAPIService';
+import { IRequestService } from '../abstract/IRequestService';
 import { Injectable } from '@angular/core';
 import { IAuthService } from '../abstract/IAuthService';
 import { UpdateExample } from '../../models/example/update-example';
@@ -9,8 +9,8 @@ import { CreateExampleForm } from 'src/app/models/example/create-example-form';
 
 // Import this as your service so tests can override it
 export abstract class TutorBitsExampleService extends TutorBitsBaseModelApiService<CreateExample, UpdateExample, ViewExample> {
-  constructor(apiService: IAPIService, auth: IAuthService) {
-    super(apiService, auth);
+  constructor(requestService: IRequestService, auth: IAuthService) {
+    super(requestService, auth);
   }
 
   public abstract async Publish(exampleId: string): Promise<boolean>;
@@ -22,19 +22,19 @@ export abstract class TutorBitsExampleService extends TutorBitsBaseModelApiServi
 export class TutorBitsConcreteExampleService extends TutorBitsExampleService {
   protected readonly basePath = `api/Example`;
 
-  constructor(apiService: IAPIService, auth: IAuthService) {
-    super(apiService, auth);
+  constructor(requestService: IRequestService, auth: IAuthService) {
+    super(requestService, auth);
   }
 
   public async Publish(exampleId: string): Promise<boolean> {
-    const response = await this.apiService.generateRequest()
+    const response = await this.requestService
       .Post(`${this.basePath}/Publish?exampleId=${exampleId}`, null, await this.GetAuthHeaders(HandlerType.Update));
 
     return response.ok;
   }
 
   public async GetExampleTopics(): Promise<string[]> {
-    const response = await this.apiService.generateRequest()
+    const response = await this.requestService
       .Get(`${this.basePath}/GetProgrammingTopics`, await this.GetHeaders(HandlerType.Get));
 
     if (!response.ok) {

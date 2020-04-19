@@ -1,5 +1,5 @@
 import { TutorBitsBaseModelApiService, HandlerType } from '../abstract/tutor-bits-base-model-api.service';
-import { IAPIService } from '../abstract/IAPIService';
+import { IRequestService } from '../abstract/IRequestService';
 import { Injectable } from '@angular/core';
 import { IAuthService } from '../abstract/IAuthService';
 import { CreateThumbnail } from 'src/app/models/thumbnail/create-thumbnail';
@@ -8,8 +8,8 @@ import { ViewThumbnail } from 'src/app/models/thumbnail/view-thumbnail';
 
 // Import this as your service so tests can override it
 export abstract class TutorBitsThumbnailService extends TutorBitsBaseModelApiService<CreateThumbnail, UpdateThumbnail, ViewThumbnail> {
-  constructor(apiService: IAPIService, auth: IAuthService) {
-    super(apiService, auth);
+  constructor(requestService: IRequestService, auth: IAuthService) {
+    super(requestService, auth);
   }
 }
 
@@ -35,7 +35,7 @@ export class TutorBitsConcreteThumbnailService extends TutorBitsThumbnailService
     return formData;
   }
 
-  constructor(apiService: IAPIService, auth: IAuthService) {
-    super(apiService, auth);
+  constructor(requestService: IRequestService, auth: IAuthService) {
+    super(requestService, auth);
   }
 }

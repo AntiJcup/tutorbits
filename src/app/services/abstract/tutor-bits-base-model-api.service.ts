@@ -1,5 +1,5 @@
 import { IModelApiService, ResponseWrapper, Status } from './IModelApiService';
-import { IAPIService } from './IAPIService';
+import { IRequestService } from './IRequestService';
 import { IAuthService } from './IAuthService';
 
 export enum HandlerType {
@@ -18,7 +18,7 @@ export abstract class TutorBitsBaseModelApiService<CreateModelT, UpdateModelT, V
     'Content-Type': 'application/json'
   };
 
-  constructor(protected apiService: IAPIService, protected auth: IAuthService) { }
+  constructor(protected requestService: IRequestService, protected auth: IAuthService) { }
 
   protected async GetHeaders(handlerType: HandlerType): Promise<{ [key: string]: any }> {
     return { ...this.baseHeaders };
@@ -38,7 +38,7 @@ export abstract class TutorBitsBaseModelApiService<CreateModelT, UpdateModelT, V
 
   public async Create(model: CreateModelT): Promise<ResponseWrapper<ViewModelT>> {
     const responseWrapper = { error: null, data: null } as ResponseWrapper<ViewModelT>;
-    const response = await this.apiService.generateRequest()
+    const response = await this.requestService
       .Post(`${this.basePath}/Create`, await this.SerializeCreateBody(model), await this.GetAuthHeaders(HandlerType.Create));
 
     if (!response.ok) {
@@ -52,7 +52,7 @@ export abstract class TutorBitsBaseModelApiService<CreateModelT, UpdateModelT, V
 
   public async Update(model: UpdateModelT): Promise<ResponseWrapper<ViewModelT>> {
     const responseWrapper = { error: null, data: null } as ResponseWrapper<ViewModelT>;
-    const response = await this.apiService.generateRequest()
+    const response = await this.requestService
       .Post(`${this.basePath}/Update`, await this.SerializeUpdateBody(model), await this.GetAuthHeaders(HandlerType.Update));
 
     if (!response.ok) {
@@ -66,7 +66,7 @@ export abstract class TutorBitsBaseModelApiService<CreateModelT, UpdateModelT, V
 
   public async UpdateStatus(id: string, status: Status): Promise<boolean> {
     const response =
-      await this.apiService.generateRequest().Post(
+      await this.requestService.Post(
         `${this.basePath}/UpdateStatusById?id=${id}&status=${Status[status]}`,
         null,
         await this.GetAuthHeaders(HandlerType.Update));
@@ -75,7 +75,7 @@ export abstract class TutorBitsBaseModelApiService<CreateModelT, UpdateModelT, V
   }
 
   public async GetAll(status: Status = Status.Active, take: number = null, skip: number = null): Promise<ViewModelT[]> {
-    const response = await this.apiService.generateRequest()
+    const response = await this.requestService
       .Get(`${this.basePath}/GetAll?state=${Status[status]}${take === null ? '' : `&take=${take}`}${skip === null ? '' : `&skip=${skip}`}`,
         await this.GetHeaders(HandlerType.GetAll));
 
@@ -87,7 +87,7 @@ export abstract class TutorBitsBaseModelApiService<CreateModelT, UpdateModelT, V
   }
 
   public async GetAllByOwner(take: number = null, skip: number = null): Promise<ViewModelT[]> {
-    const response = await this.apiService.generateRequest()
+    const response = await this.requestService
       .Get(`${this.basePath}/GetAllByOwner${take === null ? '' : `?take=${take}`}${skip === null ? '' : `${take === null ? '?' : '&'}skip=${skip}`}`,
         await this.GetAuthHeaders(HandlerType.GetOwner));
 
@@ -100,7 +100,7 @@ export abstract class TutorBitsBaseModelApiService<CreateModelT, UpdateModelT, V
 
   public async Delete(id: string): Promise<boolean> {
     const response =
-      await this.apiService.generateRequest().Post(
+      await this.requestService.Post(
         `${this.basePath}/DeleteById?id=${id}`,
         null,
         await this.GetAuthHeaders(HandlerType.Delete));
@@ -109,7 +109,7 @@ export abstract class TutorBitsBaseModelApiService<CreateModelT, UpdateModelT, V
   }
 
   public async Get(id: string): Promise<ViewModelT> {
-    const response = await this.apiService.generateRequest()
+    const response = await this.requestService
       .Get(`${this.basePath}/GetById?id=${id}`,
         await this.GetHeaders(HandlerType.Get));
 

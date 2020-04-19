@@ -1,5 +1,5 @@
 import { TutorBitsBaseModelApiService, HandlerType } from '../abstract/tutor-bits-base-model-api.service';
-import { IAPIService } from '../abstract/IAPIService';
+import { IRequestService } from '../abstract/IRequestService';
 import { Injectable } from '@angular/core';
 import { IAuthService } from '../abstract/IAuthService';
 import { CreateAccount } from '../../models/user/create-account';
@@ -8,8 +8,8 @@ import { UpdateAccount } from '../../models/user/update-account';
 
 // Import this as your service so tests can override it
 export abstract class TutorBitsAccountService extends TutorBitsBaseModelApiService<CreateAccount, UpdateAccount, ViewAccount> {
-  constructor(apiService: IAPIService, auth: IAuthService) {
-    super(apiService, auth);
+  constructor(requestService: IRequestService, auth: IAuthService) {
+    super(requestService, auth);
   }
 
   public abstract async Login(): Promise<ViewAccount>;
@@ -21,12 +21,12 @@ export abstract class TutorBitsAccountService extends TutorBitsBaseModelApiServi
 export class TutorBitsConcreteAccountService extends TutorBitsAccountService {
   protected readonly basePath = `api/Account`;
 
-  constructor(apiService: IAPIService, auth: IAuthService) {
-    super(apiService, auth);
+  constructor(requestService: IRequestService, auth: IAuthService) {
+    super(requestService, auth);
   }
 
   public async Login(): Promise<ViewAccount> {
-    const response = await this.apiService.generateRequest()
+    const response = await this.requestService
       .Get(`api/Account/Login`, await this.GetAuthHeaders(HandlerType.Update));
 
     if (!response.ok) {

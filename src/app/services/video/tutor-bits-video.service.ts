@@ -1,5 +1,5 @@
 import { HandlerType } from '../abstract/tutor-bits-base-model-api.service';
-import { IAPIService } from '../abstract/IAPIService';
+import { IRequestService } from '../abstract/IRequestService';
 import { Injectable } from '@angular/core';
 import { IAuthService } from '../abstract/IAuthService';
 import { Part } from 'shared/media/lib/ts/Common';
@@ -10,12 +10,12 @@ import { IVideoService } from '../abstract/IVideoService';
 export class TutorBitsVideoService extends IVideoService {
   protected readonly basePath = `api/Video`;
 
-  constructor(apiService: IAPIService, auth: IAuthService) {
-    super(apiService, auth);
+  constructor(requestService: IRequestService, auth: IAuthService) {
+    super(requestService, auth);
   }
 
   public async StartUpload(videoId: string): Promise<string> {
-    const response = await this.apiService.generateRequest()
+    const response = await this.requestService
       .Post(`${this.basePath}/start?videoId=${videoId}`, null, (await this.GetAuthHeaders(HandlerType.Create)));
 
     if (!response.ok) {
@@ -26,7 +26,7 @@ export class TutorBitsVideoService extends IVideoService {
   }
 
   public async ContinueUpload(videoId: string, recordingId: string, data: Blob, part: number, last: boolean): Promise<string> {
-    const response = await this.apiService.generateRequest().Post(
+    const response = await this.requestService.Post(
       `${this.basePath}/continue?videoId=${videoId}&recordingId=${recordingId}&part=${part}&last=${last}`, data,
       (await this.GetAuthHeaders(HandlerType.Create)));
 
@@ -38,7 +38,7 @@ export class TutorBitsVideoService extends IVideoService {
   }
 
   public async FinishUpload(videoId: string, recordingId: string, parts: Array<Part>): Promise<boolean> {
-    const response = await this.apiService.generateRequest().Post(
+    const response = await this.requestService.Post(
       `${this.basePath}/stop?videoId=${videoId}&recordingId=${recordingId}`, JSON.stringify(parts),
       (await this.GetAuthHeaders(HandlerType.Create)));
 
@@ -50,7 +50,7 @@ export class TutorBitsVideoService extends IVideoService {
   }
 
   public async CheckStatus(videoId: string): Promise<string> {
-    const response = await this.apiService.generateRequest().Get(
+    const response = await this.requestService.Get(
       `${this.basePath}/status?videoId=${videoId}`,
       (await this.GetAuthHeaders(HandlerType.Get)));
 
@@ -62,7 +62,7 @@ export class TutorBitsVideoService extends IVideoService {
   }
 
   public async GetVideoStreamUrl(videoId: string, cacheBuster?: string): Promise<string> {
-    const response = await this.apiService.generateRequest().Get(`${this.basePath}/video?videoId=${videoId}`);
+    const response = await this.requestService.Get(`${this.basePath}/video?videoId=${videoId}`);
     if (!response.ok) {
       return null;
     }
@@ -71,7 +71,7 @@ export class TutorBitsVideoService extends IVideoService {
   }
 
   public async Publish(videoId: string): Promise<boolean> {
-    const response = await this.apiService.generateRequest()
+    const response = await this.requestService
       .Post(`${this.basePath}/Publish?videoId=${videoId}`, null, await this.GetAuthHeaders(HandlerType.Update));
 
     return response.ok;

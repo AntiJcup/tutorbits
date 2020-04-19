@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { environment } from 'src/environments/environment';
 import { IAuthService } from '../abstract/IAuthService';
-import { IAPIService } from '../abstract/IAPIService';
+import { IRequestService } from '../abstract/IRequestService';
 import { JWT } from '../../models/auth/JWT';
 import { IDataService } from '../abstract/IDataService';
 import { BehaviorSubject } from 'rxjs';
@@ -75,7 +75,7 @@ export class TutorBitsAuthService extends IAuthService {
   }
 
   constructor(
-    protected apiService: IAPIService,
+    protected requestService: IRequestService,
     protected dataService: IDataService,
     protected logServer: ILogService,
     protected errorServer: IErrorService,
@@ -98,7 +98,7 @@ export class TutorBitsAuthService extends IAuthService {
         redirect_uri: environment.loginRedirectUri
       };
 
-      const response = await this.apiService.generateRequest().PostFormFullUrl(`${environment.loginTokenUrl}`,
+      const response = await this.requestService.PostFormFullUrl(`${environment.loginTokenUrl}`,
         requestBody, this.getHeaders());
 
       if (!response.ok) {
@@ -143,7 +143,7 @@ export class TutorBitsAuthService extends IAuthService {
         client_id: environment.loginClientId
       };
 
-      const response = await this.apiService.generateRequest().PostFormFullUrl(`${environment.loginTokenUrl}`,
+      const response = await this.requestService.PostFormFullUrl(`${environment.loginTokenUrl}`,
         requestBody, this.getHeaders());
 
       if (!response.ok) {
