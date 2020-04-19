@@ -15,6 +15,7 @@ import { IAuthService } from 'src/app/services/abstract/IAuthService';
 import { TutorBitsAccountService } from 'src/app/services/user/tutor-bits-account.service';
 import { ViewComment } from 'src/app/models/comment/view-comment';
 import { TutorBitsAnswerCommentService } from 'src/app/services/question/tutor-bits-answer-comment.service';
+import { ICacheService } from 'src/app/services/abstract/ICacheService';
 
 @Component({
   templateUrl: './view-question.component.html',
@@ -46,7 +47,8 @@ export class ViewQuestionComponent implements OnInit {
     private accountService: TutorBitsAccountService,
     public commentService: TutorBitsQuestionCommentService, // Dont remove these components use them
     public ratingService: TutorBitsQuestionRatingService,
-    public answerCommentService: TutorBitsAnswerCommentService
+    public answerCommentService: TutorBitsAnswerCommentService,
+    private cache: ICacheService
   ) {
     this.questionId = this.route.snapshot.paramMap.get('questionId');
     this.questionTitle = this.route.snapshot.paramMap.get('questionTitle');
@@ -68,7 +70,7 @@ export class ViewQuestionComponent implements OnInit {
 
       this.titleService.SetTitle(`${this.question.title} - ${this.question.topic} Question`);
 
-      this.answers = await this.answerService.GetComments(this.questionId);
+      this.answers = await this.cache.CacheFunc(this.answerService.GetComments, this.answerService, this.questionId);
 
       if (this.authService.IsLoggedIn()) {
         this.currentUserId = await (await this.accountService.GetAccountInformation()).id;
