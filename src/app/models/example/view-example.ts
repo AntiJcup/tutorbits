@@ -10,4 +10,5 @@ export interface ViewExample {
     score: number;
     projectId: string;
     projectType: string;
+    dateCreated: string;
 }

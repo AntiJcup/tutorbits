@@ -9,13 +9,17 @@ import { ViewExample } from 'src/app/models/example/view-example';
 export class ExampleCardComponent implements OnInit {
   @Input() example: ViewExample;
 
-  get exampleSubTitle(): string {
-    return `${this.example.score} - ${this.example.owner} - ${this.example.topic}`;
-  }
-
   constructor() { }
 
   ngOnInit() {
+  }
+
+  get subTitle(): string {
+    return `${this.example.topic} Example - By ${this.example.owner}`;
+  }
+
+  get createdDate(): string {
+    return new Date(this.example.dateCreated).toLocaleDateString();
   }
 
 }
