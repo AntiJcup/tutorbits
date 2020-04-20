@@ -9,13 +9,12 @@ import { ViewQuestion } from 'src/app/models/question/view-question';
 export class QuestionCardComponent implements OnInit {
   @Input() question: ViewQuestion;
 
-  get questionSubTitle(): string {
-    return `${this.question.score} - ${this.question.owner} - ${this.question.topic}`;
-  }
-
   constructor() { }
 
   ngOnInit() {
   }
 
+  get createdDate(): string {
+    return new Date(this.question.dateCreated).toLocaleDateString();
+  }
 }
