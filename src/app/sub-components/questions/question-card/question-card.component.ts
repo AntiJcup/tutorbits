@@ -15,6 +15,7 @@ export class QuestionCardComponent implements OnInit {
   }
 
   get createdDate(): string {
-    return new Date(this.question.dateCreated).toLocaleDateString();
+    const date = new Date(this.question.dateCreated);
+    return `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
   }
 }
