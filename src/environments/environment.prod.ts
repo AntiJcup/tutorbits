@@ -15,5 +15,5 @@ export const environment = {
   envName: 'prod',
   allowCreate: false,
   defaultVideoVolume: 0.5,
-  defaultCacheDurationMS: 5000
+  defaultCacheDurationMS: 60000
 };

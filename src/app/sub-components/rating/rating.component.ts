@@ -30,7 +30,7 @@ export class RatingComponent implements OnInit {
 
     try {
       if (this.score === -1) {
-        this.score = await this.ratingService.GetScore(this.targetId);
+        this.score = await this.ratingService.GetScoreCached(this.targetId);
       }
     } catch (err) {
       this.errorServer.HandleError('Rating', `Error loading score`);
@@ -38,7 +38,7 @@ export class RatingComponent implements OnInit {
 
     try {
       if (this.loggedIn) {
-        this.rating = await this.ratingService.GetYourRatingForTarget(this.targetId);
+        this.rating = await this.ratingService.GetYourRatingForTargetCached(this.targetId);
       }
     } catch (err) {
       this.errorServer.HandleError('Rating', `Error loading rating`);

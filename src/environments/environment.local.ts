@@ -15,5 +15,5 @@ export const environment = {
   envName: 'local',
   allowCreate: true,
   defaultVideoVolume: 0.5,
-  defaultCacheDurationMS: 5000
+  defaultCacheDurationMS: 30000
 };

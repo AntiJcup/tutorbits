@@ -87,7 +87,7 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
     });
 
     try {
-      const tutorial: ViewTutorial = await this.tutorialService.Get(this.tutorialId);
+      const tutorial: ViewTutorial = await this.tutorialService.GetCached(this.tutorialId);
       this.titleService.SetTitle(`Recording: ${tutorial.title}`);
       this.zone.runTask(() => {
         this.tutorial = tutorial;

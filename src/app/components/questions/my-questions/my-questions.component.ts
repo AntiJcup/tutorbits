@@ -26,7 +26,7 @@ export class MyQuestionsComponent implements OnInit {
   async ngOnInit() {
     this.titleService.SetTitle('My Questions');
     try {
-      const questions = await this.questionsService.GetAllByOwner();
+      const questions = await this.questionsService.GetAllByOwnerCached();
 
       this.zone.runTask(() => {
         this.questions = questions;

@@ -24,7 +24,7 @@ export class TutorBitsCacheService extends ICacheService {
 
   // For best caching key results make sure to implement toString() functions for objects
   // Do not call this on for functions that are shared on many instances of the same class
-  // Use CachFuncKey and define your own key to distinguish
+  // Use CachFuncKey and define your own key to distinguish between them
   public async CacheFunc(
     func: (...args: any[]) => Promise<any>,
     target: any,
@@ -43,12 +43,12 @@ export class TutorBitsCacheService extends ICacheService {
   }
 
   public ClearCache(): void {
-    this.logger.LogToConsole(`clearing cache`);
+    this.logger.LogToConsole('Caching', `clearing cache`);
     this.cache.clear();
   }
 
   public ClearCacheForKey(key: string): void {
-    this.logger.LogToConsole(`clearing cache for key: ${key}`);
+    this.logger.LogToConsole('Caching', `clearing cache for key: ${key}`);
     this.cache.delete(key);
   }
 
@@ -61,16 +61,15 @@ export class TutorBitsCacheService extends ICacheService {
 
   private GetCreateCacheEntry(key: string, createCallback: () => Observable<any>, options: CacheOptions): Promise<any> {
     if (!this.cache.has(key)) {
-      this.logger.LogToConsole(`caching new key: ${key} for: ${options.cacheDuration}`);
+      this.logger.LogToConsole('Caching', `caching new key: ${key} for: ${options.cacheDuration}`);
       const newCacheEntry = createCallback().pipe(
         shareReplay(1));
       this.cache.set(key, newCacheEntry);
       setTimeout(() => {
-        this.logger.LogToConsole(`clearing cache for key: ${key}`);
         this.ClearCacheForKey(key);
       }, options.cacheDuration);
     } else {
-      this.logger.LogToConsole(`found cache for key: ${key}`);
+      this.logger.LogToConsole('Caching', `found cache for key: ${key}`);
     }
 
     const cacheEntry: Observable<Response> = this.cache.get(key);
@@ -78,6 +77,6 @@ export class TutorBitsCacheService extends ICacheService {
   }
 
   private GenerateKeyFromFunction(func: () => Promise<any>, target: any, args: any[]) {
-    return `${typeof (target)}::${target.constructor.name}::${func.name}(${args.map((value: any, index: number, array: any[]) => `${typeof (value)}::${value.constructor.name}::${value}`).join(',')})`;
+    return `${typeof (target)}::${target.constructor.name}::${func.name}(${args.map((value: any, index: number, array: any[]) => `${typeof (value)}::${(value != null && typeof (value) !== 'undefined') ? value.constructor.name : "null"}::${value}`).join(',')})`;
   }
 }

@@ -63,7 +63,6 @@ export class CreateCommentComponent implements OnInit {
         this.errorServer.HandleError('CreateError', JSON.stringify(res.error));
       }
 
-      this.cache.ClearCache();
       this.commentAdded.next(res.data as ViewComment);
     } catch (err) {
       this.errorServer.HandleError('CreateError', err);

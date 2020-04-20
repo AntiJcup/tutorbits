@@ -35,7 +35,7 @@ export class ViewTutorialsComponent implements OnInit, OnDestroy {
       'name=\'description\'');
 
     try {
-      const tutorials = await this.tutorialsService.GetAll();
+      const tutorials = await this.tutorialsService.GetAllCached();
       this.tutorials = tutorials;
       this.logServer.LogToConsole('ViewTutorials', tutorials.length);
       this.tutorials.forEach(element => {

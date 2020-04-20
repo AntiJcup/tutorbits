@@ -63,7 +63,6 @@ export class CreateAnswerComponent implements OnInit {
         this.errorServer.HandleError('CreateError', JSON.stringify(res.error));
       }
 
-      this.cache.ClearCache();
       this.answerAdded.next(res.data as ViewAnswer);
     } catch (err) {
       this.errorServer.HandleError('CreateError', err);

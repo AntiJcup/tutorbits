@@ -24,6 +24,10 @@ export abstract class TutorBitsBaseCommentService extends TutorBitsBaseModelApiS
     return (await response.json()) as ViewComment[];
   }
 
+  public async GetCommentsCached(targetId: string, status: Status = Status.Active, take: number = null, skip: number = null): Promise<ViewComment[]> {
+    return await this.cache.CacheFunc(this.GetComments, this, targetId, status, take, skip);
+  }
+
   public async GetCommentCount(targetId: string, status: Status = Status.Active): Promise<number> {
     const response = await this.requestService
       .Get(`${this.basePath}/GetCountForTarget?state=${Status[status]}&targetId=${targetId}`,
@@ -34,6 +38,10 @@ export abstract class TutorBitsBaseCommentService extends TutorBitsBaseModelApiS
     }
 
     return (await response.json()) as number;
+  }
+
+  public async GetCommentCountCached(targetId: string, status: Status = Status.Active): Promise<number> {
+    return await this.cache.CacheFunc(this.GetCommentCountCached, this, targetId, status);
   }
 }
 

@@ -35,7 +35,7 @@ export class ViewExamplesComponent implements OnInit, OnDestroy {
       'name=\'description\'');
 
     try {
-      const examples = await this.examplesService.GetAll();
+      const examples = await this.examplesService.GetAllCached();
       this.examples = examples;
       this.logServer.LogToConsole('ViewExamples', examples.length);
       this.examples.forEach(element => {

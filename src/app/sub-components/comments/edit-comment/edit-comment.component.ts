@@ -67,7 +67,6 @@ export class EditCommentComponent implements OnInit {
         this.errorServer.HandleError('EditError', JSON.stringify(res.error));
       }
 
-      this.cache.ClearCache();
       this.updated.next(res.data as ViewComment);
     } catch (err) {
       this.errorServer.HandleError('EditError', err);

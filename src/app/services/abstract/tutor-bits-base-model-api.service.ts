@@ -47,6 +47,8 @@ export abstract class TutorBitsBaseModelApiService<CreateModelT, UpdateModelT, V
       return responseWrapper;
     }
 
+    this.cache.ClearCache();
+
     responseWrapper.data = await response.json() as ViewModelT;
     return responseWrapper;
   }
@@ -61,6 +63,8 @@ export abstract class TutorBitsBaseModelApiService<CreateModelT, UpdateModelT, V
       return responseWrapper;
     }
 
+    this.cache.ClearCache();
+
     responseWrapper.data = await response.json() as ViewModelT;
     return responseWrapper;
   }
@@ -72,6 +76,7 @@ export abstract class TutorBitsBaseModelApiService<CreateModelT, UpdateModelT, V
         null,
         await this.GetAuthHeaders(HandlerType.Update));
 
+    this.cache.ClearCache();
     return response.ok;
   }
 
@@ -87,6 +92,10 @@ export abstract class TutorBitsBaseModelApiService<CreateModelT, UpdateModelT, V
     return (await response.json()) as ViewModelT[];
   }
 
+  public async GetAllCached(status: Status = Status.Active, take: number = null, skip: number = null): Promise<ViewModelT[]> {
+    return await this.cache.CacheFunc(this.GetAll, this, status, take, skip);
+  }
+
   public async GetAllByOwner(take: number = null, skip: number = null): Promise<ViewModelT[]> {
     const response = await this.requestService
       .Get(`${this.basePath}/GetAllByOwner${!take ? '' : `?take=${take}`}${!skip ? '' : `${!take ? '?' : '&'}skip=${skip}`}`,
@@ -99,6 +108,10 @@ export abstract class TutorBitsBaseModelApiService<CreateModelT, UpdateModelT, V
     return (await response.json()) as ViewModelT[];
   }
 
+  public async GetAllByOwnerCached(take: number = null, skip: number = null): Promise<ViewModelT[]> {
+    return await this.cache.CacheFunc(this.GetAllByOwner, this, take, skip);
+  }
+
   public async Delete(id: string): Promise<boolean> {
     const response =
       await this.requestService.Post(
@@ -106,6 +119,7 @@ export abstract class TutorBitsBaseModelApiService<CreateModelT, UpdateModelT, V
         null,
         await this.GetAuthHeaders(HandlerType.Delete));
 
+    this.cache.ClearCache();
     return response.ok;
   }
 
@@ -119,5 +133,9 @@ export abstract class TutorBitsBaseModelApiService<CreateModelT, UpdateModelT, V
     }
 
     return (await response.json()) as ViewModelT;
+  }
+
+  public async GetCached(id: string): Promise<ViewModelT> {
+    return this.cache.CacheFunc(this.Get, this, id);
   }
 }

@@ -36,7 +36,7 @@ export class CommentSectionComponent implements OnInit {
     this.loggedIn = this.auth.IsLoggedIn();
 
     try {
-      const res: ViewComment[] = await this.cache.CacheFunc(this.commentService.GetComments, this.commentService, this.targetId);
+      const res: ViewComment[] = await this.commentService.GetCommentsCached(this.targetId);
       // Hack because monaco editor needs a resize event to consider the comment section
       setTimeout(() => {
         window.dispatchEvent(new Event('resize'));

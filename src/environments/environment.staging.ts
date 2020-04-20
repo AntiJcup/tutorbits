@@ -15,5 +15,5 @@ export const environment = {
   envName: 'staging',
   allowCreate: true,
   defaultVideoVolume: 0.5,
-  defaultCacheDurationMS: 5000
+  defaultCacheDurationMS: 60000
 };

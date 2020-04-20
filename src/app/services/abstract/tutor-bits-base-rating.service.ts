@@ -24,6 +24,10 @@ export abstract class TutorBitsBaseRatingService extends TutorBitsBaseModelApiSe
     return (await response.json()) as number;
   }
 
+  public async GetScoreCached(targetId: string, status: Status = Status.Active): Promise<number> {
+    return await this.cache.CacheFunc(this.GetScore, this, targetId, status);
+  }
+
   public async GetYourRatingForTarget(targetId: string): Promise<ViewRating> {
     const response = await this.requestService
       .Get(`${this.basePath}/GetYourScoreForTarget?targetId=${targetId}`,
@@ -34,6 +38,10 @@ export abstract class TutorBitsBaseRatingService extends TutorBitsBaseModelApiSe
     }
 
     return (await response.json()) as ViewRating;
+  }
+
+  public async GetYourRatingForTargetCached(targetId: string): Promise<ViewRating> {
+    return await this.cache.CacheFunc(this.GetYourRatingForTarget, this, targetId);
   }
 }
 

@@ -63,14 +63,14 @@ export class ViewQuestionComponent implements OnInit {
 
   async ngOnInit() {
     try {
-      this.question = await this.questionService.Get(this.questionId);
+      this.question = await this.questionService.GetCached(this.questionId);
       if (!this.question) {
         throw new Error(`No question found matching this id ${this.questionId}`);
       }
 
       this.titleService.SetTitle(`${this.question.title} - ${this.question.topic} Question`);
 
-      this.answers = await this.cache.CacheFunc(this.answerService.GetComments, this.answerService, this.questionId);
+      this.answers = await this.answerService.GetCommentsCached(this.questionId);
 
       if (this.authService.IsLoggedIn()) {
         this.currentUserId = await (await this.accountService.GetAccountInformation()).id;

@@ -67,7 +67,7 @@ export class CreateSandboxComponent implements OnInit, OnDestroy {
       });
 
       if (this.loadProjectId !== null) {
-        const baseProject = await this.projectService.Get(this.loadProjectId);
+        const baseProject = await this.projectService.GetCached(this.loadProjectId);
         if (baseProject == null) {
           throw new Error('invalid base project');
         }

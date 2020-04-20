@@ -26,7 +26,7 @@ export class MyExamplesComponent implements OnInit {
   async ngOnInit() {
     this.titleService.SetTitle('My Examples');
     try {
-      const examples = await this.examplesService.GetAllByOwner();
+      const examples = await this.examplesService.GetAllByOwnerCached();
       this.zone.runTask(() => {
         this.examples = examples;
       });

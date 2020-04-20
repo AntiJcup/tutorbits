@@ -65,7 +65,6 @@ export class EditAnswerComponent implements OnInit {
         this.errorServer.HandleError('EditError', JSON.stringify(res.error));
       }
 
-      this.cache.ClearCache();
       this.updated.next(res.data as ViewAnswer);
     } catch (err) {
       this.errorServer.HandleError('EditError', err);

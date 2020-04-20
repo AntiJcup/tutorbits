@@ -36,7 +36,7 @@ export class ViewQuestionsComponent implements OnInit, OnDestroy {
       'name=\'description\'');
 
     try {
-      const questions = await this.questionsService.GetAll();
+      const questions = await this.questionsService.GetAllCached();
       this.questions = questions;
       this.logServer.LogToConsole('ViewQuestions', questions.length);
       this.questions.forEach(element => {

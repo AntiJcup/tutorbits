@@ -26,7 +26,7 @@ export class MyTutorialsComponent implements OnInit {
   async ngOnInit() {
     this.titleService.SetTitle('My Tutorials');
     try {
-      const tutorials = await this.tutorialsService.GetAllByOwner();
+      const tutorials = await this.tutorialsService.GetAllByOwnerCached();
 
       this.zone.runTask(() => {
         this.tutorials = tutorials;

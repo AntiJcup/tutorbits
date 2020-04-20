@@ -53,7 +53,7 @@ export class CreateExampleComponent implements OnInit, OnDestroy {
     this.titleService.SetTitle('Create Example');
     this.loading = true;
     try {
-      const existingProject = await this.projectService.Get(this.projectId);
+      const existingProject = await this.projectService.GetCached(this.projectId);
       if (!existingProject) {
         throw new Error('Project doesnt exist');
       }
