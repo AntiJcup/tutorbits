@@ -11,10 +11,11 @@
                 <mat-card-title [innerText]="question.title" matTooltip="{{question.title}}"></mat-card-title>
             </mat-card-header>
             <div class="question-details">Asked by: {{question.owner}} - On: {{askedDate}}</div>
-            <mat-card-content>
-                <p [innerText]="question.description">
+            <mat-card-content *ngIf="!editing">
+                <p [innerText]="question.description" >
                 </p>
             </mat-card-content>
+            <app-edit-question *ngIf="editing" [question]="question" (updated)="onUpdated($event)" (cancelled)="onUpdateCancel($event)"></app-edit-question>
             <mat-divider></mat-divider>
             <mat-card-actions>
                 <div class="rating">
@@ -27,6 +28,9 @@
                         [commentService]="commentService" [targetId]="questionId" [class.focused]="showCommentSection">
                     </app-comments-button>
                 </div>
+                <button class="editBtn" mat-icon-button *ngIf="owned" (click)="onEditClicked($event)">
+                    <mat-icon class="icon">edit</mat-icon>
+                </button>
             </mat-card-actions>
         </mat-card>
         <h3 class="answersHeader">Answers:</h3>

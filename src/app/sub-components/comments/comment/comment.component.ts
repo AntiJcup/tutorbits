@@ -32,7 +32,7 @@ export class CommentComponent implements OnInit {
       return;
     }
 
-    this.owned = this.comment.ownerId === (await this.account.GetAccountInformation()).id;
+    this.owned = this.comment.ownerId === (await this.account.GetAccountInformationCached()).id;
   }
 
   onEditClicked(e: any) {

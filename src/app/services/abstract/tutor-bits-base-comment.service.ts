@@ -41,7 +41,7 @@ export abstract class TutorBitsBaseCommentService extends TutorBitsBaseModelApiS
   }
 
   public async GetCommentCountCached(targetId: string, status: Status = Status.Active): Promise<number> {
-    return await this.cache.CacheFunc(this.GetCommentCountCached, this, targetId, status);
+    return await this.cache.CacheFunc(this.GetCommentCount, this, targetId, status);
   }
 }
 

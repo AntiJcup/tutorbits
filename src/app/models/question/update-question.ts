@@ -1,5 +1,5 @@
 export interface UpdateQuestion {
-    Id: string;
-    Title: string;
-    Description: string;
+    id: string;
+    title: string;
+    description: string;
 }

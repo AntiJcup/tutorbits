@@ -39,7 +39,7 @@ export class AnswerComponent implements OnInit {
       return;
     }
 
-    this.owned = this.answer.ownerId === (await this.account.GetAccountInformation()).id;
+    this.owned = this.answer.ownerId === (await this.account.GetAccountInformationCached()).id;
   }
 
   public onCommentsClicked(e: any) {

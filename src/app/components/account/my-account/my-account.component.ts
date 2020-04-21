@@ -25,7 +25,7 @@ export class MyAccountComponent implements OnInit {
     this.titleService.SetTitle('Account');
 
     try {
-      this.account = await this.accountService.GetAccountInformation();
+      this.account = await this.accountService.GetAccountInformationCached();
     } catch (err) {
       this.errorServer.HandleError('MyAccountComponent', `${err}`);
     }

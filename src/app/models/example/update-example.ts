@@ -1,5 +1,5 @@
 export interface UpdateExample {
-    Id: string;
-    Title: string;
-    Description: string;
+    id: string;
+    title: string;
+    description: string;
 }

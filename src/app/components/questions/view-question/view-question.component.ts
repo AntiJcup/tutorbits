@@ -34,6 +34,8 @@ export class ViewQuestionComponent implements OnInit {
   public comments: ViewComment[];
   public targetAnswerId: string;
   public showAnswerCommentSection = false;
+  public owned = false;
+  public editing = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -47,8 +49,7 @@ export class ViewQuestionComponent implements OnInit {
     private accountService: TutorBitsAccountService,
     public commentService: TutorBitsQuestionCommentService, // Dont remove these components use them
     public ratingService: TutorBitsQuestionRatingService,
-    public answerCommentService: TutorBitsAnswerCommentService,
-    private cache: ICacheService
+    public answerCommentService: TutorBitsAnswerCommentService
   ) {
     this.questionId = this.route.snapshot.paramMap.get('questionId');
     this.questionTitle = this.route.snapshot.paramMap.get('questionTitle');
@@ -73,8 +74,10 @@ export class ViewQuestionComponent implements OnInit {
       this.answers = await this.answerService.GetCommentsCached(this.questionId);
 
       if (this.authService.IsLoggedIn()) {
-        this.currentUserId = await (await this.accountService.GetAccountInformation()).id;
+        this.currentUserId = (await this.accountService.GetAccountInformationCached()).id;
+        this.owned = this.question.ownerId === this.currentUserId;
       }
+
     } catch (err) {
       this.errorServer.HandleError('ViewQuestionComponent', err);
     }
@@ -134,5 +137,18 @@ export class ViewQuestionComponent implements OnInit {
   public onAnswerCommentsClosed(e: any) {
     this.eventService.TriggerButtonClick('Question', `Answer CommentsClose - ${this.targetAnswerId}`);
     this.showAnswerCommentSection = false;
+  }
+
+  onEditClicked(e: any) {
+    this.editing = true;
+  }
+
+  onUpdated(e: ViewQuestion) {
+    this.editing = false;
+    this.question = e;
+  }
+
+  onUpdateCancel(e: any) {
+    this.editing = false;
   }
 }

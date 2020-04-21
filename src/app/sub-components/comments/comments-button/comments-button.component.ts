@@ -26,7 +26,7 @@ export class CommentButtonComponent implements OnInit {
     } catch (err) {
       this.errorServer.HandleError('CommentsButton', `Error loading comment count`);
     }
-    
+
     this.loading = false;
   }
 }

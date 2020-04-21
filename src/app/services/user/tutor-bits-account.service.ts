@@ -15,6 +15,7 @@ export abstract class TutorBitsAccountService extends TutorBitsBaseModelApiServi
 
   public abstract async Login(): Promise<ViewAccount>;
   public abstract async GetAccountInformation(): Promise<ViewAccount>;
+  public abstract async GetAccountInformationCached(): Promise<ViewAccount>;
   public abstract async UpdateNickName(nickName: string, accountId: string): Promise<void>;
 }
 
@@ -38,12 +39,16 @@ export class TutorBitsConcreteAccountService extends TutorBitsAccountService {
   }
 
   public async GetAccountInformation(): Promise<ViewAccount> {
-    const accounts = await this.GetAllByOwnerCached();
+    const accounts = await this.GetAllByOwner();
     if (accounts.length <= 0) {
       throw new Error(`Failed getting account information`);
     }
 
     return accounts[0];
+  }
+
+  public async GetAccountInformationCached(): Promise<ViewAccount> {
+    return this.cache.CacheFunc(this.GetAccountInformation, this);
   }
 
   public async UpdateNickName(nickName: string, accountId: string): Promise<void> {
