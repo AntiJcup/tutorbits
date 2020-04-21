@@ -11,4 +11,5 @@ export interface ViewExample {
     projectId: string;
     projectType: string;
     dateCreated: string;
+    commentCount: number;
 }

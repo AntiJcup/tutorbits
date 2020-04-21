@@ -12,4 +12,5 @@ export interface ViewTutorial {
     projectId: string;
     videoId: string;
     dateCreated: string;
+    commentCount: number;
 }

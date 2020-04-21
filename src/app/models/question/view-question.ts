@@ -7,4 +7,5 @@ export interface ViewQuestion {
     status: string;
     score: number;
     dateCreated: number;
+    answerCount: number;
 }
