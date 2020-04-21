@@ -19,7 +19,8 @@ export const environment = {
   envName: 'default',
   allowCreate: true,
   defaultVideoVolume: 0.5,
-  defaultCacheDurationMS: 30000
+  defaultCacheDurationMS: 30000,
+  accountInfoCacheDurationMS: 1000 * 60 * 60
 };
 
 /*

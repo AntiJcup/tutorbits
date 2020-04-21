@@ -33,6 +33,17 @@ export class TutorBitsCacheService extends ICacheService {
       this.GenerateKeyFromFunction(func, target, args), () => defer(() => from(func.apply(target, args))), this.defaultCacheOptions);
   }
 
+  public async CacheFuncOptions(
+    options: CacheOptions,
+    func: (...args: any[]) => Promise<any>,
+    target: any,
+    ...args: any[]): Promise<any> {
+    return this.GetCreateCacheEntry(
+      this.GenerateKeyFromFunction(func, target, args),
+      () => defer(() => from(func.apply(target, args))),
+      options || this.defaultCacheOptions);
+  }
+
   public async CacheFuncKey(
     key: string,
     func: (...args: any[]) => Promise<any>,
@@ -40,6 +51,16 @@ export class TutorBitsCacheService extends ICacheService {
     ...args: any[]): Promise<any> {
     return this.GetCreateCacheEntry(
       key, () => defer(() => from(func.apply(target, args))), this.defaultCacheOptions);
+  }
+
+  public async CacheFuncKeyOptions(
+    key: string,
+    options: CacheOptions,
+    func: (...args: any[]) => Promise<any>,
+    target: any,
+    ...args: any[]): Promise<any> {
+    return this.GetCreateCacheEntry(
+      key, () => defer(() => from(func.apply(target, args))), options || this.defaultCacheOptions);
   }
 
   public ClearCache(): void {

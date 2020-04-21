@@ -6,6 +6,7 @@ import { CreateAccount } from '../../models/user/create-account';
 import { ViewAccount } from '../../models/user/view-account';
 import { UpdateAccount } from '../../models/user/update-account';
 import { ICacheService } from '../abstract/ICacheService';
+import { environment } from 'src/environments/environment';
 
 // Import this as your service so tests can override it
 export abstract class TutorBitsAccountService extends TutorBitsBaseModelApiService<CreateAccount, UpdateAccount, ViewAccount> {
@@ -35,6 +36,8 @@ export class TutorBitsConcreteAccountService extends TutorBitsAccountService {
       throw new Error(`Failed logging in - ${response.statusText}`);
     }
 
+    this.cache.ClearCache();
+
     return (await response.json()) as ViewAccount;
   }
 
@@ -48,7 +51,7 @@ export class TutorBitsConcreteAccountService extends TutorBitsAccountService {
   }
 
   public async GetAccountInformationCached(): Promise<ViewAccount> {
-    return this.cache.CacheFunc(this.GetAccountInformation, this);
+    return this.cache.CacheFuncOptions({ cacheDuration: environment.accountInfoCacheDurationMS }, this.GetAccountInformation, this);
   }
 
   public async UpdateNickName(nickName: string, accountId: string): Promise<void> {

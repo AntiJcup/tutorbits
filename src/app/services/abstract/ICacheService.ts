@@ -15,9 +15,18 @@ export abstract class ICacheService {
         key: string,
         func: (...args: any[]) => Promise<any>,
         ...args: any[]): Promise<any>;
+        public abstract async CacheFuncKeyOptions(
+            key: string,
+            options: CacheOptions,
+            func: (...args: any[]) => Promise<any>,
+            ...args: any[]): Promise<any>;
     public abstract async CacheFunc(
         func: (...args: any[]) => Promise<any>,
         ...args: any[]): Promise<any>;
+    public abstract async CacheFuncOptions(
+            options: CacheOptions,
+            func: (...args: any[]) => Promise<any>,
+            ...args: any[]): Promise<any>;
     public abstract ClearCache(): void;
     public abstract ClearCacheForKey(key: string): void;
     public abstract ClearCacheForFunc(
