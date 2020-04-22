@@ -329,9 +329,9 @@ export class WatchComponent implements OnInit, OnDestroy {
     this.eventService.TriggerButtonClick('Watch', `Sandbox - ${this.tutorialId}`);
     // this.router.navigate([`sandbox/${this.projectId}`]);
     if (newWindow) {
-      window.open(`sandbox/${this.tutorial.projectId}`, 'Sandbox', 'height=720,width=1080');
+      window.open(`create/sandbox/${this.tutorial.projectId}`, 'Sandbox', 'height=720,width=1080');
     } else {
-      window.open(`sandbox/${this.tutorial.projectId}`);
+      window.open(`create/sandbox/${this.tutorial.projectId}`);
     }
   }
 

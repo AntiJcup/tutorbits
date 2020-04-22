@@ -3,7 +3,7 @@ import { InjectionToken } from '@angular/core';
 
 export interface CacheOptions {
     cacheDuration: number;
-    overrideCacheKey?: string;
+    saveLocal?: boolean;
 }
 
 export abstract class ICacheService {
@@ -15,7 +15,7 @@ export abstract class ICacheService {
         key: string,
         func: (...args: any[]) => Promise<any>,
         ...args: any[]): Promise<any>;
-        public abstract async CacheFuncKeyOptions(
+    public abstract async CacheFuncKeyOptions(
             key: string,
             options: CacheOptions,
             func: (...args: any[]) => Promise<any>,
