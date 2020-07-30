@@ -1,0 +1,55 @@
+diff --git a/node_modules/monaco-languageclient/lib/monaco-converter.d.ts b/node_modules/monaco-languageclient/lib/monaco-converter.d.ts
+index c718955..2d088ab 100644
+--- a/node_modules/monaco-languageclient/lib/monaco-converter.d.ts
++++ b/node_modules/monaco-languageclient/lib/monaco-converter.d.ts
+@@ -1,4 +1,4 @@
+-/// <reference types="monaco-editor-core/monaco" />
++
+ import * as ls from 'vscode-languageserver-protocol';
+ import { CodeActionParams, CodeLensParams, DocumentFormattingParams, DocumentOnTypeFormattingParams, DocumentRangeFormattingParams, ReferenceParams, RenameParams, TextDocumentPositionParams, Position, TextDocumentIdentifier, CompletionItem, CompletionList, CompletionParams, CompletionContext, CompletionTriggerKind, Range, Diagnostic, CompletionItemKind, Hover, SignatureHelp, SignatureInformation, ParameterInformation, Definition, DefinitionLink, Location, DocumentHighlight, SymbolInformation, DocumentSymbolParams, CodeActionContext, DiagnosticSeverity, Command, CodeLens, FormattingOptions, TextEdit, WorkspaceEdit, DocumentLinkParams, DocumentLink, MarkedString, MarkupContent, ColorInformation, ColorPresentation, FoldingRange, DiagnosticRelatedInformation, SymbolKind, DocumentSymbol, CodeAction, SignatureHelpContext, SignatureHelpTriggerKind } from './services';
+ import IReadOnlyModel = monaco.editor.IReadOnlyModel;
+diff --git a/node_modules/monaco-languageclient/lib/services.d.ts b/node_modules/monaco-languageclient/lib/services.d.ts
+index 9e0b9f2..3155e1d 100644
+--- a/node_modules/monaco-languageclient/lib/services.d.ts
++++ b/node_modules/monaco-languageclient/lib/services.d.ts
+@@ -174,8 +174,8 @@ export interface Workspace {
+     readonly capabilities?: WorkspaceClientCapabilities;
+     readonly rootPath?: string | null;
+     readonly rootUri: string | null;
+-    readonly workspaceFolders?: typeof import('vscode').workspace.workspaceFolders;
+-    readonly onDidChangeWorkspaceFolders?: typeof import('vscode').workspace.onDidChangeWorkspaceFolders;
++    readonly workspaceFolders?: any; //typeof import('vscode').workspace.workspaceFolders;
++    readonly onDidChangeWorkspaceFolders?: any; //typeof import('vscode').workspace.onDidChangeWorkspaceFolders;
+     readonly textDocuments: TextDocument[];
+     readonly onDidOpenTextDocument: Event<TextDocument>;
+     readonly onDidCloseTextDocument: Event<TextDocument>;
+@@ -197,6 +197,6 @@ export interface OutputChannel extends Disposable {
+ export interface Window {
+     showMessage<T extends MessageActionItem>(type: MessageType, message: string, ...actions: T[]): PromiseLike<T | undefined>;
+     createOutputChannel?(name: string): OutputChannel;
+-    withProgress?: typeof import('vscode').window.withProgress;
++    withProgress?: any; //typeof import('vscode').window.withProgress;
+ }
+ //# sourceMappingURL=services.d.ts.map
+diff --git a/node_modules/monaco-languageclient/src/services.ts b/node_modules/monaco-languageclient/src/services.ts
+index 41a9b42..b7848d4 100644
+--- a/node_modules/monaco-languageclient/src/services.ts
++++ b/node_modules/monaco-languageclient/src/services.ts
+@@ -259,8 +259,8 @@ export interface Workspace {
+     readonly capabilities?: WorkspaceClientCapabilities;
+     readonly rootPath?: string | null;
+     readonly rootUri: string | null;
+-    readonly workspaceFolders?: typeof import('vscode').workspace.workspaceFolders;
+-    readonly onDidChangeWorkspaceFolders?: typeof import('vscode').workspace.onDidChangeWorkspaceFolders
++    readonly workspaceFolders?: any;
++    readonly onDidChangeWorkspaceFolders?: any
+     readonly textDocuments: TextDocument[];
+     readonly onDidOpenTextDocument: Event<TextDocument>;
+     readonly onDidCloseTextDocument: Event<TextDocument>;
+@@ -285,5 +285,5 @@ export interface OutputChannel extends Disposable {
+ export interface Window {
+     showMessage<T extends MessageActionItem>(type: MessageType, message: string, ...actions: T[]): PromiseLike<T | undefined>;
+     createOutputChannel?(name: string): OutputChannel;
+-    withProgress?: typeof import('vscode').window.withProgress
++    withProgress?: any
+ }
