@@ -1,9 +1,8 @@
 import { Injectable } from '@angular/core';
-import { environment } from 'src/environments/environment';
 import { IErrorService } from '../abstract/IErrorService';
-import { MatSnackBar, SimpleSnackBar, MatSnackBarRef } from '@angular/material';
+import { MatSnackBar, SimpleSnackBar, MatSnackBarRef } from '@angular/material/snack-bar';
 import { Router, Event, NavigationStart } from '@angular/router';
-import { Subscription, Observable } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { IEventService } from '../abstract/IEventService';
 import { ILogService } from '../abstract/ILogService';
 

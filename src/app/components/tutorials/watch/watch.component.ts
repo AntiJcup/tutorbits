@@ -1,13 +1,11 @@
 import { Component, OnInit, ViewChild, ElementRef, NgZone, OnDestroy } from '@angular/core';
-import { OnlineProjectLoader, OnlineTransactionReader } from 'shared/Tracer/lib/ts/OnlineTransaction';
 import { environment } from 'src/environments/environment';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PlaybackEditorComponent } from 'src/app/sub-components/playing/playback-editor/playback-editor.component';
 import { PlaybackFileTreeComponent } from 'src/app/sub-components/playing/playback-file-tree/playback-file-tree.component';
 import { MonacoPlayer } from 'src/app/sub-components/playing/player/monaco.player';
-import { ApiHttpRequest, ApiHttpRequestInfo } from 'shared/web/lib/ts/ApiHttpRequest';
+import { ApiHttpRequestInfo } from 'shared/web/lib/ts/ApiHttpRequest';
 import { VidPlayer } from 'src/app/sub-components/playing/player/vid.player';
-import { OnlineStreamLoader } from 'shared/media/lib/ts/OnlineStreamLoader';
 import { TransactionPlayerState } from 'shared/Tracer/lib/ts/TransactionPlayer';
 import { IErrorService } from 'src/app/services/abstract/IErrorService';
 import { ILogService } from 'src/app/services/abstract/ILogService';
@@ -21,7 +19,7 @@ import { PlaybackMouseComponent } from 'src/app/sub-components/playing/playback-
 import { PreviewComponent } from 'src/app/sub-components/preview/preview.component';
 import { ITitleService } from 'src/app/services/abstract/ITitleService';
 import { ViewTutorial } from 'src/app/models/tutorial/view-tutorial';
-import { MatDialog } from '@angular/material';
+import { MatDialog } from '@angular/material/dialog';
 import { WatchGuideComponent } from 'src/app/sub-components/watch-guide/watch-guide.component';
 import { IDataService } from 'src/app/services/abstract/IDataService';
 import { Meta } from '@angular/platform-browser';
@@ -29,7 +27,6 @@ import { TutorBitsTutorialCommentService } from 'src/app/services/tutorial/tutor
 import { ViewComment } from 'src/app/models/comment/view-comment';
 import { TutorBitsTutorialRatingService } from 'src/app/services/tutorial/tutor-bits-tutorial-rating.service';
 import { IVideoService } from 'src/app/services/abstract/IVideoService';
-import { Status } from 'src/app/services/abstract/IModelApiService';
 
 @Component({
   templateUrl: './watch.component.html',
