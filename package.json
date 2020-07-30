@@ -37,6 +37,7 @@
     "google-protobuf": "^3.11.4",
     "guid-typescript": "^1.0.9",
     "hammerjs": "^2.0.8",
+    "monaco-languageclient": "^0.13.0",
     "ngx-device-detector": "^1.4.1",
     "ngx-monaco-editor": "^8.1.1",
     "ngx-webcam": "^0.2.6",
@@ -48,8 +49,8 @@
     "zone.js": "~0.9.1"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "^0.803.26",
-    "@angular/cli": "^8.3.26",
+    "@angular-devkit/build-angular": "^0.1000.4",
+    "@angular/cli": "^8.3.29",
     "@angular/compiler-cli": "^8.2.14",
     "@angular/language-service": "^8.2.14",
     "@types/jasmine": "~3.3.8",

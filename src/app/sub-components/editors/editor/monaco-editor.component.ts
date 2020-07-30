@@ -180,6 +180,10 @@ export abstract class MonacoEditorComponent implements OnDestroy {
       return 'html';
     } else if (path.endsWith('.css')) {
       return 'css';
+    } else if (path.endsWith('.cs')) {
+      return 'csharp';
+    } else if (path.endsWith('.py')) {
+      return 'python';
     }
 
     return '';
