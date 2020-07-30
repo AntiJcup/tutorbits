@@ -1,4 +1,4 @@
-import { ViewChild, NgZone, Injectable, Output, EventEmitter, ElementRef } from '@angular/core';
+import { ViewChild, NgZone, Injectable, Output, EventEmitter, ElementRef, Directive } from '@angular/core';
 import {
   TreeComponent,
   Ng2TreeSettings,
@@ -41,6 +41,7 @@ export interface PropogateTreeOptions {
   overrideProjectId?: string;
 }
 
+@Directive()
 @Injectable()
 export abstract class NG2FileTreeComponent {
   editable = false;

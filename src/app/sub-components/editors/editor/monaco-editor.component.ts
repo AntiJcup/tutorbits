@@ -1,4 +1,4 @@
-import { Output, EventEmitter, OnDestroy } from '@angular/core';
+import { Output, EventEmitter, OnDestroy, Directive } from '@angular/core';
 import { ILogService } from 'src/app/services/abstract/ILogService';
 
 export interface GoToDefinitionEvent {
@@ -6,6 +6,7 @@ export interface GoToDefinitionEvent {
   offset: monaco.Position;
 }
 
+@Directive()
 export abstract class MonacoEditorComponent implements OnDestroy {
   private static editOptions: monaco.editor.IEditorOptions = {
     readOnly: false

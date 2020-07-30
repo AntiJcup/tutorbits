@@ -22,7 +22,25 @@
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
             "tsConfig": "tsconfig.app.json",
-            "aot": false,
+            "aot": true,
+            "allowedCommonJsDependencies": [
+              "rxjs/add/operator/merge",
+              "rxjs/add/operator/of",
+              "rxjs/add/observable/of",
+              "rxjs/add/operator/filter",
+              "hammerjs",
+              "rxjs/Observable",
+              "rxjs/Subject",
+              "shared/Tracer/models/ts/Tracer_pb",
+              "uuid/v4",
+              "rxjs/Subject",
+              "rxjs/add/operator/filter",
+              "rxjs-compat/Observable",
+              "rxjs-compat/Subject",
+              "rxjs-compat/add/operator/filter",
+              "rxjs-compat/add/operator/merge",
+              "rxjs-compat/add/observable/of"
+            ],
             "assets": [
               "src/favicon.ico",
               "src/sitemap.xml",
@@ -45,7 +63,7 @@
             ],
             "styles": [
               "./node_modules/@angular/material/prebuilt-themes/purple-green.css",
-              "./node_modules/videogular2/fonts/videogular.css",
+              "./node_modules/@videogular/ngx-videogular/fonts/videogular.css",
               "./node_modules/font-awesome/css/font-awesome.min.css",
               "./shared/Ng2-Tree/src/styles.css",
               "src/styles.sass"
@@ -65,7 +83,6 @@
               "sourceMap": false,
               "extractCss": true,
               "namedChunks": false,
-              "aot": true,
               "extractLicenses": true,
               "vendorChunk": false,
               "buildOptimizer": true,
@@ -94,7 +111,6 @@
               "sourceMap": false,
               "extractCss": true,
               "namedChunks": false,
-              "aot": true,
               "extractLicenses": true,
               "vendorChunk": false,
               "buildOptimizer": true,
@@ -123,7 +139,6 @@
               "sourceMap": true,
               "extractCss": true,
               "namedChunks": true,
-              "aot": true,
               "extractLicenses": true,
               "vendorChunk": true,
               "buildOptimizer": false,
@@ -152,7 +167,6 @@
               "sourceMap": true,
               "extractCss": true,
               "namedChunks": true,
-              "aot": true,
               "extractLicenses": true,
               "vendorChunk": true,
               "buildOptimizer": false,
@@ -179,7 +193,7 @@
             "host": "local.tutorbits.com",
             "sslKey": "localhost.key",
             "sslCert": "localhost.crt",
-            "ssl": true
+            "ssl": true,
           },
           "configurations": {
             "production": {
