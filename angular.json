@@ -39,7 +39,11 @@
               "rxjs-compat/Subject",
               "rxjs-compat/add/operator/filter",
               "rxjs-compat/add/operator/merge",
-              "rxjs-compat/add/observable/of"
+              "rxjs-compat/add/observable/of",
+              "monaco-languageclient/lib/monaco-converter",
+              "monaco-languageclient/lib/services",
+              "vscode-languageserver-protocol",
+              "vscode-jsonrpc"
             ],
             "assets": [
               "src/favicon.ico",
