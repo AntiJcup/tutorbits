@@ -20,12 +20,13 @@ export class RespondingWebSocket<TResponseMessageInterface, ResponseIdField exte
     this.addEventListener('message', this.responseCallback);
   }
 
-  private onResponse(event: MessageEvent) {
+  private async onResponse(event: MessageEvent) {
     if (this.expectedResponses.size <= 0) {
       return;
     }
 
-    const parsedData = JSON.parse(event.data) as TResponseMessageInterface;
+    let eventDataText = typeof (event.data) === 'string' ? event.data : await (event.data as Blob).text();
+    const parsedData = JSON.parse(eventDataText) as TResponseMessageInterface;
     let matchedId: TResponseMessageInterface[ResponseIdField];
     for (const expectedId of this.expectedResponses.keys()) {
       const id = parsedData[this.idField];

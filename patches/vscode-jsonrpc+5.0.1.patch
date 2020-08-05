@@ -1,0 +1,18 @@
+diff --git a/node_modules/vscode-jsonrpc/lib/messageReader.js b/node_modules/vscode-jsonrpc/lib/messageReader.js
+index 5342509..4fac7b8 100644
+--- a/node_modules/vscode-jsonrpc/lib/messageReader.js
++++ b/node_modules/vscode-jsonrpc/lib/messageReader.js
+@@ -5,10 +5,11 @@
+ 'use strict';
+ Object.defineProperty(exports, "__esModule", { value: true });
+ const events_1 = require("./events");
++const Buffer = require("buffer");
+ const Is = require("./is");
+ let DefaultSize = 8192;
+-let CR = Buffer.from('\r', 'ascii')[0];
+-let LF = Buffer.from('\n', 'ascii')[0];
++let CR = Buffer.Buffer.from('\r', 'ascii')[0];
++let LF = Buffer.Buffer.from('\n', 'ascii')[0];
+ let CRLF = '\r\n';
+ class MessageBuffer {
+     constructor(encoding = 'utf8') {
