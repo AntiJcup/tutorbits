@@ -735,11 +735,12 @@ export abstract class MonacoEditorComponent implements OnDestroy {
 
       monaco.languages.registerDocumentRangeFormattingEditProvider(PYTHON_LANGUAGE_ID, {
         provideDocumentRangeFormattingEdits: async (model, range, options, token): Promise<monaco.languages.TextEdit[]> => {
-          const source = model.getValue(); // .replace(/\r\n/g, '\n');
+          const source = model.getValue();
           const cmd: any = {
             id: Math.floor((Math.random() * 10000)),
             type: 'format',
-            source
+            source,
+            range
           };
 
           webSocket.send(JSON.stringify(cmd));
