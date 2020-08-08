@@ -2,9 +2,11 @@ import { Output, EventEmitter, OnDestroy, Directive } from '@angular/core';
 import { ILogService } from 'src/app/services/abstract/ILogService';
 import { MonacoToProtocolConverter, ProtocolToMonacoConverter } from 'monaco-languageclient/lib/monaco-converter';
 import { RespondingWebSocket } from 'shared/web/lib/ts/RespondingWebSocket';
+import { RestTextConverter } from 'shared/web/lib/ts/restTextConverter';
 import * as normalizeUrl from 'normalize-url';
-import { CompletionItemKind, SymbolKind, WorkspaceEdit, TextEdit, Position, Range, EOL } from 'monaco-languageclient/lib/services';
+import { CompletionItemKind, SymbolKind, WorkspaceEdit, TextEdit, Position, Range, EOL, SymbolInformation } from 'monaco-languageclient/lib/services';
 import { Diff, diff_match_patch, DIFF_DELETE, DIFF_INSERT, DIFF_EQUAL } from 'diff-match-patch';
+
 
 export interface GoToDefinitionEvent {
   path: string;
@@ -651,6 +653,31 @@ export abstract class MonacoEditorComponent implements OnDestroy {
     return workspaceEdit;
   }
 
+  private getSignature(signature: string, kind: SymbolKind, currentWord: string): string {
+    switch (kind) {
+      case SymbolKind.Constructor:
+      case SymbolKind.Function:
+      case SymbolKind.Method: {
+        signature = `def ${signature}`;
+        break;
+      }
+      case SymbolKind.Class: {
+        signature = `class ${signature}`;
+        break;
+      }
+      case SymbolKind.Module: {
+        if (signature.length > 0) {
+          signature = `module ${signature}`;
+        }
+        break;
+      }
+      default: {
+        // signature = typeof item.text === 'string' && item.text.length > 0 ? item.text : currentWord;
+      }
+    }
+    return signature;
+  }
+
   private setupPython() {
     const url = this.createUrl('/');
     const webSocket = this.createWebSocket(url);
@@ -668,22 +695,20 @@ export abstract class MonacoEditorComponent implements OnDestroy {
           const type = CommandType.Completions;
           const column = position.column;
 
-          const source = model.getValue().replace(/\r\n/g, '\n'); // "#%%\nprint('hello')\n\nt = \"lol\"\nprint(t)\n\nprint(\"noice\")\npr";
+          const source = model.getValue();
+          // .replace(/\r\n/g, '\n'); // "#%%\nprint('hello')\n\nt = \"lol\"\nprint(t)\n\nprint(\"noice\")\npr";
 
           const cmd: any = {
             id: Math.floor((Math.random() * 10000)),
             type: 'completion',
             prefix: '',
             lookup: commandNames.get(type),
-            path: '', //'c:\\Users\\Jacob\\Documents\\GitHub\\vscode-python\\data\\test.py',
+            path: '',
             column: column - 1,
             line: position.lineNumber - 1,
             source,
             config: {
-              extraPaths: [
-                // 'c:\\Users\\Jacob\\Documents\\GitHub\\vscode-python\\data',
-                // '.'
-              ],
+              extraPaths: [],
               useSnippets: false,
               caseInsensitiveCompletion: true,
               showDescriptions: true,
@@ -718,6 +743,8 @@ export abstract class MonacoEditorComponent implements OnDestroy {
 
               if (item.kind === SymbolKind.Function || item.kind === SymbolKind.Method) {
                 completionItem.insertText = `${item.text}()`;
+              } else {
+                completionItem.insertText = `${item.text}`;
               }
 
               return completionItem;
@@ -749,6 +776,78 @@ export abstract class MonacoEditorComponent implements OnDestroy {
 
           const edits = this.getTextEditsFromPatch(model.getValue(), results);
           return this.p2m.asTextEdits(edits);
+        }
+      });
+
+      monaco.languages.registerDocumentSymbolProvider(PYTHON_LANGUAGE_ID, {
+        provideDocumentSymbols: async (model, token): Promise<monaco.languages.DocumentSymbol[]> => {
+          const type = CommandType.Symbols;
+          const source = model.getValue();
+          // .replace(/\r\n/g, '\n'); // "#%%\nprint('hello')\n\nt = \"lol\"\nprint(t)\n\nprint(\"noice\")\npr";
+
+          const cmd: any = {
+            id: Math.floor((Math.random() * 10000)),
+            type: 'names',
+            lookup: commandNames.get(type),
+            prefix: '',
+            sourcePath: 'C:\\Users\\Jacob\\Documents\\GitHub\\vscode-python\\data\\temp.py',
+            source,
+            column: 0,
+            line: 0,
+            config: {
+              extraPaths: [],
+              useSnippets: false,
+              caseInsensitiveCompletion: true,
+              showDescriptions: true,
+              fuzzyMatcher: true
+            }
+          };
+
+          webSocket.send(JSON.stringify(cmd));
+          const response = await webSocket.listenForResponse(cmd.id);
+          console.log(response.results);
+          // TODO parse results (Currently returning something I dont expect)
+          return this.p2m.asSymbolInformations(response.results as SymbolInformation[]);
+        }
+      });
+
+      monaco.languages.registerHoverProvider(PYTHON_LANGUAGE_ID, {
+        provideHover: async (model, position, token): Promise<monaco.languages.Hover> => {
+          const type = CommandType.Hover;
+          const source = model.getValue();
+          const word = model.getWordAtPosition(position);
+          const cmd: any = {
+            id: Math.floor((Math.random() * 10000)),
+            type: 'tooltip',
+            prefix: '',
+            sourcePath: 'C:\\Users\\Jacob\\Documents\\GitHub\\vscode-python\\data\\temp.py',
+            lookup: commandNames.get(type),
+            source,
+            column: position.column - 1,
+            line: position.lineNumber - 1,
+            config: {
+              extraPaths: [
+                'c:\\Users\\Jacob\\Documents\\GitHub\\vscode-python\\data',
+                '.'
+              ],
+              useSnippets: false,
+              caseInsensitiveCompletion: true,
+              showDescriptions: true,
+              fuzzyMatcher: true
+            }
+          };
+
+          webSocket.send(JSON.stringify(cmd));
+          const response = await webSocket.listenForResponse(cmd.id);
+          console.log(response.results);
+          response.results.forEach(element => {
+            const textConverter = new RestTextConverter();
+            const sig = this.getSignature(element.signature, element.kind, word.word);
+            const description = textConverter.toMarkdown(element.docstring);
+            element.contents = description;
+          });
+
+          return this.p2m.asHover(response.results[0]);
         }
       });
     };
