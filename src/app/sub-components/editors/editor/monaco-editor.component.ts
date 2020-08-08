@@ -4,7 +4,7 @@ import { MonacoToProtocolConverter, ProtocolToMonacoConverter } from 'monaco-lan
 import { RespondingWebSocket } from 'shared/web/lib/ts/RespondingWebSocket';
 import { RestTextConverter } from 'shared/web/lib/ts/restTextConverter';
 import * as normalizeUrl from 'normalize-url';
-import { CompletionItemKind, SymbolKind, WorkspaceEdit, TextEdit, Position, Range, EOL, SymbolInformation } from 'monaco-languageclient/lib/services';
+import { CompletionItemKind, SymbolKind, WorkspaceEdit, TextEdit, Position, Range, EOL, SymbolInformation, Definition, Location, DocumentUri } from 'monaco-languageclient/lib/services';
 import { Diff, diff_match_patch, DIFF_DELETE, DIFF_INSERT, DIFF_EQUAL } from 'diff-match-patch';
 
 
@@ -848,6 +848,52 @@ export abstract class MonacoEditorComponent implements OnDestroy {
           });
 
           return this.p2m.asHover(response.results[0]);
+        }
+      });
+
+      monaco.languages.registerDefinitionProvider(PYTHON_LANGUAGE_ID, {
+        provideDefinition: async (model, position, token)
+          : Promise<monaco.languages.Definition | monaco.languages.LocationLink[] | monaco.languages.Location> => {
+          const type = CommandType.Definitions;
+          const column = position.column;
+
+          const source = model.getValue();
+          // .replace(/\r\n/g, '\n'); // "#%%\nprint('hello')\n\nt = \"lol\"\nprint(t)\n\nprint(\"noice\")\npr";
+
+          const cmd: any = {
+            id: Math.floor((Math.random() * 10000)),
+            type: 'definitions',
+            prefix: '',
+            lookup: commandNames.get(type),
+            path: '',
+            sourcePath: 'C:/Users/Jacob/Documents/GitHub/vscode-python/data' + model.uri.path,
+            column: column - 1,
+            line: position.lineNumber - 1,
+            source,
+            config: {
+              extraPaths: [],
+              useSnippets: false,
+              caseInsensitiveCompletion: true,
+              showDescriptions: true,
+              fuzzyMatcher: true
+            }
+          };
+
+          const word = model.getWordAtPosition(position).word;
+          webSocket.send(JSON.stringify(cmd));
+          const response = await webSocket.listenForResponse(cmd.id);
+          console.log(response.results);
+
+          const definitions = response.results.filter((d) => d.text === word);
+          const definition = definitions.length > 0 ? definitions[0] : response.results[response.results.length - 1];
+          const definitionResource = definition.fileName;
+          const range = Range.create(
+            definition.range.start_line,
+            definition.range.start_column,
+            definition.range.end_line,
+            definition.range.end_column
+          );
+          return this.p2m.asLocation(Location.create((definitionResource.replace('C:\\Users\\Jacob\\Documents\\GitHub\\vscode-python\\data', '')).replace(/\\/g, '/') as DocumentUri, range));
         }
       });
     };
