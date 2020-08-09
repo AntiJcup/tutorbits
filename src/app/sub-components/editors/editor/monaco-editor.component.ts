@@ -3,8 +3,10 @@ import { ILogService } from 'src/app/services/abstract/ILogService';
 import { MonacoToProtocolConverter, ProtocolToMonacoConverter } from 'monaco-languageclient/lib/monaco-converter';
 import { RespondingWebSocket } from 'shared/web/lib/ts/RespondingWebSocket';
 import { RestTextConverter } from 'shared/web/lib/ts/restTextConverter';
+import { Tokenizer, TokenType, IToken, TokenizerMode } from 'shared/web/lib/ts/tokenizer';
+import 'shared/web/lib/ts/extensions';
 import * as normalizeUrl from 'normalize-url';
-import { CompletionItemKind, SymbolKind, WorkspaceEdit, TextEdit, Position, Range, EOL, SymbolInformation, Definition, Location, DocumentUri } from 'monaco-languageclient/lib/services';
+import { CompletionItemKind, SymbolKind, WorkspaceEdit, TextEdit, Position, Range, EOL, SymbolInformation, Definition, Location, DocumentUri, SignatureHelp, SignatureInformation } from 'monaco-languageclient/lib/services';
 import { Diff, diff_match_patch, DIFF_DELETE, DIFF_INSERT, DIFF_EQUAL } from 'diff-match-patch';
 
 
@@ -76,6 +78,21 @@ class Patch {
   public start2!: number;
   public length1!: number;
   public length2!: number;
+}
+
+
+export interface ITextRange {
+  readonly start: number;
+  readonly end: number;
+  readonly length: number;
+  contains(position: number): boolean;
+}
+
+export interface ITextRangeCollection<T> extends ITextRange {
+  count: number;
+  getItemAt(index: number): T;
+  getItemAtPosition(position: number): number;
+  getItemContaining(position: number): number;
 }
 
 class Edit {
@@ -178,6 +195,12 @@ pythonVSCodeSymbolMappings.set('complex', SymbolKind.Number);
 pythonVSCodeSymbolMappings.set('string', SymbolKind.String);
 pythonVSCodeSymbolMappings.set('unicode', SymbolKind.String);
 pythonVSCodeSymbolMappings.set('list', SymbolKind.Array);
+
+const DOCSTRING_PARAM_PATTERNS = [
+  '\\s*:type\\s*PARAMNAME:\\s*([^\\n, ]+)', // Sphinx
+  '\\s*:param\\s*(\\w?)\\s*PARAMNAME:[^\\n]+', // Sphinx param with type
+  '\\s*@type\\s*PARAMNAME:\\s*([^\\n, ]+)' // Epydoc
+];
 
 function getMappedVSCodeType(pythonType: string): CompletionItemKind {
   if (pythonVSCodeTypeMappings.has(pythonType)) {
@@ -678,6 +701,67 @@ export abstract class MonacoEditorComponent implements OnDestroy {
     return signature;
   }
 
+  extractParamDocString(paramName: string, docString: string): string {
+    let paramDocString = '';
+    // In docstring the '*' is escaped with a backslash
+    paramName = paramName.replace(new RegExp('\\*', 'g'), '\\\\\\*');
+
+    DOCSTRING_PARAM_PATTERNS.forEach((pattern) => {
+      if (paramDocString.length > 0) {
+        return;
+      }
+      pattern = pattern.replace('PARAMNAME', paramName);
+      const regExp = new RegExp(pattern);
+      const matches = regExp.exec(docString);
+      if (matches && matches.length > 0) {
+        paramDocString = matches[0];
+        if (paramDocString.indexOf(':') >= 0) {
+          paramDocString = paramDocString.substring(paramDocString.indexOf(':') + 1);
+        }
+        if (paramDocString.indexOf(':') >= 0) {
+          paramDocString = paramDocString.substring(paramDocString.indexOf(':') + 1);
+        }
+      }
+    });
+
+    return paramDocString.trim();
+  }
+
+  getDocumentTokens(
+    document: monaco.editor.ITextModel,
+    tokenizeTo: Position,
+    mode: TokenizerMode
+  ): ITextRangeCollection<IToken> {
+    const offset = document.getOffsetAt({
+      lineNumber: tokenizeTo.line,
+      column: tokenizeTo.character
+    });
+    const text = document.getValue().substr(0, offset);
+    return new Tokenizer().tokenize(text, 0, text.length, mode);
+  }
+
+  isPositionInsideStringOrComment(document: monaco.editor.ITextModel, position: Position): boolean {
+
+    const tokenizeTo = Position.create(position.line + 1, position.character);
+    const tokens = this.getDocumentTokens(document, tokenizeTo, TokenizerMode.CommentsAndStrings);
+    const offset = document.getOffsetAt({
+      lineNumber: position.line,
+      column: position.character
+    });
+    const index = tokens.getItemContaining(offset - 1);
+    if (index >= 0) {
+      const token = tokens.getItemAt(index);
+      return token.type === TokenType.String || token.type === TokenType.Comment;
+    }
+    if (offset > 0 && index >= 0) {
+      // In case position is at the every end of the comment or unterminated string
+      const token = tokens.getItemAt(index);
+      return token.end === offset && token.type === TokenType.Comment;
+    }
+    return false;
+  }
+
+
   private setupPython() {
     const url = this.createUrl('/');
     const webSocket = this.createWebSocket(url);
@@ -894,6 +978,113 @@ export abstract class MonacoEditorComponent implements OnDestroy {
             definition.range.end_column
           );
           return this.p2m.asLocation(Location.create((definitionResource.replace('C:\\Users\\Jacob\\Documents\\GitHub\\vscode-python\\data', '')).replace(/\\/g, '/') as DocumentUri, range));
+        }
+      });
+
+      monaco.languages.registerSignatureHelpProvider(PYTHON_LANGUAGE_ID, {
+        signatureHelpTriggerCharacters: ['(', ','],
+        provideSignatureHelp: async (model, position, token, context): Promise<monaco.languages.SignatureHelpResult> => {
+          if (position.column <= 0 ||
+            this.isPositionInsideStringOrComment(model, { line: position.lineNumber, character: position.column })) {
+            return null;
+          }
+
+          const type = CommandType.Arguments;
+          const column = position.column;
+
+          const source = model.getValue();
+          // .replace(/\r\n/g, '\n'); // "#%%\nprint('hello')\n\nt = \"lol\"\nprint(t)\n\nprint(\"noice\")\npr";
+
+          const cmd: any = {
+            id: Math.floor((Math.random() * 10000)),
+            type: 'arguments',
+            prefix: '',
+            lookup: commandNames.get(type),
+            path: '',
+            sourcePath: 'C:/Users/Jacob/Documents/GitHub/vscode-python/data' + model.uri.path,
+            column: column - 1,
+            line: position.lineNumber - 1,
+            source,
+            config: {
+              extraPaths: [],
+              useSnippets: false,
+              caseInsensitiveCompletion: true,
+              showDescriptions: true,
+              fuzzyMatcher: true
+            }
+          };
+
+          webSocket.send(JSON.stringify(cmd));
+          const response = await webSocket.listenForResponse(cmd.id);
+          console.log(response.results);
+
+          if (response && Array.isArray(response.results) && response.results.length > 0) {
+            const signature = {
+              signatures: [],
+              activeParameter: null,
+              activeSignature: null
+            } as SignatureHelp;
+            signature.activeSignature = 0;
+
+            response.results.forEach((def) => {
+              signature.activeParameter = def.paramindex;
+              // Don't display the documentation, as vs code doesn't format the documentation.
+              // i.e. line feeds are not respected, long content is stripped.
+
+              // Some functions do not come with parameter docs
+              let label: string;
+              let documentation: string;
+              const validParamInfo =
+                def.params && def.params.length > 0 && def.docstring && def.docstring.startsWith(`${def.name}(`);
+
+              if (validParamInfo) {
+                const docLines = def.docstring.splitLines();
+                label = docLines.shift().trim();
+                documentation = docLines.join(EOL).trim();
+              } else {
+                if (def.params && def.params.length > 0) {
+                  label = `${def.name}(${def.params.map((p) => p.name).join(', ')})`;
+                  documentation = def.docstring;
+                } else {
+                  label = def.description;
+                  documentation = def.docstring;
+                }
+              }
+
+              // tslint:disable-next-line:no-object-literal-type-assertion
+              const sig = {
+                label,
+                documentation,
+                parameters: []
+              } as SignatureInformation;
+
+              if (def.params && def.params.length) {
+                sig.parameters = def.params.map((arg) => {
+                  if (arg.docstring.length === 0) {
+                    arg.docstring = this.extractParamDocString(arg.name, def.docstring);
+                  }
+                  // tslint:disable-next-line:no-object-literal-type-assertion
+                  return {
+                    documentation: arg.docstring.length > 0 ? arg.docstring : arg.description,
+                    label: arg.name.trim()
+                  } as monaco.languages.ParameterInformation;
+                });
+              }
+              signature.signatures.push(sig);
+            });
+            return {
+              value: signature
+            } as monaco.languages.SignatureHelpResult;
+          }
+
+
+          return {
+            value: {
+              signatures: [],
+              activeParameter: null,
+              activeSignature: null
+            } as SignatureHelp
+          } as monaco.languages.SignatureHelpResult;
         }
       });
     };
