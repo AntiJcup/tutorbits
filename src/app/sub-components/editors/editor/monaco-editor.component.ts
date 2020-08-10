@@ -6,8 +6,10 @@ import { RestTextConverter } from 'shared/web/lib/ts/restTextConverter';
 import { Tokenizer, TokenType, IToken, TokenizerMode } from 'shared/web/lib/ts/tokenizer';
 import 'shared/web/lib/ts/extensions';
 import * as normalizeUrl from 'normalize-url';
-import { CompletionItemKind, SymbolKind, WorkspaceEdit, TextEdit, Position, Range, EOL, SymbolInformation, Definition, Location, DocumentUri, SignatureHelp, SignatureInformation } from 'monaco-languageclient/lib/services';
+// tslint:disable-next-line: max-line-length
+import { CompletionItemKind, SymbolKind, WorkspaceEdit, TextEdit, Position, Range, EOL, SymbolInformation, Location, DocumentUri, SignatureHelp, SignatureInformation } from 'monaco-languageclient/lib/services';
 import { Diff, diff_match_patch, DIFF_DELETE, DIFF_INSERT, DIFF_EQUAL } from 'diff-match-patch';
+import ReconnectingWebSocket from 'reconnecting-websocket';
 
 
 export interface GoToDefinitionEvent {
@@ -25,7 +27,8 @@ export enum CommandType {
   Hover,
   Usages,
   Definitions,
-  Symbols
+  Symbols,
+  Syntax
 }
 
 const commandNames = new Map<CommandType, string>();
@@ -35,6 +38,7 @@ commandNames.set(CommandType.Definitions, 'definitions');
 commandNames.set(CommandType.Hover, 'tooltip');
 commandNames.set(CommandType.Usages, 'usages');
 commandNames.set(CommandType.Symbols, 'names');
+commandNames.set(CommandType.Syntax, 'syntax');
 
 // tslint:disable-next-line:no-unused-variable
 export interface ICommand {
@@ -64,6 +68,13 @@ export interface IAutoCompleteItem {
 
 export interface ICompletionResult {
   items: IAutoCompleteItem[];
+}
+
+export interface ISyntaxErrorRange {
+  startLine: number;
+  endLine: number;
+  startColumn: number;
+  endColumn: number;
 }
 
 enum EditAction {
@@ -237,12 +248,15 @@ export abstract class MonacoEditorComponent implements OnDestroy {
   };
   public startingCode = '';
   protected fileEditors: { [fileName: string]: monaco.editor.ITextModel } = {};
+  protected fileEditorListeners: { [fileName: string]: monaco.IDisposable } = {};
   private filePath: string;
   private ignoreNext = false;
   public visible = false;
 
   private m2p = new MonacoToProtocolConverter();
   private p2m = new ProtocolToMonacoConverter();
+
+  private ws: RespondingWebSocket<IResponse, 'id'>;
 
   public get ignoreNextEvent(): boolean {
     const res = this.ignoreNext;
@@ -267,6 +281,10 @@ export abstract class MonacoEditorComponent implements OnDestroy {
 
   ngOnDestroy(): void {
     window.removeEventListener('resize', this.windowCallback);
+    for (const filePath of Object.keys(this.fileEditorListeners)) {
+      this.fileEditorListeners[filePath].dispose();
+    }
+    this.fileEditorListeners = null;
   }
 
   onWindowResize() {
@@ -350,20 +368,23 @@ export abstract class MonacoEditorComponent implements OnDestroy {
     }
   }
 
-  public UpdateCacheForFile(path: string, data: string) {
-    this.logServer.LogToConsole('MonacoEditor', `UpdateCacheForCurrentFile: ${path}`);
+  public UpdateCacheForFile(filePath: string, data: string) {
+    this.logServer.LogToConsole('MonacoEditor', `UpdateCacheForCurrentFile: ${filePath}`);
 
-    if (!this.fileEditors[path]) {
-      const fileModel = this.GenerateNewEditorModel(path, data);
-      this.fileEditors[path] = fileModel;
+    if (!this.fileEditors[filePath]) {
+      const fileModel = this.GenerateNewEditorModel(filePath, data);
+      this.fileEditors[filePath] = fileModel;
+      this.fileEditorListeners[filePath] = fileModel.onDidChangeContent(async (e: monaco.editor.IModelContentChangedEvent) => {
+        await this.ValidateEditor(e, filePath);
+      });
     } else {
-      this.fileEditors[path].setValue(data);
+      this.fileEditors[filePath].setValue(data);
     }
   }
 
-  public UpdateModelForFile(path: string, model: monaco.editor.ITextModel) {
-    this.logServer.LogToConsole('MonacoEditor', `UpdateCacheForCurrentFile: ${path}`);
-    this.fileEditors[path] = model;
+  public UpdateModelForFile(filePath: string, model: monaco.editor.ITextModel) {
+    this.logServer.LogToConsole('MonacoEditor', `UpdateCacheForCurrentFile: ${filePath}`);
+    this.fileEditors[filePath] = model;
   }
 
   public UpdateCacheForCurrentFile(): void {
@@ -417,7 +438,55 @@ export abstract class MonacoEditorComponent implements OnDestroy {
       const fileData = files[filePath];
       const fileModel = this.GenerateNewEditorModel(filePath, fileData);
       this.fileEditors[filePath] = fileModel;
+      this.fileEditorListeners[filePath] = fileModel.onDidChangeContent(async (e: monaco.editor.IModelContentChangedEvent) => {
+        await this.ValidateEditor(e, filePath);
+      });
     }
+  }
+
+  private async ValidateEditor(e: monaco.editor.IModelContentChangedEvent, filePath: string): Promise<void> {
+    if (!this.ws) {
+      return;
+    }
+
+    const type = CommandType.Syntax;
+    const model = this.fileEditors[filePath];
+    const source = model.getValue();
+
+    const cmd: any = {
+      id: Math.floor((Math.random() * 10000)),
+      type: 'syntax',
+      lookup: commandNames.get(type),
+      prefix: '',
+      sourcePath: 'C:\\Users\\Jacob\\Documents\\GitHub\\vscode-python\\data\\temp.py',
+      source,
+      column: 0,
+      line: 0,
+      config: {
+        extraPaths: [],
+        useSnippets: false,
+        caseInsensitiveCompletion: true,
+        showDescriptions: true,
+        fuzzyMatcher: true
+      }
+    };
+
+    this.ws.send(JSON.stringify(cmd));
+    const response = await this.ws.listenForResponse(cmd.id);
+    console.log(response.results);
+
+    const syntaxErrors = response.results as ISyntaxErrorRange[];
+    const markers = syntaxErrors.map(error => {
+      return {
+        severity: monaco.MarkerSeverity.Error,
+        message: 'Syntax Error',
+        startLineNumber: error.startLine,
+        startColumn: error.startColumn,
+        endLineNumber: error.endLine,
+        endColumn: error.endColumn,
+      } as monaco.editor.IMarkerData;
+    });
+    monaco.editor.setModelMarkers(model, 'default', markers);
   }
 
   public GenerateNewEditorModel(path: string, data: string = ''): monaco.editor.ITextModel {
@@ -767,6 +836,7 @@ export abstract class MonacoEditorComponent implements OnDestroy {
     const webSocket = this.createWebSocket(url);
 
     webSocket.onopen = () => {
+      this.ws = webSocket;
       monaco.languages.register({
         id: PYTHON_LANGUAGE_ID,
         extensions: ['.py'],
@@ -1087,6 +1157,8 @@ export abstract class MonacoEditorComponent implements OnDestroy {
           } as monaco.languages.SignatureHelpResult;
         }
       });
+
+
     };
   }
 }

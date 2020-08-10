@@ -5,8 +5,8 @@
 // tslint:disable-next-line:import-name
 import Char from 'typescript-char';
 import { isBinary, isDecimal, isHex, isIdentifierChar, isIdentifierStartChar, isOctal } from './characters';
-import { CharacterStream } from './characterStream';
-import { TextRangeCollection, TextRange, ITextRange } from './textRangeCollection';
+import { CharacterStream, ICharacterStream } from './characterStream';
+import { TextRangeCollection, TextRange, ITextRange, ITextRangeCollection } from './textRangeCollection';
 
 export enum TokenizerMode {
   CommentsAndStrings,
@@ -52,6 +52,12 @@ class Token extends TextRange implements IToken {
         this.type = type;
     }
 }
+
+export interface ITokenizer {
+  tokenize(text: string): ITextRangeCollection<IToken>;
+  tokenize(text: string, start: number, length: number, mode: TokenizerMode): ITextRangeCollection<IToken>;
+}
+
 
 export class Tokenizer implements ITokenizer {
     private cs: ICharacterStream = new CharacterStream('');

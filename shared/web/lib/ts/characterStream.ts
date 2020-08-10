@@ -6,7 +6,31 @@
 import Char from 'typescript-char';
 import { isLineBreak, isWhiteSpace } from './characters';
 import { TextIterator } from './textIterator';
-import { ICharacterStream, ITextIterator } from './types';
+
+export interface ITextIterator {
+  readonly length: number;
+  charCodeAt(index: number): number;
+  getText(): string;
+}
+
+export interface ICharacterStream extends ITextIterator {
+  position: number;
+  readonly currentChar: number;
+  readonly nextChar: number;
+  readonly prevChar: number;
+  getText(): string;
+  isEndOfStream(): boolean;
+  lookAhead(offset: number): number;
+  advance(offset: number): void;
+  moveNext(): boolean;
+  isAtWhiteSpace(): boolean;
+  isAtLineBreak(): boolean;
+  isAtString(): boolean;
+  skipLineBreak(): void;
+  skipWhitespace(): void;
+  skipToEol(): void;
+  skipToWhitespace(): void;
+}
 
 export class CharacterStream implements ICharacterStream {
     private text: ITextIterator;
