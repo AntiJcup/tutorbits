@@ -25,7 +25,7 @@ export class RespondingWebSocket<TResponseMessageInterface, ResponseIdField exte
       return;
     }
 
-    let eventDataText = typeof (event.data) === 'string' ? event.data : await (event.data as Blob).text();
+    const eventDataText = typeof (event.data) === 'string' ? event.data : await (event.data as Blob).text();
     const parsedData = JSON.parse(eventDataText) as TResponseMessageInterface;
     let matchedId: TResponseMessageInterface[ResponseIdField];
     for (const expectedId of this.expectedResponses.keys()) {

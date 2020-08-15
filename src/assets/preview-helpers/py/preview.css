@@ -1,0 +1,25 @@
+#sourceCode {
+    border: none;
+    background-color: #9F9F9F;
+    margin-left: 15px;
+    margin-top: 10px;
+    margin-bottom: 20px;
+    width: 75%;
+    min-height: 200px;
+}
+
+body {
+    background-color: #303030;
+    color: white;
+}
+
+#consoleOutput {
+    margin-left: 15px;
+    margin-top: 10px;
+    background-color: #1e1e1e;
+    width: 75%;
+    padding: 10px;
+    height: 100%;
+    min-height: 300px;
+    overflow-y: scroll;
+}

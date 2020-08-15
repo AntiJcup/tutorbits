@@ -1,5 +1,4 @@
 import { Component, OnInit, EventEmitter, Output, Input, NgZone } from '@angular/core';
-import { environment } from 'src/environments/environment';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { IPreviewService } from 'src/app/services/abstract/IPreviewService';
 import { IErrorService } from 'src/app/services/abstract/IErrorService';
@@ -20,6 +19,8 @@ export class PreviewComponent implements OnInit {
   internalPreviewUrl: SafeUrl;
   internalLoadingId: string;
 
+  public otherPaths: string[] = null;
+
   get previewUrl(): SafeUrl {
     return this.internalPreviewUrl;
   }
@@ -36,10 +37,12 @@ export class PreviewComponent implements OnInit {
 
     let urlPath = path;
     const extensionType = path.split('.').pop();
+    const sourceUrl = encodeURIComponent(fileUrl);
+
     switch (extensionType) {
       case 'js':
-        const sourceUrl = encodeURIComponent(fileUrl);
-        urlPath = `/preview-helpers/js/preview.html?src=${sourceUrl}`;
+      case 'py':
+        urlPath = `/preview-helpers/${extensionType}/preview.html?base=${encodeURIComponent(this.internalPreviewBaseUrl)}&target=${encodeURIComponent(path)}&otherPaths=${encodeURIComponent(JSON.stringify(this.otherPaths))}&server=${encodeURIComponent('ws://localhost:8999')}`;
         break;
     }
     this.internalPreviewUrl = this.sanitizer.bypassSecurityTrustResourceUrl(`${this.internalPreviewBaseUrl}${urlPath}`);
@@ -111,10 +114,11 @@ export class PreviewComponent implements OnInit {
   public ClosePreview() {
     this.previewBaseUrl = '';
     this.previewPath = '';
+    this.otherPaths = null;
     this.loading = false;
   }
 
-  private async ShowPreview(url: string, path: string): Promise<void> {
+  private async ShowPreview(url: string, path: string, otherPaths?: string[]): Promise<void> {
     if (!url) {
       this.errorServer.HandleError('PreviewError', ' preview url failed to be retrieved');
       return;

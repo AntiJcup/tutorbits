@@ -17,6 +17,11 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
+            "sourceMap": {
+              "scripts": false,
+              "styles": false,
+              "vendor": false
+            },
             "outputPath": "dist/tutorbits",
             "index": "src/index.html",
             "main": "src/main.ts",
