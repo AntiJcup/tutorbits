@@ -12,6 +12,7 @@ export abstract class TutorBitsBaseCommentService extends TutorBitsBaseModelApiS
     super(requestService, auth, cache);
   }
 
+  // tslint:disable-next-line: max-line-length
   public async GetComments(targetId: string, status: Status = Status.Active, take: number = null, skip: number = null): Promise<ViewComment[]> {
     const response = await this.requestService
       .Get(`${this.basePath}/GetCommentsForTarget?state=${Status[status]}&targetId=${targetId}${take === null ? '' : `&take=${take}`}${skip === null ? '' : `&skip=${skip}`}`,
@@ -24,6 +25,7 @@ export abstract class TutorBitsBaseCommentService extends TutorBitsBaseModelApiS
     return (await response.json()) as ViewComment[];
   }
 
+  // tslint:disable-next-line: max-line-length
   public async GetCommentsCached(targetId: string, status: Status = Status.Active, take: number = null, skip: number = null): Promise<ViewComment[]> {
     return await this.cache.CacheFunc(this.GetComments, this, targetId, status, take, skip);
   }

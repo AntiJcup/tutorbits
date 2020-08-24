@@ -77,6 +77,8 @@ import { ITitleService } from './services/abstract/ITitleService';
 import { TutorBitsTitleService } from './services/tutor-bits-title.service';
 import { WatchGuideComponent } from './sub-components/watch-guide/watch-guide.component';
 import { PlayButtonHintComponent } from './sub-components/playing/play-button-hint/play-button-hint.component';
+import { IEditorPluginService } from './services/abstract/IEditorPluginService';
+import { EditorPluginService } from './services/editor/editor-plugin.service';
 import { TutorBitsTutorialCommentService, TutorBitsConcreteTutorialCommentService } from './services/tutorial/tutor-bits-tutorial-comment.service';
 import { TutorBitsConcreteQuestionCommentService, TutorBitsQuestionCommentService } from './services/question/tutor-bits-question-comment.service';
 import { TutorBitsAnswerService, TutorBitsConcreteAnswerService } from './services/question/tutor-bits-answer.service';
@@ -409,6 +411,7 @@ const appRoutes: Routes = [
     { provide: TutorBitsExampleCommentService, useClass: TutorBitsConcreteExampleCommentService },
     { provide: TutorBitsExampleRatingService, useClass: TutorBitsConcreteExampleRatingService },
     { provide: TutorBitsExampleCommentRatingService, useClass: TutorBitsConcreteExampleCommentRatingService },
+    { provide: IEditorPluginService, useClass: EditorPluginService },
   ],
   bootstrap: [AppComponent],
   entryComponents: [WatchGuideComponent]
