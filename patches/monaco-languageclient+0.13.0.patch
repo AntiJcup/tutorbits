@@ -1,5 +1,18 @@
+diff --git a/node_modules/monaco-languageclient/dist/amd/monaco-converter.d.ts b/node_modules/monaco-languageclient/dist/amd/monaco-converter.d.ts
+index c718955..be91b50 100644
+--- a/node_modules/monaco-languageclient/dist/amd/monaco-converter.d.ts
++++ b/node_modules/monaco-languageclient/dist/amd/monaco-converter.d.ts
+@@ -89,7 +89,7 @@ export declare class MonacoToProtocolConverter {
+     asDocumentLink(item: monaco.languages.ILink): DocumentLink;
+ }
+ export declare class ProtocolToMonacoConverter {
+-    asResourceEdits(resource: monaco.Uri, edits: TextEdit[], modelVersionId?: number): monaco.languages.ResourceTextEdit;
++    asResourceEdits(resource: monaco.Uri, edits: TextEdit[], modelVersionId?: number): monaco.languages.TextEdit;
+     asWorkspaceEdit(item: WorkspaceEdit): monaco.languages.WorkspaceEdit;
+     asWorkspaceEdit(item: undefined | null): undefined;
+     asWorkspaceEdit(item: WorkspaceEdit | undefined | null): monaco.languages.WorkspaceEdit | undefined;
 diff --git a/node_modules/monaco-languageclient/lib/monaco-converter.d.ts b/node_modules/monaco-languageclient/lib/monaco-converter.d.ts
-index c718955..2d088ab 100644
+index c718955..cb3213a 100644
 --- a/node_modules/monaco-languageclient/lib/monaco-converter.d.ts
 +++ b/node_modules/monaco-languageclient/lib/monaco-converter.d.ts
 @@ -1,4 +1,4 @@
@@ -8,6 +21,15 @@ index c718955..2d088ab 100644
  import * as ls from 'vscode-languageserver-protocol';
  import { CodeActionParams, CodeLensParams, DocumentFormattingParams, DocumentOnTypeFormattingParams, DocumentRangeFormattingParams, ReferenceParams, RenameParams, TextDocumentPositionParams, Position, TextDocumentIdentifier, CompletionItem, CompletionList, CompletionParams, CompletionContext, CompletionTriggerKind, Range, Diagnostic, CompletionItemKind, Hover, SignatureHelp, SignatureInformation, ParameterInformation, Definition, DefinitionLink, Location, DocumentHighlight, SymbolInformation, DocumentSymbolParams, CodeActionContext, DiagnosticSeverity, Command, CodeLens, FormattingOptions, TextEdit, WorkspaceEdit, DocumentLinkParams, DocumentLink, MarkedString, MarkupContent, ColorInformation, ColorPresentation, FoldingRange, DiagnosticRelatedInformation, SymbolKind, DocumentSymbol, CodeAction, SignatureHelpContext, SignatureHelpTriggerKind } from './services';
  import IReadOnlyModel = monaco.editor.IReadOnlyModel;
+@@ -89,7 +89,7 @@ export declare class MonacoToProtocolConverter {
+     asDocumentLink(item: monaco.languages.ILink): DocumentLink;
+ }
+ export declare class ProtocolToMonacoConverter {
+-    asResourceEdits(resource: monaco.Uri, edits: TextEdit[], modelVersionId?: number): monaco.languages.ResourceTextEdit;
++    asResourceEdits(resource: monaco.Uri, edits: TextEdit[], modelVersionId?: number): monaco.languages.TextEdit;
+     asWorkspaceEdit(item: WorkspaceEdit): monaco.languages.WorkspaceEdit;
+     asWorkspaceEdit(item: undefined | null): undefined;
+     asWorkspaceEdit(item: WorkspaceEdit | undefined | null): monaco.languages.WorkspaceEdit | undefined;
 diff --git a/node_modules/monaco-languageclient/lib/services.d.ts b/node_modules/monaco-languageclient/lib/services.d.ts
 index 9e0b9f2..3155e1d 100644
 --- a/node_modules/monaco-languageclient/lib/services.d.ts
@@ -31,6 +53,50 @@ index 9e0b9f2..3155e1d 100644
 +    withProgress?: any; //typeof import('vscode').window.withProgress;
  }
  //# sourceMappingURL=services.d.ts.map
+diff --git a/node_modules/monaco-languageclient/src/monaco-converter.ts b/node_modules/monaco-languageclient/src/monaco-converter.ts
+index 0ae4561..c112624 100644
+--- a/node_modules/monaco-languageclient/src/monaco-converter.ts
++++ b/node_modules/monaco-languageclient/src/monaco-converter.ts
+@@ -457,7 +457,7 @@ export class MonacoToProtocolConverter {
+ 
+ export class ProtocolToMonacoConverter {
+ 
+-    asResourceEdits(resource: monaco.Uri, edits: TextEdit[], modelVersionId?: number): monaco.languages.ResourceTextEdit {
++    asResourceEdits(resource: monaco.Uri, edits: TextEdit[], modelVersionId?: number): monaco.languages.TextEdit {
+         return {
+             resource: resource,
+             edits: this.asTextEdits(edits),
+@@ -472,7 +472,7 @@ export class ProtocolToMonacoConverter {
+         if (!item) {
+             return undefined;
+         }
+-        const edits: (monaco.languages.ResourceTextEdit | monaco.languages.ResourceFileEdit)[] = [];
++        const edits: (monaco.languages.TextEdit | monaco.languages.ResourceFileEdit)[] = [];
+         if (item.documentChanges) {
+             item.documentChanges.forEach(change => {
+                 if (ls.CreateFile.is(change)) {
+diff --git a/node_modules/monaco-languageclient/src/monaco-workspace.ts b/node_modules/monaco-languageclient/src/monaco-workspace.ts
+index 1588f0c..749963a 100644
+--- a/node_modules/monaco-languageclient/src/monaco-workspace.ts
++++ b/node_modules/monaco-languageclient/src/monaco-workspace.ts
+@@ -90,7 +90,7 @@ export class MonacoWorkspace implements Workspace {
+         // Collect all referenced models
+         const models: { [uri: string]: monaco.editor.IModel } = edit.edits ? edit.edits.reduce(
+             (acc: { [uri: string]: monaco.editor.IModel }, currentEdit) => {
+-                const textEdit = currentEdit as monaco.languages.ResourceTextEdit;
++                const textEdit = currentEdit as monaco.languages.TextEdit;
+                 acc[textEdit.resource.toString()] = monaco.editor.getModel(textEdit.resource) as monaco.editor.ITextModel;
+                 return acc;
+             }, {}
+@@ -104,7 +104,7 @@ export class MonacoWorkspace implements Workspace {
+         // Group edits by resource so we can batch them when applying
+         const editsByResource: { [uri: string]: IIdentifiedSingleEditOperation[] } = edit.edits ? edit.edits.reduce(
+             (acc: { [uri: string]: IIdentifiedSingleEditOperation[] }, currentEdit) => {
+-                const textEdit = currentEdit as monaco.languages.ResourceTextEdit;
++                const textEdit = currentEdit as monaco.languages.TextEdit;
+                 const uri = textEdit.resource.toString();
+                 if (!(uri in acc)) {
+                     acc[uri] = [];
 diff --git a/node_modules/monaco-languageclient/src/services.ts b/node_modules/monaco-languageclient/src/services.ts
 index 41a9b42..b7848d4 100644
 --- a/node_modules/monaco-languageclient/src/services.ts
