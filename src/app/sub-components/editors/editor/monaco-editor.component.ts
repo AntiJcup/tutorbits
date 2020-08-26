@@ -47,7 +47,6 @@ export abstract class MonacoEditorComponent implements OnDestroy {
       this.onWindowResize();
     };
     window.addEventListener('resize', this.windowCallback);
-    this.editorPluginService.getPlugins();
   }
 
   ngOnDestroy(): void {
@@ -87,6 +86,8 @@ export abstract class MonacoEditorComponent implements OnDestroy {
       this.gotoDefinition.emit(
         { path: file, offset: new monaco.Position(range.startLineNumber, range.startColumn) } as GoToDefinitionEvent);
     };
+
+    this.editorPluginService.registerPlugins().then();
   }
 
   public get currentFilePath() {
@@ -156,6 +157,10 @@ export abstract class MonacoEditorComponent implements OnDestroy {
   public UpdateModelForFile(filePath: string, model: monaco.editor.ITextModel) {
     this.logServer.LogToConsole('MonacoEditor', `UpdateCacheForCurrentFile: ${filePath}`);
     this.fileEditors[filePath] = model;
+    this.fileEditorListeners[filePath]?.dispose();
+    this.fileEditorListeners[filePath] = model.onDidChangeContent(async (e: monaco.editor.IModelContentChangedEvent) => {
+      // await this.ValidateEditor(e, filePath); TODO hookup plugins
+    });
   }
 
   public UpdateCacheForCurrentFile(): void {

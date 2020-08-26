@@ -19,4 +19,10 @@ export class EditorPluginService extends IEditorPluginService {
   public getPlugins(): BaseEditorPlugin[] {
     return Object.values(this.plugins);
   }
+
+  public async registerPlugins(): Promise<void> {
+    this.getPlugins().forEach(async (plugin: BaseEditorPlugin) => {
+      await plugin.register();
+    });
+  }
 }

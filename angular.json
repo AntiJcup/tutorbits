@@ -18,7 +18,7 @@
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
             "sourceMap": {
-              "scripts": false,
+              "scripts": true,
               "styles": false,
               "vendor": false
             },
@@ -89,7 +89,7 @@
               ],
               "optimization": true,
               "outputHashing": "all",
-              "sourceMap": false,
+              "sourceMap": true,
               "extractCss": true,
               "namedChunks": false,
               "extractLicenses": true,
