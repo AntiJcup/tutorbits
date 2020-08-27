@@ -583,10 +583,19 @@ index 0000000..8f1bbef
 +{"version":3,"file":"editor.module.d.ts","sources":["editor.module.d.ts"],"names":[],"mappings":"AAAA;AACA;;;;;AACA;AACA;;;AACA","sourcesContent":["import { ModuleWithProviders } from '@angular/core';\nimport { NgxMonacoEditorConfig } from './config';\nexport declare class MonacoEditorModule {\n    static forRoot(config?: NgxMonacoEditorConfig): ModuleWithProviders<MonacoEditorModule>;\n}\n"]}
 \ No newline at end of file
 diff --git a/node_modules/ngx-monaco-editor/lib/monaco.d.ts b/node_modules/ngx-monaco-editor/lib/monaco.d.ts
-index 1047328..20e6d8c 100644
+index 1047328..840e2a0 100644
 --- a/node_modules/ngx-monaco-editor/lib/monaco.d.ts
 +++ b/node_modules/ngx-monaco-editor/lib/monaco.d.ts
-@@ -4201,6 +4201,7 @@ declare namespace monaco.editor {
+@@ -8,8 +8,6 @@
+  *  Licensed under the MIT License. See License.txt in the project root for license information.
+  *--------------------------------------------------------------------------------------------*/
+ 
+-declare let MonacoEnvironment: monaco.Environment | undefined;
+-
+ declare namespace monaco {
+ 
+     export type Thenable<T> = PromiseLike<T>;
+@@ -4201,6 +4199,7 @@ declare namespace monaco.editor {
       * A rich code editor.
       */
      export interface ICodeEditor extends IEditor {
