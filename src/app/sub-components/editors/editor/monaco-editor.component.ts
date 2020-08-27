@@ -147,7 +147,7 @@ export abstract class MonacoEditorComponent implements OnDestroy {
       const fileModel = this.GenerateNewEditorModel(filePath, data);
       this.fileEditors[filePath] = fileModel;
       this.fileEditorListeners[filePath] = fileModel.onDidChangeContent(async (e: monaco.editor.IModelContentChangedEvent) => {
-        // await this.ValidateEditor(e, filePath); TODO hookup plugins
+        await this.editorPluginService.getPlugin(fileModel.getModeId())?.validateEditor(e, fileModel);
       });
     } else {
       this.fileEditors[filePath].setValue(data);
@@ -159,7 +159,7 @@ export abstract class MonacoEditorComponent implements OnDestroy {
     this.fileEditors[filePath] = model;
     this.fileEditorListeners[filePath]?.dispose();
     this.fileEditorListeners[filePath] = model.onDidChangeContent(async (e: monaco.editor.IModelContentChangedEvent) => {
-      // await this.ValidateEditor(e, filePath); TODO hookup plugins
+      await this.editorPluginService.getPlugin(model.getModeId())?.validateEditor(e, model);
     });
   }
 
