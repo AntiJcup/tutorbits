@@ -30,6 +30,7 @@
     "@ngx-formly/core": "^5.9.3",
     "@ngx-formly/material": "^5.9.3",
     "@ngx-formly/schematics": "^5.9.3",
+    "@toojs/postmate": "^1.5.4",
     "@types/core-js": "^2.5.3",
     "@types/dom-mediacapture-record": "^1.0.4",
     "@types/normalize-url": "^4.2.0",
