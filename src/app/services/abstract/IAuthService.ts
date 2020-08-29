@@ -1,5 +1,3 @@
-import { ApiHttpRequestInfo, ApiHttpRequest } from 'shared/web/lib/ts/ApiHttpRequest';
-import { InjectionToken } from '@angular/core';
 import { JWT } from 'src/app/models/auth/JWT';
 import { BehaviorSubject } from 'rxjs';
 

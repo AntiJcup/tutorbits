@@ -1,5 +1,3 @@
-import { InjectionToken } from '@angular/core';
-
 export interface ResponseWrapper<T> {
     error: any;
     data: T;

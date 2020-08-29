@@ -1,4 +1,3 @@
-import { InjectionToken } from '@angular/core';
 import { JWT } from 'src/app/models/auth/JWT';
 
 export abstract class IDataService {

@@ -17,7 +17,11 @@ export class TutorBitsTracerProjectService extends ITracerProjectService {
     'Content-Type': 'application/json'
   };
 
-  constructor(protected requestService: IRequestService, protected auth: IAuthService, protected logging: ILogService, cache: ICacheService) {
+  constructor(
+    protected requestService: IRequestService,
+    protected auth: IAuthService,
+    protected logging: ILogService,
+    cache: ICacheService) {
     super(requestService, auth, cache);
   }
 

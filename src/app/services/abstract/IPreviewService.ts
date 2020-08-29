@@ -1,4 +1,3 @@
-import { InjectionToken } from '@angular/core';
 import { TraceTransactionLog } from 'shared/Tracer/models/ts/Tracer_pb';
 
 export abstract class IPreviewService {

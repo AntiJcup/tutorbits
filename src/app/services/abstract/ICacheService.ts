@@ -1,6 +1,3 @@
-import { ApiHttpRequestInfo, ApiHttpRequest } from 'shared/web/lib/ts/ApiHttpRequest';
-import { InjectionToken } from '@angular/core';
-
 export interface CacheOptions {
     cacheDuration: number;
     saveLocal?: boolean;

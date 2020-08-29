@@ -1,5 +1,3 @@
-import { InjectionToken } from '@angular/core';
-
 export abstract class IStorageService {
     public abstract GetItem(key: string): any;
     public abstract SetItem(key: string, item: any): void;

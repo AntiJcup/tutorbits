@@ -1,5 +1,4 @@
 import { ApiHttpRequestInfo, ApiHttpRequest } from 'shared/web/lib/ts/ApiHttpRequest';
-import { InjectionToken } from '@angular/core';
 
 export abstract class IRequestService {
     public abstract getRequestInfo(): ApiHttpRequestInfo;
