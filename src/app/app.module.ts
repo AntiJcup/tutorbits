@@ -42,6 +42,8 @@ import { IStorageService } from './services/abstract/IStorageService';
 import { TutorBitsStorageService } from './services/storage/tutor-bits-storage.service';
 import { TutorBitsErrorService } from './services/logging/tutor-bits-error.service';
 import { IErrorService } from './services/abstract/IErrorService';
+import { TutorBitsCodeService } from './services/editor/tutor-bits-code.service';
+import { ICodeService } from './services/abstract/ICodeService';
 import { IDataService } from './services/abstract/IDataService';
 import { TutorBitsDataService } from './services/storage/tutor-bits-persist.service';
 import { LogoutComponent } from './components/logout/logout.component';
@@ -56,7 +58,7 @@ import { PrivacyComponent } from './components/privacy/privacy.component';
 import { TermsComponent } from './components/terms/terms.component';
 import { ResourceViewerComponent } from './sub-components/resource-viewer/resource-viewer.component';
 import { IPreviewService } from './services/abstract/IPreviewService';
-import { TutorBitsPreviewService } from './services/project/tutor-bits-preview.service';
+import { TutorBitsPreviewService } from './services/preview/tutor-bits-preview.service';
 import { MyTutorialsComponent } from './components/tutorials/my-tutorials/my-tutorials.component';
 import { EditTutorialCardComponent } from './sub-components/tutorials/edit-tutorial-card/edit-tutorial-card.component';
 import { MyAccountComponent } from './components/account/my-account/my-account.component';
@@ -78,7 +80,7 @@ import { TutorBitsTitleService } from './services/tutor-bits-title.service';
 import { WatchGuideComponent } from './sub-components/watch-guide/watch-guide.component';
 import { PlayButtonHintComponent } from './sub-components/playing/play-button-hint/play-button-hint.component';
 import { IEditorPluginService } from './services/abstract/IEditorPluginService';
-import { EditorPluginService } from './services/editor/editor-plugin.service';
+import { TutorBitsEditorPluginService } from './services/editor/tutor-bites-editor-plugin.service';
 import { TutorBitsTutorialCommentService, TutorBitsConcreteTutorialCommentService } from './services/tutorial/tutor-bits-tutorial-comment.service';
 import { TutorBitsConcreteQuestionCommentService, TutorBitsQuestionCommentService } from './services/question/tutor-bits-question-comment.service';
 import { TutorBitsAnswerService, TutorBitsConcreteAnswerService } from './services/question/tutor-bits-answer.service';
@@ -411,7 +413,8 @@ const appRoutes: Routes = [
     { provide: TutorBitsExampleCommentService, useClass: TutorBitsConcreteExampleCommentService },
     { provide: TutorBitsExampleRatingService, useClass: TutorBitsConcreteExampleRatingService },
     { provide: TutorBitsExampleCommentRatingService, useClass: TutorBitsConcreteExampleCommentRatingService },
-    { provide: IEditorPluginService, useClass: EditorPluginService },
+    { provide: IEditorPluginService, useClass: TutorBitsEditorPluginService },
+    { provide: ICodeService, useClass: TutorBitsCodeService },
   ],
   bootstrap: [AppComponent],
   entryComponents: [WatchGuideComponent]

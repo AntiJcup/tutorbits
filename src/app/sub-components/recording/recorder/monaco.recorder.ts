@@ -5,7 +5,6 @@ import { IProjectReader } from 'shared/Tracer/lib/ts/IProjectReader';
 import { IProjectWriter } from 'shared/Tracer/lib/ts/IProjectWriter';
 import { NodeSelectedEvent, NodeCreatedEvent, NodeRenamedEvent, NodeRemovedEvent, NodeMovedEvent, Tree } from 'shared/Ng2-Tree';
 import { Subscription } from 'rxjs';
-import { MonacoEditorComponent } from '../../editors/editor/monaco-editor.component';
 import { NG2FileTreeComponent, ResourceType, FileUploadData, TutorBitsTreeModel } from '../../file-tree/ng2-file-tree.component';
 import { ILogService } from 'src/app/services/abstract/ILogService';
 import { IErrorService } from 'src/app/services/abstract/IErrorService';
@@ -13,6 +12,7 @@ import { ITracerProjectService } from 'src/app/services/abstract/ITracerProjectS
 import { ResourceViewerComponent, ResourceData } from '../../resource-viewer/resource-viewer.component';
 import { environment } from 'src/environments/environment';
 import { PreviewComponent } from '../../preview/preview.component';
+import { ICodeService } from 'src/app/services/abstract/ICodeService';
 
 export interface MonacoRecorderSettings {
     overrideSaveSpeed?: number;
@@ -50,12 +50,12 @@ export class MonacoRecorder extends TransactionRecorder {
     }
 
     constructor(
-        protected codeComponent: MonacoEditorComponent,
         protected fileTreeComponent: NG2FileTreeComponent,
         protected resourceViewerComponent: ResourceViewerComponent,
         protected previewComponent: PreviewComponent,
         protected logging: ILogService,
         protected errorServer: IErrorService,
+        protected codeService: ICodeService,
         protected resourceAuth: boolean,
         projectId: string,
         projectLoader: IProjectReader,
@@ -82,7 +82,7 @@ export class MonacoRecorder extends TransactionRecorder {
         this.recording = true;
         this.start = Date.now() - this.project.getDuration();
         this.timeOffset = Date.now() - this.start;
-        this.fileChangeListener = this.codeComponent.codeEditor.onDidChangeModelContent((e: monaco.editor.IModelContentChangedEvent) => {
+        this.fileChangeListener = this.codeService.editor.onDidChangeModelContent((e: monaco.editor.IModelContentChangedEvent) => {
             this.OnFileModified(e);
         });
 
@@ -112,7 +112,7 @@ export class MonacoRecorder extends TransactionRecorder {
             };
             window.addEventListener('mousemove', this.mouseMoveCallbackWrapper);
 
-            this.scrollChangeListener = this.codeComponent.codeEditor.onDidScrollChange((e: monaco.IScrollEvent) => {
+            this.scrollChangeListener = this.codeService.editor.onDidScrollChange((e: monaco.IScrollEvent) => {
                 this.onScrolled(e);
             });
 
@@ -174,14 +174,14 @@ export class MonacoRecorder extends TransactionRecorder {
 
     protected OnFileModified(e: monaco.editor.IModelContentChangedEvent): void {
         this.logging.LogToConsole('MonacoRecorder', `OnFileModified ${JSON.stringify(e)}`);
-        if (this.codeComponent.ignoreNextEvent) { // Handles expected edits that shouldnt be tracked
+        if (this.codeService.ignoreNextEvent) { // Handles expected edits that shouldnt be tracked
             this.logging.LogToConsole('MonacoRecorder', `OnFileModified Ignoring ${e}`);
             return;
         }
         this.logging.LogToConsole('MonacoRecorder', `OnFileModified change count: ${e.changes.length}`);
         for (const change of e.changes) {
             this.logging.LogToConsole('MonacoRecorder', `OnFileModified change count: ${change}`);
-            const previousCache = this.codeComponent.GetCacheForCurrentFile();
+            const previousCache = this.codeService.GetCacheForCurrentFile();
             const previousData = change.rangeLength <= 0 || !previousCache ?
                 undefined :
                 previousCache
@@ -189,11 +189,11 @@ export class MonacoRecorder extends TransactionRecorder {
                     .substring(change.rangeOffset, change.rangeOffset + change.rangeLength);
             this.logging.LogToConsole('MonacoRecorder', `OnFileModified Previous File Data: ${previousData}`);
             this.timeOffset = Date.now() - this.start;
-            const transaction = this.ModifyFile(this.timeOffset, this.codeComponent.currentFilePath, change.rangeOffset,
+            const transaction = this.ModifyFile(this.timeOffset, this.codeService.currentFilePath, change.rangeOffset,
                 change.rangeOffset + change.rangeLength, change.text, previousData);
             this.logging.LogToConsole('MonacoRecorder', `OnFileModified File Modified: ${JSON.stringify(transaction.toObject())}`);
         }
-        this.codeComponent.UpdateCacheForCurrentFile();
+        this.codeService.UpdateCacheForCurrentFile();
 
         this.TriggerDelayedSave();
     }
@@ -204,20 +204,20 @@ export class MonacoRecorder extends TransactionRecorder {
             return;
         }
 
-        const oldFileName = this.codeComponent.currentFilePath;
+        const oldFileName = this.codeService.currentFilePath;
         const newFileName = this.fileTreeComponent.getPathForNode(e.node);
 
         this.logging.LogToConsole('MonacoRecorder', `OnNodeSelected from: ${oldFileName} to: ${newFileName}`);
 
         switch (this.fileTreeComponent.GetNodeType(e.node)) {
             case ResourceType.code:
-                this.codeComponent.currentFilePath = newFileName;
-                this.codeComponent.UpdateCacheForCurrentFile();
+                this.codeService.currentFilePath = newFileName;
+                this.codeService.UpdateCacheForCurrentFile();
                 this.resourceViewerComponent.Resource = null;
                 break;
             case ResourceType.asset:
-                this.codeComponent.currentFilePath = '';
-                this.codeComponent.UpdateCacheForCurrentFile();
+                this.codeService.currentFilePath = '';
+                this.codeService.UpdateCacheForCurrentFile();
                 const model = e.node.node as TutorBitsTreeModel;
                 this.resourceViewerComponent.Resource = {
                     projectId: model.overrideProjectId || this.id,
@@ -237,7 +237,7 @@ export class MonacoRecorder extends TransactionRecorder {
 
     protected OnNodeCreated(e: NodeCreatedEvent) {
         this.logging.LogToConsole('MonacoRecorder', `OnNodeCreated ${JSON.stringify(e.node.node)}`);
-        const oldFileName = this.codeComponent.currentFilePath;
+        const oldFileName = this.codeService.currentFilePath;
         const nodeName = e.node.value;
         const sanitizedNodeName = this.fileTreeComponent.SantizeFileName(nodeName);
         if (nodeName !== sanitizedNodeName) {
@@ -259,8 +259,8 @@ export class MonacoRecorder extends TransactionRecorder {
         switch (this.fileTreeComponent.GetNodeType(e.node)) {
             case ResourceType.code:
                 if (!e.node.isBranch()) {
-                    this.codeComponent.currentFilePath = newFileName;
-                    this.codeComponent.codeEditor.focus();
+                    this.codeService.currentFilePath = newFileName;
+                    this.codeService.editor.focus();
                 }
                 break;
             case ResourceType.asset:
@@ -315,11 +315,11 @@ export class MonacoRecorder extends TransactionRecorder {
         switch (this.fileTreeComponent.GetNodeType(e.node)) {
             case ResourceType.code:
                 if (!e.node.isBranch()) {
-                    oldFileData = this.codeComponent.GetCacheForFileName(oldFileName).getValue();
-                    this.codeComponent.ClearCacheForFile(oldFileName);
-                    this.codeComponent.currentFilePath = '';
-                    this.codeComponent.UpdateCacheForFile(newFileName, oldFileData);
-                    this.codeComponent.currentFilePath = newFileName;
+                    oldFileData = this.codeService.GetCacheForFileName(oldFileName).getValue();
+                    this.codeService.ClearCacheForFile(oldFileName);
+                    this.codeService.currentFilePath = '';
+                    this.codeService.UpdateCacheForFile(newFileName, oldFileData);
+                    this.codeService.currentFilePath = newFileName;
                 }
                 break;
             case ResourceType.asset:
@@ -355,11 +355,11 @@ export class MonacoRecorder extends TransactionRecorder {
         switch (this.fileTreeComponent.GetNodeType(node)) {
             case ResourceType.code:
                 if (!node.isBranch()) {
-                    oldFileData = this.codeComponent.GetCacheForFileName(oldFileName).getValue();
-                    this.codeComponent.ClearCacheForFile(oldFileName);
-                    this.codeComponent.currentFilePath = '';
-                    this.codeComponent.UpdateCacheForFile(newFileName, oldFileData);
-                    this.codeComponent.currentFilePath = newFileName;
+                    oldFileData = this.codeService.GetCacheForFileName(oldFileName).getValue();
+                    this.codeService.ClearCacheForFile(oldFileName);
+                    this.codeService.currentFilePath = '';
+                    this.codeService.UpdateCacheForFile(newFileName, oldFileData);
+                    this.codeService.currentFilePath = newFileName;
                 }
                 break;
             case ResourceType.asset:
@@ -388,14 +388,14 @@ export class MonacoRecorder extends TransactionRecorder {
 
         const nodePath = this.fileTreeComponent.getPathForNode(e.node);
         this.timeOffset = Date.now() - this.start;
-        const oldCache = this.codeComponent.GetCacheForFileName(nodePath);
+        const oldCache = this.codeService.GetCacheForFileName(nodePath);
         const oldData = oldCache ? oldCache.getValue() : '';
         this.DeleteFile(this.timeOffset, nodePath, oldData, e.node.isBranch());
 
         switch (this.fileTreeComponent.GetNodeType(e.node)) {
             case ResourceType.code:
-                if (nodePath === this.codeComponent.currentFilePath) {
-                    this.codeComponent.currentFilePath = '';
+                if (nodePath === this.codeService.currentFilePath) {
+                    this.codeService.currentFilePath = '';
                 }
                 break;
             case ResourceType.asset:
@@ -434,13 +434,13 @@ export class MonacoRecorder extends TransactionRecorder {
         switch (this.fileTreeComponent.GetNodeType(e.node)) {
             case ResourceType.code:
                 if (!e.node.isBranch()) {
-                    const oldCache = this.codeComponent.GetCacheForFileName(oldFileName);
+                    const oldCache = this.codeService.GetCacheForFileName(oldFileName);
                     if (oldCache) {
                         oldFileData = oldCache.getValue();
-                        this.codeComponent.ClearCacheForFile(oldFileName);
-                        this.codeComponent.UpdateCacheForFile(newFileName, oldFileData);
+                        this.codeService.ClearCacheForFile(oldFileName);
+                        this.codeService.UpdateCacheForFile(newFileName, oldFileData);
                     }
-                    this.codeComponent.currentFilePath = newFileName;
+                    this.codeService.currentFilePath = newFileName;
                 }
                 break;
             case ResourceType.asset:
@@ -497,21 +497,21 @@ export class MonacoRecorder extends TransactionRecorder {
         }
 
         this.lastScrollTrackOffset = this.timeOffset;
-        this.ScrollFile(this.timeOffset, this.codeComponent.currentFilePath, this.lastScrollHeight,
-            this.codeComponent.codeEditor.getScrollTop());
+        this.ScrollFile(this.timeOffset, this.codeService.currentFilePath, this.lastScrollHeight,
+            this.codeService.editor.getScrollTop());
         this.TriggerDelayedSave();
-        this.lastScrollHeight = this.codeComponent.codeEditor.getScrollTop();
+        this.lastScrollHeight = this.codeService.editor.getScrollTop();
     }
 
     public onPreviewClicked(file: string) {
         this.timeOffset = Date.now() - this.start;
-        this.PreviewAction(this.timeOffset, file, this.codeComponent.currentFilePath);
+        this.PreviewAction(this.timeOffset, file, this.codeService.currentFilePath);
         this.TriggerDelayedSave();
     }
 
     public onPreviewCloseClicked() {
         this.timeOffset = Date.now() - this.start;
-        this.PreviewCloseAction(this.timeOffset, this.codeComponent.currentFilePath);
+        this.PreviewCloseAction(this.timeOffset, this.codeService.currentFilePath);
         this.TriggerDelayedSave();
     }
 

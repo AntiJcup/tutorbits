@@ -20,7 +20,7 @@ import { PreviewComponent } from 'src/app/sub-components/preview/preview.compone
 import { ITitleService } from 'src/app/services/abstract/ITitleService';
 import { ViewTutorial } from 'src/app/models/tutorial/view-tutorial';
 import { ITracerProjectService } from 'src/app/services/abstract/ITracerProjectService';
-import { GoToDefinitionEvent } from 'src/app/sub-components/editors/editor/monaco-editor.component';
+import { ICodeService, CodeEvents, GoToDefinitionEvent } from 'src/app/services/abstract/ICodeService';
 
 @Component({
   templateUrl: './record.component.html',
@@ -71,7 +71,8 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
     private videoRecordingService: IVideoService,
     private eventService: IEventService,
     private tutorialService: TutorBitsTutorialService,
-    private titleService: ITitleService) {
+    private titleService: ITitleService,
+    private codeService: ICodeService) {
     this.tutorialId = this.route.snapshot.paramMap.get('tutorialId');
     this.hasRecorded = this.route.snapshot.queryParamMap.get('back') === 'true';
   }
@@ -84,6 +85,11 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
     this.selectFileSub = this.recordingTreeComponent.treeComponent.nodeSelected.subscribe(() => {
       this.eventService.TriggerButtonClick('Record', `PreviewClose - ${this.tutorialId}`);
       this.previewComponent.ClosePreview();
+    });
+
+    this.codeService.once(CodeEvents[CodeEvents.InitializedSession], () => { this.onCodeInitialized(); });
+    this.codeService.on(CodeEvents[CodeEvents.GotoDefinition], (e) => {
+      this.onGoToDefinition(e);
     });
 
     try {
@@ -131,8 +137,8 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
     this.errorServer.HandleError('WebCamError', e);
   }
 
-  onCodeInitialized(recordingEditor: RecordingEditorComponent) {
-    this.recordingEditor.AllowEdits(false);
+  onCodeInitialized() {
+    this.codeService.AllowEdits(false);
     this.recordingTreeComponent.selectNodeByPath(this.recordingTreeComponent.treeComponent.tree, '/project');
     this.zone.runTask(() => {
       this.editorInitialized = true;
@@ -144,8 +150,8 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
 
     this.recordingTreeComponent.selectNodeByPath(this.recordingTreeComponent.treeComponent.tree, event.path);
     this.zone.runTask(() => {
-      this.recordingEditor.codeEditor.focus();
-      this.recordingEditor.codeEditor.setPosition(event.offset);
+      this.codeService.editor.focus();
+      this.codeService.editor.setPosition(event.offset);
     });
   }
 
@@ -153,8 +159,8 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
     this.recordingTreeComponent.treeComponent.treeModel = this.recordingTreeComponent.tree;
     this.recordingTreeComponent.treeComponent.ngOnChanges(null);
     this.recordingTreeComponent.selectNodeByPath(this.recordingTreeComponent.treeComponent.tree, '/project');
-    this.recordingEditor.ClearCacheForFolder('/');
-    this.recordingEditor.currentFilePath = '';
+    this.codeService.ClearCacheForFolder('/');
+    this.codeService.currentFilePath = '';
   }
 
   async StartRecording() {
@@ -187,12 +193,12 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
 
     this.loadingRecording = true;
     this.codeRecorder = new MonacoRecorder(
-      this.recordingEditor,
       this.recordingTreeComponent,
       this.resourceViewerComponent,
       this.previewComponent,
       this.logServer,
       this.errorServer,
+      this.codeService,
       true, /* resourceAuth */
       this.tutorial.projectId,
       this.projectService,
@@ -224,7 +230,7 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
       this.hasRecorded = true;
       this.codeRecorder.StartRecording();
       this.recordingTreeComponent.allowEdit(true);
-      this.recordingEditor.AllowEdits(true);
+      this.codeService.AllowEdits(true);
       this.recording = true;
     } catch (e) {
       this.errorServer.HandleError('Record', `Failed start record ${e}`);
@@ -234,7 +240,7 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
   async StopRecording() {
     this.recording = false;
     this.recordingTreeComponent.allowEdit(false);
-    this.recordingEditor.AllowEdits(false);
+    this.codeService.AllowEdits(false);
     this.saving = true;
     try {
       await Promise.all([

@@ -2,7 +2,7 @@ import { IEditorPluginService } from '../abstract/IEditorPluginService';
 import { BaseEditorPlugin } from '../../../../shared/language-server/src/client/base-editor-plugin';
 import { PythonEditorPlugin } from '../../../../shared/language-server/src/client/languages/python/python-editor-plugin';
 
-export class EditorPluginService extends IEditorPluginService {
+export class TutorBitsEditorPluginService extends IEditorPluginService {
   private plugins: { [pluginId: string]: BaseEditorPlugin } = {};
 
   constructor() {

@@ -27,6 +27,8 @@ import { TutorBitsTutorialCommentService } from 'src/app/services/tutorial/tutor
 import { ViewComment } from 'src/app/models/comment/view-comment';
 import { TutorBitsTutorialRatingService } from 'src/app/services/tutorial/tutor-bits-tutorial-rating.service';
 import { IVideoService } from 'src/app/services/abstract/IVideoService';
+import { ICodeService } from 'src/app/services/abstract/ICodeService';
+import { CodeEvents } from 'src/app/services/abstract/ICodeService';
 
 @Component({
   templateUrl: './watch.component.html',
@@ -92,6 +94,7 @@ export class WatchComponent implements OnInit, OnDestroy {
     private logServer: ILogService,
     private eventService: IEventService,
     private titleService: ITitleService,
+    private codeService: ICodeService,
     public dialog: MatDialog,
     private dataService: IDataService,
     private metaService: Meta,
@@ -111,6 +114,12 @@ export class WatchComponent implements OnInit, OnDestroy {
       this.eventService.TriggerButtonClick('Record', `PreviewClose - ${this.tutorialId}`);
       this.previewComponent.ClosePreview();
     });
+
+    this.codeService.once(CodeEvents[CodeEvents.InitializedSession], () => { this.onCodeInitialized(); });
+    // TODO do we want this?
+    // this.codeService.on(CodeEvents[CodeEvents.GotoDefinition], (e) => {
+    //   this.onGoToDefinition(e);
+    // });
 
     if (!this.dataService.GetShownWatchHelp()) {
       this.dialog.open(WatchGuideComponent);
@@ -167,12 +176,12 @@ export class WatchComponent implements OnInit, OnDestroy {
   async onReady() {
     // If publish mode make sure not to cache!
     this.codePlayer = new MonacoPlayer(
-      this.playbackEditor,
       this.playbackTreeComponent,
       this.resourceViewerComponent,
       this.playbackMouseComponent,
       this.previewComponent,
       this.logServer,
+      this.codeService,
       this.projectService,
       this.projectService,
       this.tutorial.projectId,
@@ -200,7 +209,7 @@ export class WatchComponent implements OnInit, OnDestroy {
   }
 
   // Starting point as monaco will call this when loaded
-  async onCodeInitialized(playbackEditor: PlaybackEditorComponent) {
+  async onCodeInitialized() {
     this.codeInitialized = true;
     if (this.tutorial) {
       await this.onReady();
@@ -213,7 +222,7 @@ export class WatchComponent implements OnInit, OnDestroy {
     }
     const currentVideoTime = this.videoPlayer.player.currentTime * 1000;
     if (currentVideoTime === 0) {
-      this.codePlayer.SetPostionPct(1);
+      this.codePlayer.SetPositionPct(1);
       return;
     }
 

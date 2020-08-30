@@ -15,19 +15,17 @@ import { Observable, Subscription } from 'rxjs';
 import { IEventService } from 'src/app/services/abstract/IEventService';
 import { PreviewComponent } from 'src/app/sub-components/preview/preview.component';
 import { ITitleService } from 'src/app/services/abstract/ITitleService';
-import { TransactionLoader } from 'shared/Tracer/lib/ts/TransactionLoader';
 import { ViewProject } from 'src/app/models/project/view-project';
-import { CreateProject } from 'src/app/models/project/create-project';
 import { IAuthService } from 'src/app/services/abstract/IAuthService';
 import { ITracerProjectService } from 'src/app/services/abstract/ITracerProjectService';
 import { MonacoPlayer } from 'src/app/sub-components/playing/player/monaco.player';
-import { TransactionPlayerSettings } from 'shared/Tracer/lib/ts/TransactionPlayer';
-import { TraceTransactionLogs, TraceTransactionLog } from 'shared/Tracer/models/ts/Tracer_pb';
+import { TraceTransactionLog } from 'shared/Tracer/models/ts/Tracer_pb';
 import { ViewComment } from 'src/app/models/comment/view-comment';
 import { TutorBitsExampleCommentService } from 'src/app/services/example/tutor-bits-example-comment.service';
 import { TutorBitsExampleRatingService } from 'src/app/services/example/tutor-bits-example-rating.service';
-import { GoToDefinitionEvent } from 'src/app/sub-components/editors/editor/monaco-editor.component';
 import { Meta } from '@angular/platform-browser';
+import { ICodeService } from 'src/app/services/abstract/ICodeService';
+import { CodeEvents, GoToDefinitionEvent } from 'src/app/services/abstract/ICodeService';
 
 @Component({
   templateUrl: './sandbox.component.html',
@@ -73,6 +71,7 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate, OnDestr
     private previewService: IPreviewService,
     private titleService: ITitleService,
     private authService: IAuthService,
+    private codeService: ICodeService,
     private metaService: Meta,
     public commentService: TutorBitsExampleCommentService, // Dont remove these components use them
     public ratingService: TutorBitsExampleRatingService) {
@@ -100,6 +99,11 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate, OnDestr
       this.eventService.TriggerButtonClick('Preview', `PreviewClose - ${this.projectId}`);
       this.previewComponent.ClosePreview();
     });
+
+    this.codeService.once(CodeEvents[CodeEvents.InitializedSession], () => { this.onCodeInitialized(); });
+    this.codeService.on(CodeEvents[CodeEvents.GotoDefinition], (e) => {
+      this.onGoToDefinition(e);
+    });
   }
 
   ngOnDestroy(): void {
@@ -111,7 +115,7 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate, OnDestr
   }
 
   // Starting point as monaco will call this when loaded
-  async onCodeInitialized(recordingEditor: RecordingEditorComponent) {
+  async onCodeInitialized() {
     if (!this.projectType || !this.projectService.ValidateProjectType(this.projectType)) {
       this.errorServer.HandleError('SandboxComponent', `invalid project type ${this.projectType}`);
       return;
@@ -136,25 +140,25 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate, OnDestr
 
     this.recordingTreeComponent.selectNodeByPath(this.recordingTreeComponent.treeComponent.tree, event.path);
     this.zone.runTask(() => {
-      this.recordingEditor.codeEditor.focus();
-      this.recordingEditor.codeEditor.setPosition(event.offset);
+      this.codeService.editor.focus();
+      this.codeService.editor.setPosition(event.offset);
     });
   }
 
   async startEditing(loadedTransactionLogs: TraceTransactionLog[]) {
     try {
-      this.recordingEditor.AllowEdits(true);
+      this.codeService.AllowEdits(true);
       this.recordingTreeComponent.allowEdit(true);
 
       this.recordingTreeComponent.selectNodeByPath(this.recordingTreeComponent.treeComponent.tree, '/project');
 
       this.codeRecorder = new MonacoRecorder(
-        this.recordingEditor,
         this.recordingTreeComponent,
         this.resourceViewerComponent,
         this.previewComponent,
         this.logServer,
         this.errorServer,
+        this.codeService,
         false, /* resourceAuth */
         this.projectId,
         this.isLoggedIn ? this.projectService : new LocalProjectLoader(), // Only save project updates if logged in
@@ -204,7 +208,7 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate, OnDestr
     }
 
     this.zone.runTask(() => {
-      this.recordingEditor.PropogateEditor(projectJson);
+      this.codeService.PropogateEditor(projectJson);
       this.recordingTreeComponent.PropogateTreeJson(projectJson, {
         overrideProjectId: this.loadProjectId
       } as PropogateTreeOptions);
@@ -215,12 +219,12 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate, OnDestr
     this.loadingProject = true;
 
     const codePlayer = new MonacoPlayer(
-      this.recordingEditor,
       this.recordingTreeComponent,
       this.resourceViewerComponent,
       null, // mouse component
       this.previewComponent,
       this.logServer,
+      this.codeService,
       this.isLoggedIn ? this.projectService : new LocalProjectLoader(), // Only save project updates if logged in
       this.isLoggedIn ? this.projectService : new LocalTransactionReader(), // Only save project updates if logged in
       this.projectId,
@@ -243,14 +247,14 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate, OnDestr
           return;
         }
 
-        codePlayer.SetPostionPct(1);
+        codePlayer.SetPositionPct(1);
         if (codePlayer.isCaughtUp) {
           await this.startEditing(codePlayer.GetLoadedTransactionLogs());
           finishedLoadingSub.unsubscribe();
           startedLoadingSub.unsubscribe();
         } else {
           const waitInterval = setInterval(() => {
-            codePlayer.SetPostionPct(1);
+            codePlayer.SetPositionPct(1);
           }, 1000);
           codePlayer.caughtUp.subscribe(async () => {
             await this.startEditing(codePlayer.GetLoadedTransactionLogs());
@@ -262,13 +266,13 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate, OnDestr
       });
 
       codePlayer.Play();
-      codePlayer.SetPostionPct(1);
+      codePlayer.SetPositionPct(1);
     } catch (e) {
       this.errorServer.HandleError(`CodeError`, e);
     }
 
     codePlayer.Dispose();
-    this.recordingEditor.AllowEdits(true);
+    this.codeService.AllowEdits(true);
 
   }
 
