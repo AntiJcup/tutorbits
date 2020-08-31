@@ -44,6 +44,8 @@ import { TutorBitsErrorService } from './services/logging/tutor-bits-error.servi
 import { IErrorService } from './services/abstract/IErrorService';
 import { TutorBitsCodeService } from './services/editor/tutor-bits-code.service';
 import { ICodeService } from './services/abstract/ICodeService';
+import { TutorBitsWorkspacePluginService } from './services/editor/tutor-bits-workspace-plugin.service';
+import { IWorkspacePluginService } from './services/abstract/IWorkspacePluginService';
 import { IDataService } from './services/abstract/IDataService';
 import { TutorBitsDataService } from './services/storage/tutor-bits-persist.service';
 import { LogoutComponent } from './components/logout/logout.component';
@@ -80,7 +82,7 @@ import { TutorBitsTitleService } from './services/tutor-bits-title.service';
 import { WatchGuideComponent } from './sub-components/watch-guide/watch-guide.component';
 import { PlayButtonHintComponent } from './sub-components/playing/play-button-hint/play-button-hint.component';
 import { IEditorPluginService } from './services/abstract/IEditorPluginService';
-import { TutorBitsEditorPluginService } from './services/editor/tutor-bites-editor-plugin.service';
+import { TutorBitsEditorPluginService } from './services/editor/tutor-bits-editor-plugin.service';
 import { TutorBitsTutorialCommentService, TutorBitsConcreteTutorialCommentService } from './services/tutorial/tutor-bits-tutorial-comment.service';
 import { TutorBitsConcreteQuestionCommentService, TutorBitsQuestionCommentService } from './services/question/tutor-bits-question-comment.service';
 import { TutorBitsAnswerService, TutorBitsConcreteAnswerService } from './services/question/tutor-bits-answer.service';
@@ -415,6 +417,7 @@ const appRoutes: Routes = [
     { provide: TutorBitsExampleCommentRatingService, useClass: TutorBitsConcreteExampleCommentRatingService },
     { provide: IEditorPluginService, useClass: TutorBitsEditorPluginService },
     { provide: ICodeService, useClass: TutorBitsCodeService },
+    { provide: IWorkspacePluginService, useClass: TutorBitsWorkspacePluginService },
   ],
   bootstrap: [AppComponent],
   entryComponents: [WatchGuideComponent]

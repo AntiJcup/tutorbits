@@ -4,6 +4,8 @@ import { IPreviewService } from 'src/app/services/abstract/IPreviewService';
 import { IErrorService } from 'src/app/services/abstract/IErrorService';
 import { TraceTransactionLog } from 'shared/Tracer/models/ts/Tracer_pb';
 import { Guid } from 'guid-typescript';
+import { IEditorPluginService } from 'src/app/services/abstract/IEditorPluginService';
+import { ICodeService } from 'src/app/services/abstract/ICodeService';
 
 @Component({
   selector: 'app-preview',
@@ -18,8 +20,6 @@ export class PreviewComponent implements OnInit {
   internalPreviewPath: string;
   internalPreviewUrl: SafeUrl;
   internalLoadingId: string;
-
-  public otherPaths: string[] = null;
 
   get previewUrl(): SafeUrl {
     return this.internalPreviewUrl;
@@ -39,12 +39,20 @@ export class PreviewComponent implements OnInit {
     const extensionType = path.split('.').pop();
     const sourceUrl = encodeURIComponent(fileUrl);
 
+    const language = this.codeService.GetLanguageByPath(path);
+    const languageServerUrl = this.editorPluginService.getPlugin(language)?.serverUrl;
+
     switch (extensionType) {
       case 'js':
       case 'py':
-        urlPath = `/preview-helpers/${extensionType}/preview.html?base=${encodeURIComponent(this.internalPreviewBaseUrl)}&target=${encodeURIComponent(path)}&otherPaths=${encodeURIComponent(JSON.stringify(this.otherPaths))}&server=${encodeURIComponent('ws://localhost:8999')}`;
+        urlPath = `/preview-helpers/${extensionType}/preview.html?base=${encodeURIComponent(this.internalPreviewBaseUrl)}&target=${encodeURIComponent(path)}`;
         break;
     }
+
+    if (languageServerUrl) {
+      urlPath += `&server=${encodeURIComponent(languageServerUrl)}`;
+    }
+
     this.internalPreviewUrl = this.sanitizer.bypassSecurityTrustResourceUrl(`${this.internalPreviewBaseUrl}${urlPath}`);
   }
 
@@ -58,6 +66,8 @@ export class PreviewComponent implements OnInit {
     private sanitizer: DomSanitizer,
     private previewService: IPreviewService,
     private errorServer: IErrorService,
+    private editorPluginService: IEditorPluginService,
+    private codeService: ICodeService,
     private zone: NgZone) { }
 
   ngOnInit() {
@@ -114,11 +124,10 @@ export class PreviewComponent implements OnInit {
   public ClosePreview() {
     this.previewBaseUrl = '';
     this.previewPath = '';
-    this.otherPaths = null;
     this.loading = false;
   }
 
-  private async ShowPreview(url: string, path: string, otherPaths?: string[]): Promise<void> {
+  private async ShowPreview(url: string, path: string): Promise<void> {
     if (!url) {
       this.errorServer.HandleError('PreviewError', ' preview url failed to be retrieved');
       return;

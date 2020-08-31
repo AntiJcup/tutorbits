@@ -1,7 +1,6 @@
 import { TransactionPlayer, TransactionPlayerSettings } from 'shared/Tracer/lib/ts/TransactionPlayer';
 import { TraceTransaction } from 'shared/Tracer/models/ts/Tracer_pb';
 import { IProjectReader } from 'shared/Tracer/lib/ts/IProjectReader';
-import { MonacoEditorComponent } from '../../editors/editor/monaco-editor.component';
 import { NG2FileTreeComponent, ResourceType, TutorBitsTreeModel } from '../../file-tree/ng2-file-tree.component';
 import { NodeSelectedEvent } from 'shared/Ng2-Tree';
 import { Subscription } from 'rxjs';
@@ -150,7 +149,7 @@ export class MonacoPlayer extends TransactionPlayer {
           } else {
             this.fileTreeComponent.deleteNodeByPath(uploadNewPath, false);
             this.fileTreeComponent.selectNodeByPath(this.fileTreeComponent.treeComponent.tree, uploadOldPath);
-            if (uploadOldPath === '') { // Select node empty will always fail but we still need to unselect paths in the editor
+            if (uploadOldPath === '') { // Select node on empty path will always fail but we still need to unselect paths in the editor
               this.codeService.currentFilePath = '';
             }
           }
@@ -164,7 +163,7 @@ export class MonacoPlayer extends TransactionPlayer {
           } else {
             this.fileTreeComponent.deleteNodeByPath(createNewPath, transaction.getCreateFile().getIsFolder());
             this.fileTreeComponent.selectNodeByPath(this.fileTreeComponent.treeComponent.tree, createOldPath);
-            if (createOldPath === '') { // Select node empty will always fail but we still need to unselect paths in the editor
+            if (createOldPath === '') { // Select node on empty path will always fail but we still need to unselect paths in the editor
               this.codeService.currentFilePath = '';
             }
           }
@@ -176,7 +175,7 @@ export class MonacoPlayer extends TransactionPlayer {
             this.fileTreeComponent.selectNodeByPath(this.fileTreeComponent.treeComponent.tree, selectNewPath);
           } else {
             this.fileTreeComponent.selectNodeByPath(this.fileTreeComponent.treeComponent.tree, selectOldPath);
-            if (selectOldPath === '') { // Select node empty will always fail but we still need to unselect paths in the editor
+            if (selectOldPath === '') { // Select node on empty path will always fail but we still need to unselect paths in the editor
               this.codeService.currentFilePath = '';
             }
           }

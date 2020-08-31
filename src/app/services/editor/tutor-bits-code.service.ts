@@ -24,7 +24,7 @@ export class TutorBitsCodeService extends ICodeService {
 
   protected codeEditor: monaco.editor.ICodeEditor;
   protected selectedFilePath: string;
-  protected fileEditors: { [fileName: string]: CodeFile } = {};
+  protected fileEditors: { [path: string]: CodeFile } = {};
   protected log: (msg: string) => void;
 
   private ignoreNext = false;
@@ -72,7 +72,7 @@ export class TutorBitsCodeService extends ICodeService {
     return this.codeEditor;
   }
 
-  public initializeCodeSession(editor: monaco.editor.IEditor): void {
+  public InitializeCodeSession(editor: monaco.editor.IEditor): void {
     if (this.initialized) {
       throw new Error('Already initialized, end previous session before continouing');
     }
@@ -91,14 +91,14 @@ export class TutorBitsCodeService extends ICodeService {
   }
 
   /* Removes all event listeners */
-  public endCodeSession(): void {
+  public EndCodeSession(): void {
     this.codeEditor = null;
     this.emit(CodeEvents[CodeEvents.EndedSession]);
     this.selectedFilePath = '';
     this.removeAllListeners();
     this.ignoreNext = false;
 
-    this.clearFiles();
+    this.ClearFiles();
 
     this.initialized = false;
   }
@@ -215,7 +215,7 @@ export class TutorBitsCodeService extends ICodeService {
     return monaco.editor.createModel(data, this.GetLanguageByPath(path), modelPath);
   }
 
-  public clearFiles(): void {
+  public ClearFiles(): void {
     for (const key of Object.keys(this.fileEditors)) {
       this.ClearCacheForFile(key);
     }

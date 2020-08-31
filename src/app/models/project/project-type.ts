@@ -1,3 +1,4 @@
 export enum ProjectType {
-    Website = 0
+    Website = 0,
+    Python = 1,
 }

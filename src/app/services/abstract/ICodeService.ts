@@ -23,9 +23,9 @@ export abstract class ICodeService extends EventEmitter {
 
   public abstract get editor(): monaco.editor.ICodeEditor;
 
-  public abstract initializeCodeSession(editor: monaco.editor.IEditor): void;
+  public abstract InitializeCodeSession(editor: monaco.editor.IEditor): void;
 
-  public abstract endCodeSession(): void;
+  public abstract EndCodeSession(): void;
 
   public abstract ClearCacheForFile(path: string): void;
 
@@ -49,5 +49,5 @@ export abstract class ICodeService extends EventEmitter {
 
   public abstract GenerateNewEditorModel(path: string, data: string): monaco.editor.ITextModel;
 
-  public abstract clearFiles(): void;
+  public abstract ClearFiles(): void;
 }

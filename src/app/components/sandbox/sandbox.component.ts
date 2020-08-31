@@ -26,6 +26,8 @@ import { TutorBitsExampleRatingService } from 'src/app/services/example/tutor-bi
 import { Meta } from '@angular/platform-browser';
 import { ICodeService } from 'src/app/services/abstract/ICodeService';
 import { CodeEvents, GoToDefinitionEvent } from 'src/app/services/abstract/ICodeService';
+import { IEditorPluginService } from 'src/app/services/abstract/IEditorPluginService';
+import { IWorkspacePluginService } from 'src/app/services/abstract/IWorkspacePluginService';
 
 @Component({
   templateUrl: './sandbox.component.html',
@@ -72,6 +74,7 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate, OnDestr
     private titleService: ITitleService,
     private authService: IAuthService,
     private codeService: ICodeService,
+    private workspacePluginService: IWorkspacePluginService,
     private metaService: Meta,
     public commentService: TutorBitsExampleCommentService, // Dont remove these components use them
     public ratingService: TutorBitsExampleRatingService) {
@@ -132,6 +135,7 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate, OnDestr
     } else {
       this.recordingTreeComponent.allowEdit(true);
       await this.LoadProject();
+      await this.workspacePluginService.setupNewWorkspace(this.projectType);
     }
   }
 

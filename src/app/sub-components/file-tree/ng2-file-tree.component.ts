@@ -10,7 +10,6 @@ import {
   MenuItemSelectedEvent,
   TreeModel,
   NodeRenamedEvent,
-  TreeController,
   NodeRemovedEvent
 } from 'shared/Ng2-Tree';
 import { ILogService } from 'src/app/services/abstract/ILogService';
