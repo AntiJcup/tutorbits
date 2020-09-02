@@ -29,6 +29,7 @@ import { TutorBitsTutorialRatingService } from 'src/app/services/tutorial/tutor-
 import { IVideoService } from 'src/app/services/abstract/IVideoService';
 import { ICodeService } from 'src/app/services/abstract/ICodeService';
 import { CodeEvents } from 'src/app/services/abstract/ICodeService';
+import { IFileTreeService } from 'src/app/services/abstract/IFileTreeService';
 
 @Component({
   templateUrl: './watch.component.html',
@@ -95,6 +96,7 @@ export class WatchComponent implements OnInit, OnDestroy {
     private eventService: IEventService,
     private titleService: ITitleService,
     private codeService: ICodeService,
+    private fileTreeService: IFileTreeService,
     public dialog: MatDialog,
     private dataService: IDataService,
     private metaService: Meta,
@@ -176,7 +178,7 @@ export class WatchComponent implements OnInit, OnDestroy {
   async onReady() {
     // If publish mode make sure not to cache!
     this.codePlayer = new MonacoPlayer(
-      this.playbackTreeComponent,
+      this.fileTreeService,
       this.resourceViewerComponent,
       this.playbackMouseComponent,
       this.previewComponent,

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { IPreviewService } from '../abstract/IPreviewService';
+import { IPreviewService, PreviewEvents } from '../abstract/IPreviewService';
 import { IRequestService } from '../abstract/IRequestService';
 import { TraceTransactionLogs, TraceTransactionLog } from 'shared/Tracer/models/ts/Tracer_pb';
 
@@ -55,5 +55,19 @@ export class TutorBitsPreviewService extends IPreviewService {
     downloadFrame.style.display = 'none';
     downloadFrame.src = downloadUrl;
     document.body.appendChild(downloadFrame);
+  }
+
+  public async ShowPreview(
+    projectId: string,
+    offset: number,
+    path: string,
+    logs: TraceTransactionLog[],
+    baseProjectId?: string
+  ): Promise<void> {
+    this.emit(PreviewEvents[PreviewEvents.Show]);
+  }
+
+  public async HidePreview(): Promise<void> {
+    this.emit(PreviewEvents[PreviewEvents.Hide]);
   }
 }

@@ -27,7 +27,7 @@ export abstract class MonacoEditorComponent implements OnDestroy {
 
   ngOnDestroy(): void {
     window.removeEventListener('resize', this.windowCallback);
-    this.codeService.EndCodeSession();
+    this.codeService.EndSession();
   }
 
   onWindowResize() {
@@ -47,7 +47,7 @@ export abstract class MonacoEditorComponent implements OnDestroy {
       await this.editorPluginService.getPlugin(fileModel.getModeId())?.validateEditor(e, fileModel);
     });
 
-    this.codeService.InitializeCodeSession(codeEditor);
+    this.codeService.InitializeSession(codeEditor);
     if (!this.codeService.currentFilePath || this.codeService.currentFilePath === '') {
       this.Show(false);
     }

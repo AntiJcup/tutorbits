@@ -15,6 +15,7 @@ import { ICodeService } from 'src/app/services/abstract/ICodeService';
 
 export class PreviewComponent implements OnInit {
   @Output() closeClicked = new EventEmitter();
+  @Output() initialize = new EventEmitter();
 
   internalPreviewBaseUrl: string;
   internalPreviewPath: string;

@@ -44,6 +44,8 @@ import { TutorBitsErrorService } from './services/logging/tutor-bits-error.servi
 import { IErrorService } from './services/abstract/IErrorService';
 import { TutorBitsCodeService } from './services/editor/tutor-bits-code.service';
 import { ICodeService } from './services/abstract/ICodeService';
+import { IFileTreeService } from './services/abstract/IFileTreeService';
+import { TutorBitsFileTreeService } from './services/editor/tutor-bits-file-tree.service';
 import { TutorBitsWorkspacePluginService } from './services/editor/tutor-bits-workspace-plugin.service';
 import { IWorkspacePluginService } from './services/abstract/IWorkspacePluginService';
 import { IDataService } from './services/abstract/IDataService';
@@ -417,6 +419,7 @@ const appRoutes: Routes = [
     { provide: TutorBitsExampleCommentRatingService, useClass: TutorBitsConcreteExampleCommentRatingService },
     { provide: IEditorPluginService, useClass: TutorBitsEditorPluginService },
     { provide: ICodeService, useClass: TutorBitsCodeService },
+    { provide: IFileTreeService, useClass: TutorBitsFileTreeService },
     { provide: IWorkspacePluginService, useClass: TutorBitsWorkspacePluginService },
   ],
   bootstrap: [AppComponent],

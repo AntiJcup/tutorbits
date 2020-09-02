@@ -1,4 +1,4 @@
-import { ViewChild, NgZone, Injectable, Output, EventEmitter, ElementRef, Directive } from '@angular/core';
+import { ViewChild, NgZone, Injectable, Output, EventEmitter, ElementRef, Directive, OnInit, OnDestroy } from '@angular/core';
 import {
   TreeComponent,
   Ng2TreeSettings,
@@ -10,97 +10,113 @@ import {
   MenuItemSelectedEvent,
   TreeModel,
   NodeRenamedEvent,
-  NodeRemovedEvent
+  NodeRemovedEvent,
+  NodeMovedEvent
 } from 'shared/Ng2-Tree';
 import { ILogService } from 'src/app/services/abstract/ILogService';
 import { FileUtils, FileData } from 'shared/web/lib/ts/FileUtils';
 import { IEventService } from 'src/app/services/abstract/IEventService';
-import { Guid } from 'guid-typescript';
-
-export interface FileUploadData {
-  fileData: FileData;
-  target: Tree;
-}
-
-export enum ResourceType {
-  code,
-  asset
-}
-
-export interface TutorBitsTreeModel extends TreeModel {
-  resourceId?: string;
-  type?: ResourceType;
-  overrideProjectId?: string;
-}
-
-export interface PropogateTreeOptions {
-  topLevelMenu?: NodeMenuItem[];
-  branchMenu?: NodeMenuItem[];
-  fileMenu?: NodeMenuItem[];
-  overrideProjectId?: string;
-}
+import { TutorBitsTreeModel, IFileTreeService, ResourceType, PathType, FileTreeEvents } from 'src/app/services/abstract/IFileTreeService';
+import { ITracerProjectService } from 'src/app/services/abstract/ITracerProjectService';
 
 @Directive()
 @Injectable()
-export abstract class NG2FileTreeComponent {
-  editable = false;
-  fileSelected: string = null;
-  folderSelected: string = null;
-  internalFiles: { [path: string]: TutorBitsTreeModel } = {};
+export abstract class NG2FileTreeComponent implements OnInit, OnDestroy {
   counter = 3;
-  public selectedPath: string;
   public settings: Ng2TreeSettings = {
     rootIsVisible: false,
     showCheckboxes: false
   };
+  protected log: (...args: any[]) => void;
+  protected lastNodeCreated: { path: string, timestamp: number };
+  protected readonly MINCREATETIME: number = 1000 * 1;
+  protected ignoreNextSelectEvent = false;
 
   @ViewChild(TreeComponent, { static: true }) treeComponent: TreeComponent;
 
   @Output() previewClicked = new EventEmitter<string>();
-  @Output() fileUploaded = new EventEmitter<FileUploadData>();
+
+  @Output()
+  public get fileSelected(): string {
+    if (this.fileTreeService.selectedPathType !== PathType.file) {
+      return null;
+    }
+
+    return this.fileTreeService.selectedPath;
+  }
+
+  @Output()
+  public get folderSelected(): string {
+    if (this.fileTreeService.selectedPathType !== PathType.folder) {
+      return null;
+    }
+
+    return this.fileTreeService.selectedPath;
+  }
+
+  @Output()
+  public get editable(): boolean {
+    return this.fileTreeService.editable;
+  }
 
   constructor(
     private zone: NgZone,
     private logServer: ILogService,
     private eventService: IEventService,
-    protected myElement: ElementRef) { }
-
-  public nodeSelected(event: NodeSelectedEvent) {
-    this.logServer.LogToConsole('FileTree', event);
-    const test = this.treeComponent.getControllerByNodeId(event.node.id);
-    this.fileSelected = null;
-    this.folderSelected = null;
-
-    if (!event.node.isBranch()) {
-      this.selectedPath = this.fileSelected = this.getPathForNode(event.node);
-      return;
-    }
-    this.selectedPath = this.folderSelected = this.getPathForNode(event.node);
-
-    if (event.node.parent.isRoot()) { // No collapsing root level nodes
-      return;
-    }
-
-    if (!test.isCollapsed()) {
-      test.collapse();
-    } else {
-      test.expand();
-    }
+    protected fileTreeService: IFileTreeService,
+    private projectService: ITracerProjectService,
+    protected myElement: ElementRef) {
+    this.log = this.logServer.LogToConsole.bind(this.logServer, 'NG2FileTreeComponent');
   }
 
-  public getPathForNode(e: Tree) {
-    let path = '';
-    const parents = [];
-    while (e.parent) {
-      parents.push(e);
-      e = e.parent;
-    }
+  public ngOnInit() {
+    this.fileTreeService.on(FileTreeEvents[FileTreeEvents.TreeUpdate], () => {
+      this.zone.runTask(() => {
+        this.treeComponent.treeModel = {
+          value: '/',
+          id: 1,
+          settings: {
+            menuItems: [
+            ],
+            cssClasses: {
+              expanded: 'fa fa-caret-down',
+              collapsed: 'fa fa-caret-right',
+              empty: 'fa fa-caret-right disabled',
+              leaf: 'fa'
+            },
+            templates: {
+              node: '<i class="fa fa-folder-o"></i>',
+              leaf: '<i class="fa fa-file-o"></i>'
+            },
+            keepNodesInDOM: true,
+            static: false
+          },
+          children: [
+            {
+              value: 'project',
+              id: 2,
+              children: this.fileTreeService.tree,
+              settings: {
+                isCollapsedOnInit: false,
+                menuItems: [
+                  { action: NodeMenuItemAction.NewFolder, name: 'Add folder', cssClass: '' },
+                  { action: NodeMenuItemAction.NewTag, name: 'Add file', cssClass: '' },
+                ]
+              }
+            }
+          ]
+        };
+        this.treeComponent.ngOnChanges(null);
+        if (this.fileTreeService.selectedPath) {
+          this.ignoreNextSelectEvent = true;
+          setTimeout(() => {
+            this.selectNodeByPath(this.treeComponent.tree, this.fileTreeService.selectedPath, true);
+          }, 0);
+        }
+      });
+    });
+    this.fileTreeService.InitializeSession();
 
-    for (const parent of parents.reverse()) {
-      path += '/' + parent.value;
-    }
-
-    return path;
   }
 
   public findNodeByPath(node: Tree, path: string): Tree {
@@ -159,8 +175,7 @@ export abstract class NG2FileTreeComponent {
   }
 
   public selectNodeByPath(node: Tree, path: string, retry: boolean = true) {
-    this.logServer.LogToConsole('FileTree', `Selecting node: ${path}`);
-    this.selectedPath = path;
+    this.log(`Selecting node: ${path}`);
     this.zone.runTask(() => {
       const foundNode = this.findNodeByPath(node, path);
       if (!foundNode) {
@@ -183,101 +198,32 @@ export abstract class NG2FileTreeComponent {
           throw new Error(`Node missing controller ${path}`);
         }
       }
-      this.logServer.LogToConsole('FileTree', `Selecting found node: ${path}`);
+      this.log(`Selecting found node: ${path}`);
       controller.select();
     });
   }
 
-  public expandNodeByPath(node: Tree, path: string, retry: boolean = true) {
-    this.logServer.LogToConsole('FileTree', `Expanding node: ${path}`);
-    this.selectedPath = path;
-    this.zone.runTask(() => {
-      const foundNode = this.findNodeByPath(node, path);
-      if (!foundNode) {
-        if (retry) {
-          setTimeout(() => {
-            this.expandNodeByPath(node, path, false);
-          }, 1);
-          return;
-        } else {
-          throw new Error(`Node not found ${path}`);
-        }
-      }
-      const controller = this.treeComponent.getControllerByNodeId(foundNode.id);
-      if (controller == null) {
-        if (retry) {
-          setTimeout(() => {
-            this.expandNodeByPath(node, path, false);
-          }, 1);
-        } else {
-          throw new Error(`Node missing controller ${path}`);
-        }
-      }
-      controller.expand();
-    });
+  public ngOnDestroy() {
+    this.fileTreeService.EndSession();
   }
 
-  public addNodeByPath(path: string, isBranch: boolean, childModel: TutorBitsTreeModel = { value: '' }): void {
-    this.zone.runTask(() => {
-      if (path.endsWith('/') && !isBranch) {
-        path = path.substr(0, path.length - 1);
-      } else if (!path.endsWith('/') && isBranch) {
-        path += '/';
-      }
-
-
-      childModel.id = this.counter++;
-      this.internalFiles[path] = childModel;
-
-      this.PropogateTree(this.internalFiles);
-    });
-  }
-
-  public deleteNodeByPath(path: string, isBranch: boolean, retry: boolean = true): void {
-    this.zone.runTask(() => {
-      if (path.endsWith('/') && !isBranch) {
-        path = path.substr(0, path.length - 1);
-      } else if (!path.endsWith('/') && isBranch) {
-        path += '/';
-      }
-
-      const deletedNode = this.findNodeByPath(this.treeComponent.tree, path);
-
-      delete this.internalFiles[path];
-      this.PropogateTree(this.internalFiles);
-      this.treeComponent.nodeRemoved.next({
-        node: deletedNode
-      } as NodeRemovedEvent);
-    });
-  }
-
-  public renameNodeByPath(sourcePath: string, destinationPath: string, isBranch: boolean) {
-    if (sourcePath === destinationPath) {
+  public onNodeSelected(event: NodeSelectedEvent) {
+    if (this.ignoreNextSelectEvent) {
+      this.ignoreNextSelectEvent = false;
       return;
     }
-    this.zone.runTask(() => {
-      if (sourcePath.endsWith('/') && !isBranch) {
-        sourcePath = sourcePath.substr(0, sourcePath.length - 1);
-      } else if (!sourcePath.endsWith('/') && isBranch) {
-        sourcePath += '/';
-      }
+    this.log(event);
+    this.fileTreeService.selectedPath = this.getPathForNodeUI(event.node);
 
-      if (destinationPath.endsWith('/') && !isBranch) {
-        destinationPath = destinationPath.substr(0, destinationPath.length - 1);
-      } else if (!destinationPath.endsWith('/') && isBranch) {
-        destinationPath += '/';
-      }
+    if (event.node.parent.isRoot() || !event.node.isBranch()) { // No collapsing root level nodes
+      return;
+    }
 
-      const oldNode = this.internalFiles[sourcePath];
-      this.internalFiles[destinationPath] = oldNode;
-      delete this.internalFiles[sourcePath];
-
-      this.PropogateTree(this.internalFiles);
-    });
+    this.fileTreeService.ToggleExpandNodeByPath(this.fileTreeService.selectedPath);
   }
 
-  public allowEdit(edit: boolean) {
-    this.editable = edit;
+  public onEditChange(edit: boolean) {
+    // this.editable = edit;
     if (edit) {
       this.treeComponent.treeModel.settings.menuItems = [
         { action: NodeMenuItemAction.NewFolder, name: 'Add folder', cssClass: '' },
@@ -288,8 +234,9 @@ export abstract class NG2FileTreeComponent {
       ];
 
       this.treeComponent.treeModel.settings.static = false;
-      const projectNode = this.findNodeByPath(this.treeComponent.tree, '/project');
-      projectNode.node.settings.menuItems = this.treeComponent.treeModel.settings.menuItems;
+      const projectSettings = this.fileTreeService.GetNodeSettingsByPath('/project');
+      projectSettings.menuItems = this.treeComponent.treeModel.settings.menuItems;
+      this.fileTreeService.UpdateNodeSettings('/project', true, projectSettings);
     } else {
       this.treeComponent.treeModel = this.treeComponent.tree.toTreeModel();
       this.treeComponent.treeModel.settings.menuItems = this.GetReadonlyMenuItems();
@@ -305,84 +252,107 @@ export abstract class NG2FileTreeComponent {
 
   public onMenuItemSelected(e: MenuItemSelectedEvent) {
     if (e.selectedItem === 'Preview') {
-      this.previewClicked.next(this.getPathForNode(e.node));
+      this.previewClicked.next(this.fileTreeService.GetPathForNode(e.node.node));
     }
   }
 
   public onPreviewHeaderButtonClicked(e: MouseEvent) {
-    this.previewClicked.next(this.fileSelected);
+    this.previewClicked.next(this.fileTreeService.selectedPath);
   }
 
   public onNodeCreated(e: NodeCreatedEvent) {
+    this.log(`NodeCreated Event Fired`);
+    // Node created from this lib has a bug if you press enter on the rename module it can try and send 2 nodecreated events instead of one
+
     this.eventService.TriggerButtonClick('FileTree', 'NodeCreate');
-    if (!this.editable) {
+    if (!this.fileTreeService.editable) {
       return;
     }
 
-    this.fileSelected = null;
-    this.folderSelected = null;
+    const newPath = this.getPathForNodeUI(e.node);
 
-    if (e.node.isBranch()) {
-      this.folderSelected = this.getPathForNode(e.node);
-    } else {
-      this.fileSelected = this.getPathForNode(e.node);
+    const now = (new Date()).valueOf();
+    if (this.lastNodeCreated && this.lastNodeCreated.path === newPath && (now - this.lastNodeCreated.timestamp) < this.MINCREATETIME) {
+      e.node.removeItselfFromParent();
+      return;
     }
 
-    e.node.node.settings.menuItems = e.node.isBranch() ? [
-      { action: NodeMenuItemAction.NewFolder, name: 'Add folder', cssClass: '' },
-      { action: NodeMenuItemAction.NewTag, name: 'Add file', cssClass: '' },
-      { action: NodeMenuItemAction.Remove, name: 'Delete', cssClass: '' },
-      { action: NodeMenuItemAction.Rename, name: 'Rename', cssClass: '' }
-    ] : [
-        { action: NodeMenuItemAction.Remove, name: 'Delete', cssClass: '' },
-        { action: NodeMenuItemAction.Rename, name: 'Rename', cssClass: '' },
-        { action: NodeMenuItemAction.Custom, name: 'Preview', cssClass: '' }
-      ];
-  }
+    this.lastNodeCreated = {
+      path: newPath,
+      timestamp: now
+    };
 
-  private GetSelectedBranch(): Tree {
-    const path = this.fileSelected || this.folderSelected;
-    let selectedNode = this.findNodeByPath(this.treeComponent.tree, path);
+    const newNodeModel = {
+      value: e.node.isBranch() ? 'untitled_folder' : 'untitled_file',
+      children: e.node.isBranch() ? [] : undefined,
+      type: e.node.isBranch() ? undefined : ResourceType.code,
+      settings: {
+        menuItems: e.node.isBranch() ? [
+          { action: NodeMenuItemAction.NewFolder, name: 'Add folder', cssClass: '' },
+          { action: NodeMenuItemAction.NewTag, name: 'Add file', cssClass: '' },
+          { action: NodeMenuItemAction.Remove, name: 'Delete', cssClass: '' },
+          { action: NodeMenuItemAction.Rename, name: 'Rename', cssClass: '' }
+        ] : [
+            { action: NodeMenuItemAction.Remove, name: 'Delete', cssClass: '' },
+            { action: NodeMenuItemAction.Rename, name: 'Rename', cssClass: '' },
+            { action: NodeMenuItemAction.Custom, name: 'Preview', cssClass: '' }
+          ]
+      }
+    } as TutorBitsTreeModel;
 
-    if (this.fileSelected) {
-      selectedNode = selectedNode.parent;
-    }
-
-    return selectedNode;
+    this.fileTreeService.AddNode(newPath, e.node.isBranch(), newNodeModel, false);
+    this.fileTreeService.selectedPath = newPath;
   }
 
   public async onNewFolderClicked(e: MouseEvent) {
     this.eventService.TriggerButtonClick('FileTree', 'FolderCreate');
-    const selectedNode = this.GetSelectedBranch();
-    const selectedNodeController = this.treeComponent.getControllerByNodeId(selectedNode.id);
 
     const newNodeModel = {
       value: 'untitled_folder',
-      children: []
-    } as TreeModel;
+      children: [],
+      settings: {
+        menuItems: [
+          { action: NodeMenuItemAction.NewFolder, name: 'Add folder', cssClass: '' },
+          { action: NodeMenuItemAction.NewTag, name: 'Add file', cssClass: '' },
+          { action: NodeMenuItemAction.Remove, name: 'Delete', cssClass: '' },
+          { action: NodeMenuItemAction.Rename, name: 'Rename', cssClass: '' }
+        ]
+      }
+    } as TutorBitsTreeModel;
 
-    const newNode = await selectedNodeController.addChildAsync(newNodeModel);
-    const newNodeController = this.treeComponent.getControllerByNodeId(newNode.id);
-    newNodeController.rename('untitled_folder');
-    newNodeController.startRenaming();
+    let targetPath = this.fileTreeService.selectedPath;
+    if (this.fileTreeService.selectedPathType !== PathType.folder) {
+      targetPath = this.fileTreeService.GetParentPath(targetPath);
+    }
+    const newPath = `${targetPath}/${newNodeModel.value}`;
+
+    this.fileTreeService.AddNode(newPath, true, newNodeModel, true);
+    this.fileTreeService.selectedPath = newPath;
   }
 
   public async onNewFileClicked(e: MouseEvent) {
     this.eventService.TriggerButtonClick('FileTree', 'FileCreate');
-    const selectedNode = this.GetSelectedBranch();
-    const selectedNodeController = this.treeComponent.getControllerByNodeId(selectedNode.id);
 
     const newNodeModel = {
       value: 'untitled_file',
-      type: ResourceType.code
+      type: ResourceType.code,
+      settings: {
+        menuItems: [
+          { action: NodeMenuItemAction.Remove, name: 'Delete', cssClass: '' },
+          { action: NodeMenuItemAction.Rename, name: 'Rename', cssClass: '' },
+          { action: NodeMenuItemAction.Custom, name: 'Preview', cssClass: '' }
+        ]
+      }
     } as TutorBitsTreeModel;
 
-    const newNode = await selectedNodeController.addChildAsync(newNodeModel)
-    const newNodeController = this.treeComponent.getControllerByNodeId(newNode.id);
-    newNodeController.rename('untitled_file');
-    newNodeController.startRenaming();
+    let targetPath = this.fileTreeService.selectedPath;
+    if (this.fileTreeService.selectedPathType !== PathType.folder) {
+      targetPath = this.fileTreeService.GetParentPath(targetPath);
+    }
+    const newPath = `${targetPath}/${newNodeModel.value}`;
 
-    this.internalFiles[this.getPathForNode(newNode)] = newNode.node;
+    this.fileTreeService.AddNode(newPath, false, newNodeModel, true);
+    this.fileTreeService.selectedPath = newPath;
   }
 
   public async onUploadFileClicked(e: MouseEvent) {
@@ -392,235 +362,53 @@ export abstract class NG2FileTreeComponent {
     // const selectedBranch = this.GetSelectedBranch();
     // const selectedBranchPath = this.getPathForNode(selectedBranch);
     // fileData.name = selectedBranchPath + '/' + fileData.name;
-    this.fileUploaded.next({
-      fileData,
-      target: this.GetSelectedBranch()
-    } as FileUploadData);
-  }
-
-  public async addResourceNode(nodePath: string, resourceId: string, nodeName: string) {
-    this.eventService.TriggerButtonClick('FileTree', 'UploadFileFinish');
-    const selectedNode = this.findNodeByPath(this.treeComponent.tree, nodePath);
-    const selectedNodeController = this.treeComponent.getControllerByNodeId(selectedNode.id);
-
-    const newNodeModel = {
-      value: nodeName,
-      resourceId,
-      type: ResourceType.asset
-    } as TutorBitsTreeModel;
-
-    const newNode = await selectedNodeController.addChildAsync(newNodeModel)
-    const newNodeController = this.treeComponent.getControllerByNodeId(newNode.id);
-    newNodeController.rename(nodeName);
+    // TODO this, but I need the project id here, this.projectService.UploadResource()
   }
 
   public onNodeRenamed(e: NodeRenamedEvent) {
     this.eventService.TriggerButtonClick('FileTree', 'NodeRenamed');
-    this.fileSelected = null;
-    this.folderSelected = null;
+    this.fileTreeService.selectedPath = null;
 
-    if (e.node.isBranch()) {
-      this.folderSelected = this.getPathForNode(e.node);
-    } else {
-      this.fileSelected = this.getPathForNode(e.node);
-    }
+    const newPath = this.getPathForNodeUI(e.node);
+    const newPathPieces = newPath.split('/');
+    newPathPieces.pop();
+    const parentPath = newPathPieces.join('/');
+    const oldPath = `${parentPath}/${e.oldValue}`;
+
+    this.fileTreeService.RenameNode(oldPath, newPath, e.node.isBranch());
+    this.fileTreeService.selectedPath = newPath;
+  }
+
+  public onNodeMoved(e: NodeMovedEvent) {
+    this.eventService.TriggerButtonClick('FileTree', 'NodeMoved');
+    this.fileTreeService.selectedPath = null;
+
+    const newPath = this.getPathForNodeUI(e.node);
+    const previousParentPath = this.getPathForNodeUI(e.previousParent);
+    const oldPath = `${previousParentPath}/${e.node.value}`;
+
+    this.fileTreeService.RenameNode(oldPath, newPath, e.node.isBranch());
+    this.fileTreeService.selectedPath = newPath;
   }
 
   public onNodeRemoved(e: NodeRemovedEvent) {
     this.eventService.TriggerButtonClick('FileTree', 'NodeRemoved');
-    this.fileSelected = null;
-    this.folderSelected = null;
+    const deletePath = this.getPathForNodeUI(e.node);
+    this.fileTreeService.DeleteNode(deletePath, e.node.isBranch());
   }
 
-  private CreateChildTree(
-    path: string, tmodel: TutorBitsTreeModel, options: PropogateTreeOptions,
-    cache?: { [path: string]: TreeModel }, parentPath?: string): TreeModel {
-
-    const splitPath = path.replace('/project/', '').split('/');
-
-    parentPath = parentPath || '/project';
-
-    let model: TreeModel = null;
-    const type: ResourceType = tmodel.type || ResourceType.code;
-    const id: string | number = tmodel.id;
-    const nodeName = splitPath[0];
-    const resourceId: string = tmodel.resourceId;
-    if (nodeName === '') {
-      return null;
-    }
-    const cacheName = parentPath + '/' + splitPath[0];
-
-    cache = cache || {};
-
-    if (cache && cache[cacheName]) {
-      model = cache[cacheName];
-    } else {
-      model = {
-        id,
-        value: nodeName,
-        settings: {
-          menuItems: options.fileMenu || ([
-            { action: NodeMenuItemAction.Remove, name: 'Delete', cssClass: '' },
-            { action: NodeMenuItemAction.Rename, name: 'Rename', cssClass: '' },
-            { action: NodeMenuItemAction.Custom, name: 'Preview', cssClass: '' }
-          ])
-        },
-        type,
-        resourceId,
-        overrideProjectId: options.overrideProjectId
-      } as TutorBitsTreeModel;
-      cache[cacheName] = model;
+  public getPathForNodeUI(e: Tree) {
+    let path = '';
+    const parents = [];
+    while (e.parent) {
+      parents.push(e);
+      e = e.parent;
     }
 
-    if (splitPath.length === 1) {
-      return model;
+    for (const parent of parents.reverse()) {
+      path += '/' + parent.value;
     }
 
-    const childTree = this.CreateChildTree(splitPath.slice(1).join('/'), tmodel, options, cache, cacheName);
-    if (childTree !== null) {
-      if (model.children) {
-        const exists = model.children.find((c) => {
-          return c.value === childTree.value;
-        });
-        if (!exists) {
-          model.children.push(childTree);
-        }
-      } else {
-        model.children = [childTree];
-      }
-    } else { // This implies there was a trailing slash implying a folder
-      if (!model.children || model.children.length <= 0) {
-        model.children = [];
-      }
-      model.settings.menuItems = options.branchMenu || [
-        { action: NodeMenuItemAction.NewFolder, name: 'Add folder', cssClass: '' },
-        { action: NodeMenuItemAction.NewTag, name: 'Add file', cssClass: '' },
-        { action: NodeMenuItemAction.Remove, name: 'Delete', cssClass: '' },
-        { action: NodeMenuItemAction.Rename, name: 'Rename', cssClass: '' }
-      ];
-    }
-
-    return model;
-  }
-
-  public PropogateTreeJson(fileJson: { [path: string]: string }, options: PropogateTreeOptions = {}): void {
-    const files: { [path: string]: TutorBitsTreeModel } = {};
-
-    for (let path of Object.keys(fileJson)) {
-      const model = {
-        id: Guid.create().toString()
-      } as TutorBitsTreeModel;
-
-      if (path.startsWith('res:')) {
-        model.resourceId = fileJson[path];
-        path = path.replace('res:', '');
-        model.type = ResourceType.asset;
-      }
-
-      files[path] = model;
-    }
-
-    this.internalFiles = files;
-    this.PropogateTree(files, options);
-  }
-
-  public PropogateTree(files: { [path: string]: TutorBitsTreeModel }, options: PropogateTreeOptions = {}): void {
-    const stagingChildren: Array<TreeModel> = [];
-    const cache = {};
-    for (const path of Object.keys(files).sort((a, b) => {
-      // ASC  -> a.length - b.length
-      // DESC -> b.length - a.length
-      return a.length - b.length;
-    })) {
-      const child = this.CreateChildTree(path, files[path], options, cache);
-      if (child) {
-        const exists = stagingChildren.find((c) => {
-          return c.value === child.value;
-        });
-        if (exists) {
-          continue;
-        }
-        stagingChildren.push(child);
-      }
-    }
-
-    this.treeComponent.treeModel = {
-      value: '/',
-      id: 1,
-      settings: {
-        menuItems: [
-        ],
-        cssClasses: {
-          expanded: 'fa fa-caret-down',
-          collapsed: 'fa fa-caret-right',
-          empty: 'fa fa-caret-right disabled',
-          leaf: 'fa'
-        },
-        templates: {
-          node: '<i class="fa fa-folder-o"></i>',
-          leaf: '<i class="fa fa-file-o"></i>'
-        },
-        keepNodesInDOM: true,
-        static: false
-      },
-      children: [
-        {
-          value: 'project',
-          id: 2,
-          children: stagingChildren,
-          settings: {
-            isCollapsedOnInit: false,
-            menuItems: options.topLevelMenu || [
-              { action: NodeMenuItemAction.NewFolder, name: 'Add folder', cssClass: '' },
-              { action: NodeMenuItemAction.NewTag, name: 'Add file', cssClass: '' },
-            ]
-          }
-        }
-      ]
-    };
-    this.treeComponent.ngOnChanges(null);
-    if (this.selectedPath) {
-      setTimeout(() => {
-        this.selectNodeByPath(this.treeComponent.tree, this.selectedPath);
-      }, 1);
-    }
-  }
-
-  public GetNodeType(node: Tree): ResourceType {
-    return (node.node as TutorBitsTreeModel).type || ResourceType.code;
-  }
-
-  public SantizeFileName(name: string): string {
-    return name.replace(/[^a-z0-9._-]+/ig, '_');
-  }
-
-  public AddModifiersToFilePath(path: string, node: Tree): string {
-    let newPath = path;
-    let index = 1;
-    const splitPath = path.split('.');
-    const indexToModify = Math.max(0, splitPath.length - 2);
-    while (this.DoesPathExist(newPath, node)) {
-      newPath = path;
-      const newSplitPath = splitPath.concat([]);
-      newSplitPath[indexToModify] = `${splitPath[indexToModify]}_${index++}`;
-      newPath = newSplitPath.join('.');
-    }
-
-    const newPathSplit = newPath.split('/');
-    return newPathSplit[newPathSplit.length - 1];
-  }
-
-  public DoesPathExist(path: string, node?: Tree, parent?: Tree): boolean {
-    const matchingNodes = this.listNodesByPath(parent || this.treeComponent.tree, path);
-
-    for (const matchingNode of matchingNodes) {
-      if (node && matchingNode.id === node.id) {
-        continue;
-      }
-
-      return true;
-    }
-
-    return false;
+    return path;
   }
 }

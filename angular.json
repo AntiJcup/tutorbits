@@ -203,6 +203,7 @@
             "sslKey": "localhost.key",
             "sslCert": "localhost.crt",
             "ssl": true,
+            "sourceMap": true
           },
           "configurations": {
             "production": {

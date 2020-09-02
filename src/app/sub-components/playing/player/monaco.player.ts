@@ -1,7 +1,7 @@
 import { TransactionPlayer, TransactionPlayerSettings } from 'shared/Tracer/lib/ts/TransactionPlayer';
 import { TraceTransaction } from 'shared/Tracer/models/ts/Tracer_pb';
 import { IProjectReader } from 'shared/Tracer/lib/ts/IProjectReader';
-import { NG2FileTreeComponent, ResourceType, TutorBitsTreeModel } from '../../file-tree/ng2-file-tree.component';
+import { NG2FileTreeComponent } from '../../file-tree/ng2-file-tree.component';
 import { NodeSelectedEvent } from 'shared/Ng2-Tree';
 import { Subscription } from 'rxjs';
 import { ILogService } from 'src/app/services/abstract/ILogService';
@@ -11,6 +11,7 @@ import { PlaybackMouseComponent } from '../playback-mouse/playback-mouse.compone
 import { PreviewComponent } from '../../preview/preview.component';
 import { ITransactionReader } from 'shared/Tracer/lib/ts/ITransactionReader';
 import { ICodeService } from 'src/app/services/abstract/ICodeService';
+import { IFileTreeService, FileTreeEvents, ResourceType, TutorBitsTreeModel, PathType } from 'src/app/services/abstract/IFileTreeService';
 
 export interface LoadStartEvent {
   playPosition: number;
@@ -28,13 +29,14 @@ export interface OnCaughtUpEvent {
 }
 
 export class MonacoPlayer extends TransactionPlayer {
-  private nodeSelectedListener: Subscription = null;
   public loadStart: EventEmitter<LoadStartEvent> = new EventEmitter<LoadStartEvent>();
   public loadComplete: EventEmitter<LoadCompleteEvent> = new EventEmitter<LoadCompleteEvent>();
   public caughtUp: EventEmitter<OnCaughtUpEvent> = new EventEmitter<OnCaughtUpEvent>();
 
+  protected log: (...args: any[]) => void;
+
   constructor(
-    protected fileTreeComponent: NG2FileTreeComponent,
+    protected fileTreeService: IFileTreeService,
     protected resourceViewerComponent: ResourceViewerComponent,
     protected playbackMouseComponent: PlaybackMouseComponent,
     protected previewComponent: PreviewComponent,
@@ -60,34 +62,34 @@ export class MonacoPlayer extends TransactionPlayer {
       projectId,
       cacheBuster);
 
+    this.log = this.logServer.LogToConsole.bind(this.logServer, 'MonacoPlayer');
     this.codeService.AllowEdits(false);
 
-    this.nodeSelectedListener = this.fileTreeComponent.treeComponent.nodeSelected.subscribe((e: NodeSelectedEvent) => {
-      this.OnNodeSelected(e);
+    this.fileTreeService.on(FileTreeEvents[FileTreeEvents.SelectedNode], (path: string) => {
+      this.OnNodeSelected(path);
     });
   }
 
   public Dispose() {
-    if (this.nodeSelectedListener) {
-      this.nodeSelectedListener.unsubscribe();
-    }
+
   }
 
-  protected OnNodeSelected(e: NodeSelectedEvent): void {
-    this.logServer.LogToConsole('MonacoPlayer', `OnNodeSelected: ${JSON.stringify(e.node.node)}`);
-    if (e.node.isBranch()) {
+  protected OnNodeSelected(path: string): void {
+    this.log(`OnNodeSelected: ${path}`);
+    const isFolder = this.fileTreeService.GetPathTypeForPath(path) === PathType.folder;
+    if (isFolder) {
       return;
     }
-    const newFileName = this.fileTreeComponent.getPathForNode(e.node);
-    switch (this.fileTreeComponent.GetNodeType(e.node)) {
+
+    switch (this.fileTreeService.GetNodeTypeByPath(path)) {
       case ResourceType.code:
-        this.codeService.currentFilePath = newFileName;
+        this.codeService.currentFilePath = path;
         this.resourceViewerComponent.Resource = null;
         break;
       case ResourceType.asset:
         this.codeService.currentFilePath = '';
         this.codeService.UpdateCacheForCurrentFile();
-        const model = e.node.node as TutorBitsTreeModel;
+        const model = this.fileTreeService.GetNodeForPath(path);
         this.resourceViewerComponent.Resource = {
           projectId: model.overrideProjectId || this.projectId,
           fileName: model.value,
@@ -100,7 +102,7 @@ export class MonacoPlayer extends TransactionPlayer {
   protected HandleTransaction(transaction: TraceTransaction, undo?: boolean): void {
     try {
       const edits: monaco.editor.IIdentifiedSingleEditOperation[] = [];
-      this.logServer.LogToConsole('MonacoPlayer', JSON.stringify(transaction.toObject()));
+      this.log(JSON.stringify(transaction.toObject()));
       switch (transaction.getType()) {
         case TraceTransaction.TraceTransactionType.CUSTOMACTION:
           const customData = transaction.getCustomAction();
@@ -120,7 +122,7 @@ export class MonacoPlayer extends TransactionPlayer {
               }
               break;
             default:
-              this.logServer.LogToConsole('MonacoPlayer', `Unidentified action: ${customData.getAction()}`);
+              this.log(`Unidentified action: ${customData.getAction()}`);
               break;
           }
           break;
@@ -142,13 +144,10 @@ export class MonacoPlayer extends TransactionPlayer {
           const uploadNewPath = transaction.getUploadFile().getNewFilePath();
           const uploadOldPath = transaction.getFilePath();
           if (!undo) {
-            this.fileTreeComponent.addNodeByPath(uploadNewPath, false, {
-              resourceId: uploadResourceId,
-              type: ResourceType.asset
-            } as TutorBitsTreeModel);
+            this.fileTreeService.AddResourceNode(uploadNewPath, uploadResourceId);
           } else {
-            this.fileTreeComponent.deleteNodeByPath(uploadNewPath, false);
-            this.fileTreeComponent.selectNodeByPath(this.fileTreeComponent.treeComponent.tree, uploadOldPath);
+            this.fileTreeService.DeleteNode(uploadNewPath, false);
+            this.fileTreeService.selectedPath = uploadOldPath;
             if (uploadOldPath === '') { // Select node on empty path will always fail but we still need to unselect paths in the editor
               this.codeService.currentFilePath = '';
             }
@@ -158,26 +157,24 @@ export class MonacoPlayer extends TransactionPlayer {
           const createNewPath = transaction.getCreateFile().getNewFilePath();
           const createOldPath = transaction.getFilePath();
           if (!undo) {
-            this.fileTreeComponent.addNodeByPath(createNewPath, transaction.getCreateFile().getIsFolder());
-            this.fileTreeComponent.selectNodeByPath(this.fileTreeComponent.treeComponent.tree, createNewPath);
+            this.fileTreeService.AddNode(createNewPath, transaction.getCreateFile().getIsFolder());
+            this.fileTreeService.selectedPath = createNewPath;
+            this.codeService.currentFilePath = createNewPath;
           } else {
-            this.fileTreeComponent.deleteNodeByPath(createNewPath, transaction.getCreateFile().getIsFolder());
-            this.fileTreeComponent.selectNodeByPath(this.fileTreeComponent.treeComponent.tree, createOldPath);
-            if (createOldPath === '') { // Select node on empty path will always fail but we still need to unselect paths in the editor
-              this.codeService.currentFilePath = '';
-            }
+            this.fileTreeService.DeleteNode(createNewPath, transaction.getCreateFile().getIsFolder());
+            this.fileTreeService.selectedPath = createOldPath;
+            this.codeService.currentFilePath = createOldPath;
           }
           break;
         case TraceTransaction.TraceTransactionType.SELECTFILE:
           const selectNewPath = transaction.getSelectFile().getNewFilePath();
           const selectOldPath = transaction.getFilePath();
           if (!undo) {
-            this.fileTreeComponent.selectNodeByPath(this.fileTreeComponent.treeComponent.tree, selectNewPath);
+            this.fileTreeService.selectedPath = selectNewPath;
+            this.codeService.currentFilePath = selectNewPath;
           } else {
-            this.fileTreeComponent.selectNodeByPath(this.fileTreeComponent.treeComponent.tree, selectOldPath);
-            if (selectOldPath === '') { // Select node on empty path will always fail but we still need to unselect paths in the editor
-              this.codeService.currentFilePath = '';
-            }
+            this.fileTreeService.selectedPath = selectOldPath;
+            this.codeService.currentFilePath = selectOldPath;
           }
           break;
         case TraceTransaction.TraceTransactionType.DELETEFILE:
@@ -185,12 +182,13 @@ export class MonacoPlayer extends TransactionPlayer {
           const deletePath = transaction.getFilePath();
           const deleteIsFolder = transaction.getDeleteFile().getIsFolder();
           if (!undo) {
-            this.fileTreeComponent.deleteNodeByPath(deletePath, deleteIsFolder);
+            this.fileTreeService.DeleteNode(deletePath, deleteIsFolder);
             this.codeService.currentFilePath = '';
             this.codeService.ClearCacheForFile(deletePath);
           } else {
-            this.fileTreeComponent.addNodeByPath(deletePath, deleteIsFolder);
+            this.fileTreeService.AddNode(deletePath, deleteIsFolder);
             this.codeService.UpdateCacheForFile(deletePath, deletePreviousData);
+            this.codeService.currentFilePath = deletePath;
           }
           break;
         case TraceTransaction.TraceTransactionType.RENAMEFILE:
@@ -198,17 +196,17 @@ export class MonacoPlayer extends TransactionPlayer {
           const renameNewPath = transaction.getRenameFile().getNewFilePath();
           const renameOldPath = transaction.getFilePath();
           if (!undo) {
-            this.fileTreeComponent.renameNodeByPath(renameOldPath, renameNewPath, transaction.getRenameFile().getIsFolder());
+            this.fileTreeService.RenameNode(renameOldPath, renameNewPath, transaction.getRenameFile().getIsFolder());
 
             this.codeService.ClearCacheForFile(renameOldPath);
             this.codeService.UpdateCacheForFile(renameNewPath, renamePreviousData);
-            this.fileTreeComponent.selectNodeByPath(this.fileTreeComponent.treeComponent.tree, renameNewPath);
+            this.fileTreeService.selectedPath = renameNewPath;
           } else {
-            this.fileTreeComponent.renameNodeByPath(renameNewPath, renameOldPath, transaction.getRenameFile().getIsFolder());
+            this.fileTreeService.RenameNode(renameNewPath, renameOldPath, transaction.getRenameFile().getIsFolder());
 
             this.codeService.ClearCacheForFile(renameNewPath);
             this.codeService.UpdateCacheForFile(renameOldPath, renamePreviousData);
-            this.fileTreeComponent.selectNodeByPath(this.fileTreeComponent.treeComponent.tree, renameOldPath);
+            this.fileTreeService.selectedPath = renameOldPath;
           }
           break;
         case TraceTransaction.TraceTransactionType.MODIFYFILE:

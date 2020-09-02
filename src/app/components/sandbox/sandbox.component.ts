@@ -7,7 +7,6 @@ import { LocalTransactionWriter, LocalProjectWriter, LocalProjectLoader, LocalTr
 import { Guid } from 'guid-typescript';
 import { IErrorService } from 'src/app/services/abstract/IErrorService';
 import { ILogService } from 'src/app/services/abstract/ILogService';
-import { PropogateTreeOptions } from 'src/app/sub-components/file-tree/ng2-file-tree.component';
 import { ResourceViewerComponent } from 'src/app/sub-components/resource-viewer/resource-viewer.component';
 import { IPreviewService } from 'src/app/services/abstract/IPreviewService';
 import { ComponentCanDeactivate } from 'src/app/services/guards/tutor-bits-pending-changes-guard.service';
@@ -28,6 +27,7 @@ import { ICodeService } from 'src/app/services/abstract/ICodeService';
 import { CodeEvents, GoToDefinitionEvent } from 'src/app/services/abstract/ICodeService';
 import { IEditorPluginService } from 'src/app/services/abstract/IEditorPluginService';
 import { IWorkspacePluginService } from 'src/app/services/abstract/IWorkspacePluginService';
+import { IFileTreeService, PropogateTreeOptions, FileTreeEvents } from 'src/app/services/abstract/IFileTreeService';
 
 @Component({
   templateUrl: './sandbox.component.html',
@@ -74,6 +74,7 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate, OnDestr
     private titleService: ITitleService,
     private authService: IAuthService,
     private codeService: ICodeService,
+    private fileTreeService: IFileTreeService,
     private workspacePluginService: IWorkspacePluginService,
     private metaService: Meta,
     public commentService: TutorBitsExampleCommentService, // Dont remove these components use them
@@ -98,7 +99,7 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate, OnDestr
     this.metaService.updateTag({ name: 'description', content: `TutotorBits Sandbox` },
       'name=\'description\'');
 
-    this.selectFileSub = this.recordingTreeComponent.treeComponent.nodeSelected.subscribe(() => {
+    this.fileTreeService.on(FileTreeEvents[FileTreeEvents.SelectedNode], (path: string) => {
       this.eventService.TriggerButtonClick('Preview', `PreviewClose - ${this.projectId}`);
       this.previewComponent.ClosePreview();
     });
@@ -133,7 +134,7 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate, OnDestr
       }
       this.loadingProject = false;
     } else {
-      this.recordingTreeComponent.allowEdit(true);
+      this.fileTreeService.editable = true;
       await this.LoadProject();
       await this.workspacePluginService.setupNewWorkspace(this.projectType);
     }
@@ -142,8 +143,8 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate, OnDestr
   onGoToDefinition(event: GoToDefinitionEvent) {
     this.logServer.LogToConsole(JSON.stringify(event));
 
-    this.recordingTreeComponent.selectNodeByPath(this.recordingTreeComponent.treeComponent.tree, event.path);
     this.zone.runTask(() => {
+      this.fileTreeService.selectedPath = event.path;
       this.codeService.editor.focus();
       this.codeService.editor.setPosition(event.offset);
     });
@@ -152,12 +153,12 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate, OnDestr
   async startEditing(loadedTransactionLogs: TraceTransactionLog[]) {
     try {
       this.codeService.AllowEdits(true);
-      this.recordingTreeComponent.allowEdit(true);
+      this.fileTreeService.editable = true;
 
-      this.recordingTreeComponent.selectNodeByPath(this.recordingTreeComponent.treeComponent.tree, '/project');
+      this.fileTreeService.selectedPath = '/project';
 
       this.codeRecorder = new MonacoRecorder(
-        this.recordingTreeComponent,
+        this.fileTreeService,
         this.resourceViewerComponent,
         this.previewComponent,
         this.logServer,
@@ -213,7 +214,7 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate, OnDestr
 
     this.zone.runTask(() => {
       this.codeService.PropogateEditor(projectJson);
-      this.recordingTreeComponent.PropogateTreeJson(projectJson, {
+      this.fileTreeService.PropogateTreeJson(projectJson, {
         overrideProjectId: this.loadProjectId
       } as PropogateTreeOptions);
     });
@@ -223,7 +224,7 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate, OnDestr
     this.loadingProject = true;
 
     const codePlayer = new MonacoPlayer(
-      this.recordingTreeComponent,
+      this.fileTreeService,
       this.resourceViewerComponent,
       null, // mouse component
       this.previewComponent,

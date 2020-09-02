@@ -3,9 +3,7 @@ import { TransactionRecorder } from 'shared/Tracer/lib/ts/TransactionRecorder';
 import { ITransactionWriter } from 'shared/Tracer/lib/ts/ITransactionWriter';
 import { IProjectReader } from 'shared/Tracer/lib/ts/IProjectReader';
 import { IProjectWriter } from 'shared/Tracer/lib/ts/IProjectWriter';
-import { NodeSelectedEvent, NodeCreatedEvent, NodeRenamedEvent, NodeRemovedEvent, NodeMovedEvent, Tree } from 'shared/Ng2-Tree';
 import { Subscription } from 'rxjs';
-import { NG2FileTreeComponent, ResourceType, FileUploadData, TutorBitsTreeModel } from '../../file-tree/ng2-file-tree.component';
 import { ILogService } from 'src/app/services/abstract/ILogService';
 import { IErrorService } from 'src/app/services/abstract/IErrorService';
 import { ITracerProjectService } from 'src/app/services/abstract/ITracerProjectService';
@@ -13,526 +11,388 @@ import { ResourceViewerComponent, ResourceData } from '../../resource-viewer/res
 import { environment } from 'src/environments/environment';
 import { PreviewComponent } from '../../preview/preview.component';
 import { ICodeService } from 'src/app/services/abstract/ICodeService';
+import { IFileTreeService, FileTreeEvents, PathType, ResourceType } from 'src/app/services/abstract/IFileTreeService';
 
 export interface MonacoRecorderSettings {
-    overrideSaveSpeed?: number;
-    saveUnfinishedPartitions?: boolean;
+  overrideSaveSpeed?: number;
+  saveUnfinishedPartitions?: boolean;
 }
 
 export class MonacoRecorder extends TransactionRecorder {
 
-    private fileChangeListener: monaco.IDisposable = null;
-    private scrollChangeListener: monaco.IDisposable = null;
+  private fileChangeListener: monaco.IDisposable = null;
+  private scrollChangeListener: monaco.IDisposable = null;
 
-    private nodeSelectedListener: Subscription = null;
-    private nodeCreatedListener: Subscription = null;
-    private nodeRenameListener: Subscription = null;
-    private nodeDeletedListener: Subscription = null;
-    private nodeMovedListener: Subscription = null;
-    private fileUploadedListener: Subscription = null;
-    private previewListener: Subscription = null;
-    private previewCloseListener: Subscription = null;
+  private previewListener: Subscription = null;
+  private previewCloseListener: Subscription = null;
 
-    private mouseMoveCallbackWrapper: any = null;
+  private mouseMoveCallbackWrapper: any = null;
 
-    private timeOffset: number;
-    private start: number;
-    private recording: boolean;
+  private timeOffset: number;
+  private start: number;
+  private recording: boolean;
 
-    private delayTimer: any;
-    private lastMouseTrackOffset: number;
-    private lastScrollTrackOffset: number;
+  private delayTimer: any;
+  private lastMouseTrackOffset: number;
+  private lastScrollTrackOffset: number;
 
-    private lastScrollHeight: number;
+  private lastScrollHeight: number;
 
-    public get position(): number {
-        return this.timeOffset;
+  protected log: (...args: any[]) => void;
+
+  public get position(): number {
+    return this.timeOffset;
+  }
+
+  constructor(
+    protected fileTreeService: IFileTreeService,
+    protected resourceViewerComponent: ResourceViewerComponent,
+    protected previewComponent: PreviewComponent,
+    protected logServer: ILogService,
+    protected errorServer: IErrorService,
+    protected codeService: ICodeService,
+    protected resourceAuth: boolean,
+    projectId: string,
+    projectLoader: IProjectReader,
+    projectWriter: IProjectWriter,
+    transactionWriter: ITransactionWriter,
+    protected projectService: ITracerProjectService,
+    protected trackNonFile: boolean,
+    transactionLogs?: TraceTransactionLog[],
+    cacheBuster?: string,
+    private settings?: MonacoRecorderSettings) {
+    super(projectId, projectLoader, projectWriter, transactionWriter, cacheBuster, transactionLogs);
+
+    this.log = this.logServer.LogToConsole.bind(this.logServer, 'MonacoRecorder');
+
+    this.fileTreeService.on(FileTreeEvents[FileTreeEvents.SelectedNode], (path: string) => {
+      this.OnNodeSelected(path);
+    });
+
+    if (!this.settings) {
+      this.settings = {} as MonacoRecorderSettings;
+    }
+  }
+
+  public StartRecording(): void {
+    this.log(`Started Recording`);
+    this.recording = true;
+    this.start = Date.now() - this.project.getDuration();
+    this.timeOffset = Date.now() - this.start;
+
+    this.fileChangeListener = this.codeService.editor.onDidChangeModelContent((e: monaco.editor.IModelContentChangedEvent) => {
+      this.OnFileModified(e);
+    });
+
+    this.fileTreeService.on(FileTreeEvents[FileTreeEvents.AddedNode], (path: string) => {
+      this.OnNodeCreated(path);
+    });
+
+    this.fileTreeService.on(FileTreeEvents[FileTreeEvents.RenamedNode], (sourcePath: string, destinationPath: string) => {
+      this.OnNodeRename(sourcePath, destinationPath);
+    });
+
+    this.fileTreeService.on(FileTreeEvents[FileTreeEvents.DeletedNode], (path: string, isFolder: boolean, type: ResourceType) => {
+      this.OnNodeDeleted(path, isFolder, type);
+    });
+
+    this.fileTreeService.on(FileTreeEvents[FileTreeEvents.MovedNode], (sourcePath: string, destinationPath: string) => {
+      this.OnNodeMoved(sourcePath, destinationPath);
+    });
+
+    this.fileTreeService.on(FileTreeEvents[FileTreeEvents.AddedResource], (path: string, resourceId: string, resourceName: string) => {
+      this.onFileUploaded(path, resourceId, resourceName);
+    });
+
+    if (this.trackNonFile) {
+      this.mouseMoveCallbackWrapper = (e: MouseEvent) => {
+        this.onMouseMoved(e);
+      };
+      window.addEventListener('mousemove', this.mouseMoveCallbackWrapper);
+
+      this.scrollChangeListener = this.codeService.editor.onDidScrollChange((e: monaco.IScrollEvent) => {
+        this.onScrolled(e);
+      });
+
+      // this.previewListener = this.fileTreeComponent.previewClicked.subscribe((file: string) => {
+      //   this.onPreviewClicked(file);
+      // });
+
+      this.previewCloseListener = this.previewComponent.closeClicked.subscribe((e: any) => {
+        this.onPreviewCloseClicked();
+      });
+    }
+  }
+
+  public async StopRecording(): Promise<boolean> {
+    this.log(`Stopped Recording`);
+    this.recording = false;
+    if (this.fileChangeListener) {
+      this.fileChangeListener.dispose();
     }
 
-    constructor(
-        protected fileTreeComponent: NG2FileTreeComponent,
-        protected resourceViewerComponent: ResourceViewerComponent,
-        protected previewComponent: PreviewComponent,
-        protected logging: ILogService,
-        protected errorServer: IErrorService,
-        protected codeService: ICodeService,
-        protected resourceAuth: boolean,
-        projectId: string,
-        projectLoader: IProjectReader,
-        projectWriter: IProjectWriter,
-        transactionWriter: ITransactionWriter,
-        protected projectService: ITracerProjectService,
-        protected trackNonFile: boolean,
-        transactionLogs?: TraceTransactionLog[],
-        cacheBuster?: string,
-        private settings?: MonacoRecorderSettings) {
-        super(projectId, projectLoader, projectWriter, transactionWriter, cacheBuster, transactionLogs);
-
-        this.nodeSelectedListener = this.fileTreeComponent.treeComponent.nodeSelected.subscribe((e: NodeSelectedEvent) => {
-            this.OnNodeSelected(e);
-        });
-
-        if (!this.settings) {
-            this.settings = {} as MonacoRecorderSettings;
-        }
+    if (this.mouseMoveCallbackWrapper) {
+      window.removeEventListener('mousemove', this.mouseMoveCallbackWrapper);
     }
 
-    public StartRecording(): void {
-        this.logging.LogToConsole('MonacoRecorder', `Started Recording`);
-        this.recording = true;
-        this.start = Date.now() - this.project.getDuration();
-        this.timeOffset = Date.now() - this.start;
-        this.fileChangeListener = this.codeService.editor.onDidChangeModelContent((e: monaco.editor.IModelContentChangedEvent) => {
-            this.OnFileModified(e);
-        });
-
-        this.nodeCreatedListener = this.fileTreeComponent.treeComponent.nodeCreated.subscribe((e: NodeCreatedEvent) => {
-            this.OnNodeCreated(e);
-        });
-
-        this.nodeRenameListener = this.fileTreeComponent.treeComponent.nodeRenamed.subscribe((e: NodeRenamedEvent) => {
-            this.OnNodeRename(e);
-        });
-
-        this.nodeDeletedListener = this.fileTreeComponent.treeComponent.nodeRemoved.subscribe((e: NodeRemovedEvent) => {
-            this.OnNodeDeleted(e);
-        });
-
-        this.nodeMovedListener = this.fileTreeComponent.treeComponent.nodeMoved.subscribe((e: NodeMovedEvent) => {
-            this.OnNodeMoved(e);
-        });
-
-        this.fileUploadedListener = this.fileTreeComponent.fileUploaded.subscribe((e: FileUploadData) => {
-            this.onFileUploaded(e);
-        });
-
-        if (this.trackNonFile) {
-            this.mouseMoveCallbackWrapper = (e: MouseEvent) => {
-                this.onMouseMoved(e);
-            };
-            window.addEventListener('mousemove', this.mouseMoveCallbackWrapper);
-
-            this.scrollChangeListener = this.codeService.editor.onDidScrollChange((e: monaco.IScrollEvent) => {
-                this.onScrolled(e);
-            });
-
-            this.previewListener = this.fileTreeComponent.previewClicked.subscribe((file: string) => {
-                this.onPreviewClicked(file);
-            });
-
-            this.previewCloseListener = this.previewComponent.closeClicked.subscribe((e: any) => {
-                this.onPreviewCloseClicked();
-            });
-        }
+    if (this.scrollChangeListener) {
+      this.scrollChangeListener.dispose();
     }
 
-    public async StopRecording(): Promise<boolean> {
-        this.logging.LogToConsole('MonacoRecorder', `Stopped Recording`);
-        this.recording = false;
-        if (this.fileChangeListener) {
-            this.fileChangeListener.dispose();
-        }
-
-        if (this.nodeCreatedListener) {
-            this.nodeCreatedListener.unsubscribe();
-        }
-
-        if (this.nodeRenameListener) {
-            this.nodeRenameListener.unsubscribe();
-        }
-
-        if (this.nodeDeletedListener) {
-            this.nodeDeletedListener.unsubscribe();
-        }
-
-        if (this.nodeMovedListener) {
-            this.nodeMovedListener.unsubscribe();
-        }
-
-        if (this.fileUploadedListener) {
-            this.fileUploadedListener.unsubscribe();
-        }
-
-        if (this.mouseMoveCallbackWrapper) {
-            window.removeEventListener('mousemove', this.mouseMoveCallbackWrapper);
-        }
-
-        if (this.scrollChangeListener) {
-            this.scrollChangeListener.dispose();
-        }
-
-        if (this.previewListener) {
-            this.previewListener.unsubscribe();
-        }
-
-        if (this.previewCloseListener) {
-            this.previewCloseListener.unsubscribe();
-        }
-
-        return await this.SaveTransactionLogs(true);
+    if (this.previewListener) {
+      this.previewListener.unsubscribe();
     }
 
-    protected OnFileModified(e: monaco.editor.IModelContentChangedEvent): void {
-        this.logging.LogToConsole('MonacoRecorder', `OnFileModified ${JSON.stringify(e)}`);
-        if (this.codeService.ignoreNextEvent) { // Handles expected edits that shouldnt be tracked
-            this.logging.LogToConsole('MonacoRecorder', `OnFileModified Ignoring ${e}`);
-            return;
-        }
-        this.logging.LogToConsole('MonacoRecorder', `OnFileModified change count: ${e.changes.length}`);
-        for (const change of e.changes) {
-            this.logging.LogToConsole('MonacoRecorder', `OnFileModified change count: ${change}`);
-            const previousCache = this.codeService.GetCacheForCurrentFile();
-            const previousData = change.rangeLength <= 0 || !previousCache ?
-                undefined :
-                previousCache
-                    .getValue()
-                    .substring(change.rangeOffset, change.rangeOffset + change.rangeLength);
-            this.logging.LogToConsole('MonacoRecorder', `OnFileModified Previous File Data: ${previousData}`);
-            this.timeOffset = Date.now() - this.start;
-            const transaction = this.ModifyFile(this.timeOffset, this.codeService.currentFilePath, change.rangeOffset,
-                change.rangeOffset + change.rangeLength, change.text, previousData);
-            this.logging.LogToConsole('MonacoRecorder', `OnFileModified File Modified: ${JSON.stringify(transaction.toObject())}`);
-        }
+    if (this.previewCloseListener) {
+      this.previewCloseListener.unsubscribe();
+    }
+
+    return await this.SaveTransactionLogs(true);
+  }
+
+  protected OnFileModified(e: monaco.editor.IModelContentChangedEvent): void {
+    this.log(`OnFileModified ${JSON.stringify(e)}`);
+    if (this.codeService.ignoreNextEvent) { // Handles expected edits that shouldnt be tracked
+      this.log(`OnFileModified Ignoring ${e}`);
+      return;
+    }
+    this.log(`OnFileModified change count: ${e.changes.length}`);
+    for (const change of e.changes) {
+      this.log(`OnFileModified change count: ${change}`);
+      const previousCache = this.codeService.GetCacheForCurrentFile();
+      const previousData = change.rangeLength <= 0 || !previousCache ?
+        undefined :
+        previousCache
+          .getValue()
+          .substring(change.rangeOffset, change.rangeOffset + change.rangeLength);
+      this.log(`OnFileModified Previous File Data: ${previousData}`);
+      this.timeOffset = Date.now() - this.start;
+      const transaction = this.ModifyFile(this.timeOffset, this.codeService.currentFilePath, change.rangeOffset,
+        change.rangeOffset + change.rangeLength, change.text, previousData);
+      this.log(`OnFileModified File Modified: ${JSON.stringify(transaction.toObject())}`);
+    }
+    this.codeService.UpdateCacheForCurrentFile();
+
+    this.TriggerDelayedSave();
+  }
+
+  protected OnNodeSelected(path: string): void {
+    this.log(`OnNodeSelected ${path}`);
+    if (this.fileTreeService.GetPathTypeForPath(path) === PathType.folder) {
+      return;
+    }
+
+    const oldPath = this.codeService.currentFilePath;
+    const newPath = path;
+
+    this.log(`OnNodeSelected from: ${oldPath} to: ${newPath}`);
+
+    switch (this.fileTreeService.GetNodeTypeByPath(path)) {
+      case ResourceType.code:
+        this.codeService.currentFilePath = newPath;
         this.codeService.UpdateCacheForCurrentFile();
-
-        this.TriggerDelayedSave();
+        this.resourceViewerComponent.Resource = null;
+        break;
+      case ResourceType.asset:
+        this.codeService.currentFilePath = '';
+        this.codeService.UpdateCacheForCurrentFile();
+        const model = this.fileTreeService.GetNodeForPath(path);
+        this.resourceViewerComponent.Resource = {
+          projectId: model.overrideProjectId || this.id,
+          fileName: model.value,
+          resourceId: model.resourceId,
+          path: newPath
+        } as ResourceData;
+        break;
     }
 
-    protected OnNodeSelected(e: NodeSelectedEvent): void {
-        this.logging.LogToConsole('MonacoRecorder', `OnNodeSelected ${JSON.stringify(e.node.node)}`);
-        if (e.node.isBranch()) {
-            return;
+    if (this.recording) {
+      this.timeOffset = Date.now() - this.start;
+      this.SelectFile(this.timeOffset, oldPath, newPath);
+      this.TriggerDelayedSave();
+    }
+  }
+
+  protected OnNodeCreated(path: string) {
+    this.log(`OnNodeCreated ${path}`);
+    const oldPath = this.codeService.currentFilePath;
+    const newPath = path;
+
+    const isFolder = this.fileTreeService.GetPathTypeForPath(newPath) === PathType.folder;
+    switch (this.fileTreeService.GetNodeTypeByPath(newPath)) {
+      case ResourceType.code:
+        if (!isFolder) {
+          this.codeService.currentFilePath = newPath;
+          this.codeService.editor.focus();
         }
-
-        const oldFileName = this.codeService.currentFilePath;
-        const newFileName = this.fileTreeComponent.getPathForNode(e.node);
-
-        this.logging.LogToConsole('MonacoRecorder', `OnNodeSelected from: ${oldFileName} to: ${newFileName}`);
-
-        switch (this.fileTreeComponent.GetNodeType(e.node)) {
-            case ResourceType.code:
-                this.codeService.currentFilePath = newFileName;
-                this.codeService.UpdateCacheForCurrentFile();
-                this.resourceViewerComponent.Resource = null;
-                break;
-            case ResourceType.asset:
-                this.codeService.currentFilePath = '';
-                this.codeService.UpdateCacheForCurrentFile();
-                const model = e.node.node as TutorBitsTreeModel;
-                this.resourceViewerComponent.Resource = {
-                    projectId: model.overrideProjectId || this.id,
-                    fileName: model.value,
-                    resourceId: model.resourceId,
-                    path: newFileName
-                } as ResourceData;
-                break;
-        }
-
-        if (this.recording) {
-            this.timeOffset = Date.now() - this.start;
-            this.SelectFile(this.timeOffset, oldFileName, newFileName);
-            this.TriggerDelayedSave();
-        }
+        break;
+      case ResourceType.asset:
+        return;
     }
 
-    protected OnNodeCreated(e: NodeCreatedEvent) {
-        this.logging.LogToConsole('MonacoRecorder', `OnNodeCreated ${JSON.stringify(e.node.node)}`);
-        const oldFileName = this.codeService.currentFilePath;
-        const nodeName = e.node.value;
-        const sanitizedNodeName = this.fileTreeComponent.SantizeFileName(nodeName);
-        if (nodeName !== sanitizedNodeName) {
-            try {
-                this.fileTreeComponent.treeComponent.getControllerByNodeId(e.node.id).rename(sanitizedNodeName);
-            } catch (e) { }
-        }
-        let newFileName = this.fileTreeComponent.getPathForNode(e.node);
+    this.timeOffset = Date.now() - this.start;
+    this.CreateItem(this.timeOffset, oldPath, newPath, isFolder);
+    this.fileTreeService.selectedPath = newPath;
+    this.TriggerDelayedSave();
+  }
 
-        const modifiedNewFileName = this.fileTreeComponent.AddModifiersToFilePath(newFileName, e.node);
-        if (modifiedNewFileName !== nodeName) {
-            e.node.value = modifiedNewFileName;
-            try {
-                this.fileTreeComponent.treeComponent.getControllerByNodeId(e.node.id).rename(modifiedNewFileName);
-            } catch (e) { }
-            newFileName = this.fileTreeComponent.getPathForNode(e.node);
-        }
+  protected OnNodeRename(sourcePath: string, destinationPath: string) {
+    this.log(`OnNodeRename ${sourcePath} to ${destinationPath}`);
 
-        switch (this.fileTreeComponent.GetNodeType(e.node)) {
-            case ResourceType.code:
-                if (!e.node.isBranch()) {
-                    this.codeService.currentFilePath = newFileName;
-                    this.codeService.editor.focus();
-                }
-                break;
-            case ResourceType.asset:
-                return;
-                break;
+    let oldFileData: string = null;
+    const isFolder = this.fileTreeService.GetPathTypeForPath(destinationPath) === PathType.folder;
+    switch (this.fileTreeService.GetNodeTypeByPath(destinationPath)) {
+      case ResourceType.code:
+        if (!isFolder) {
+          oldFileData = this.codeService.GetCacheForFileName(sourcePath).getValue();
+          this.codeService.ClearCacheForFile(sourcePath);
+          this.codeService.currentFilePath = '';
+          this.codeService.UpdateCacheForFile(destinationPath, oldFileData);
+          this.codeService.currentFilePath = destinationPath;
         }
-
-        this.timeOffset = Date.now() - this.start;
-        this.CreateItem(this.timeOffset, oldFileName, newFileName, e.node.isBranch());
-        setTimeout(() => {
-            this.fileTreeComponent.treeComponent.getControllerByNodeId(e.node.id).select();
-        }, 1);
-        this.TriggerDelayedSave();
+        break;
+      case ResourceType.asset:
+        if (sourcePath === (this.resourceViewerComponent.Resource ? this.resourceViewerComponent.Resource.path : null)) {
+          this.resourceViewerComponent.Resource.path = destinationPath;
+          this.resourceViewerComponent.Resource.fileName = destinationPath.split('/').pop();
+          this.resourceViewerComponent.Resource = this.resourceViewerComponent.Resource;
+        }
+        break;
     }
 
-    protected OnNodeRename(e: NodeRenamedEvent) {
-        this.logging.LogToConsole('MonacoRecorder', `OnNodeRename ${JSON.stringify(e.node.node)}`);
+    this.timeOffset = Date.now() - this.start;
+    try {
+      this.fileTreeService.selectedPath = destinationPath;
+    } catch (e) { }
+    this.RenameFile(this.timeOffset, sourcePath, destinationPath, oldFileData, isFolder);
 
-        const nodeName = e.node.value;
-        const sanitizedNodeName = this.fileTreeComponent.SantizeFileName(nodeName);
-        if (nodeName !== sanitizedNodeName) {
-            try {
-                this.fileTreeComponent.treeComponent.getControllerByNodeId(e.node.id).rename(sanitizedNodeName);
-            } catch (e) { }
+    this.TriggerDelayedSave();
+  }
+
+  protected OnNodeDeleted(path: string, isFolder: boolean, type: ResourceType) {
+    this.log(`OnNodeDeleted ${path}`);
+
+    this.timeOffset = Date.now() - this.start;
+    const oldCache = this.codeService.GetCacheForFileName(path);
+    const oldData = oldCache ? oldCache.getValue() : '';
+
+    this.DeleteFile(this.timeOffset, path, oldData, isFolder);
+
+    switch (type) {
+      case ResourceType.code:
+        if (path === this.codeService.currentFilePath) {
+          this.codeService.currentFilePath = '';
         }
-        const oldNodeName = e.oldValue as string;
-        const sanitizedOldNodeName = this.fileTreeComponent.SantizeFileName(oldNodeName);
-        if (sanitizedOldNodeName === sanitizedNodeName) {
-            return;
+        break;
+      case ResourceType.asset:
+        if (path === (this.resourceViewerComponent.Resource ? this.resourceViewerComponent.Resource.path : null)) {
+          this.resourceViewerComponent.Resource = null;
         }
-        let newFileName = this.fileTreeComponent.getPathForNode(e.node);
-        const newFileNameSplit = newFileName.split('/');
-        const oldParentPath = newFileNameSplit.slice(0, newFileNameSplit.length - 1).join('/');
-        const oldFileName = oldParentPath + '/' + e.oldValue;
-
-        const modifiedNewFileName = this.fileTreeComponent.AddModifiersToFilePath(newFileName, e.node);
-        if (modifiedNewFileName !== nodeName) {
-            e.node.value = modifiedNewFileName;
-            try {
-                this.fileTreeComponent.treeComponent.getControllerByNodeId(e.node.id).rename(modifiedNewFileName);
-            } catch (e) { }
-            newFileName = this.fileTreeComponent.getPathForNode(e.node);
-        }
-
-        if (e.node.isBranch()) {
-            for (const child of e.node.children) {
-                this.OnNodeChildRenamed(child, oldFileName);
-            }
-        }
-
-        let oldFileData: string = null;
-        switch (this.fileTreeComponent.GetNodeType(e.node)) {
-            case ResourceType.code:
-                if (!e.node.isBranch()) {
-                    oldFileData = this.codeService.GetCacheForFileName(oldFileName).getValue();
-                    this.codeService.ClearCacheForFile(oldFileName);
-                    this.codeService.currentFilePath = '';
-                    this.codeService.UpdateCacheForFile(newFileName, oldFileData);
-                    this.codeService.currentFilePath = newFileName;
-                }
-                break;
-            case ResourceType.asset:
-                if (oldFileName === (this.resourceViewerComponent.Resource ? this.resourceViewerComponent.Resource.path : null)) {
-                    this.resourceViewerComponent.Resource.path = newFileName;
-                    this.resourceViewerComponent.Resource.fileName = sanitizedNodeName;
-                    this.resourceViewerComponent.Resource = this.resourceViewerComponent.Resource;
-                }
-                break;
-        }
-
-        this.timeOffset = Date.now() - this.start;
-        try {
-            this.fileTreeComponent.treeComponent.getControllerByNodeId(e.node.id).select();
-        } catch (e) { }
-        this.RenameFile(this.timeOffset, oldFileName, newFileName, oldFileData, e.node.isBranch());
-
-        this.TriggerDelayedSave();
+        break;
     }
 
-    protected OnNodeChildRenamed(node: Tree, oldParentName: string) {
-        const newFileName = this.fileTreeComponent.getPathForNode(node);
-        const oldFileName = oldParentName + '/' + node.value;
+    this.TriggerDelayedSave();
+  }
 
-        if (node.isBranch()) {
-            for (const child of node.children) {
-                this.OnNodeChildRenamed(child, oldFileName);
-            }
+  protected OnNodeMoved(sourcePath: string, destinationPath: string) {
+    this.log(`OnNodeMoved ${sourcePath} to ${destinationPath}`);
+
+    let oldFileData: string = null;
+
+    const isFolder = this.fileTreeService.GetPathTypeForPath(destinationPath) === PathType.folder;
+    switch (this.fileTreeService.GetNodeTypeByPath(destinationPath)) {
+      case ResourceType.code:
+        if (!isFolder) {
+          const oldCache = this.codeService.GetCacheForFileName(sourcePath);
+          if (oldCache) {
+            oldFileData = oldCache.getValue();
+            this.codeService.ClearCacheForFile(sourcePath);
+            this.codeService.UpdateCacheForFile(destinationPath, oldFileData);
+          }
+          this.codeService.currentFilePath = destinationPath;
         }
-
-        let oldFileData: string = null;
-
-        switch (this.fileTreeComponent.GetNodeType(node)) {
-            case ResourceType.code:
-                if (!node.isBranch()) {
-                    oldFileData = this.codeService.GetCacheForFileName(oldFileName).getValue();
-                    this.codeService.ClearCacheForFile(oldFileName);
-                    this.codeService.currentFilePath = '';
-                    this.codeService.UpdateCacheForFile(newFileName, oldFileData);
-                    this.codeService.currentFilePath = newFileName;
-                }
-                break;
-            case ResourceType.asset:
-                if (oldFileName === (this.resourceViewerComponent.Resource ? this.resourceViewerComponent.Resource.path : null)) {
-                    this.resourceViewerComponent.Resource.fileName = newFileName;
-                }
-                break;
-        }
-
-        this.timeOffset = Date.now() - this.start;
-        try {
-            this.fileTreeComponent.treeComponent.getControllerByNodeId(node.id).select();
-        } catch (e) { }
-        this.RenameFile(this.timeOffset, oldFileName, newFileName, oldFileData, node.isBranch());
-        this.TriggerDelayedSave();
+        break;
+      case ResourceType.asset:
+        break;
     }
 
-    protected OnNodeDeleted(e: NodeRemovedEvent) {
-        this.logging.LogToConsole('MonacoRecorder', `OnNodeDeleted ${JSON.stringify(e.node.node)}`);
+    this.timeOffset = Date.now() - this.start;
+    try {
+      this.fileTreeService.selectedPath = destinationPath;
+    } catch (e) {
+      this.log(`on move select ${destinationPath}`);
+    }
+    this.RenameFile(this.timeOffset, sourcePath, destinationPath, oldFileData, isFolder);
+    this.TriggerDelayedSave();
+  }
 
-        if (e.node.isBranch()) {
-            for (const child of e.node.children) {
-                this.OnNodeDeleted(new NodeRemovedEvent(child, 0));
-            }
-        }
+  public async onFileUploaded(path: string, resourceId: string, resourceName: string) {
+    this.log(`onFileUploaded ${path}`);
 
-        const nodePath = this.fileTreeComponent.getPathForNode(e.node);
-        this.timeOffset = Date.now() - this.start;
-        const oldCache = this.codeService.GetCacheForFileName(nodePath);
-        const oldData = oldCache ? oldCache.getValue() : '';
-        this.DeleteFile(this.timeOffset, nodePath, oldData, e.node.isBranch());
+    try {
+      const newFilePath = path;
+      this.timeOffset = Date.now() - this.start;
+      this.UploadFile(this.timeOffset, path, newFilePath, resourceId);
+      this.TriggerDelayedSave();
+    } catch (err) {
+      this.errorServer.HandleError(`UploadResourceError`, `${err}`);
+    }
+  }
 
-        switch (this.fileTreeComponent.GetNodeType(e.node)) {
-            case ResourceType.code:
-                if (nodePath === this.codeService.currentFilePath) {
-                    this.codeService.currentFilePath = '';
-                }
-                break;
-            case ResourceType.asset:
-                if (nodePath === (this.resourceViewerComponent.Resource ? this.resourceViewerComponent.Resource.path : null)) {
-                    this.resourceViewerComponent.Resource = null;
-                }
-                break;
-        }
-
-        this.TriggerDelayedSave();
+  public onMouseMoved(e: MouseEvent) {
+    this.timeOffset = Date.now() - this.start;
+    if (this.timeOffset - this.lastMouseTrackOffset < environment.mouseAccurracyMS) {
+      return;
     }
 
-    protected OnNodeMoved(e: NodeMovedEvent) {
-        this.logging.LogToConsole('MonacoRecorder', `OnNodeMoved ${JSON.stringify(e.node.node)}`);
-        const nodeName = e.node.value;
-        let newFileName = this.fileTreeComponent.getPathForNode(e.node);
-        const oldParentPath = this.fileTreeComponent.getPathForNode(e.previousParent);
-        const oldFileName = oldParentPath + '/' + e.node.value;
+    this.lastMouseTrackOffset = this.timeOffset;
+    this.MouseMove(this.timeOffset, e.x, e.y);
+    this.TriggerDelayedSave();
+  }
 
-        this.logging.LogToConsole('MonacoRecorder', `OnNodeMoved from: ${oldFileName} to: ${newFileName}`);
-
-        const modifiedNewFileName = this.fileTreeComponent.AddModifiersToFilePath(newFileName, e.node);
-        if (modifiedNewFileName !== nodeName) {
-            e.node.value = modifiedNewFileName;
-            newFileName = this.fileTreeComponent.getPathForNode(e.node);
-        }
-
-        if (e.node.isBranch()) {
-            for (const child of e.node.children) {
-                this.OnNodeChildRenamed(child, oldFileName);
-            }
-        }
-
-        let oldFileData: string = null;
-
-        switch (this.fileTreeComponent.GetNodeType(e.node)) {
-            case ResourceType.code:
-                if (!e.node.isBranch()) {
-                    const oldCache = this.codeService.GetCacheForFileName(oldFileName);
-                    if (oldCache) {
-                        oldFileData = oldCache.getValue();
-                        this.codeService.ClearCacheForFile(oldFileName);
-                        this.codeService.UpdateCacheForFile(newFileName, oldFileData);
-                    }
-                    this.codeService.currentFilePath = newFileName;
-                }
-                break;
-            case ResourceType.asset:
-                break;
-        }
-
-        this.timeOffset = Date.now() - this.start;
-        try {
-            this.fileTreeComponent.selectNodeByPath(this.fileTreeComponent.treeComponent.tree, newFileName);
-        } catch (e) {
-            this.logging.LogErrorToConsole('MonacoRecorder', `on move select ${JSON.stringify(newFileName)}`);
-        }
-        this.RenameFile(this.timeOffset, oldFileName, newFileName, oldFileData, e.node.isBranch());
-        this.TriggerDelayedSave();
+  public onScrolled(e: monaco.IScrollEvent) {
+    this.timeOffset = Date.now() - this.start;
+    if (this.timeOffset - this.lastScrollTrackOffset < environment.scrollAccurracyMS) {
+      return;
     }
 
-    public async onFileUploaded(e: FileUploadData) {
-        this.logging.LogToConsole('MonacoRecorder', `onFileUploaded ${JSON.stringify(e.fileData)}`);
+    this.lastScrollTrackOffset = this.timeOffset;
+    this.ScrollFile(this.timeOffset, this.codeService.currentFilePath, this.lastScrollHeight,
+      this.codeService.editor.getScrollTop());
+    this.TriggerDelayedSave();
+    this.lastScrollHeight = this.codeService.editor.getScrollTop();
+  }
 
-        try {
-            const resourceId: string =
-                await this.projectService.UploadResource(this.id, e.fileData.name, e.fileData.data, this.resourceAuth);
-            if (!resourceId) {
-                this.errorServer.HandleError(`UploadResourceError`, `resourceId is null`);
-                return;
-            }
+  public onPreviewClicked(file: string) {
+    this.timeOffset = Date.now() - this.start;
+    this.PreviewAction(this.timeOffset, file, this.codeService.currentFilePath);
+    this.TriggerDelayedSave();
+  }
 
-            const targetBranchPath = this.fileTreeComponent.getPathForNode(e.target);
-            const newFilePath = `${targetBranchPath}/${e.fileData.name}`;
-            this.fileTreeComponent.addResourceNode(targetBranchPath, resourceId, e.fileData.name);
-            this.timeOffset = Date.now() - this.start;
-            this.UploadFile(this.timeOffset, this.fileTreeComponent.fileSelected, newFilePath, resourceId);
-            this.TriggerDelayedSave();
-        } catch (err) {
-            this.errorServer.HandleError(`UploadResourceError`, `${err}`);
-        }
+  public onPreviewCloseClicked() {
+    this.timeOffset = Date.now() - this.start;
+    this.PreviewCloseAction(this.timeOffset, this.codeService.currentFilePath);
+    this.TriggerDelayedSave();
+  }
+
+  private TriggerDelayedSave(): void {
+    // Try to delay saves by partition size to increase odds we save this partition
+    if (this.delayTimer) {
+      return;
     }
+    this.delayTimer = setTimeout(async () => {
+      this.delayTimer = null;
+      if (!this.recording) {
+        return;
+      }
 
-    public onMouseMoved(e: MouseEvent) {
-        this.timeOffset = Date.now() - this.start;
-        if (this.timeOffset - this.lastMouseTrackOffset < environment.mouseAccurracyMS) {
-            return;
-        }
+      await this.Save();
+    }, !!this.settings.overrideSaveSpeed ? this.settings.overrideSaveSpeed : this.project.getPartitionSize());
+  }
 
-        this.lastMouseTrackOffset = this.timeOffset;
-        this.MouseMove(this.timeOffset, e.x, e.y);
-        this.TriggerDelayedSave();
-    }
-
-    public onScrolled(e: monaco.IScrollEvent) {
-        this.timeOffset = Date.now() - this.start;
-        if (this.timeOffset - this.lastScrollTrackOffset < environment.scrollAccurracyMS) {
-            return;
-        }
-
-        this.lastScrollTrackOffset = this.timeOffset;
-        this.ScrollFile(this.timeOffset, this.codeService.currentFilePath, this.lastScrollHeight,
-            this.codeService.editor.getScrollTop());
-        this.TriggerDelayedSave();
-        this.lastScrollHeight = this.codeService.editor.getScrollTop();
-    }
-
-    public onPreviewClicked(file: string) {
-        this.timeOffset = Date.now() - this.start;
-        this.PreviewAction(this.timeOffset, file, this.codeService.currentFilePath);
-        this.TriggerDelayedSave();
-    }
-
-    public onPreviewCloseClicked() {
-        this.timeOffset = Date.now() - this.start;
-        this.PreviewCloseAction(this.timeOffset, this.codeService.currentFilePath);
-        this.TriggerDelayedSave();
-    }
-
-    private TriggerDelayedSave(): void {
-        // Try to delay saves by partition size to increase odds we save this partition
-        if (this.delayTimer) {
-            return;
-        }
-        this.delayTimer = setTimeout(async () => {
-            this.delayTimer = null;
-            if (!this.recording) {
-                return;
-            }
-
-            await this.Save();
-        }, !!this.settings.overrideSaveSpeed ? this.settings.overrideSaveSpeed : this.project.getPartitionSize());
-    }
-
-    public async Save() {
-        this.timeOffset = Date.now() - this.start;
-        this.GetTransactionLogByTimeOffset(this.timeOffset); // call this trigger new partition before save maybe
-        await this.SaveTransactionLogs(!!this.settings.saveUnfinishedPartitions);
-    }
+  public async Save() {
+    this.timeOffset = Date.now() - this.start;
+    this.GetTransactionLogByTimeOffset(this.timeOffset); // call this trigger new partition before save maybe
+    await this.SaveTransactionLogs(!!this.settings.saveUnfinishedPartitions);
+  }
 }

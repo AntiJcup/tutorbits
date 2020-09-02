@@ -33,6 +33,7 @@ export class PlaybackFileTreeComponent extends NG2FileTreeComponent implements O
   };
 
   ngOnInit() {
+    super.ngOnInit();
   }
 
   protected GetReadonlyMenuItems(): NodeMenuItem[] {

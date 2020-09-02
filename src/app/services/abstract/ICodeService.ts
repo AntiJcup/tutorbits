@@ -15,7 +15,7 @@ export interface GoToDefinitionEvent {
 }
 
 export abstract class ICodeService extends EventEmitter {
-  public abstract get currentFilePath();
+  public abstract get currentFilePath(): string;
 
   public abstract set currentFilePath(path: string);
 
@@ -23,9 +23,9 @@ export abstract class ICodeService extends EventEmitter {
 
   public abstract get editor(): monaco.editor.ICodeEditor;
 
-  public abstract InitializeCodeSession(editor: monaco.editor.IEditor): void;
+  public abstract InitializeSession(editor: monaco.editor.IEditor): void;
 
-  public abstract EndCodeSession(): void;
+  public abstract EndSession(): void;
 
   public abstract ClearCacheForFile(path: string): void;
 

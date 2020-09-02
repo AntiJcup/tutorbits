@@ -21,6 +21,7 @@ import { ITitleService } from 'src/app/services/abstract/ITitleService';
 import { ViewTutorial } from 'src/app/models/tutorial/view-tutorial';
 import { ITracerProjectService } from 'src/app/services/abstract/ITracerProjectService';
 import { ICodeService, CodeEvents, GoToDefinitionEvent } from 'src/app/services/abstract/ICodeService';
+import { IFileTreeService } from 'src/app/services/abstract/IFileTreeService';
 
 @Component({
   templateUrl: './record.component.html',
@@ -72,7 +73,8 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
     private eventService: IEventService,
     private tutorialService: TutorBitsTutorialService,
     private titleService: ITitleService,
-    private codeService: ICodeService) {
+    private codeService: ICodeService,
+    private fileTreeService: IFileTreeService) {
     this.tutorialId = this.route.snapshot.paramMap.get('tutorialId');
     this.hasRecorded = this.route.snapshot.queryParamMap.get('back') === 'true';
   }
@@ -139,7 +141,7 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
 
   onCodeInitialized() {
     this.codeService.AllowEdits(false);
-    this.recordingTreeComponent.selectNodeByPath(this.recordingTreeComponent.treeComponent.tree, '/project');
+    this.fileTreeService.selectedPath = '/project';
     this.zone.runTask(() => {
       this.editorInitialized = true;
     });
@@ -148,7 +150,7 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
   onGoToDefinition(event: GoToDefinitionEvent) {
     this.logServer.LogToConsole(JSON.stringify(event));
 
-    this.recordingTreeComponent.selectNodeByPath(this.recordingTreeComponent.treeComponent.tree, event.path);
+    this.fileTreeService.selectedPath = event.path;
     this.zone.runTask(() => {
       this.codeService.editor.focus();
       this.codeService.editor.setPosition(event.offset);
@@ -158,7 +160,7 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
   resetState() {
     this.recordingTreeComponent.treeComponent.treeModel = this.recordingTreeComponent.tree;
     this.recordingTreeComponent.treeComponent.ngOnChanges(null);
-    this.recordingTreeComponent.selectNodeByPath(this.recordingTreeComponent.treeComponent.tree, '/project');
+    this.fileTreeService.selectedPath = '/project';
     this.codeService.ClearCacheForFolder('/');
     this.codeService.currentFilePath = '';
   }
@@ -193,7 +195,7 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
 
     this.loadingRecording = true;
     this.codeRecorder = new MonacoRecorder(
-      this.recordingTreeComponent,
+      this.fileTreeService,
       this.resourceViewerComponent,
       this.previewComponent,
       this.logServer,
@@ -229,7 +231,7 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
       this.loadingRecording = false;
       this.hasRecorded = true;
       this.codeRecorder.StartRecording();
-      this.recordingTreeComponent.allowEdit(true);
+      this.fileTreeService.editable = true;
       this.codeService.AllowEdits(true);
       this.recording = true;
     } catch (e) {
@@ -239,7 +241,7 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
 
   async StopRecording() {
     this.recording = false;
-    this.recordingTreeComponent.allowEdit(false);
+    this.fileTreeService.editable = false;
     this.codeService.AllowEdits(false);
     this.saving = true;
     try {

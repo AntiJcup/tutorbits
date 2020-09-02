@@ -25,7 +25,7 @@ export class TutorBitsCodeService extends ICodeService {
   protected codeEditor: monaco.editor.ICodeEditor;
   protected selectedFilePath: string;
   protected fileEditors: { [path: string]: CodeFile } = {};
-  protected log: (msg: string) => void;
+  protected log: (...args: any[]) => void;
 
   private ignoreNext = false;
   private initialized = false;
@@ -72,7 +72,7 @@ export class TutorBitsCodeService extends ICodeService {
     return this.codeEditor;
   }
 
-  public InitializeCodeSession(editor: monaco.editor.IEditor): void {
+  public InitializeSession(editor: monaco.editor.IEditor): void {
     if (this.initialized) {
       throw new Error('Already initialized, end previous session before continouing');
     }
@@ -91,7 +91,7 @@ export class TutorBitsCodeService extends ICodeService {
   }
 
   /* Removes all event listeners */
-  public EndCodeSession(): void {
+  public EndSession(): void {
     this.codeEditor = null;
     this.emit(CodeEvents[CodeEvents.EndedSession]);
     this.selectedFilePath = '';
