@@ -1,5 +1,4 @@
 import { IStreamLoader } from 'shared/media/lib/ts/IStreamLoader';
-import { MonacoPlayer } from './monaco.player';
 
 export class VidPlayer {
     constructor(

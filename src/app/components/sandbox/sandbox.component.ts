@@ -2,7 +2,7 @@ import { Component, OnInit, ViewChild, NgZone, HostListener, OnDestroy } from '@
 import { ActivatedRoute, Router } from '@angular/router';
 import { RecordingEditorComponent } from 'src/app/sub-components/recording/recording-editor/recording-editor.component';
 import { RecordingFileTreeComponent } from 'src/app/sub-components/recording/recording-file-tree/recording-file-tree.component';
-import { LocalTransactionWriter, LocalProjectWriter, LocalProjectLoader, LocalTransactionReader } from 'shared/Tracer/lib/ts/LocalTransaction';
+import { LocalProjectLoader, LocalTransactionReader } from 'shared/Tracer/lib/ts/LocalTransaction';
 import { Guid } from 'guid-typescript';
 import { IErrorService } from 'src/app/services/abstract/IErrorService';
 import { ILogService } from 'src/app/services/abstract/ILogService';
@@ -11,12 +11,10 @@ import { IPreviewService } from 'src/app/services/abstract/IPreviewService';
 import { ComponentCanDeactivate } from 'src/app/services/guards/tutor-bits-pending-changes-guard.service';
 import { Observable, Subscription } from 'rxjs';
 import { IEventService } from 'src/app/services/abstract/IEventService';
-import { PreviewComponent } from 'src/app/sub-components/preview/preview.component';
 import { ITitleService } from 'src/app/services/abstract/ITitleService';
 import { ViewProject } from 'src/app/models/project/view-project';
 import { IAuthService } from 'src/app/services/abstract/IAuthService';
 import { ITracerProjectService } from 'src/app/services/abstract/ITracerProjectService';
-import { MonacoPlayer } from 'src/app/sub-components/playing/player/monaco.player';
 import { TraceTransactionLog } from 'shared/Tracer/models/ts/Tracer_pb';
 import { ViewComment } from 'src/app/models/comment/view-comment';
 import { TutorBitsExampleCommentService } from 'src/app/services/example/tutor-bits-example-comment.service';
@@ -28,6 +26,8 @@ import { IEditorPluginService } from 'src/app/services/abstract/IEditorPluginSer
 import { IWorkspacePluginService } from 'src/app/services/abstract/IWorkspacePluginService';
 import { IFileTreeService, PropogateTreeOptions, FileTreeEvents } from 'src/app/services/abstract/IFileTreeService';
 import { IRecorderService, RecorderSettings } from 'src/app/services/abstract/IRecorderService';
+import { ICurrentTracerProjectService } from 'src/app/services/abstract/ICurrentTracerProjectService';
+import { IPlayerService, PlayerEvents } from 'src/app/services/abstract/IPlayerService';
 
 @Component({
   templateUrl: './sandbox.component.html',
@@ -74,6 +74,8 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate, OnDestr
     private fileTreeService: IFileTreeService,
     private workspacePluginService: IWorkspacePluginService,
     private recorderService: IRecorderService,
+    private currentProjectService: ICurrentTracerProjectService,
+    private playerService: IPlayerService,
     private metaService: Meta,
     public commentService: TutorBitsExampleCommentService, // Dont remove these components use them
     public ratingService: TutorBitsExampleRatingService) {
@@ -154,12 +156,17 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate, OnDestr
       this.fileTreeService.editable = true;
       this.fileTreeService.selectedPath = '/project';
 
+      // Load or create new project so the recorder can reference it
+      this.isLoggedIn ?
+        await this.currentProjectService.LoadProject(true /*Online*/, this.projectId) :
+        await this.currentProjectService.NewProject(false /*Offline since not logged in*/);
+
+      // Starts recording using the current assigned project
       this.recorderService.StartRecording({
-        load: this.isLoggedIn,
-        local: !this.isLoggedIn,
         trackNonFileEvents: false,
         overrideSaveSpeed: 5000,
-        saveUnfinishedPartitions: true
+        saveUnfinishedPartitions: true,
+        startingTransactionLogs: loadedTransactionLogs
       } as RecorderSettings);
       this.logServer.LogToConsole('Sandbox', 'Ready to edit');
       this.zone.runTask(() => {
@@ -202,62 +209,51 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate, OnDestr
   public async LoadProject(): Promise<void> {
     this.loadingProject = true;
 
-    const codePlayer = new MonacoPlayer(
-      this.fileTreeService,
-      this.previewService,
-      this.resourceViewerComponent,
-      null, // mouse component
-      this.logServer,
-      this.codeService,
-      this.isLoggedIn ? this.projectService : new LocalProjectLoader(), // Only save project updates if logged in
-      this.isLoggedIn ? this.projectService : new LocalTransactionReader(), // Only save project updates if logged in
-      this.projectId,
-      null, // Use default settings
-      Guid.create().toString());
+    await this.currentProjectService.LoadProject(this.isLoggedIn, this.projectId);
 
     try {
-      await codePlayer.Load();
-      if (codePlayer.duration === 0) {
+      await this.playerService.Load();
+      if (this.playerService.duration === 0) {
         await this.startEditing([]);
         return;
       }
+
       let loadingReferences = 0;
-      const startedLoadingSub = codePlayer.loadStart.subscribe((event) => {
+      const loadStartSub = this.playerService.sub(PlayerEvents[PlayerEvents.loadStart], (event) => {
         loadingReferences++;
       });
 
-      const finishedLoadingSub = codePlayer.loadComplete.subscribe(async () => {
-        if (--loadingReferences > 0 || codePlayer.isBuffering) {
+      const loadCompleteSub = this.playerService.sub(PlayerEvents[PlayerEvents.loadComplete], async (event) => {
+        if (--loadingReferences > 0 || this.playerService.isBuffering) {
           return;
         }
 
-        codePlayer.SetPositionPct(1);
-        if (codePlayer.isCaughtUp) {
-          await this.startEditing(codePlayer.GetLoadedTransactionLogs());
-          finishedLoadingSub.unsubscribe();
-          startedLoadingSub.unsubscribe();
+        this.playerService.positionPct = 1;
+        if (this.playerService.isCaughtUp) {
+          await this.startEditing(this.playerService.logs);
+          loadStartSub.Dispose();
+          loadCompleteSub.Dispose();
         } else {
           const waitInterval = setInterval(() => {
-            codePlayer.SetPositionPct(1);
+            this.playerService.positionPct = 1;
           }, 1000);
-          codePlayer.caughtUp.subscribe(async () => {
-            await this.startEditing(codePlayer.GetLoadedTransactionLogs());
-            finishedLoadingSub.unsubscribe();
-            startedLoadingSub.unsubscribe();
+
+          this.playerService.on(PlayerEvents[PlayerEvents.caughtUp], async () => {
+            await this.startEditing(this.playerService.logs);
+            loadStartSub.Dispose();
+            loadCompleteSub.Dispose();
             clearInterval(waitInterval);
           });
         }
       });
 
-      codePlayer.Play();
-      codePlayer.SetPositionPct(1);
+      this.playerService.Play();
+      this.playerService.positionPct = 1;
     } catch (e) {
       this.errorServer.HandleError(`CodeError`, e);
     }
 
-    codePlayer.Dispose();
     this.codeService.AllowEdits(true);
-
   }
 
   public async onDownloadClicked(e: any) {

@@ -1,5 +1,5 @@
-import { EventEmitter } from 'events';
 import 'ngx-monaco-editor';
+import { EasyEventEmitter } from 'shared/web/lib/ts/EasyEventEmitter';
 
 export enum CodeEvents {
   InitializedSession,
@@ -14,7 +14,7 @@ export interface GoToDefinitionEvent {
   offset: monaco.Position;
 }
 
-export abstract class ICodeService extends EventEmitter {
+export abstract class ICodeService extends EasyEventEmitter {
   public abstract get currentFilePath(): string;
 
   public abstract set currentFilePath(path: string);

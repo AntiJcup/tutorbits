@@ -21,6 +21,8 @@ import { ICurrentTracerProjectService } from 'src/app/services/abstract/ICurrent
 import { IAuthService } from 'src/app/services/abstract/IAuthService';
 import { IPreviewService } from 'src/app/services/abstract/IPreviewService';
 import { IRecorderService } from 'src/app/services/abstract/IRecorderService';
+import { IPlayerService } from 'src/app/services/abstract/IPlayerService';
+import { TraceTransactionLog } from 'shared/Tracer/models/ts/Tracer_pb';
 
 @Directive()
 @Injectable()
@@ -70,6 +72,8 @@ export abstract class NG2FileTreeComponent implements OnInit, OnDestroy {
     private currentProjectService: ICurrentTracerProjectService,
     private authService: IAuthService,
     private previewService: IPreviewService,
+    private recorderService: IRecorderService,
+    private playerService: IPlayerService,
     protected myElement: ElementRef) {
     this.log = this.logServer.LogToConsole.bind(this.logServer, 'NG2FileTreeComponent');
   }
@@ -262,7 +266,18 @@ export abstract class NG2FileTreeComponent implements OnInit, OnDestroy {
   }
 
   public onPreviewHeaderButtonClicked(e: MouseEvent) {
-    //this.previewService.ShowPreview(this.currentProjectService.projectId, )
+    let position = this.playerService.position;
+    let logs: TraceTransactionLog[] = [];
+    if (this.recorderService.recording) {
+      logs = this.recorderService.logs;
+      position = this.recorderService.position;
+    }
+
+    this.previewService.ShowPreview(
+      this.currentProjectService.projectId,
+      position,
+      this.fileTreeService.selectedPath,
+      logs);
   }
 
   public onNodeCreated(e: NodeCreatedEvent) {

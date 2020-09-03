@@ -56,18 +56,6 @@ export class TutorBitsRecorderService extends IRecorderService {
     return this.timeOffset;
   }
 
-  protected get projectLoader(): IProjectReader {
-    return this.settings.local ? new LocalProjectLoader() : this.projectService;
-  }
-
-  protected get projectWriter(): IProjectWriter {
-    return this.settings.local ? new LocalProjectWriter() : this.projectService;
-  }
-
-  protected get transactionWriter(): ITransactionWriter {
-    return this.settings.local ? new LocalTransactionWriter() : this.projectService;
-  }
-
   protected get cacheBuster(): string {
     return this.settings.cacheBuster;
   }
@@ -104,7 +92,7 @@ export class TutorBitsRecorderService extends IRecorderService {
     protected resourceViewerService: IResourceViewerService) {
     super();
 
-    this.log = this.logServer.LogToConsole.bind(this.logServer, 'MonacoRecorder');
+    this.log = this.logServer.LogToConsole.bind(this.logServer, 'RecorderService');
 
     this.fileTreeService.on(FileTreeEvents[FileTreeEvents.SelectedNode], (path: string) => {
       this.OnNodeSelected(path);
@@ -115,9 +103,6 @@ export class TutorBitsRecorderService extends IRecorderService {
     this.log(`Started Recording`);
     this.settings = settings;
     this.internalTransactionLogs = this.settings.startingTransactionLogs || [];
-    if (!this.settings.useCachedProject) {
-      this.settings.load ? await this.Load() : await this.New();
-    }
 
     this.internalRecording = true;
     this.start = Date.now() - this.currentProjectService.project.getDuration();
@@ -456,42 +441,6 @@ export class TutorBitsRecorderService extends IRecorderService {
     // console.log(`presaved transaction logs: ${this.savedTransactionLogPartions}`);
   }
 
-  // Call this if you are starting a new recording session
-  public async New(): Promise<void> {
-    await this.currentProjectService.NewProject();
-    this.Reset();
-
-    if (!this.project) {
-      throw new Error('Failed to load project id: ' + this.projectId);
-    }
-  }
-
-  // Call this if you are loading an existing recording session
-  public async Load(): Promise<void> {
-    await this.currentProjectService.LoadProject(this.projectId, this.settings.cacheBuster);
-
-    if (!this.project) {
-      throw new Error('Failed to load project id: ' + this.projectId);
-    }
-  }
-
-  public async CreateProject(id: string): Promise<TraceProject> {
-    const result = await this.projectWriter.CreateProject(id);
-    if (!result) {
-      throw new Error('Failed to create project id: ' + id);
-    }
-
-    return await this.LoadProject(id);
-  }
-
-  public async LoadProject(id: string): Promise<TraceProject> {
-    return await this.projectLoader.GetProject(id, this.cacheBuster);
-  }
-
-  public async ResetProject(id: string): Promise<boolean> {
-    return await this.projectWriter.ResetProject(id);
-  }
-
   public GetTransactionLogByTimeOffset(timeOffset: number): TraceTransactionLog {
     this.ThrowIfNotLoaded();
     let transactionLog: TraceTransactionLog = null;
@@ -746,7 +695,7 @@ export class TutorBitsRecorderService extends IRecorderService {
   public async SaveTransactionLog(transactionLog: TraceTransactionLog, projectId: string): Promise<boolean> {
     const buffer = transactionLog.serializeBinary();
     // console.log(`saving ${JSON.stringify(transactionLog.toObject())}`);
-    return await this.transactionWriter.WriteTransactionLog(transactionLog, buffer, projectId);
+    return await this.currentProjectService.WriteTransactionLog(transactionLog, buffer);
   }
 
   protected GetWriterArgs(): any[] {

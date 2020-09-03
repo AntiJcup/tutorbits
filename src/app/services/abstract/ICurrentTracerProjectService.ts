@@ -6,9 +6,9 @@ export abstract class ICurrentTracerProjectService {
 
   public async abstract ClearCurrentProject();
 
-  public async abstract NewProject(): Promise<boolean>;
+  public async abstract NewProject(online: boolean): Promise<TraceProject>;
 
-  public async abstract LoadProject(projectId: string, cacheBuster?: string);
+  public async abstract LoadProject(online: boolean, projectId: string, cacheBuster?: string);
 
   public async abstract ResetProject(): Promise<boolean>;
 

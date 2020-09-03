@@ -4,21 +4,28 @@ import { IRequestService } from '../abstract/IRequestService';
 import { TraceTransactionLogs, TraceTransactionLog } from 'shared/Tracer/models/ts/Tracer_pb';
 import { Guid } from 'guid-typescript';
 import { IErrorService } from '../abstract/IErrorService';
+import { ICodeService } from '../abstract/ICodeService';
+import { IEditorPluginService } from '../abstract/IEditorPluginService';
+import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 
 @Injectable()
 export class TutorBitsPreviewService extends IPreviewService {
-  private internalVisible = false;
-  private internalLoading = false;
+  // tslint:disable-next-line: variable-name
+  private visible_ = false;
+  // tslint:disable-next-line: variable-name
+  private loading_ = false;
+  // tslint:disable-next-line: variable-name
+  private fullUrl_: SafeUrl;
   private currentPreviewUrl: string;
   private currentPreviewPath: string;
-  private internalLoadingId: string;
+  private loadingId: string;
 
-  public visible(): boolean {
-    return this.internalVisible;
+  public get visible(): boolean {
+    return this.visible_;
   }
 
-  public loading(): boolean {
-    return this.internalLoading;
+  public get loading(): boolean {
+    return this.loading_;
   }
 
   public get previewUrl(): string {
@@ -31,11 +38,19 @@ export class TutorBitsPreviewService extends IPreviewService {
 
   public set previewPath(p: string) {
     this.currentPreviewPath = p;
+    this.fullUrl_ = this.constructFullUrl(this.currentPreviewUrl, p);
+  }
+
+  public get fullUrl(): SafeUrl {
+    return this.fullUrl_;
   }
 
   constructor(
     protected requestService: IRequestService,
-    protected errorService: IErrorService) {
+    protected errorService: IErrorService,
+    protected codeService: ICodeService,
+    protected editorPluginService: IEditorPluginService,
+    private sanitizer: DomSanitizer) {
     super();
   }
 
@@ -106,9 +121,9 @@ export class TutorBitsPreviewService extends IPreviewService {
   ): Promise<void> {
     let url = '';
     try {
-      this.internalLoading = true;
-      this.internalLoadingId = Guid.create().toString();
-      const loadingRef = this.internalLoadingId;
+      this.loading_ = true;
+      this.loadingId = Guid.create().toString();
+      const loadingRef = this.loadingId;
       if (logs || baseProjectId) {
         url = await this.GeneratePreview(projectId, offset, logs || [], baseProjectId);
       } else {
@@ -116,24 +131,49 @@ export class TutorBitsPreviewService extends IPreviewService {
       }
 
       // Was cancelled or another preview started loading
-      if (!this.loading || this.internalLoadingId !== loadingRef) {
+      if (!this.loading || this.loadingId !== loadingRef) {
         return;
       }
 
       this.currentPreviewUrl = url;
       this.currentPreviewPath = path;
-      this.internalVisible = true;
+      this.previewPath = path;
+      this.visible_ = true;
       this.emit(PreviewEvents[PreviewEvents.RequestShow], projectId, offset, url, path);
     } catch (err) {
       this.errorService.HandleError('PreviewError', err);
     }
-    this.internalLoading = false;
+    this.loading_ = false;
   }
 
   public async HidePreview(): Promise<void> {
     this.currentPreviewUrl = null;
     this.currentPreviewPath = null;
-    this.internalVisible = false;
+    this.visible_ = false;
     this.emit(PreviewEvents[PreviewEvents.RequestHide]);
+  }
+
+  protected async constructFullUrl(url: string, path: string) {
+    const fileUrl = `${url}${path}`;
+
+    let urlPath = path;
+    const extensionType = path.split('.').pop();
+    const sourceUrl = encodeURIComponent(fileUrl);
+
+    const language = this.codeService.GetLanguageByPath(path);
+    const languageServerUrl = this.editorPluginService.getPlugin(language)?.serverUrl;
+
+    switch (extensionType) {
+      case 'js':
+      case 'py':
+        urlPath = `/preview-helpers/${extensionType}/preview.html?base=${encodeURIComponent(url)}&target=${encodeURIComponent(path)}`;
+        break;
+    }
+
+    if (languageServerUrl) {
+      urlPath += `&server=${encodeURIComponent(languageServerUrl)}`;
+    }
+
+    return this.sanitizer.bypassSecurityTrustResourceUrl(`${url}${urlPath}`);
   }
 }

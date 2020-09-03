@@ -1,6 +1,7 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { ITracerProjectService } from 'src/app/services/abstract/ITracerProjectService';
 import { IErrorService } from 'src/app/services/abstract/IErrorService';
+import { IResourceViewerService, ResourceType } from 'src/app/services/abstract/IResourceViewerService';
 
 export interface ResourceData {
   fileName: string;
@@ -15,50 +16,23 @@ export interface ResourceData {
   styleUrls: ['./resource-viewer.component.sass']
 })
 export class ResourceViewerComponent implements OnInit {
-  private internalResource: ResourceData;
-  imageUrl: string;
-  resourceName: string;
-  @Input()
-  set Resource(resource: ResourceData) {
-    this.internalResource = resource;
-    this.evaluateResourceType().then();
+  public get imageUrl(): string {
+    if (this.resourceViewerService.urlType !== ResourceType.image) {
+      return null;
+    }
+    return this.resourceViewerService.url;
   }
 
-  get Resource(): ResourceData {
-    return this.internalResource;
+  public get resourceName(): string {
+    if (!this.resourceViewerService.resource) {
+      return null;
+    }
+    return this.resourceViewerService.resource.fileName;
   }
 
-  constructor(private projectService: ITracerProjectService, private errorServer: IErrorService) { }
+  constructor(private resourceViewerService: IResourceViewerService) { }
 
   ngOnInit() {
-  }
-
-  public async evaluateResourceType() {
-    this.resourceName = null;
-    this.imageUrl = null;
-
-    if (!this.internalResource) {
-      return;
-    }
-
-    if (this.Resource.fileName.endsWith('.png') || this.Resource.fileName.endsWith('.jpg')) {
-      try {
-        const url = await this.projectService.GetResource(this.Resource.projectId, this.Resource.resourceId);
-        if (!url) {
-          this.errorServer.HandleError('ResourceViewerComponent', `Url was null`);
-          return;
-        }
-
-        if (!this.internalResource) {
-          return;
-        }
-
-        this.resourceName = this.Resource.fileName;
-        this.imageUrl = url;
-      } catch (e) {
-        this.errorServer.HandleError('ResourceViewerComponent', `Failed retrieving resource`);
-      }
-    }
   }
 
 }

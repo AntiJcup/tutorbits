@@ -57,7 +57,7 @@
         <source #videoSource type="video/webm">
       </video>
     </vg-player>
-    <app-playback-file-tree id="tutorialFileExplorer" (previewClicked)="onPreviewClicked($event)">
+    <app-playback-file-tree id="tutorialFileExplorer">
     </app-playback-file-tree>
   </div>
   <div class="editorContainer" fxLayout fxLayoutGap="5px">
@@ -65,7 +65,7 @@
     </app-resource-viewer>
     <app-playback-editor class="recordingEditor">
     </app-playback-editor>
-    <app-preview class="preview" (closeClicked)="onPreviewClosed($event)">
+    <app-preview class="preview">
     </app-preview>
     <div class="commentSection" *ngIf="showCommentSection">
       <app-comment-section [comments]="comments" [targetId]="tutorialId" (closeClicked)="onCommentsClosed($event);"

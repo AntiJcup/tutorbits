@@ -1,5 +1,5 @@
 import { TraceTransactionLog } from 'shared/Tracer/models/ts/Tracer_pb';
-import { EventEmitter } from 'events';
+import { EasyEventEmitter } from 'shared/web/lib/ts/EasyEventEmitter';
 import { SafeUrl } from '@angular/platform-browser';
 
 export enum PreviewEvents {
@@ -10,9 +10,12 @@ export enum PreviewEvents {
   RequestHide
 }
 
-export abstract class IPreviewService extends EventEmitter {
-  public abstract visible(): boolean;
-  public abstract loading(): boolean;
+export abstract class IPreviewService extends EasyEventEmitter {
+  public abstract get visible(): boolean;
+  public abstract get loading(): boolean;
+
+  public abstract get fullUrl(): SafeUrl;
+
   public abstract get previewUrl(): string;
 
   public abstract get previewPath(): string;

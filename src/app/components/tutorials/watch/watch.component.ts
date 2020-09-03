@@ -3,7 +3,6 @@ import { environment } from 'src/environments/environment';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PlaybackEditorComponent } from 'src/app/sub-components/playing/playback-editor/playback-editor.component';
 import { PlaybackFileTreeComponent } from 'src/app/sub-components/playing/playback-file-tree/playback-file-tree.component';
-import { MonacoPlayer } from 'src/app/sub-components/playing/player/monaco.player';
 import { ApiHttpRequestInfo } from 'shared/web/lib/ts/ApiHttpRequest';
 import { VidPlayer } from 'src/app/sub-components/playing/player/vid.player';
 import { TransactionPlayerState } from 'shared/Tracer/lib/ts/TransactionPlayer';
@@ -29,8 +28,11 @@ import { TutorBitsTutorialRatingService } from 'src/app/services/tutorial/tutor-
 import { IVideoService } from 'src/app/services/abstract/IVideoService';
 import { ICodeService } from 'src/app/services/abstract/ICodeService';
 import { CodeEvents } from 'src/app/services/abstract/ICodeService';
-import { IFileTreeService } from 'src/app/services/abstract/IFileTreeService';
+import { IFileTreeService, FileTreeEvents } from 'src/app/services/abstract/IFileTreeService';
 import { IPreviewService } from 'src/app/services/abstract/IPreviewService';
+import { IPlayerService, PlayerEvents, PlayerState } from 'src/app/services/abstract/IPlayerService';
+import { EventSub } from 'shared/web/lib/ts/EasyEventEmitter';
+import { ICurrentTracerProjectService } from 'src/app/services/abstract/ICurrentTracerProjectService';
 
 @Component({
   templateUrl: './watch.component.html',
@@ -52,11 +54,7 @@ export class WatchComponent implements OnInit, OnDestroy {
   @ViewChild(PlaybackFileTreeComponent, { static: true }) playbackTreeComponent: PlaybackFileTreeComponent;
   @ViewChild(PlaybackEditorComponent, { static: true }) playbackEditor: PlaybackEditorComponent;
   @ViewChild('video', { static: true }) playbackVideo: ElementRef;
-  @ViewChild(ResourceViewerComponent, { static: true }) resourceViewerComponent: ResourceViewerComponent;
-  @ViewChild(PlaybackMouseComponent, { static: true }) playbackMouseComponent: PlaybackMouseComponent;
-  @ViewChild(PreviewComponent, { static: true }) previewComponent: PreviewComponent;
 
-  codePlayer: MonacoPlayer;
   videoPlayer: VidPlayer;
 
   paceKeeperInterval: any;
@@ -80,10 +78,9 @@ export class WatchComponent implements OnInit, OnDestroy {
 
   commentsBtnText = 'Comments';
 
-  private onLoadStartSub: Subscription;
-  private onLoadCompleteSub: Subscription;
-
-  selectFileSub: Subscription;
+  private onLoadStartSub: EventSub;
+  private onLoadCompleteSub: EventSub;
+  private selectFileSub: EventSub;
 
   constructor(
     private router: Router,
@@ -99,6 +96,8 @@ export class WatchComponent implements OnInit, OnDestroy {
     private codeService: ICodeService,
     private fileTreeService: IFileTreeService,
     private previewService: IPreviewService,
+    private playerService: IPlayerService,
+    private currentProjectService: ICurrentTracerProjectService,
     public dialog: MatDialog,
     private dataService: IDataService,
     private metaService: Meta,
@@ -114,16 +113,12 @@ export class WatchComponent implements OnInit, OnDestroy {
   }
 
   async ngOnInit() {
-    this.selectFileSub = this.playbackTreeComponent.treeComponent.nodeSelected.subscribe(() => {
+    this.selectFileSub = this.fileTreeService.sub(FileTreeEvents[FileTreeEvents.SelectedNode], async () => {
       this.eventService.TriggerButtonClick('Record', `PreviewClose - ${this.tutorialId}`);
-      this.previewComponent.ClosePreview();
+      await this.previewService.HidePreview();
     });
 
     this.codeService.once(CodeEvents[CodeEvents.InitializedSession], () => { this.onCodeInitialized(); });
-    // TODO do we want this?
-    // this.codeService.on(CodeEvents[CodeEvents.GotoDefinition], (e) => {
-    //   this.onGoToDefinition(e);
-    // });
 
     if (!this.dataService.GetShownWatchHelp()) {
       this.dialog.open(WatchGuideComponent);
@@ -161,48 +156,46 @@ export class WatchComponent implements OnInit, OnDestroy {
     clearInterval(this.paceKeeperInterval);
 
     if (this.selectFileSub) {
-      this.selectFileSub.unsubscribe();
+      this.selectFileSub.Dispose();
     }
 
     if (this.onLoadStartSub) {
-      this.onLoadStartSub.unsubscribe();
+      this.onLoadStartSub.Dispose();
     }
 
     if (this.onLoadCompleteSub) {
-      this.onLoadCompleteSub.unsubscribe();
-    }
-
-    if (this.codePlayer) {
-      this.codePlayer.Dispose();
+      this.onLoadCompleteSub.Dispose();
     }
   }
 
   async onReady() {
     // If publish mode make sure not to cache!
-    this.codePlayer = new MonacoPlayer(
-      this.fileTreeService,
-      this.previewService,
-      this.resourceViewerComponent,
-      this.playbackMouseComponent,
-      this.logServer,
-      this.codeService,
-      this.projectService,
-      this.projectService,
-      this.tutorial.projectId,
-      null, // Use default settings
-      this.publishMode ? Guid.create().toString() : 'play');
+    // this.codePlayer = new MonacoPlayer(
+    //   this.fileTreeService,
+    //   this.previewService,
+    //   this.resourceViewerComponent,
+    //   this.playbackMouseComponent,
+    //   this.logServer,
+    //   this.codeService,
+    //   this.projectService,
+    //   this.projectService,
+    //   this.tutorial.projectId,
+    //   null, // Use default settings
+    //   this.publishMode ? Guid.create().toString() : 'play');
 
-    this.onLoadStartSub = this.codePlayer.loadStart.subscribe((event) => {
+    this.currentProjectService.LoadProject(true, this.tutorial.projectId);
+
+    this.onLoadStartSub = this.playerService.sub(PlayerEvents[PlayerEvents.loadStart], (event) => {
       this.loadingReferences++;
     });
 
-    this.onLoadCompleteSub = this.codePlayer.loadComplete.subscribe((event) => {
+    this.onLoadStartSub = this.playerService.sub(PlayerEvents[PlayerEvents.loadComplete], (event) => {
       this.loadingReferences--;
     });
 
     try {
-      await this.codePlayer.Load();
-      this.codePlayer.Play();
+      await this.playerService.Load();
+      this.playerService.Play();
       this.playbackVideo.nativeElement.volume = environment.defaultVideoVolume;
       this.paceKeeperInterval = setInterval(() => {
         this.paceKeeperLoop();
@@ -221,12 +214,9 @@ export class WatchComponent implements OnInit, OnDestroy {
   }
 
   paceKeeperLoop() {
-    if (!this.codePlayer) {
-      return;
-    }
     const currentVideoTime = this.videoPlayer.player.currentTime * 1000;
     if (currentVideoTime === 0) {
-      this.codePlayer.SetPositionPct(1);
+      this.playerService.positionPct = 1;
       return;
     }
 
@@ -235,11 +225,11 @@ export class WatchComponent implements OnInit, OnDestroy {
     }
 
     if (this.videoPlayer.IsBuffering() && !this.pausedVideo) {
-      this.paceKeperPosition = this.codePlayer.position = currentVideoTime;
+      this.paceKeperPosition = this.playerService.position = currentVideoTime;
       return;
     }
 
-    if (this.codePlayer.state === TransactionPlayerState.Paused || this.codePlayer.isBuffering) {
+    if (this.playerService.state === PlayerState.Paused || this.playerService.isBuffering) {
       if (!this.videoPlayer.player.paused) {
         this.videoPlayer.player.pause();
         this.pausedVideo = true;
@@ -258,25 +248,9 @@ export class WatchComponent implements OnInit, OnDestroy {
       this.paceKeperPosition += this.paceKeeperCheckSpeedMS;
     }
 
-    this.codePlayer.position = this.paceKeperPosition;
+    this.playerService.position = this.paceKeperPosition;
     this.lastVideoTime = currentVideoTime;
   }
-
-  public async onPreviewClicked(e: string) {
-    this.eventService.TriggerButtonClick('Watch', `Preview - ${this.tutorialId} - ${e}`);
-    const previewPos = Math.min(Math.round(this.codePlayer.position), this.codePlayer.duration);
-    try {
-      await this.previewService.ShowPreview(this.tutorial.projectId, previewPos, e);
-    } catch (err) {
-      this.errorServer.HandleError(`PreviewError`, err);
-    }
-  }
-
-  public onPreviewClosed(e: any) {
-    this.eventService.TriggerButtonClick('Watch', `PreviewClose - ${this.tutorialId}`);
-    this.previewComponent.ClosePreview();
-  }
-
 
   public onCommentsClosed(e: any) {
     this.eventService.TriggerButtonClick('Watch', `CommentsClose - ${this.tutorialId}`);
@@ -324,7 +298,7 @@ export class WatchComponent implements OnInit, OnDestroy {
     this.eventService.TriggerButtonClick('Watch', `Download - ${this.tutorialId}`);
     this.downloading = true;
     try {
-      const res = await this.projectService.DownloadProject(this.tutorial.projectId);
+      const res = await this.currentProjectService.DownloadProject();
       if (!res) {
         this.errorServer.HandleError('DownloadProject', `Error downloading project`);
         return;

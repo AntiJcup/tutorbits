@@ -430,4 +430,9 @@ export class TutorBitsFileTreeService extends IFileTreeService {
   public GetNodeForPath(path: string): Readonly<TutorBitsTreeModel> {
     return this.internalModels[path];
   }
+
+  public Reset(): void {
+    this.internalModels = {};
+    this.AddNode('/project', true);
+  }
 }

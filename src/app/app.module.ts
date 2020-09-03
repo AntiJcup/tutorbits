@@ -46,6 +46,8 @@ import { TutorBitsCodeService } from './services/editor/tutor-bits-code.service'
 import { ICodeService } from './services/abstract/ICodeService';
 import { IFileTreeService } from './services/abstract/IFileTreeService';
 import { TutorBitsFileTreeService } from './services/editor/tutor-bits-file-tree.service';
+import { IPlaybackMouseService } from './services/abstract/IPlaybackMouseService';
+import { TutorBitsPlaybackMouseService } from './services/mouse/tutor-bits-playback-mouse.service';
 import { TutorBitsWorkspacePluginService } from './services/editor/tutor-bits-workspace-plugin.service';
 import { IWorkspacePluginService } from './services/abstract/IWorkspacePluginService';
 import { IDataService } from './services/abstract/IDataService';
@@ -85,6 +87,8 @@ import { ITitleService } from './services/abstract/ITitleService';
 import { TutorBitsTitleService } from './services/tutor-bits-title.service';
 import { IRecorderService } from './services/abstract/IRecorderService';
 import { TutorBitsRecorderService } from './services/project/tutor-bits-recorder.service';
+import { IPlayerService } from './services/abstract/IPlayerService';
+import { TutorBitsPlayerService } from './services/project/tutor-bits-player.service';
 import { IResourceViewerService } from './services/abstract/IResourceViewerService';
 import { TutorBitsResourceViewerService } from './services/project/tutor-bits-resource-viewer.service';
 import { WatchGuideComponent } from './sub-components/watch-guide/watch-guide.component';
@@ -430,8 +434,9 @@ const appRoutes: Routes = [
     { provide: IWorkspacePluginService, useClass: TutorBitsWorkspacePluginService },
     { provide: ICurrentTracerProjectService, useClass: TutorBitsCurrentTracerProjectService },
     { provide: IRecorderService, useClass: TutorBitsRecorderService },
-    { provide: IResourceViewerService, useClass: TutorBitsResourceViewerService }
-
+    { provide: IResourceViewerService, useClass: TutorBitsResourceViewerService },
+    { provide: IPlayerService, useClass: TutorBitsPlayerService },
+    { provide: IPlaybackMouseService, useClass: TutorBitsPlaybackMouseService }
   ],
   bootstrap: [AppComponent],
   entryComponents: [WatchGuideComponent]

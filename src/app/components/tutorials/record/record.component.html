@@ -1,20 +1,20 @@
 <app-recording-controls class="controls" (recordingStateChanged)="onRecordingStateChanged($event)"
-    [canRecord]="canRecord" [saving]="saving" [finishSaving]="finishRecording" [canFinish]="hasRecorded && !saving"
-    (finishClicked)="onFinishClicked()" [loadingRecording]="loadingRecording" [recording]="recording">
+  [canRecord]="canRecord" [saving]="saving" [finishSaving]="finishRecording" [canFinish]="hasRecorded && !saving"
+  (finishClicked)="onFinishClicked()" [loadingRecording]="loadingRecording" [recording]="recording">
 </app-recording-controls>
 <div fxLayout fxLayoutGap="5px" class="tutorialContainer">
-    <div class="sideBar">
-        <app-web-cam class="tutorialVideo" (streamInitialized)="onStreamInitialized($event)"
-            (streamError)="onStreamError($event)"></app-web-cam>
-        <app-recording-file-tree id="tutorialFileExplorer" (previewClicked)="onPreviewClicked($event)" tabindex="-1">
-        </app-recording-file-tree>
-    </div>
-    <div class="editorContainer" fxLayout fxLayoutGap="5px">
-        <app-resource-viewer class="resourceViewer">
-        </app-resource-viewer>
-        <app-recording-editor class="recordingEditor">
-        </app-recording-editor>
-        <app-preview class="preview" (closeClicked)="onCloseClicked($event)" >
-        </app-preview>
-    </div>
+  <div class="sideBar">
+    <app-web-cam class="tutorialVideo" (streamInitialized)="onStreamInitialized($event)"
+      (streamError)="onStreamError($event)"></app-web-cam>
+    <app-recording-file-tree id="tutorialFileExplorer" tabindex="-1">
+    </app-recording-file-tree>
+  </div>
+  <div class="editorContainer" fxLayout fxLayoutGap="5px">
+    <app-resource-viewer class="resourceViewer">
+    </app-resource-viewer>
+    <app-recording-editor class="recordingEditor">
+    </app-recording-editor>
+    <app-preview class="preview">
+    </app-preview>
+  </div>
 </div>

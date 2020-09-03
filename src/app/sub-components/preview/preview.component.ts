@@ -14,61 +14,26 @@ import { ICodeService } from 'src/app/services/abstract/ICodeService';
 })
 
 export class PreviewComponent implements OnInit, OnDestroy {
-  @Output() closeClicked = new EventEmitter();
-  @Output() initialize = new EventEmitter();
-
-  internalPreviewBaseUrl: string;
-  internalPreviewPath: string;
-  internalPreviewUrl: SafeUrl;
-  internalLoadingId: string;
-
   get previewUrl(): SafeUrl {
-    return this.internalPreviewUrl;
-  }
-
-  @Input()
-  set previewBaseUrl(baseUrl: string) {
-    this.internalPreviewBaseUrl = baseUrl;
+    return this.previewService.fullUrl;
   }
 
   @Input()
   set previewPath(path: string) {
-    this.internalPreviewPath = path;
-    const fileUrl = `${this.internalPreviewBaseUrl}${path}`;
-
-    let urlPath = path;
-    const extensionType = path.split('.').pop();
-    const sourceUrl = encodeURIComponent(fileUrl);
-
-    const language = this.codeService.GetLanguageByPath(path);
-    const languageServerUrl = this.editorPluginService.getPlugin(language)?.serverUrl;
-
-    switch (extensionType) {
-      case 'js':
-      case 'py':
-        urlPath = `/preview-helpers/${extensionType}/preview.html?base=${encodeURIComponent(this.internalPreviewBaseUrl)}&target=${encodeURIComponent(path)}`;
-        break;
-    }
-
-    if (languageServerUrl) {
-      urlPath += `&server=${encodeURIComponent(languageServerUrl)}`;
-    }
-
-    this.internalPreviewUrl = this.sanitizer.bypassSecurityTrustResourceUrl(`${this.internalPreviewBaseUrl}${urlPath}`);
+    this.previewService.previewPath = path;
   }
 
   get previewPath(): string {
-    return this.internalPreviewPath;
+    return this.previewService.previewPath;
   }
 
-  @Input() loading = false;
+  public get loading(): boolean {
+    return this.previewService.loading;
+  }
 
   constructor(
-    private sanitizer: DomSanitizer,
     private previewService: IPreviewService,
     private errorServer: IErrorService,
-    private editorPluginService: IEditorPluginService,
-    private codeService: ICodeService,
     private zone: NgZone) { }
 
   ngOnInit() {
@@ -91,14 +56,11 @@ export class PreviewComponent implements OnInit, OnDestroy {
   }
 
   async onCloseClicked() {
-    this.closeClicked.next();
-    await this.previewService.HidePreview();
+    await this.ClosePreview();
   }
 
-  public ClosePreview() {
-    this.previewBaseUrl = '';
-    this.previewPath = '';
-    this.loading = false;
+  public async ClosePreview() {
+    await this.previewService.HidePreview();
   }
 
   private async ShowPreview(url: string, path: string): Promise<void> {
@@ -108,7 +70,6 @@ export class PreviewComponent implements OnInit, OnDestroy {
     }
 
     this.zone.runTask(() => {
-      this.previewBaseUrl = url;
       this.previewPath = path;
     });
   }

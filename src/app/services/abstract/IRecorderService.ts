@@ -1,7 +1,7 @@
 import { ResourceType } from 'src/app/services/abstract/IFileTreeService';
 import { TraceTransactionLog } from 'shared/Tracer/models/ts/Tracer_pb';
 import 'ngx-monaco-editor';
-import { EventEmitter } from 'events';
+import { EasyEventEmitter } from 'shared/web/lib/ts/EasyEventEmitter';
 
 export interface RecorderSettings {
   overrideSaveSpeed?: number;
@@ -10,8 +10,6 @@ export interface RecorderSettings {
   startingTransactionLogs?: TraceTransactionLog[];
   cacheBuster?: string;
   trackNonFileEvents?: boolean;
-  load?: boolean;
-  useCachedProject?: boolean;
 }
 
 export enum RecorderEvents {
@@ -21,7 +19,7 @@ export enum RecorderEvents {
   save
 }
 
-export abstract class IRecorderService extends EventEmitter {
+export abstract class IRecorderService extends EasyEventEmitter {
   public abstract get position(): number;
   public abstract get hasChanged(): boolean;
   public abstract get logs(): TraceTransactionLog[];

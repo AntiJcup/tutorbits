@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { IPlaybackMouseService } from 'src/app/services/abstract/IPlaybackMouseService';
 
 @Component({
   selector: 'app-playback-mouse',
@@ -6,17 +7,15 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./playback-mouse.component.sass']
 })
 export class PlaybackMouseComponent implements OnInit {
-  public x: number;
-  public y: number;
+  public get x(): number {
+    return this.playbackMouseService.position.x;
+  }
+  public get y(): number {
+    return this.playbackMouseService.position.y;
+  }
 
-  constructor() { }
+  constructor(protected playbackMouseService: IPlaybackMouseService) { }
 
   ngOnInit() {
   }
-
-  public Move(x: number, y: number) {
-    this.x = x;
-    this.y = y;
-  }
-
 }

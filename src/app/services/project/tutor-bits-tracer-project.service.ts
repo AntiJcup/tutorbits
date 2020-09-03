@@ -25,17 +25,17 @@ export class TutorBitsTracerProjectService extends ITracerProjectService {
     super(requestService, auth, cache);
   }
 
-  public async CreateProject(): Promise<boolean> {
+  public async CreateProject(): Promise<string> {
     const res = await this.Create({} as CreateProject);
 
-    return !res.error;
+    return res?.data?.id;
   }
 
   public async ResetProject(id: string): Promise<boolean> {
-    const deleteResponse = await this.requestService
+    const resetResponse = await this.requestService
       .Post(`${this.basePath}/reset?projectId=${id}`, null, (await this.GetAuthHeaders(HandlerType.Delete)));
 
-    if (!deleteResponse.ok) {
+    if (!resetResponse.ok) {
       return false;
     }
 

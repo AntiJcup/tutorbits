@@ -1,7 +1,7 @@
-import { EventEmitter } from 'events';
 import {
   TreeModel, TreeModelSettings,
 } from '../../../../shared/Ng2-Tree';
+import { EasyEventEmitter } from 'shared/web/lib/ts/EasyEventEmitter';
 
 export enum FileTreeEvents {
   InitializedSession,
@@ -38,7 +38,7 @@ export enum PathType {
   folder,
 }
 
-export abstract class IFileTreeService extends EventEmitter {
+export abstract class IFileTreeService extends EasyEventEmitter {
   public abstract get selectedPath(): string;
 
   public abstract set selectedPath(path: string);
@@ -102,4 +102,6 @@ export abstract class IFileTreeService extends EventEmitter {
   public abstract GetNodeForPath(path: string): Readonly<TutorBitsTreeModel>;
 
   public abstract GetParentPath(path: string): string;
+
+  public abstract Reset(): void;
 }

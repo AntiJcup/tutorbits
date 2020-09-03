@@ -13,7 +13,7 @@ export abstract class ITracerProjectService
     implements IProjectWriter, ITransactionWriter, IProjectReader, ITransactionReader {
 
 
-    public async abstract CreateProject(): Promise<boolean>;
+    public async abstract CreateProject(): Promise<string>;
 
     public async abstract ResetProject(id: string): Promise<boolean>;
 

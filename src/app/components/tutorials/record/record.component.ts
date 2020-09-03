@@ -19,10 +19,11 @@ import { ITitleService } from 'src/app/services/abstract/ITitleService';
 import { ViewTutorial } from 'src/app/models/tutorial/view-tutorial';
 import { ITracerProjectService } from 'src/app/services/abstract/ITracerProjectService';
 import { ICodeService, CodeEvents, GoToDefinitionEvent } from 'src/app/services/abstract/ICodeService';
-import { IFileTreeService } from 'src/app/services/abstract/IFileTreeService';
+import { IFileTreeService, FileTreeEvents } from 'src/app/services/abstract/IFileTreeService';
 import { IRecorderService, RecorderSettings } from 'src/app/services/abstract/IRecorderService';
 import { ICurrentTracerProjectService } from 'src/app/services/abstract/ICurrentTracerProjectService';
 import { IPreviewService } from 'src/app/services/abstract/IPreviewService';
+import { S_IFREG } from 'constants';
 
 @Component({
   templateUrl: './record.component.html',
@@ -42,10 +43,8 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
   timeoutWarning = this.timeout - (1000 * 60 * 2);
   confirmMessage = 'WARNING: You will lose your current recording if you navigate away!';
 
-  @ViewChild(RecordingFileTreeComponent, { static: true }) recordingTreeComponent: RecordingFileTreeComponent;
   @ViewChild(RecordingEditorComponent, { static: true }) recordingEditor: RecordingEditorComponent;
   @ViewChild(RecordingWebCamComponent, { static: true }) recordingWebCam: RecordingWebCamComponent;
-  @ViewChild(ResourceViewerComponent, { static: true }) resourceViewerComponent: ResourceViewerComponent;
 
   webCamRecorder: WebCamRecorder;
   requestInfo: ApiHttpRequestInfo = {
@@ -58,8 +57,6 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
 
   timeoutWarningTimer: any;
   timeoutTimer: any;
-
-  selectFileSub: Subscription;
 
   constructor(
     private zone: NgZone,
@@ -86,9 +83,9 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
   }
 
   async ngOnInit() {
-    this.selectFileSub = this.recordingTreeComponent.treeComponent.nodeSelected.subscribe(() => {
+    this.fileTreeService.on(FileTreeEvents[FileTreeEvents.SelectedNode], async () => {
       this.eventService.TriggerButtonClick('Record', `PreviewClose - ${this.tutorialId}`);
-      this.previewService.HidePreview();
+      await this.previewService.HidePreview();
     });
 
     this.codeService.once(CodeEvents[CodeEvents.InitializedSession], () => { this.onCodeInitialized(); });
@@ -107,9 +104,9 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
     }
   }
 
-  ngOnDestroy(): void {
-    if (this.selectFileSub) {
-      this.selectFileSub.unsubscribe();
+  async ngOnDestroy(): Promise<void> {
+    if (this.recording) {
+      await this.StopRecording();
     }
 
     if (this.timeoutWarningTimer) {
@@ -160,8 +157,7 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
   }
 
   resetState() {
-    this.recordingTreeComponent.treeComponent.treeModel = this.recordingTreeComponent.tree;
-    this.recordingTreeComponent.treeComponent.ngOnChanges(null);
+    this.fileTreeService.Reset();
     this.fileTreeService.selectedPath = '/project';
     this.codeService.ClearCacheForFolder('/');
     this.codeService.currentFilePath = '';
@@ -196,23 +192,8 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
     }
 
     this.loadingRecording = true;
-    // this.codeRecorder = new MonacoRecorder(
-    //   this.fileTreeService,
-    //   this.resourceViewerComponent,
-    //   this.previewComponent,
-    //   this.logServer,
-    //   this.errorServer,
-    //   this.codeService,
-    //   true, /* resourceAuth */
-    //   this.tutorial.projectId,
-    //   this.projectService,
-    //   this.projectService,
-    //   this.projectService,
-    //   this.projectService,
-    //   true);
 
-
-    await this.currentProjectService.LoadProject(this.tutorial.projectId);
+    await this.currentProjectService.LoadProject(true/*Online*/, this.tutorial.projectId);
     try {
       if (this.currentProjectService.project.getDuration() > 0 && !confirm('Are you sure you want to start the recording over?')) {
         this.loadingRecording = false;
@@ -228,7 +209,6 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
 
     try {
       await this.currentProjectService.ResetProject();
-      await this.currentProjectService.LoadProject(this.tutorial.projectId);
       await this.webCamRecorder.StartRecording();
       this.loadingRecording = false;
       this.hasRecorded = true;
@@ -285,21 +265,6 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
       await this.StartRecording();
     } else {
       await this.StopRecording();
-    }
-  }
-
-  public onCloseClicked(e: any) {
-    this.eventService.TriggerButtonClick('Record', `PreviewClose - ${this.tutorialId}`);
-    this.previewService.HidePreview();
-  }
-
-  public async onPreviewClicked(e: string) {
-    this.eventService.TriggerButtonClick('Record', `Preview - ${this.tutorialId} - ${e}`);
-    const previewPos = Math.round(this.recorderService.position);
-    try {
-      await this.previewService.ShowPreview(this.tutorial.projectId, previewPos, e, this.recorderService.logs);
-    } catch (err) {
-      this.errorServer.HandleError('PreviewError', err);
     }
   }
 
