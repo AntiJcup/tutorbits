@@ -43,6 +43,8 @@ export abstract class IFileTreeService extends EventEmitter {
 
   public abstract set selectedPath(path: string);
 
+  public abstract get selectedFolder(): string;
+
   public abstract get selectedPathType(): PathType;
 
   public abstract get models(): Readonly<{ [path: string]: TutorBitsTreeModel }>;

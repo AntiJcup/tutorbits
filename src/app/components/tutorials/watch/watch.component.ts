@@ -30,6 +30,7 @@ import { IVideoService } from 'src/app/services/abstract/IVideoService';
 import { ICodeService } from 'src/app/services/abstract/ICodeService';
 import { CodeEvents } from 'src/app/services/abstract/ICodeService';
 import { IFileTreeService } from 'src/app/services/abstract/IFileTreeService';
+import { IPreviewService } from 'src/app/services/abstract/IPreviewService';
 
 @Component({
   templateUrl: './watch.component.html',
@@ -97,6 +98,7 @@ export class WatchComponent implements OnInit, OnDestroy {
     private titleService: ITitleService,
     private codeService: ICodeService,
     private fileTreeService: IFileTreeService,
+    private previewService: IPreviewService,
     public dialog: MatDialog,
     private dataService: IDataService,
     private metaService: Meta,
@@ -179,9 +181,9 @@ export class WatchComponent implements OnInit, OnDestroy {
     // If publish mode make sure not to cache!
     this.codePlayer = new MonacoPlayer(
       this.fileTreeService,
+      this.previewService,
       this.resourceViewerComponent,
       this.playbackMouseComponent,
-      this.previewComponent,
       this.logServer,
       this.codeService,
       this.projectService,
@@ -264,7 +266,7 @@ export class WatchComponent implements OnInit, OnDestroy {
     this.eventService.TriggerButtonClick('Watch', `Preview - ${this.tutorialId} - ${e}`);
     const previewPos = Math.min(Math.round(this.codePlayer.position), this.codePlayer.duration);
     try {
-      await this.previewComponent.LoadPreview(this.tutorial.projectId, previewPos, e);
+      await this.previewService.ShowPreview(this.tutorial.projectId, previewPos, e);
     } catch (err) {
       this.errorServer.HandleError(`PreviewError`, err);
     }

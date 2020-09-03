@@ -1,6 +1,5 @@
 import { Component, OnInit, ViewChild, NgZone, HostListener, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MonacoRecorder, MonacoRecorderSettings } from 'src/app/sub-components/recording/recorder/monaco.recorder';
 import { RecordingEditorComponent } from 'src/app/sub-components/recording/recording-editor/recording-editor.component';
 import { RecordingFileTreeComponent } from 'src/app/sub-components/recording/recording-file-tree/recording-file-tree.component';
 import { LocalTransactionWriter, LocalProjectWriter, LocalProjectLoader, LocalTransactionReader } from 'shared/Tracer/lib/ts/LocalTransaction';
@@ -28,6 +27,7 @@ import { CodeEvents, GoToDefinitionEvent } from 'src/app/services/abstract/ICode
 import { IEditorPluginService } from 'src/app/services/abstract/IEditorPluginService';
 import { IWorkspacePluginService } from 'src/app/services/abstract/IWorkspacePluginService';
 import { IFileTreeService, PropogateTreeOptions, FileTreeEvents } from 'src/app/services/abstract/IFileTreeService';
+import { IRecorderService, RecorderSettings } from 'src/app/services/abstract/IRecorderService';
 
 @Component({
   templateUrl: './sandbox.component.html',
@@ -38,9 +38,6 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate, OnDestr
   @ViewChild(RecordingFileTreeComponent, { static: true }) recordingTreeComponent: RecordingFileTreeComponent;
   @ViewChild(RecordingEditorComponent, { static: true }) recordingEditor: RecordingEditorComponent;
   @ViewChild(ResourceViewerComponent, { static: true }) resourceViewerComponent: ResourceViewerComponent;
-  @ViewChild(PreviewComponent, { static: true }) previewComponent: PreviewComponent;
-
-  codeRecorder: MonacoRecorder;
 
   loadProjectId: string;
   projectType: string;
@@ -76,6 +73,7 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate, OnDestr
     private codeService: ICodeService,
     private fileTreeService: IFileTreeService,
     private workspacePluginService: IWorkspacePluginService,
+    private recorderService: IRecorderService,
     private metaService: Meta,
     public commentService: TutorBitsExampleCommentService, // Dont remove these components use them
     public ratingService: TutorBitsExampleRatingService) {
@@ -101,7 +99,7 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate, OnDestr
 
     this.fileTreeService.on(FileTreeEvents[FileTreeEvents.SelectedNode], (path: string) => {
       this.eventService.TriggerButtonClick('Preview', `PreviewClose - ${this.projectId}`);
-      this.previewComponent.ClosePreview();
+      this.previewService.HidePreview();
     });
 
     this.codeService.once(CodeEvents[CodeEvents.InitializedSession], () => { this.onCodeInitialized(); });
@@ -154,33 +152,15 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate, OnDestr
     try {
       this.codeService.AllowEdits(true);
       this.fileTreeService.editable = true;
-
       this.fileTreeService.selectedPath = '/project';
 
-      this.codeRecorder = new MonacoRecorder(
-        this.fileTreeService,
-        this.resourceViewerComponent,
-        this.previewComponent,
-        this.logServer,
-        this.errorServer,
-        this.codeService,
-        false, /* resourceAuth */
-        this.projectId,
-        this.isLoggedIn ? this.projectService : new LocalProjectLoader(), // Only save project updates if logged in
-        this.isLoggedIn ? this.projectService : new LocalProjectWriter(), // Only save project updates if logged in
-        this.isLoggedIn ? this.projectService : new LocalTransactionWriter(), // Only save project updates if logged in
-        this.projectService,
-        false, /* ignore non file operations */
-        loadedTransactionLogs,
-        Guid.create().toString(),
-        {
-          overrideSaveSpeed: 5000,
-          saveUnfinishedPartitions: true
-        } as MonacoRecorderSettings);
-
-      // Load if logged in since it is already created on the server
-      this.isLoggedIn ? await this.codeRecorder.Load() : await this.codeRecorder.New();
-      this.codeRecorder.StartRecording();
+      this.recorderService.StartRecording({
+        load: this.isLoggedIn,
+        local: !this.isLoggedIn,
+        trackNonFileEvents: false,
+        overrideSaveSpeed: 5000,
+        saveUnfinishedPartitions: true
+      } as RecorderSettings);
       this.logServer.LogToConsole('Sandbox', 'Ready to edit');
       this.zone.runTask(() => {
         this.loading = false;
@@ -192,14 +172,13 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate, OnDestr
 
   public onCloseClicked(e: any) {
     this.eventService.TriggerButtonClick('Preview', `PreviewClose - ${this.projectId}`);
-    this.previewComponent.ClosePreview();
   }
 
   public async onPreviewClicked(e: string) {
     this.eventService.TriggerButtonClick('Sandbox', `Preview - ${this.projectId} - ${e}`);
-    const previewPos = Math.round(this.codeRecorder.position);
+    const previewPos = Math.round(this.recorderService.position);
     try {
-      await this.previewComponent.GeneratePreview(this.projectId, previewPos, e, this.codeRecorder.logs, this.loadProjectId);
+      await this.previewService.ShowPreview(this.projectId, previewPos, e, this.recorderService.logs, this.loadProjectId);
     } catch (err) {
       this.errorServer.HandleError('PreviewError', err);
     }
@@ -225,9 +204,9 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate, OnDestr
 
     const codePlayer = new MonacoPlayer(
       this.fileTreeService,
+      this.previewService,
       this.resourceViewerComponent,
       null, // mouse component
-      this.previewComponent,
       this.logServer,
       this.codeService,
       this.isLoggedIn ? this.projectService : new LocalProjectLoader(), // Only save project updates if logged in
@@ -284,9 +263,9 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate, OnDestr
   public async onDownloadClicked(e: any) {
     this.eventService.TriggerButtonClick('Preview', `Download - ${this.projectId}`);
     this.downloading = true;
-    const previewPos = Math.round(this.codeRecorder.position);
+    const previewPos = Math.round(this.recorderService.position);
     try {
-      await this.previewService.DownloadPreview(this.projectId, previewPos, this.codeRecorder.logs, this.loadProjectId);
+      await this.previewService.DownloadPreview(this.projectId, previewPos, this.recorderService.logs, this.loadProjectId);
     } catch (err) {
       this.errorServer.HandleError(`DownloadError`, err);
     }
@@ -298,7 +277,7 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate, OnDestr
     this.publishing = true;
 
     try {
-      await this.codeRecorder.Save();
+      await this.recorderService.Save();
       this.router.navigate([`create/example/${this.projectId}`]);
     } catch (e) {
       this.errorServer.HandleError(`Sandbox`, e);
@@ -312,7 +291,7 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate, OnDestr
     // insert logic to check if there are pending changes here;
     // returning true will navigate without confirmation
     // returning false will show a confirm dialog before navigating away
-    return !(this.codeRecorder && this.codeRecorder.hasChanged);
+    return !(this.recorderService && this.recorderService.hasChanged);
   }
 
   public onCommentsClicked(e: any) {

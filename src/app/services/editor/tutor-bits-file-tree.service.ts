@@ -27,6 +27,14 @@ export class TutorBitsFileTreeService extends IFileTreeService {
     }
   }
 
+  public get selectedFolder(): string {
+    if (this.selectedPathType === PathType.folder) {
+      return this.selectedPath;
+    }
+
+    return this.GetParentPath(this.selectedPath);
+  }
+
   public get selectedPathType(): PathType {
     return this.internalSelectedPathType;
   }

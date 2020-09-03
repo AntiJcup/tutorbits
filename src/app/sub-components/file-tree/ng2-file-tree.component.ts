@@ -17,7 +17,10 @@ import { ILogService } from 'src/app/services/abstract/ILogService';
 import { FileUtils, FileData } from 'shared/web/lib/ts/FileUtils';
 import { IEventService } from 'src/app/services/abstract/IEventService';
 import { TutorBitsTreeModel, IFileTreeService, ResourceType, PathType, FileTreeEvents } from 'src/app/services/abstract/IFileTreeService';
-import { ITracerProjectService } from 'src/app/services/abstract/ITracerProjectService';
+import { ICurrentTracerProjectService } from 'src/app/services/abstract/ICurrentTracerProjectService';
+import { IAuthService } from 'src/app/services/abstract/IAuthService';
+import { IPreviewService } from 'src/app/services/abstract/IPreviewService';
+import { IRecorderService } from 'src/app/services/abstract/IRecorderService';
 
 @Directive()
 @Injectable()
@@ -64,7 +67,9 @@ export abstract class NG2FileTreeComponent implements OnInit, OnDestroy {
     private logServer: ILogService,
     private eventService: IEventService,
     protected fileTreeService: IFileTreeService,
-    private projectService: ITracerProjectService,
+    private currentProjectService: ICurrentTracerProjectService,
+    private authService: IAuthService,
+    private previewService: IPreviewService,
     protected myElement: ElementRef) {
     this.log = this.logServer.LogToConsole.bind(this.logServer, 'NG2FileTreeComponent');
   }
@@ -257,7 +262,7 @@ export abstract class NG2FileTreeComponent implements OnInit, OnDestroy {
   }
 
   public onPreviewHeaderButtonClicked(e: MouseEvent) {
-    this.previewClicked.next(this.fileTreeService.selectedPath);
+    //this.previewService.ShowPreview(this.currentProjectService.projectId, )
   }
 
   public onNodeCreated(e: NodeCreatedEvent) {
@@ -359,10 +364,9 @@ export abstract class NG2FileTreeComponent implements OnInit, OnDestroy {
     this.eventService.TriggerButtonClick('FileTree', 'UploadFileStart');
     const fileData: FileData = await FileUtils.SelectFile();
     // Update path to be relative to selected branch
-    // const selectedBranch = this.GetSelectedBranch();
-    // const selectedBranchPath = this.getPathForNode(selectedBranch);
-    // fileData.name = selectedBranchPath + '/' + fileData.name;
-    // TODO this, but I need the project id here, this.projectService.UploadResource()
+    fileData.name = `${this.fileTreeService.selectedFolder}/${fileData.name}`;
+    const resourceId = await this.currentProjectService.UploadResource(fileData.name, fileData.data, this.authService.IsLoggedIn());
+    this.fileTreeService.AddResourceNode(fileData.name, resourceId);
   }
 
   public onNodeRenamed(e: NodeRenamedEvent) {

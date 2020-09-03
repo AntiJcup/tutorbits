@@ -25,7 +25,7 @@ export class TutorBitsTracerProjectService extends ITracerProjectService {
     super(requestService, auth, cache);
   }
 
-  public async CreateProject(id: string): Promise<boolean> {
+  public async CreateProject(): Promise<boolean> {
     const res = await this.Create({} as CreateProject);
 
     return !res.error;

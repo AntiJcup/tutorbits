@@ -1,6 +1,6 @@
-import { Component, OnInit, EventEmitter, Output, Input, NgZone } from '@angular/core';
+import { Component, OnInit, EventEmitter, Output, Input, NgZone, OnDestroy } from '@angular/core';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
-import { IPreviewService } from 'src/app/services/abstract/IPreviewService';
+import { IPreviewService, PreviewEvents } from 'src/app/services/abstract/IPreviewService';
 import { IErrorService } from 'src/app/services/abstract/IErrorService';
 import { TraceTransactionLog } from 'shared/Tracer/models/ts/Tracer_pb';
 import { Guid } from 'guid-typescript';
@@ -13,7 +13,7 @@ import { ICodeService } from 'src/app/services/abstract/ICodeService';
   styleUrls: ['./preview.component.sass']
 })
 
-export class PreviewComponent implements OnInit {
+export class PreviewComponent implements OnInit, OnDestroy {
   @Output() closeClicked = new EventEmitter();
   @Output() initialize = new EventEmitter();
 
@@ -72,54 +72,27 @@ export class PreviewComponent implements OnInit {
     private zone: NgZone) { }
 
   ngOnInit() {
+    this.previewService.on(PreviewEvents[PreviewEvents.RequestShow],
+      async (projectId: string, offset: number, url: string, path: string) => {
+        await this.ShowPreview(url, path);
+      });
+
+    this.previewService.on(PreviewEvents[PreviewEvents.RequestHide], () => {
+      this.ClosePreview();
+    });
+  }
+
+  ngOnDestroy() {
+
   }
 
   navigate(path: string) {
     this.previewPath = path;
   }
 
-  onCloseClicked() {
+  async onCloseClicked() {
     this.closeClicked.next();
-  }
-
-  public async LoadPreview(projectId: string, offset: number, path: string): Promise<void> {
-    try {
-      this.loading = true;
-      this.internalLoadingId = Guid.create().toString();
-      const loadingRef = this.internalLoadingId;
-      const url = await this.previewService.LoadPreview(projectId, offset);
-
-      // Was cancelled or another preview started loading
-      if (!this.loading || this.internalLoadingId !== loadingRef) {
-        return;
-      }
-
-      this.ShowPreview(url, path);
-    } catch (err) {
-      this.errorServer.HandleError('PreviewError', err);
-    }
-    this.loading = false;
-  }
-
-  public async GeneratePreview(
-    projectId: string,
-    offset: number,
-    path: string,
-    logs: TraceTransactionLog[],
-    baseProjectId?: string): Promise<void> {
-    try {
-      this.loading = true;
-      const url = await this.previewService.GeneratePreview(projectId, offset, logs, baseProjectId);
-
-      if (!this.loading) {
-        return;
-      }
-
-      this.ShowPreview(url, path);
-    } catch (err) {
-      this.errorServer.HandleError('PreviewError', err);
-    }
-    this.loading = false;
+    await this.previewService.HidePreview();
   }
 
   public ClosePreview() {

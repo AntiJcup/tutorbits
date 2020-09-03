@@ -1,13 +1,23 @@
 import { TraceTransactionLog } from 'shared/Tracer/models/ts/Tracer_pb';
-import { EventEmitter } from '@angular/core';
+import { EventEmitter } from 'events';
+import { SafeUrl } from '@angular/platform-browser';
 
 export enum PreviewEvents {
-  Show,
-  Hide,
+  Generated,
   Loaded,
+  Downloaded,
+  RequestShow,
+  RequestHide
 }
 
 export abstract class IPreviewService extends EventEmitter {
+  public abstract visible(): boolean;
+  public abstract loading(): boolean;
+  public abstract get previewUrl(): string;
+
+  public abstract get previewPath(): string;
+  public abstract set previewPath(p: string);
+
   public abstract async LoadPreview(
     projectId: string,
     offsetEnd: number): Promise<string>;
@@ -16,19 +26,20 @@ export abstract class IPreviewService extends EventEmitter {
     projectId: string,
     offsetEnd: number,
     logs: TraceTransactionLog[],
-    baseProject?: string): Promise<string>;
+    baseProjectId?: string): Promise<string>;
 
   public abstract async DownloadPreview(
     projectId: string,
     offsetEnd: number,
     logs: TraceTransactionLog[],
-    baseProject?: string): Promise<void>;
+    baseProjectId?: string): Promise<void>;
 
   public abstract async ShowPreview(
     projectId: string,
     offset: number,
     path: string,
-    logs: TraceTransactionLog[],
+    logs?: TraceTransactionLog[],
     baseProjectId?: string): Promise<void>;
+
   public abstract async HidePreview(): Promise<void>;
 }

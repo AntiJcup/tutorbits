@@ -53,6 +53,8 @@ import { TutorBitsDataService } from './services/storage/tutor-bits-persist.serv
 import { LogoutComponent } from './components/logout/logout.component';
 import { TutorBitsTracerProjectService } from './services/project/tutor-bits-tracer-project.service';
 import { ITracerProjectService } from './services/abstract/ITracerProjectService';
+import { TutorBitsCurrentTracerProjectService } from './services/project/tutor-bits-current-tracer-project.service';
+import { ICurrentTracerProjectService } from './services/abstract/ICurrentTracerProjectService';
 import { IVideoService } from './services/abstract/IVideoService';
 import { TimerComponent } from './sub-components/timer/timer.component';
 import { FormlyFieldFileComponent } from './sub-components/formly/formly-field-file/formly-field-file.component';
@@ -81,6 +83,10 @@ import { TutorBitsGAEventService } from './services/logging/tutor-bits-ga-event.
 import { PlaybackMouseComponent } from './sub-components/playing/playback-mouse/playback-mouse.component';
 import { ITitleService } from './services/abstract/ITitleService';
 import { TutorBitsTitleService } from './services/tutor-bits-title.service';
+import { IRecorderService } from './services/abstract/IRecorderService';
+import { TutorBitsRecorderService } from './services/project/tutor-bits-recorder.service';
+import { IResourceViewerService } from './services/abstract/IResourceViewerService';
+import { TutorBitsResourceViewerService } from './services/project/tutor-bits-resource-viewer.service';
 import { WatchGuideComponent } from './sub-components/watch-guide/watch-guide.component';
 import { PlayButtonHintComponent } from './sub-components/playing/play-button-hint/play-button-hint.component';
 import { IEditorPluginService } from './services/abstract/IEditorPluginService';
@@ -88,6 +94,7 @@ import { TutorBitsEditorPluginService } from './services/editor/tutor-bits-edito
 import { TutorBitsTutorialCommentService, TutorBitsConcreteTutorialCommentService } from './services/tutorial/tutor-bits-tutorial-comment.service';
 import { TutorBitsConcreteQuestionCommentService, TutorBitsQuestionCommentService } from './services/question/tutor-bits-question-comment.service';
 import { TutorBitsAnswerService, TutorBitsConcreteAnswerService } from './services/question/tutor-bits-answer.service';
+// tslint:disable-next-line: max-line-length
 import { TutorBitsAnswerCommentService, TutorBitsConcreteAnswerCommentService } from './services/question/tutor-bits-answer-comment.service';
 import { TutorBitsTutorialRatingService, TutorBitsConcreteTutorialRatingService } from './services/tutorial/tutor-bits-tutorial-rating.service';
 import { TutorBitsTutorialCommentRatingService, TutorBitsConcreteTutorialCommentRatingService } from './services/tutorial/tutor-bits-tutorial-comment-rating.service';
@@ -421,6 +428,10 @@ const appRoutes: Routes = [
     { provide: ICodeService, useClass: TutorBitsCodeService },
     { provide: IFileTreeService, useClass: TutorBitsFileTreeService },
     { provide: IWorkspacePluginService, useClass: TutorBitsWorkspacePluginService },
+    { provide: ICurrentTracerProjectService, useClass: TutorBitsCurrentTracerProjectService },
+    { provide: IRecorderService, useClass: TutorBitsRecorderService },
+    { provide: IResourceViewerService, useClass: TutorBitsResourceViewerService }
+
   ],
   bootstrap: [AppComponent],
   entryComponents: [WatchGuideComponent]

@@ -13,7 +13,7 @@ export abstract class ITracerProjectService
     implements IProjectWriter, ITransactionWriter, IProjectReader, ITransactionReader {
 
 
-    public async abstract CreateProject(id: string): Promise<boolean>;
+    public async abstract CreateProject(): Promise<boolean>;
 
     public async abstract ResetProject(id: string): Promise<boolean>;
 
@@ -27,7 +27,7 @@ export abstract class ITracerProjectService
 
     public async abstract WriteTransactionLog(transactionLog: TraceTransactionLog, data: Uint8Array, projectId: string): Promise<boolean>;
 
-    public async abstract GetProject(id: string, cacheBuster: string): Promise<TraceProject>;
+    public async abstract GetProject(id: string, cacheBuster?: string): Promise<TraceProject>;
 
     // tslint:disable-next-line: max-line-length
     public async abstract GetPartitionsForRange(project: TraceProject, startTime: number, endTime: number, cacheBuster: string): Promise<{ [partition: string]: string; }>;

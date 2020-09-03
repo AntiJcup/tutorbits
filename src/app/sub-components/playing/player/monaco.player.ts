@@ -1,9 +1,6 @@
 import { TransactionPlayer, TransactionPlayerSettings } from 'shared/Tracer/lib/ts/TransactionPlayer';
 import { TraceTransaction } from 'shared/Tracer/models/ts/Tracer_pb';
 import { IProjectReader } from 'shared/Tracer/lib/ts/IProjectReader';
-import { NG2FileTreeComponent } from '../../file-tree/ng2-file-tree.component';
-import { NodeSelectedEvent } from 'shared/Ng2-Tree';
-import { Subscription } from 'rxjs';
 import { ILogService } from 'src/app/services/abstract/ILogService';
 import { ResourceViewerComponent, ResourceData } from '../../resource-viewer/resource-viewer.component';
 import { EventEmitter } from '@angular/core';
@@ -11,7 +8,8 @@ import { PlaybackMouseComponent } from '../playback-mouse/playback-mouse.compone
 import { PreviewComponent } from '../../preview/preview.component';
 import { ITransactionReader } from 'shared/Tracer/lib/ts/ITransactionReader';
 import { ICodeService } from 'src/app/services/abstract/ICodeService';
-import { IFileTreeService, FileTreeEvents, ResourceType, TutorBitsTreeModel, PathType } from 'src/app/services/abstract/IFileTreeService';
+import { IFileTreeService, FileTreeEvents, ResourceType, PathType } from 'src/app/services/abstract/IFileTreeService';
+import { IPreviewService } from 'src/app/services/abstract/IPreviewService';
 
 export interface LoadStartEvent {
   playPosition: number;
@@ -37,9 +35,9 @@ export class MonacoPlayer extends TransactionPlayer {
 
   constructor(
     protected fileTreeService: IFileTreeService,
+    protected previewService: IPreviewService,
     protected resourceViewerComponent: ResourceViewerComponent,
     protected playbackMouseComponent: PlaybackMouseComponent,
-    protected previewComponent: PreviewComponent,
     protected logServer: ILogService,
     protected codeService: ICodeService,
     projectLoader: IProjectReader,
@@ -109,16 +107,16 @@ export class MonacoPlayer extends TransactionPlayer {
           switch (customData.getAction()) {
             case 'previewFile':
               if (!undo) {
-                this.previewComponent.LoadPreview(this.projectId, transaction.getTimeOffsetMs(), customData.getData());
+                this.previewService.ShowPreview(this.projectId, transaction.getTimeOffsetMs(), customData.getData());
               } else {
-                this.previewComponent.ClosePreview();
+                this.previewService.HidePreview();
               }
               break;
             case 'previewFileclose':
               if (undo) {
-                this.previewComponent.LoadPreview(this.projectId, transaction.getTimeOffsetMs(), customData.getData());
+                this.previewService.ShowPreview(this.projectId, transaction.getTimeOffsetMs(), customData.getData());
               } else {
-                this.previewComponent.ClosePreview();
+                this.previewService.HidePreview();
               }
               break;
             default:
