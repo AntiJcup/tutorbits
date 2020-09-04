@@ -25,6 +25,7 @@ import { IFileTreeService, PropogateTreeOptions, FileTreeEvents } from 'src/app/
 import { IRecorderService, RecorderSettings } from 'src/app/services/abstract/IRecorderService';
 import { ICurrentTracerProjectService } from 'src/app/services/abstract/ICurrentTracerProjectService';
 import { IPlayerService, PlayerEvents } from 'src/app/services/abstract/IPlayerService';
+import { Guid } from 'guid-typescript';
 
 @Component({
   templateUrl: './sandbox.component.html',
@@ -183,7 +184,7 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate, OnDestr
   public async LoadProject(): Promise<void> {
     this.loadingProject = true;
 
-    await this.currentProjectService.LoadProject(this.isLoggedIn, this.projectId);
+    await this.currentProjectService.LoadProject(this.isLoggedIn, this.projectId, this.isLoggedIn ? Guid.create().toString() : 'sandbox');
 
     try {
       await this.playerService.Load();
