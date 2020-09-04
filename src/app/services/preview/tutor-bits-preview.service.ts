@@ -121,6 +121,7 @@ export class TutorBitsPreviewService extends IPreviewService {
   ): Promise<void> {
     let url = '';
     try {
+      this.visible_ = true;
       this.loading_ = true;
       this.loadingId = Guid.create().toString();
       const loadingRef = this.loadingId;
@@ -131,14 +132,14 @@ export class TutorBitsPreviewService extends IPreviewService {
       }
 
       // Was cancelled or another preview started loading
-      if (!this.loading || this.loadingId !== loadingRef) {
+      if (!this.visible_ || !this.loading || this.loadingId !== loadingRef) {
         return;
       }
 
       this.currentPreviewUrl = url;
       this.currentPreviewPath = path;
       this.previewPath = path;
-      this.visible_ = true;
+
       this.emit(PreviewEvents[PreviewEvents.RequestShow], projectId, offset, url, path);
     } catch (err) {
       this.errorService.HandleError('PreviewError', err);
@@ -150,6 +151,7 @@ export class TutorBitsPreviewService extends IPreviewService {
     this.currentPreviewUrl = null;
     this.currentPreviewPath = null;
     this.visible_ = false;
+    this.loading_ = false;
     this.emit(PreviewEvents[PreviewEvents.RequestHide]);
   }
 

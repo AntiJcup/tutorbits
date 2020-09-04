@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, NgZone } from '@angular/core';
 import { MonacoEditorComponent } from '../../editors/editor/monaco-editor.component';
 import { ILogService } from 'src/app/services/abstract/ILogService';
 import { IEditorPluginService } from 'src/app/services/abstract/IEditorPluginService';
@@ -16,8 +16,9 @@ export class RecordingEditorComponent extends MonacoEditorComponent implements O
     logService: ILogService,
     editorPluginService: IEditorPluginService,
     codeService: ICodeService,
-    fileTreeService: IFileTreeService) {
-    super(logService, editorPluginService, codeService, fileTreeService);
+    fileTreeService: IFileTreeService,
+    zone: NgZone) {
+    super(logService, editorPluginService, codeService, fileTreeService, zone);
   }
 
   ngOnInit() {

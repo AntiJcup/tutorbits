@@ -30,7 +30,7 @@ import { ICodeService } from 'src/app/services/abstract/ICodeService';
 import { CodeEvents } from 'src/app/services/abstract/ICodeService';
 import { IFileTreeService, FileTreeEvents } from 'src/app/services/abstract/IFileTreeService';
 import { IPreviewService } from 'src/app/services/abstract/IPreviewService';
-import { IPlayerService, PlayerEvents, PlayerState } from 'src/app/services/abstract/IPlayerService';
+import { IPlayerService, PlayerEvents, PlayerState, PlayerSettings } from 'src/app/services/abstract/IPlayerService';
 import { EventSub } from 'shared/web/lib/ts/EasyEventEmitter';
 import { ICurrentTracerProjectService } from 'src/app/services/abstract/ICurrentTracerProjectService';
 
@@ -171,8 +171,9 @@ export class WatchComponent implements OnInit, OnDestroy {
   }
 
   async onReady() {
+    const cacheBuster = this.publishMode ? Guid.create().toString() : 'play';
     // If publish mode make sure not to cache!
-    await this.currentProjectService.LoadProject(true, this.tutorial.projectId, this.publishMode ? Guid.create().toString() : 'play');
+    await this.currentProjectService.LoadProject(true, this.tutorial.projectId, cacheBuster);
 
     this.onLoadStartSub = this.playerService.sub(PlayerEvents[PlayerEvents.loadStart], (event) => {
       this.loadingReferences++;
@@ -183,7 +184,15 @@ export class WatchComponent implements OnInit, OnDestroy {
     });
 
     try {
-      await this.playerService.Load();
+      await this.playerService.Load({
+        cacheBuster,
+        speedMultiplier: 1,
+        lookAheadSize: 1000 * 15,
+        loadChunkSize: 1000 * 30,
+        updateInterval: 10,
+        loadInterval: 1000 * 1,
+        customIncrementer: true
+      } as PlayerSettings);
       this.playerService.Play();
       this.playbackVideo.nativeElement.volume = environment.defaultVideoVolume;
       this.paceKeeperInterval = setInterval(() => {

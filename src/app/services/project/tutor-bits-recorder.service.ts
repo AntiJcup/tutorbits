@@ -17,6 +17,7 @@ import { LocalProjectLoader, LocalProjectWriter, LocalTransactionWriter } from '
 import { TraceTransactionLog, TraceTransaction, CustomActionData, TraceProject, CreateItemData, DeleteItemData, ModifyFileData, SelectFileData, CursorChangeFileData, RenameItemData, UploadFileData, ScrollFileData, MouseMoveData } from 'shared/Tracer/models/ts/Tracer_pb';
 import { PartitionFromOffsetBottom } from 'shared/Tracer/lib/ts/Common';
 import { Injectable } from '@angular/core';
+import { EventSub } from 'shared/web/lib/ts/EasyEventEmitter';
 
 @Injectable()
 export class TutorBitsRecorderService extends IRecorderService {
@@ -45,8 +46,8 @@ export class TutorBitsRecorderService extends IRecorderService {
   protected savedTransactionLogPartions: number[] = [];
 
   protected log: (...args: any[]) => void;
-  protected previewShowCallback: (path: string) => void;
-  protected previewHideCallback: () => void;
+  protected previewSub: EventSub;
+  protected previewHideSub: EventSub;
 
   public get recording(): boolean {
     return this.internalRecording;
@@ -142,16 +143,14 @@ export class TutorBitsRecorderService extends IRecorderService {
         this.onScrolled(e);
       });
 
-      this.previewShowCallback = (path: string) => {
-        this.onPreviewClicked(path);
-      };
+      this.previewSub = this.previewService.sub(PreviewEvents[PreviewEvents.RequestShow],
+        (projectId: string, offset: number, url: string, path: string) => {
+          this.onPreviewClicked(path);
+        });
 
-      this.previewService.on(PreviewEvents[PreviewEvents.RequestShow], this.previewShowCallback);
-
-      this.previewHideCallback = () => {
+      this.previewHideSub = this.previewService.sub(PreviewEvents[PreviewEvents.RequestHide], () => {
         this.onPreviewCloseClicked();
-      };
-      this.previewService.on(PreviewEvents[PreviewEvents.RequestHide], this.previewHideCallback);
+      });
     }
   }
 
@@ -172,12 +171,12 @@ export class TutorBitsRecorderService extends IRecorderService {
       this.scrollChangeListener.dispose();
     }
 
-    if (this.previewShowCallback) {
-      this.previewService.removeListener(PreviewEvents[PreviewEvents.RequestShow], this.previewShowCallback);
+    if (this.previewSub) {
+      this.previewSub.Dispose();
     }
 
-    if (this.previewHideCallback) {
-      this.previewService.removeListener(PreviewEvents[PreviewEvents.RequestHide], this.previewHideCallback);
+    if (this.previewHideSub) {
+      this.previewHideSub.Dispose();
     }
 
     const res = await this.SaveTransactionLogs(true);

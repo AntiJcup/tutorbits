@@ -130,9 +130,13 @@ export class TutorBitsPlayerService extends IPlayerService {
   public ClearLoadedSession(): void {
     clearInterval(this.updateInterval_);
     clearInterval(this.loadInterval_);
-    this.transactionLogCache = null;
-    this.transactionLogs = null;
+    this.transactionLogCache = {};
+    this.transactionLogs = [];
     this.settings = null;
+    this.transactionLogIndex = 0;
+    this.previousPosition = -1;
+    this.caughtUpState = false;
+    this.loadPosition_ = 0;
   }
 
   public Play(): void {
@@ -307,9 +311,9 @@ export class TutorBitsPlayerService extends IPlayerService {
           switch (customData.getAction()) {
             case 'previewFile':
               if (!undo) {
-                this.previewService.ShowPreview(this.projectId, transaction.getTimeOffsetMs(), customData.getData());
+                this.previewService.ShowPreview(this.projectId, transaction.getTimeOffsetMs(), customData.getData()).then();
               } else {
-                this.previewService.HidePreview();
+                this.previewService.HidePreview().then();
               }
               break;
             case 'previewFileclose':

@@ -3,7 +3,7 @@ import { ILogService } from 'src/app/services/abstract/ILogService';
 import 'shared/web/lib/ts/extensions';
 import { IEditorPluginService } from 'src/app/services/abstract/IEditorPluginService';
 import { ICodeService, CodeEvents, GoToDefinitionEvent } from 'src/app/services/abstract/ICodeService';
-import { IFileTreeService, FileTreeEvents } from 'src/app/services/abstract/IFileTreeService';
+import { IFileTreeService, FileTreeEvents, PathType } from 'src/app/services/abstract/IFileTreeService';
 import { EventSub } from 'shared/web/lib/ts/EasyEventEmitter';
 
 @Directive()
@@ -75,6 +75,9 @@ export abstract class MonacoEditorComponent implements OnInit, OnDestroy {
     this.editorPluginService.registerPlugins().then();
 
     this.fileSelectSub = this.fileTreeService.sub(FileTreeEvents[FileTreeEvents.SelectedNode], (path) => {
+      if (this.fileTreeService.GetPathTypeForPath(path) === PathType.folder) {
+        return;
+      }
       this.codeService.currentFilePath = path;
     });
   }
