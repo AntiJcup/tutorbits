@@ -124,6 +124,12 @@ export abstract class NG2FileTreeComponent implements OnInit, OnDestroy {
         }
       });
     });
+
+    // Hide any previews when a file tree node is selected
+    this.fileTreeService.on(FileTreeEvents[FileTreeEvents.SelectedNode], async () => {
+      await this.previewService.HidePreview();
+    });
+
     this.fileTreeService.InitializeSession();
 
   }
@@ -214,6 +220,7 @@ export abstract class NG2FileTreeComponent implements OnInit, OnDestroy {
 
   public ngOnDestroy() {
     this.fileTreeService.EndSession();
+    this.fileTreeService.Cleanup();
   }
 
   public onNodeSelected(event: NodeSelectedEvent) {
@@ -224,7 +231,7 @@ export abstract class NG2FileTreeComponent implements OnInit, OnDestroy {
     this.log(event);
     this.fileTreeService.selectedPath = this.getPathForNodeUI(event.node);
 
-    if (event.node.parent.isRoot() || !event.node.isBranch()) { // No collapsing root level nodes
+    if ((event.node.parent && event.node.parent.isRoot()) || !event.node.isBranch()) { // No collapsing root level nodes
       return;
     }
 

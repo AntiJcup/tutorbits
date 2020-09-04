@@ -86,9 +86,7 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
     });
 
     this.codeService.once(CodeEvents[CodeEvents.InitializedSession], () => { this.onCodeInitialized(); });
-    this.codeService.on(CodeEvents[CodeEvents.GotoDefinition], (e) => {
-      this.onGoToDefinition(e);
-    });
+
 
     try {
       const tutorial: ViewTutorial = await this.tutorialService.GetCached(this.tutorialId);
@@ -143,16 +141,6 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
     this.fileTreeService.selectedPath = '/project';
     this.zone.runTask(() => {
       this.editorInitialized = true;
-    });
-  }
-
-  onGoToDefinition(event: GoToDefinitionEvent) {
-    this.logServer.LogToConsole(JSON.stringify(event));
-
-    this.fileTreeService.selectedPath = event.path;
-    this.zone.runTask(() => {
-      this.codeService.editor.focus();
-      this.codeService.editor.setPosition(event.offset);
     });
   }
 

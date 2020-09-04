@@ -56,7 +56,7 @@ export class TutorBitsPreviewService extends IPreviewService {
 
   public async LoadPreview(projectId: string, offsetEnd: number): Promise<string> {
     const response = await this.requestService
-      .Get(`api/project/preview/load?projectId=${projectId}&offsetEnd=${offsetEnd}`);
+      .Get(`api/project/preview/load?projectId=${projectId}&offsetEnd=${Math.floor(offsetEnd)}`);
 
     if (!response.ok) {
       return null;

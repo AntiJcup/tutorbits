@@ -116,11 +116,6 @@ export class WatchComponent implements OnInit, OnDestroy {
   }
 
   async ngOnInit() {
-    this.selectFileSub = this.fileTreeService.sub(FileTreeEvents[FileTreeEvents.SelectedNode], async () => {
-      this.eventService.TriggerButtonClick('Record', `PreviewClose - ${this.tutorialId}`);
-      await this.previewService.HidePreview();
-    });
-
     this.codeService.once(CodeEvents[CodeEvents.InitializedSession], () => { this.onCodeInitialized(); });
 
     if (!this.dataService.GetShownWatchHelp()) {
@@ -177,7 +172,7 @@ export class WatchComponent implements OnInit, OnDestroy {
 
   async onReady() {
     // If publish mode make sure not to cache!
-    this.currentProjectService.LoadProject(true, this.tutorial.projectId, this.publishMode ? Guid.create().toString() : 'play');
+    await this.currentProjectService.LoadProject(true, this.tutorial.projectId, this.publishMode ? Guid.create().toString() : 'play');
 
     this.onLoadStartSub = this.playerService.sub(PlayerEvents[PlayerEvents.loadStart], (event) => {
       this.loadingReferences++;

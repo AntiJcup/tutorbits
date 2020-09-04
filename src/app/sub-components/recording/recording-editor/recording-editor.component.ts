@@ -3,6 +3,7 @@ import { MonacoEditorComponent } from '../../editors/editor/monaco-editor.compon
 import { ILogService } from 'src/app/services/abstract/ILogService';
 import { IEditorPluginService } from 'src/app/services/abstract/IEditorPluginService';
 import { ICodeService } from 'src/app/services/abstract/ICodeService';
+import { IFileTreeService } from 'src/app/services/abstract/IFileTreeService';
 
 @Component({
   selector: 'app-recording-editor',
@@ -11,8 +12,12 @@ import { ICodeService } from 'src/app/services/abstract/ICodeService';
 })
 
 export class RecordingEditorComponent extends MonacoEditorComponent implements OnInit {
-  constructor(logServer: ILogService, editorPluginService: IEditorPluginService, codeService: ICodeService) {
-    super(logServer, editorPluginService, codeService);
+  constructor(
+    logService: ILogService,
+    editorPluginService: IEditorPluginService,
+    codeService: ICodeService,
+    fileTreeService: IFileTreeService) {
+    super(logService, editorPluginService, codeService, fileTreeService);
   }
 
   ngOnInit() {

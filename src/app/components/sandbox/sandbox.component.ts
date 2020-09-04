@@ -103,9 +103,6 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate, OnDestr
     });
 
     this.codeService.once(CodeEvents[CodeEvents.InitializedSession], () => { this.onCodeInitialized(); });
-    this.codeService.on(CodeEvents[CodeEvents.GotoDefinition], (e) => {
-      this.onGoToDefinition(e);
-    });
   }
 
   ngOnDestroy(): void {
@@ -139,16 +136,6 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate, OnDestr
       await this.LoadProject();
       await this.workspacePluginService.setupNewWorkspace(this.projectType);
     }
-  }
-
-  onGoToDefinition(event: GoToDefinitionEvent) {
-    this.logServer.LogToConsole(JSON.stringify(event));
-
-    this.zone.runTask(() => {
-      this.fileTreeService.selectedPath = event.path;
-      this.codeService.editor.focus();
-      this.codeService.editor.setPosition(event.offset);
-    });
   }
 
   async startEditing(loadedTransactionLogs: TraceTransactionLog[]) {

@@ -93,10 +93,6 @@ export class TutorBitsRecorderService extends IRecorderService {
     super();
 
     this.log = this.logServer.LogToConsole.bind(this.logServer, 'RecorderService');
-
-    this.fileTreeService.on(FileTreeEvents[FileTreeEvents.SelectedNode], (path: string) => {
-      this.OnNodeSelected(path);
-    });
   }
 
   public async StartRecording(settings: RecorderSettings): Promise<void> {
@@ -130,6 +126,10 @@ export class TutorBitsRecorderService extends IRecorderService {
 
     this.fileTreeService.on(FileTreeEvents[FileTreeEvents.AddedResource], (path: string, resourceId: string, resourceName: string) => {
       this.onFileUploaded(path, resourceId, resourceName);
+    });
+
+    this.fileTreeService.on(FileTreeEvents[FileTreeEvents.SelectedNode], (path: string) => {
+      this.OnNodeSelected(path);
     });
 
     if (settings.trackNonFileEvents) {

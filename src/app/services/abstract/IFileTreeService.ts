@@ -59,6 +59,8 @@ export abstract class IFileTreeService extends EasyEventEmitter {
 
   public abstract EndSession(): void;
 
+  public abstract Cleanup(): void;
+
   public abstract PropogateTreeJson(fileJson: { [path: string]: string }, options: PropogateTreeOptions): void;
 
   public abstract PropogateTree(files: { [path: string]: TutorBitsTreeModel }, options: PropogateTreeOptions): void;

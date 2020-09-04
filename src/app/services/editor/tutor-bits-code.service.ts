@@ -95,12 +95,16 @@ export class TutorBitsCodeService extends ICodeService {
     this.codeEditor = null;
     this.emit(CodeEvents[CodeEvents.EndedSession]);
     this.selectedFilePath = '';
-    this.removeAllListeners();
+
     this.ignoreNext = false;
 
     this.ClearFiles();
 
     this.initialized = false;
+  }
+
+  public Cleanup(): void {
+    this.removeAllListeners();
   }
 
   public ClearCacheForFile(path: string): void {

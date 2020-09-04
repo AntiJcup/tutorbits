@@ -61,11 +61,6 @@
               },
               {
                 "glob": "**/*",
-                "input": "assets/oil/",
-                "output": "./assets/oil/"
-              },
-              {
-                "glob": "**/*",
                 "input": "assets/fonts/",
                 "output": "./assets/fonts/"
               }

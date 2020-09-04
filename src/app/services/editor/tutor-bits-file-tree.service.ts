@@ -74,6 +74,9 @@ export class TutorBitsFileTreeService extends IFileTreeService {
     this.initialized = false;
     this.internalEditable = false;
     this.emit(FileTreeEvents[FileTreeEvents.EndedSession]);
+  }
+
+  public Cleanup(): void {
     this.removeAllListeners();
   }
 
@@ -94,13 +97,15 @@ export class TutorBitsFileTreeService extends IFileTreeService {
       files[path] = model;
     }
 
-    this.internalModels = files;
     this.PropogateTree(files, options);
   }
 
   public PropogateTree(files: { [path: string]: TutorBitsTreeModel }, options: PropogateTreeOptions = {}): void {
     const stagingChildren: Array<TutorBitsTreeModel> = [];
     const cache = {};
+
+    this.internalModels = files;
+
     for (const path of Object.keys(files).sort((a, b) => {
       // ASC  -> a.length - b.length
       // DESC -> b.length - a.length

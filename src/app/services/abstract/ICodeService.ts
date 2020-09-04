@@ -27,6 +27,8 @@ export abstract class ICodeService extends EasyEventEmitter {
 
   public abstract EndSession(): void;
 
+  public abstract Cleanup(): void;
+
   public abstract ClearCacheForFile(path: string): void;
 
   public abstract ClearCacheForFolder(path: string): void;
