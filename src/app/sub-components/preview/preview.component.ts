@@ -1,11 +1,8 @@
-import { Component, OnInit, EventEmitter, Output, Input, NgZone, OnDestroy } from '@angular/core';
+import { Component, OnInit, Input, NgZone, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { IPreviewService, PreviewEvents } from 'src/app/services/abstract/IPreviewService';
 import { IErrorService } from 'src/app/services/abstract/IErrorService';
-import { TraceTransactionLog } from 'shared/Tracer/models/ts/Tracer_pb';
-import { Guid } from 'guid-typescript';
-import { IEditorPluginService } from 'src/app/services/abstract/IEditorPluginService';
-import { ICodeService } from 'src/app/services/abstract/ICodeService';
+import { EventSub } from 'shared/web/lib/ts/EasyEventEmitter';
 
 @Component({
   selector: 'app-preview',
@@ -14,6 +11,8 @@ import { ICodeService } from 'src/app/services/abstract/ICodeService';
 })
 
 export class PreviewComponent implements OnInit, OnDestroy {
+  private showSub: EventSub;
+  private hideSub: EventSub;
   get previewUrl(): SafeUrl {
     return this.previewService.fullUrl;
   }
@@ -34,21 +33,31 @@ export class PreviewComponent implements OnInit, OnDestroy {
   constructor(
     private previewService: IPreviewService,
     private errorServer: IErrorService,
-    private zone: NgZone) { }
+    private zone: NgZone,
+    private changeDetector: ChangeDetectorRef,
+    private sanitizer: DomSanitizer) { }
 
   ngOnInit() {
-    this.previewService.on(PreviewEvents[PreviewEvents.RequestShow],
+    this.showSub = this.previewService.sub(PreviewEvents[PreviewEvents.RequestShow],
       async (projectId: string, offset: number, url: string, path: string) => {
         await this.ShowPreview(url, path);
+        this.changeDetector.detectChanges();
       });
 
-    this.previewService.on(PreviewEvents[PreviewEvents.RequestHide], () => {
-      this.ClosePreview();
-    });
+    this.hideSub = this.previewService.sub(PreviewEvents[PreviewEvents.RequestHide],
+      async () => {
+        this.changeDetector.detectChanges();
+      });
   }
 
   ngOnDestroy() {
+    if (this.showSub) {
+      this.showSub.Dispose();
+    }
 
+    if (this.hideSub) {
+      this.hideSub.Dispose();
+    }
   }
 
   navigate(path: string) {

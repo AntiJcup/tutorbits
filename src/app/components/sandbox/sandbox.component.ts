@@ -2,8 +2,6 @@ import { Component, OnInit, ViewChild, NgZone, HostListener, OnDestroy } from '@
 import { ActivatedRoute, Router } from '@angular/router';
 import { RecordingEditorComponent } from 'src/app/sub-components/recording/recording-editor/recording-editor.component';
 import { RecordingFileTreeComponent } from 'src/app/sub-components/recording/recording-file-tree/recording-file-tree.component';
-import { LocalProjectLoader, LocalTransactionReader } from 'shared/Tracer/lib/ts/LocalTransaction';
-import { Guid } from 'guid-typescript';
 import { IErrorService } from 'src/app/services/abstract/IErrorService';
 import { ILogService } from 'src/app/services/abstract/ILogService';
 import { ResourceViewerComponent } from 'src/app/sub-components/resource-viewer/resource-viewer.component';
@@ -22,7 +20,6 @@ import { TutorBitsExampleRatingService } from 'src/app/services/example/tutor-bi
 import { Meta } from '@angular/platform-browser';
 import { ICodeService } from 'src/app/services/abstract/ICodeService';
 import { CodeEvents, GoToDefinitionEvent } from 'src/app/services/abstract/ICodeService';
-import { IEditorPluginService } from 'src/app/services/abstract/IEditorPluginService';
 import { IWorkspacePluginService } from 'src/app/services/abstract/IWorkspacePluginService';
 import { IFileTreeService, PropogateTreeOptions, FileTreeEvents } from 'src/app/services/abstract/IFileTreeService';
 import { IRecorderService, RecorderSettings } from 'src/app/services/abstract/IRecorderService';
@@ -81,7 +78,8 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate, OnDestr
     public ratingService: TutorBitsExampleRatingService) {
     this.projectType = this.route.snapshot.paramMap.get('projectType');
     this.projectId = this.route.snapshot.paramMap.get('projectId');
-    this.loadProjectId = this.route.snapshot.paramMap.get('baseProjectId');
+    this.currentProjectService.ClearCurrentProject();
+    this.currentProjectService.baseProjectId = this.loadProjectId = this.route.snapshot.paramMap.get('baseProjectId');
 
     this.exampleId = this.route.snapshot.paramMap.get('exampleId');
     this.title = this.route.snapshot.paramMap.get('title');
@@ -116,6 +114,9 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate, OnDestr
     if (this.selectFileSub) {
       this.selectFileSub.unsubscribe();
     }
+
+    this.currentProjectService.baseProjectId = null;
+    this.currentProjectService.ClearCurrentProject();
   }
 
   // Starting point as monaco will call this when loaded
@@ -174,20 +175,6 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate, OnDestr
       });
     } catch (e) {
       this.errorServer.HandleError('Sandbox', `${e}`);
-    }
-  }
-
-  public onCloseClicked(e: any) {
-    this.eventService.TriggerButtonClick('Preview', `PreviewClose - ${this.projectId}`);
-  }
-
-  public async onPreviewClicked(e: string) {
-    this.eventService.TriggerButtonClick('Sandbox', `Preview - ${this.projectId} - ${e}`);
-    const previewPos = Math.round(this.recorderService.position);
-    try {
-      await this.previewService.ShowPreview(this.projectId, previewPos, e, this.recorderService.logs, this.loadProjectId);
-    } catch (err) {
-      this.errorServer.HandleError('PreviewError', err);
     }
   }
 

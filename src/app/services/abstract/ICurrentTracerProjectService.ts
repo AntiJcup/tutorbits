@@ -4,6 +4,10 @@ export abstract class ICurrentTracerProjectService {
   public abstract get project(): TraceProject;
   public abstract get projectId(): string;
 
+  public abstract get baseProjectId(): string;
+
+  public abstract set baseProjectId(i: string);
+
   public async abstract ClearCurrentProject();
 
   public async abstract NewProject(online: boolean): Promise<TraceProject>;

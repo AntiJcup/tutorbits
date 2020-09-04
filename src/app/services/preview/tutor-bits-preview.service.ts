@@ -124,7 +124,7 @@ export class TutorBitsPreviewService extends IPreviewService {
       this.loading_ = true;
       this.loadingId = Guid.create().toString();
       const loadingRef = this.loadingId;
-      if (logs || baseProjectId) {
+      if ((logs && logs.length > 0) || baseProjectId) {
         url = await this.GeneratePreview(projectId, offset, logs || [], baseProjectId);
       } else {
         url = await this.LoadPreview(projectId, offset);
@@ -153,7 +153,7 @@ export class TutorBitsPreviewService extends IPreviewService {
     this.emit(PreviewEvents[PreviewEvents.RequestHide]);
   }
 
-  protected async constructFullUrl(url: string, path: string) {
+  protected constructFullUrl(url: string, path: string): SafeUrl {
     const fileUrl = `${url}${path}`;
 
     let urlPath = path;
@@ -174,6 +174,7 @@ export class TutorBitsPreviewService extends IPreviewService {
       urlPath += `&server=${encodeURIComponent(languageServerUrl)}`;
     }
 
-    return this.sanitizer.bypassSecurityTrustResourceUrl(`${url}${urlPath}`);
+    const furl = this.sanitizer.bypassSecurityTrustResourceUrl(`${url}${urlPath}`);
+    return furl;
   }
 }

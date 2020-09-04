@@ -49,7 +49,7 @@ export abstract class IPlayerService extends EasyEventEmitter {
 
   public async abstract Load(settings?: PlayerSettings): Promise<void>;
 
-  public abstract Dispose(): void;
+  public abstract ClearLoadedSession(): void;
 
   public abstract Play(): void;
 

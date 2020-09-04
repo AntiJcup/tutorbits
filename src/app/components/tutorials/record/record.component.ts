@@ -2,7 +2,6 @@ import { Component, OnInit, ViewChild, NgZone, OnDestroy, HostListener } from '@
 import { ActivatedRoute, Router } from '@angular/router';
 import { environment } from 'src/environments/environment';
 import { RecordingEditorComponent } from 'src/app/sub-components/recording/recording-editor/recording-editor.component';
-import { RecordingFileTreeComponent } from 'src/app/sub-components/recording/recording-file-tree/recording-file-tree.component';
 import { ApiHttpRequestInfo, ApiHttpRequest } from 'shared/web/lib/ts/ApiHttpRequest';
 import { RecordingWebCamComponent } from 'src/app/sub-components/recording/recording-web-cam/recording-web-cam.component';
 import { WebCamRecorder } from 'src/app/sub-components/recording/recorder/webcam.recorder';
@@ -10,11 +9,9 @@ import { TutorBitsTutorialService } from 'src/app/services/tutorial/tutor-bits-t
 import { IErrorService } from 'src/app/services/abstract/IErrorService';
 import { ILogService } from 'src/app/services/abstract/ILogService';
 import { IVideoService } from 'src/app/services/abstract/IVideoService';
-import { ResourceViewerComponent } from 'src/app/sub-components/resource-viewer/resource-viewer.component';
-import { Observable, Subscription } from 'rxjs';
+import { Observable } from 'rxjs';
 import { ComponentCanDeactivate } from 'src/app/services/guards/tutor-bits-pending-changes-guard.service';
 import { IEventService } from 'src/app/services/abstract/IEventService';
-import { PreviewComponent } from 'src/app/sub-components/preview/preview.component';
 import { ITitleService } from 'src/app/services/abstract/ITitleService';
 import { ViewTutorial } from 'src/app/models/tutorial/view-tutorial';
 import { ITracerProjectService } from 'src/app/services/abstract/ITracerProjectService';
@@ -23,7 +20,6 @@ import { IFileTreeService, FileTreeEvents } from 'src/app/services/abstract/IFil
 import { IRecorderService, RecorderSettings } from 'src/app/services/abstract/IRecorderService';
 import { ICurrentTracerProjectService } from 'src/app/services/abstract/ICurrentTracerProjectService';
 import { IPreviewService } from 'src/app/services/abstract/IPreviewService';
-import { S_IFREG } from 'constants';
 
 @Component({
   templateUrl: './record.component.html',
@@ -64,7 +60,6 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
     private route: ActivatedRoute,
     private errorServer: IErrorService,
     private logServer: ILogService,
-    private projectService: ITracerProjectService,
     private videoRecordingService: IVideoService,
     private eventService: IEventService,
     private tutorialService: TutorBitsTutorialService,
@@ -76,6 +71,8 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
     private previewService: IPreviewService) {
     this.tutorialId = this.route.snapshot.paramMap.get('tutorialId');
     this.hasRecorded = this.route.snapshot.queryParamMap.get('back') === 'true';
+    this.currentProjectService.ClearCurrentProject();
+    this.currentProjectService.baseProjectId = null;
   }
 
   public get canRecord(): boolean {
@@ -118,6 +115,9 @@ export class RecordComponent implements OnInit, OnDestroy, ComponentCanDeactivat
       clearTimeout(this.timeoutTimer);
       this.timeoutTimer = null;
     }
+
+    this.currentProjectService.ClearCurrentProject();
+    this.currentProjectService.baseProjectId = null;
   }
 
   async onStreamInitialized(webCam: RecordingWebCamComponent) {

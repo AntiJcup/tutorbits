@@ -127,9 +127,12 @@ export class TutorBitsPlayerService extends IPlayerService {
     this.LoadLoop();
   }
 
-  public Dispose(): void {
+  public ClearLoadedSession(): void {
     clearInterval(this.updateInterval_);
     clearInterval(this.loadInterval_);
+    this.transactionLogCache = null;
+    this.transactionLogs = null;
+    this.settings = null;
   }
 
   public Play(): void {
@@ -465,7 +468,8 @@ export class TutorBitsPlayerService extends IPlayerService {
       return projectCache[partition];
     }
 
-    const traceTransactionLog: TraceTransactionLog = await this.GetTransactionLog(partition);
+    const traceTransactionLog: TraceTransactionLog =
+      await this.currentProjectService.GetTransactionLog(partition, this.settings.cacheBuster);
     // console.log(`Loaded Transaction Log: ${JSON.stringify(traceTransactionLog.toObject())}`);
 
     if (!projectCache) {

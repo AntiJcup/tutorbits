@@ -42,7 +42,7 @@ export class TutorBitsRecorderService extends IRecorderService {
   protected changed = false;
 
   private lastPreviewPath: string;
-  protected savedTransactionLogPartions: number[];
+  protected savedTransactionLogPartions: number[] = [];
 
   protected log: (...args: any[]) => void;
   protected previewShowCallback: (path: string) => void;
@@ -158,7 +158,7 @@ export class TutorBitsRecorderService extends IRecorderService {
   public async StopRecording(): Promise<boolean> {
     this.log(`Stopped Recording`);
     this.internalRecording = false;
-    this.internalTransactionLogs = [];
+
 
     if (this.fileChangeListener) {
       this.fileChangeListener.dispose();
@@ -180,7 +180,11 @@ export class TutorBitsRecorderService extends IRecorderService {
       this.previewService.removeListener(PreviewEvents[PreviewEvents.RequestHide], this.previewHideCallback);
     }
 
-    return await this.SaveTransactionLogs(true);
+    const res = await this.SaveTransactionLogs(true);
+    this.internalTransactionLogs = [];
+    this.settings = null;
+    this.savedTransactionLogPartions = [];
+    return res;
   }
 
   protected OnFileModified(e: monaco.editor.IModelContentChangedEvent): void {
@@ -709,6 +713,6 @@ export class TutorBitsRecorderService extends IRecorderService {
   }
 
   public Reset(): void {
-    this.savedTransactionLogPartions = new Array<number>();
+    this.savedTransactionLogPartions = [];
   }
 }

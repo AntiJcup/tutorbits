@@ -90,7 +90,7 @@ export class WatchComponent implements OnInit, OnDestroy {
     private projectService: ITracerProjectService,
     private videoService: IVideoService,
     private errorServer: IErrorService,
-    private logServer: ILogService,
+    private logService: ILogService,
     private eventService: IEventService,
     private titleService: ITitleService,
     private codeService: ICodeService,
@@ -110,6 +110,9 @@ export class WatchComponent implements OnInit, OnDestroy {
     if (this.title) {
       this.titleService.SetTitle(`${this.title} - TutorBits Tutorial`);
     }
+
+    this.currentProjectService.ClearCurrentProject();
+    this.currentProjectService.baseProjectId = null;
   }
 
   async ngOnInit() {
@@ -166,24 +169,15 @@ export class WatchComponent implements OnInit, OnDestroy {
     if (this.onLoadCompleteSub) {
       this.onLoadCompleteSub.Dispose();
     }
+
+    this.currentProjectService.ClearCurrentProject();
+    this.currentProjectService.baseProjectId = null;
+    this.playerService.ClearLoadedSession();
   }
 
   async onReady() {
     // If publish mode make sure not to cache!
-    // this.codePlayer = new MonacoPlayer(
-    //   this.fileTreeService,
-    //   this.previewService,
-    //   this.resourceViewerComponent,
-    //   this.playbackMouseComponent,
-    //   this.logServer,
-    //   this.codeService,
-    //   this.projectService,
-    //   this.projectService,
-    //   this.tutorial.projectId,
-    //   null, // Use default settings
-    //   this.publishMode ? Guid.create().toString() : 'play');
-
-    this.currentProjectService.LoadProject(true, this.tutorial.projectId);
+    this.currentProjectService.LoadProject(true, this.tutorial.projectId, this.publishMode ? Guid.create().toString() : 'play');
 
     this.onLoadStartSub = this.playerService.sub(PlayerEvents[PlayerEvents.loadStart], (event) => {
       this.loadingReferences++;
@@ -311,7 +305,6 @@ export class WatchComponent implements OnInit, OnDestroy {
 
   public onCopyToSandboxClicked(e: any, newWindow: boolean) {
     this.eventService.TriggerButtonClick('Watch', `Sandbox - ${this.tutorialId}`);
-    // this.router.navigate([`sandbox/${this.projectId}`]);
     if (newWindow) {
       window.open(`create/sandbox/${this.tutorial.projectId}`, 'Sandbox', 'height=720,width=1080');
     } else {

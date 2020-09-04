@@ -17,6 +17,9 @@ export class TutorBitsCurrentTracerProjectService extends ICurrentTracerProjectS
   protected online_: boolean;
 
   // tslint:disable-next-line: variable-name
+  protected baseProjectId_: string;
+
+  // tslint:disable-next-line: variable-name
   private projectLoader_: IProjectReader;
   // tslint:disable-next-line: variable-name
   private projectWriter_: IProjectWriter;
@@ -35,6 +38,14 @@ export class TutorBitsCurrentTracerProjectService extends ICurrentTracerProjectS
     }
 
     return this.project_.getId();
+  }
+
+  public get baseProjectId(): string {
+    return this.baseProjectId_;
+  }
+
+  public set baseProjectId(i: string) {
+    this.baseProjectId_ = i;
   }
 
   public get online(): boolean {

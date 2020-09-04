@@ -277,7 +277,8 @@ export abstract class NG2FileTreeComponent implements OnInit, OnDestroy {
       this.currentProjectService.projectId,
       position,
       this.fileTreeService.selectedPath,
-      logs);
+      logs,
+      this.currentProjectService.baseProjectId);
   }
 
   public onNodeCreated(e: NodeCreatedEvent) {

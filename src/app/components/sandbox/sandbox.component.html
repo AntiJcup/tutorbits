@@ -25,7 +25,7 @@
 </div>
 <div fxLayout fxLayoutGap="5px" class="tutorialContainer">
   <div class="sideBar">
-    <app-recording-file-tree id="tutorialFileExplorer" (previewClicked)="onPreviewClicked($event)" tabindex="-1">
+    <app-recording-file-tree id="tutorialFileExplorer" tabindex="-1">
     </app-recording-file-tree>
   </div>
   <div class="editorContainer" fxLayout fxLayoutGap="5px">
@@ -33,7 +33,7 @@
     </app-resource-viewer>
     <app-recording-editor class="recordingEditor">
     </app-recording-editor>
-    <app-preview class="preview" (closeClicked)="onCloseClicked($event)">
+    <app-preview class="preview">
     </app-preview>
     <div class="commentSection" *ngIf="showCommentSection">
       <app-comment-section [comments]="comments" [targetId]="exampleId" (closeClicked)="onCommentsClosed($event);"
