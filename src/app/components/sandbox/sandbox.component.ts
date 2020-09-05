@@ -157,6 +157,10 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate, OnDestr
         startingTransactionLogs: loadedTransactionLogs
       } as RecorderSettings);
       this.logServer.LogToConsole('Sandbox', 'Ready to edit');
+
+      if (!this.loadBaseProjectId && loadedTransactionLogs.length === 0) {
+        await this.workspacePluginService.setupNewWorkspace(this.projectType);
+      }
       this.zone.runTask(() => {
         this.loading = false;
       });
@@ -199,9 +203,6 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate, OnDestr
       } as PlayerSettings);
       if (this.playerService.duration === 0) {
         await this.startEditing([]);
-        if (!this.loadBaseProjectId) {
-          await this.workspacePluginService.setupNewWorkspace(this.projectType);
-        }
         return;
       }
 

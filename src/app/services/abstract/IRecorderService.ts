@@ -29,6 +29,8 @@ export abstract class IRecorderService extends EasyEventEmitter {
   public abstract async StopRecording(): Promise<boolean>;
   public abstract async Save(): Promise<void>;
 
+  public abstract async PropogateJSON(files: { [path: string]: string }): Promise<void>;
+
   public abstract OnNodeSelected(path: string): void;
   public abstract OnNodeCreated(path: string): void;
   public abstract OnNodeRename(sourcePath: string, destinationPath: string): void;

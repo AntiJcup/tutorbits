@@ -105,6 +105,14 @@ export class TutorBitsRecorderService extends IRecorderService {
     this.start = Date.now() - this.currentProjectService.project.getDuration();
     this.timeOffset = Date.now() - this.start;
 
+    const presavedTransactions = this.internalTransactionLogs.sort((a, b) => {
+      return a.getPartition() > b.getPartition() ? 1 : -1;
+    }).map((transactionLog: TraceTransactionLog) => {
+      return transactionLog.getPartition();
+    });
+    presavedTransactions.pop();
+    this.savedTransactionLogPartions = this.savedTransactionLogPartions.concat(presavedTransactions);
+
     this.fileChangeListener = this.codeService.editor.onDidChangeModelContent((e: monaco.editor.IModelContentChangedEvent) => {
       this.OnFileModified(e);
     });
@@ -413,16 +421,19 @@ export class TutorBitsRecorderService extends IRecorderService {
     await this.SaveTransactionLogs(!!this.settings.saveUnfinishedPartitions);
   }
 
-  public async Initialize(): Promise<void> {
-    const presavedTransactions = this.transactionLogs.sort((a, b) => {
-      return a.getPartition() > b.getPartition() ? 1 : -1;
-    }).map((transactionLog: TraceTransactionLog) => {
-      return transactionLog.getPartition();
-    });
-    // console.log(`loaded transaction logs: ${presavedTransactions}`);
-    presavedTransactions.pop();
-    this.savedTransactionLogPartions = this.savedTransactionLogPartions.concat(presavedTransactions);
-    // console.log(`presaved transaction logs: ${this.savedTransactionLogPartions}`);
+  public async PropogateJSON(files: { [path: string]: string }): Promise<void> {
+    for (const path of Object.keys(files).sort((a, b) => {
+      // ASC  -> a.length - b.length
+      // DESC -> b.length - a.length
+      return a.length - b.length;
+    })) {
+      const isFolder = path.endsWith('/');
+      const data = files[path];
+      this.CreateItem(0, '', path, isFolder);
+      if (!isFolder) {
+        this.ModifyFile(0, path, 0, data.length, data);
+      }
+    }
   }
 
   public GetTransactionLogByTimeOffset(timeOffset: number): TraceTransactionLog {
