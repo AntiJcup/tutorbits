@@ -52,9 +52,17 @@ export class TutorBitsCurrentTracerProjectService extends ICurrentTracerProjectS
     return this.online_;
   }
 
+  private setOnline(o: boolean) {
+    this.online_ = o;
+    this.projectLoader_ = null;
+    this.projectWriter_ = null;
+    this.transactionWriter_ = null;
+    this.transactionReader_ = null;
+  }
+
   protected get projectLoader(): IProjectReader {
     if (!this.projectLoader_) {
-      this.projectLoader_ = this.online_ ? new LocalProjectLoader() : this.projectService;
+      this.projectLoader_ = !this.online_ ? new LocalProjectLoader() : this.projectService;
     }
 
     return this.projectLoader_;
@@ -62,7 +70,7 @@ export class TutorBitsCurrentTracerProjectService extends ICurrentTracerProjectS
 
   protected get projectWriter(): IProjectWriter {
     if (!this.projectWriter_) {
-      this.projectWriter_ = this.online_ ? new LocalProjectWriter() : this.projectService;
+      this.projectWriter_ = !this.online_ ? new LocalProjectWriter() : this.projectService;
     }
 
     return this.projectWriter_;
@@ -70,7 +78,7 @@ export class TutorBitsCurrentTracerProjectService extends ICurrentTracerProjectS
 
   protected get transactionWriter(): ITransactionWriter {
     if (!this.transactionWriter_) {
-      this.transactionWriter_ = this.online_ ? new LocalTransactionWriter() : this.projectService;
+      this.transactionWriter_ = !this.online_ ? new LocalTransactionWriter() : this.projectService;
     }
 
     return this.transactionWriter_;
@@ -78,7 +86,7 @@ export class TutorBitsCurrentTracerProjectService extends ICurrentTracerProjectS
 
   protected get transactionReader(): ITransactionReader {
     if (!this.transactionWriter_) {
-      this.transactionReader_ = this.online_ ? new LocalTransactionReader() : this.projectService;
+      this.transactionReader_ = !this.online_ ? new LocalTransactionReader() : this.projectService;
     }
 
     return this.transactionReader_;
@@ -95,9 +103,9 @@ export class TutorBitsCurrentTracerProjectService extends ICurrentTracerProjectS
   }
 
   public async NewProject(online: boolean): Promise<TraceProject> {
-    this.online_ = online;
+    this.setOnline(online);
 
-    const projectId = await this.projectService.CreateProject();
+    const projectId = await this.projectWriter.CreateProject();
     if (!projectId) {
       return null;
     }
@@ -106,14 +114,14 @@ export class TutorBitsCurrentTracerProjectService extends ICurrentTracerProjectS
   }
 
   public async LoadProject(online: boolean, projectId: string, cacheBuster?: string): Promise<TraceProject> {
-    this.online_ = online;
+    this.setOnline(online);
 
-    this.project_ = await this.projectService.GetProject(projectId, cacheBuster);
+    this.project_ = await this.projectLoader.GetProject(projectId, cacheBuster);
     return this.project_;
   }
 
   public async ResetProject(): Promise<boolean> {
-    await this.projectService.ResetProject(this.projectId);
+    await this.projectWriter.ResetProject(this.projectId);
 
     return !!(await this.LoadProject(this.online_, this.projectId));
   }
@@ -135,19 +143,19 @@ export class TutorBitsCurrentTracerProjectService extends ICurrentTracerProjectS
   }
 
   public async WriteTransactionLog(transactionLog: TraceTransactionLog, data: Uint8Array): Promise<boolean> {
-    return await this.projectService.WriteTransactionLog(transactionLog, data, this.projectId);
+    return await this.transactionWriter.WriteTransactionLog(transactionLog, data, this.projectId);
   }
 
   public async GetProjectFromServer(cacheBuster: string): Promise<TraceProject> {
-    return await this.projectService.GetProject(this.projectId, cacheBuster);
+    return await this.projectLoader.GetProject(this.projectId, cacheBuster);
   }
 
   public async GetPartitionsForRange(startTime: number, endTime: number, cacheBuster: string): Promise<{ [partition: string]: string; }> {
-    return await this.projectService.GetPartitionsForRange(this.project, startTime, endTime, cacheBuster);
+    return await this.transactionReader.GetPartitionsForRange(this.project, startTime, endTime, cacheBuster);
   }
 
   public async GetTransactionLog(partition: string, cacheBuster: string): Promise<TraceTransactionLog> {
-    return await this.projectService.GetTransactionLog(this.project, partition, cacheBuster);
+    return await this.transactionReader.GetTransactionLog(this.project, partition, cacheBuster);
   }
 
   public async Publish(): Promise<boolean> {

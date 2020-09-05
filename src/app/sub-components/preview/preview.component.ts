@@ -50,7 +50,7 @@ export class PreviewComponent implements OnInit, OnDestroy {
       });
   }
 
-  ngOnDestroy() {
+  async ngOnDestroy() {
     if (this.showSub) {
       this.showSub.Dispose();
     }
@@ -58,6 +58,8 @@ export class PreviewComponent implements OnInit, OnDestroy {
     if (this.hideSub) {
       this.hideSub.Dispose();
     }
+
+    await this.previewService.HidePreview();
   }
 
   navigate(path: string) {

@@ -110,7 +110,6 @@ export class CreateSandboxComponent implements OnInit, OnDestroy {
       }
     } else {
       newProjectId = Guid.create().toString();
-      await (new LocalProjectWriter()).CreateProject(newProjectId);
     }
 
     if (this.loadProjectId === null) {

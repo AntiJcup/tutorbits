@@ -115,6 +115,7 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate, OnDestr
 
     this.currentProjectService.baseProjectId = null;
     this.currentProjectService.ClearCurrentProject();
+    this.playerService.ClearLoadedSession();
   }
 
   // Starting point as monaco will call this when loaded
@@ -143,11 +144,6 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate, OnDestr
       this.codeService.AllowEdits(true);
       this.fileTreeService.editable = true;
       this.fileTreeService.selectedPath = '/project';
-
-      // Load or create new project so the recorder can reference it
-      this.isLoggedIn ?
-        await this.currentProjectService.LoadProject(true /*Online*/, this.projectId) :
-        await this.currentProjectService.NewProject(false /*Offline since not logged in*/);
 
       // Starts recording using the current assigned project
       this.recorderService.StartRecording({
@@ -188,7 +184,9 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate, OnDestr
     this.loadingProject = true;
 
     const cacheBuster = this.isLoggedIn ? Guid.create().toString() : 'sandbox';
-    await this.currentProjectService.LoadProject(this.isLoggedIn, this.projectId, cacheBuster);
+    this.isLoggedIn ?
+      await this.currentProjectService.LoadProject(true /*Online*/, this.projectId, cacheBuster) :
+      await this.currentProjectService.NewProject(false /*Offline since not logged in*/);
 
     try {
       await this.playerService.Load({
