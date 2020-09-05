@@ -19,12 +19,12 @@ import { TutorBitsExampleCommentService } from 'src/app/services/example/tutor-b
 import { TutorBitsExampleRatingService } from 'src/app/services/example/tutor-bits-example-rating.service';
 import { Meta } from '@angular/platform-browser';
 import { ICodeService } from 'src/app/services/abstract/ICodeService';
-import { CodeEvents, GoToDefinitionEvent } from 'src/app/services/abstract/ICodeService';
+import { CodeEvents } from 'src/app/services/abstract/ICodeService';
 import { IWorkspacePluginService } from 'src/app/services/abstract/IWorkspacePluginService';
 import { IFileTreeService, PropogateTreeOptions, FileTreeEvents } from 'src/app/services/abstract/IFileTreeService';
 import { IRecorderService, RecorderSettings } from 'src/app/services/abstract/IRecorderService';
 import { ICurrentTracerProjectService } from 'src/app/services/abstract/ICurrentTracerProjectService';
-import { IPlayerService, PlayerEvents } from 'src/app/services/abstract/IPlayerService';
+import { IPlayerService, PlayerEvents, PlayerSettings } from 'src/app/services/abstract/IPlayerService';
 import { Guid } from 'guid-typescript';
 
 @Component({
@@ -37,7 +37,7 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate, OnDestr
   @ViewChild(RecordingEditorComponent, { static: true }) recordingEditor: RecordingEditorComponent;
   @ViewChild(ResourceViewerComponent, { static: true }) resourceViewerComponent: ResourceViewerComponent;
 
-  loadProjectId: string;
+  loadBaseProjectId: string;
   projectType: string;
 
   loadingProject = false;
@@ -80,7 +80,7 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate, OnDestr
     this.projectType = this.route.snapshot.paramMap.get('projectType');
     this.projectId = this.route.snapshot.paramMap.get('projectId');
     this.currentProjectService.ClearCurrentProject();
-    this.currentProjectService.baseProjectId = this.loadProjectId = this.route.snapshot.paramMap.get('baseProjectId');
+    this.currentProjectService.baseProjectId = this.loadBaseProjectId = this.route.snapshot.paramMap.get('baseProjectId');
 
     this.exampleId = this.route.snapshot.paramMap.get('exampleId');
     this.title = this.route.snapshot.paramMap.get('title');
@@ -124,7 +124,7 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate, OnDestr
       return;
     }
 
-    if (this.loadProjectId) {
+    if (this.loadBaseProjectId) {
       try {
         await this.LoadBaseProject();
         await this.LoadProject();
@@ -135,7 +135,6 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate, OnDestr
     } else {
       this.fileTreeService.editable = true;
       await this.LoadProject();
-      await this.workspacePluginService.setupNewWorkspace(this.projectType);
     }
   }
 
@@ -168,7 +167,7 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate, OnDestr
 
   public async LoadBaseProject(): Promise<void> {
     this.loadingProject = true;
-    const projectJson = await this.projectService.GetProjectJson(this.loadProjectId);
+    const projectJson = await this.projectService.GetProjectJson(this.loadBaseProjectId);
     if (!projectJson) {
       throw new Error('Project Json Load Failed');
     }
@@ -176,7 +175,7 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate, OnDestr
     this.zone.runTask(() => {
       this.codeService.PropogateEditor(projectJson);
       this.fileTreeService.PropogateTreeJson(projectJson, {
-        overrideProjectId: this.loadProjectId
+        overrideProjectId: this.loadBaseProjectId
       } as PropogateTreeOptions);
     });
   }
@@ -184,12 +183,25 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate, OnDestr
   public async LoadProject(): Promise<void> {
     this.loadingProject = true;
 
-    await this.currentProjectService.LoadProject(this.isLoggedIn, this.projectId, this.isLoggedIn ? Guid.create().toString() : 'sandbox');
+    const cacheBuster = this.isLoggedIn ? Guid.create().toString() : 'sandbox';
+    await this.currentProjectService.LoadProject(this.isLoggedIn, this.projectId, cacheBuster);
 
     try {
-      await this.playerService.Load();
+      await this.playerService.Load({
+        cacheBuster,
+        speedMultiplier: 1,
+        lookAheadSize: 1000 * 15,
+        loadChunkSize: 1000 * 30,
+        updateInterval: 10,
+        loadInterval: 1000 * 1,
+        customIncrementer: true,
+        onlyFileBasedPlaybacks: true
+      } as PlayerSettings);
       if (this.playerService.duration === 0) {
         await this.startEditing([]);
+        if (!this.loadBaseProjectId) {
+          await this.workspacePluginService.setupNewWorkspace(this.projectType);
+        }
         return;
       }
 
@@ -236,7 +248,7 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate, OnDestr
     this.downloading = true;
     const previewPos = Math.round(this.recorderService.position);
     try {
-      await this.previewService.DownloadPreview(this.projectId, previewPos, this.recorderService.logs, this.loadProjectId);
+      await this.previewService.DownloadPreview(this.projectId, previewPos, this.recorderService.logs, this.loadBaseProjectId);
     } catch (err) {
       this.errorServer.HandleError(`DownloadError`, err);
     }

@@ -1,5 +1,5 @@
 import { IRecorderService, RecorderSettings } from '../abstract/IRecorderService';
-import { IFileTreeService, FileTreeEvents, ResourceType, PathType } from '../abstract/IFileTreeService';
+import { IFileTreeService, FileTreeEvents, ResourceNodeType, PathType } from '../abstract/IFileTreeService';
 import { IPreviewService, PreviewEvents } from '../abstract/IPreviewService';
 import { ILogService } from '../abstract/ILogService';
 import { IErrorService } from '../abstract/IErrorService';
@@ -117,7 +117,7 @@ export class TutorBitsRecorderService extends IRecorderService {
       this.OnNodeRename(sourcePath, destinationPath);
     });
 
-    this.fileTreeService.on(FileTreeEvents[FileTreeEvents.DeletedNode], (path: string, isFolder: boolean, type: ResourceType) => {
+    this.fileTreeService.on(FileTreeEvents[FileTreeEvents.DeletedNode], (path: string, isFolder: boolean, type: ResourceNodeType) => {
       this.OnNodeDeleted(path, isFolder, type);
     });
 
@@ -129,11 +129,11 @@ export class TutorBitsRecorderService extends IRecorderService {
       this.onFileUploaded(path, resourceId, resourceName);
     });
 
-    this.fileTreeService.on(FileTreeEvents[FileTreeEvents.SelectedNode], (path: string) => {
-      this.OnNodeSelected(path);
-    });
-
     if (settings.trackNonFileEvents) {
+      this.fileTreeService.on(FileTreeEvents[FileTreeEvents.SelectedNode], (path: string) => {
+        this.OnNodeSelected(path);
+      });
+
       this.mouseMoveCallbackWrapper = (e: MouseEvent) => {
         this.onMouseMoved(e);
       };
@@ -223,25 +223,6 @@ export class TutorBitsRecorderService extends IRecorderService {
 
     this.log(`OnNodeSelected from: ${oldPath} to: ${newPath}`);
 
-    switch (this.fileTreeService.GetNodeTypeByPath(path)) {
-      case ResourceType.code:
-        this.codeService.currentFilePath = newPath;
-        this.codeService.UpdateCacheForCurrentFile();
-        this.resourceViewerService.resource = null;
-        break;
-      case ResourceType.asset:
-        this.codeService.currentFilePath = '';
-        this.codeService.UpdateCacheForCurrentFile();
-        const model = this.fileTreeService.GetNodeForPath(path);
-        this.resourceViewerService.resource = {
-          projectId: model.overrideProjectId || this.projectId,
-          fileName: model.value,
-          resourceId: model.resourceId,
-          path: newPath
-        } as ResourceData;
-        break;
-    }
-
     if (this.recording) {
       this.timeOffset = Date.now() - this.start;
       this.SelectFile(this.timeOffset, oldPath, newPath);
@@ -256,13 +237,13 @@ export class TutorBitsRecorderService extends IRecorderService {
 
     const isFolder = this.fileTreeService.GetPathTypeForPath(newPath) === PathType.folder;
     switch (this.fileTreeService.GetNodeTypeByPath(newPath)) {
-      case ResourceType.code:
+      case ResourceNodeType.code:
         if (!isFolder) {
           this.codeService.currentFilePath = newPath;
           this.codeService.editor.focus();
         }
         break;
-      case ResourceType.asset:
+      case ResourceNodeType.asset:
         return;
     }
 
@@ -278,7 +259,7 @@ export class TutorBitsRecorderService extends IRecorderService {
     let oldFileData: string = null;
     const isFolder = this.fileTreeService.GetPathTypeForPath(destinationPath) === PathType.folder;
     switch (this.fileTreeService.GetNodeTypeByPath(destinationPath)) {
-      case ResourceType.code:
+      case ResourceNodeType.code:
         if (!isFolder) {
           oldFileData = this.codeService.GetCacheForFileName(sourcePath).getValue();
           this.codeService.ClearCacheForFile(sourcePath);
@@ -287,7 +268,7 @@ export class TutorBitsRecorderService extends IRecorderService {
           this.codeService.currentFilePath = destinationPath;
         }
         break;
-      case ResourceType.asset:
+      case ResourceNodeType.asset:
         if (sourcePath === (this.resourceViewerService.resource ? this.resourceViewerService.resource.path : null)) {
           this.resourceViewerService.resource.path = destinationPath;
           this.resourceViewerService.resource.fileName = destinationPath.split('/').pop();
@@ -305,7 +286,7 @@ export class TutorBitsRecorderService extends IRecorderService {
     this.TriggerDelayedSave();
   }
 
-  public OnNodeDeleted(path: string, isFolder: boolean, type: ResourceType) {
+  public OnNodeDeleted(path: string, isFolder: boolean, type: ResourceNodeType) {
     this.log(`OnNodeDeleted ${path}`);
 
     this.timeOffset = Date.now() - this.start;
@@ -315,12 +296,12 @@ export class TutorBitsRecorderService extends IRecorderService {
     this.DeleteFile(this.timeOffset, path, oldData, isFolder);
 
     switch (type) {
-      case ResourceType.code:
+      case ResourceNodeType.code:
         if (path === this.codeService.currentFilePath) {
           this.codeService.currentFilePath = '';
         }
         break;
-      case ResourceType.asset:
+      case ResourceNodeType.asset:
         if (path === (this.resourceViewerService.resource ? this.resourceViewerService.resource.path : null)) {
           this.resourceViewerService.resource = null;
         }
@@ -337,7 +318,7 @@ export class TutorBitsRecorderService extends IRecorderService {
 
     const isFolder = this.fileTreeService.GetPathTypeForPath(destinationPath) === PathType.folder;
     switch (this.fileTreeService.GetNodeTypeByPath(destinationPath)) {
-      case ResourceType.code:
+      case ResourceNodeType.code:
         if (!isFolder) {
           const oldCache = this.codeService.GetCacheForFileName(sourcePath);
           if (oldCache) {
@@ -348,7 +329,7 @@ export class TutorBitsRecorderService extends IRecorderService {
           this.codeService.currentFilePath = destinationPath;
         }
         break;
-      case ResourceType.asset:
+      case ResourceNodeType.asset:
         break;
     }
 

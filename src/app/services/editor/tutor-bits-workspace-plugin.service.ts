@@ -4,12 +4,15 @@ import { PythonWorkspacePlugin } from '../../../../shared/language-server/src/cl
 import { WebsiteWorkspacePlugin } from '../../../../shared/language-server/src/client/projects/Website/website-workspace-plugin';
 import { BaseWorkspacePlugin } from '../../../../shared/language-server/src/client/base-workspace-plugin';
 import { Injectable } from '@angular/core';
+import { IFileTreeService } from '../abstract/IFileTreeService';
 
 @Injectable()
 export class TutorBitsWorkspacePluginService extends IWorkspacePluginService {
   private plugins: { [pluginId: string]: BaseWorkspacePlugin } = {};
 
-  constructor(protected codeService: ICodeService) {
+  constructor(
+    protected codeService: ICodeService,
+    protected fileTreeService: IFileTreeService) {
     super();
 
     const pythonPlugin = new PythonWorkspacePlugin();
@@ -33,6 +36,7 @@ export class TutorBitsWorkspacePluginService extends IWorkspacePluginService {
       }
       const workspace = await plugin.setupWorkspace();
       this.codeService.PropogateEditor(workspace);
+      this.fileTreeService.PropogateTreeJson(workspace, {});
     });
   }
 }

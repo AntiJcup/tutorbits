@@ -16,7 +16,7 @@ import {
 import { ILogService } from 'src/app/services/abstract/ILogService';
 import { FileUtils, FileData } from 'shared/web/lib/ts/FileUtils';
 import { IEventService } from 'src/app/services/abstract/IEventService';
-import { TutorBitsTreeModel, IFileTreeService, ResourceType, PathType, FileTreeEvents } from 'src/app/services/abstract/IFileTreeService';
+import { TutorBitsTreeModel, IFileTreeService, ResourceNodeType, PathType, FileTreeEvents } from 'src/app/services/abstract/IFileTreeService';
 import { ICurrentTracerProjectService } from 'src/app/services/abstract/ICurrentTracerProjectService';
 import { IAuthService } from 'src/app/services/abstract/IAuthService';
 import { IPreviewService } from 'src/app/services/abstract/IPreviewService';
@@ -313,7 +313,7 @@ export abstract class NG2FileTreeComponent implements OnInit, OnDestroy {
     const newNodeModel = {
       value: e.node.isBranch() ? 'untitled_folder' : 'untitled_file',
       children: e.node.isBranch() ? [] : undefined,
-      type: e.node.isBranch() ? undefined : ResourceType.code,
+      type: e.node.isBranch() ? undefined : ResourceNodeType.code,
       settings: {
         menuItems: e.node.isBranch() ? [
           { action: NodeMenuItemAction.NewFolder, name: 'Add folder', cssClass: '' },
@@ -363,7 +363,7 @@ export abstract class NG2FileTreeComponent implements OnInit, OnDestroy {
 
     const newNodeModel = {
       value: 'untitled_file',
-      type: ResourceType.code,
+      type: ResourceNodeType.code,
       settings: {
         menuItems: [
           { action: NodeMenuItemAction.Remove, name: 'Delete', cssClass: '' },

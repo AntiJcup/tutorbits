@@ -310,6 +310,9 @@ export class TutorBitsPlayerService extends IPlayerService {
           const customData = transaction.getCustomAction();
           switch (customData.getAction()) {
             case 'previewFile':
+              if (this.settings.onlyFileBasedPlaybacks) {
+                return;
+              }
               if (!undo) {
                 this.previewService.ShowPreview(this.projectId, transaction.getTimeOffsetMs(), customData.getData()).then();
               } else {
@@ -317,6 +320,9 @@ export class TutorBitsPlayerService extends IPlayerService {
               }
               break;
             case 'previewFileclose':
+              if (this.settings.onlyFileBasedPlaybacks) {
+                return;
+              }
               if (undo) {
                 this.previewService.ShowPreview(this.projectId, transaction.getTimeOffsetMs(), customData.getData());
               } else {
@@ -329,6 +335,9 @@ export class TutorBitsPlayerService extends IPlayerService {
           }
           break;
         case TraceTransaction.TraceTransactionType.SCROLLFILE:
+          if (this.settings.onlyFileBasedPlaybacks) {
+            return;
+          }
           const scrollData = transaction.getScrollFile();
           if (!undo) {
             this.codeService.editor.setScrollTop(scrollData.getScrollEnd());
@@ -337,6 +346,9 @@ export class TutorBitsPlayerService extends IPlayerService {
           }
           break;
         case TraceTransaction.TraceTransactionType.MOUSEMOVE:
+          if (this.settings.onlyFileBasedPlaybacks) {
+            return;
+          }
           const mouseMoveData = transaction.getMouseMove();
           this.playbackMouseService.position = { x: mouseMoveData.getX(), y: mouseMoveData.getY() } as Position;
           break;
@@ -368,6 +380,9 @@ export class TutorBitsPlayerService extends IPlayerService {
           }
           break;
         case TraceTransaction.TraceTransactionType.SELECTFILE:
+          if (this.settings.onlyFileBasedPlaybacks) {
+            return;
+          }
           const selectNewPath = transaction.getSelectFile().getNewFilePath();
           const selectOldPath = transaction.getFilePath();
           if (!undo) {

@@ -19,11 +19,11 @@ export enum FileTreeEvents {
 
 export interface TutorBitsTreeModel extends TreeModel {
   resourceId?: string;
-  type?: ResourceType;
+  type?: ResourceNodeType;
   overrideProjectId?: string;
 }
 
-export enum ResourceType {
+export enum ResourceNodeType {
   code,
   asset
 }
@@ -85,9 +85,9 @@ export abstract class IFileTreeService extends EasyEventEmitter {
 
   public abstract PathIsExpanded(path: string): boolean;
 
-  public abstract GetNodeType(node: TutorBitsTreeModel): ResourceType;
+  public abstract GetNodeType(node: TutorBitsTreeModel): ResourceNodeType;
 
-  public abstract GetNodeTypeByPath(path: string): ResourceType;
+  public abstract GetNodeTypeByPath(path: string): ResourceNodeType;
 
   public abstract SanitizeFileName(name: string): string;
 

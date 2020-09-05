@@ -24,6 +24,7 @@ export interface PlayerSettings {
   loadInterval: number;
   customIncrementer: boolean;
   cacheBuster?: string;
+  onlyFileBasedPlaybacks?: boolean;
 }
 
 export abstract class IPlayerService extends EasyEventEmitter {

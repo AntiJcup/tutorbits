@@ -1,7 +1,10 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, OnDestroy } from '@angular/core';
 import { ITracerProjectService } from 'src/app/services/abstract/ITracerProjectService';
 import { IErrorService } from 'src/app/services/abstract/IErrorService';
 import { IResourceViewerService, ResourceType } from 'src/app/services/abstract/IResourceViewerService';
+import { IFileTreeService, FileTreeEvents, PathType, ResourceNodeType } from 'src/app/services/abstract/IFileTreeService';
+import { EventSub } from 'shared/web/lib/ts/EasyEventEmitter';
+import { ICurrentTracerProjectService } from 'src/app/services/abstract/ICurrentTracerProjectService';
 
 export interface ResourceData {
   fileName: string;
@@ -15,7 +18,9 @@ export interface ResourceData {
   templateUrl: './resource-viewer.component.html',
   styleUrls: ['./resource-viewer.component.sass']
 })
-export class ResourceViewerComponent implements OnInit {
+export class ResourceViewerComponent implements OnInit, OnDestroy {
+  private selectSub: EventSub;
+
   public get imageUrl(): string {
     if (this.resourceViewerService.urlType !== ResourceType.image) {
       return null;
@@ -30,9 +35,35 @@ export class ResourceViewerComponent implements OnInit {
     return this.resourceViewerService.resource.fileName;
   }
 
-  constructor(private resourceViewerService: IResourceViewerService) { }
+  constructor(
+    private resourceViewerService: IResourceViewerService,
+    private fileTreeService: IFileTreeService,
+    private currentProjectService: ICurrentTracerProjectService) { }
 
   ngOnInit() {
+    this.selectSub = this.fileTreeService.sub(FileTreeEvents[FileTreeEvents.SelectedNode],
+      (path, pathType: PathType, nodeType: ResourceNodeType) => {
+        switch (nodeType) {
+          case ResourceNodeType.code:
+            this.resourceViewerService.resource = null;
+            break;
+          case ResourceNodeType.asset:
+            const model = this.fileTreeService.GetNodeForPath(path);
+            this.resourceViewerService.resource = {
+              projectId: model.overrideProjectId || this.currentProjectService.projectId,
+              fileName: model.value,
+              resourceId: model.resourceId,
+              path
+            } as ResourceData;
+            break;
+        }
+      });
+  }
+
+  ngOnDestroy() {
+    if (this.selectSub) {
+      this.selectSub.Dispose();
+    }
   }
 
 }

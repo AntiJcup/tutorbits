@@ -1,4 +1,4 @@
-import { ResourceType } from 'src/app/services/abstract/IFileTreeService';
+import { ResourceNodeType } from 'src/app/services/abstract/IFileTreeService';
 import { TraceTransactionLog } from 'shared/Tracer/models/ts/Tracer_pb';
 import 'ngx-monaco-editor';
 import { EasyEventEmitter } from 'shared/web/lib/ts/EasyEventEmitter';
@@ -32,7 +32,7 @@ export abstract class IRecorderService extends EasyEventEmitter {
   public abstract OnNodeSelected(path: string): void;
   public abstract OnNodeCreated(path: string): void;
   public abstract OnNodeRename(sourcePath: string, destinationPath: string): void;
-  public abstract OnNodeDeleted(path: string, isFolder: boolean, type: ResourceType): void;
+  public abstract OnNodeDeleted(path: string, isFolder: boolean, type: ResourceNodeType): void;
   public abstract OnNodeMoved(sourcePath: string, destinationPath: string): void;
   public abstract onFileUploaded(path: string, resourceId: string, resourceName: string): void;
   public abstract onMouseMoved(e: MouseEvent): void;

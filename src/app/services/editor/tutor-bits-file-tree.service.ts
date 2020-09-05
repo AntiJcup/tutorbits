@@ -1,4 +1,4 @@
-import { IFileTreeService, PathType, PropogateTreeOptions, TutorBitsTreeModel, ResourceType, FileTreeEvents } from '../abstract/IFileTreeService';
+import { IFileTreeService, PathType, PropogateTreeOptions, TutorBitsTreeModel, ResourceNodeType, FileTreeEvents } from '../abstract/IFileTreeService';
 import { Guid } from 'guid-typescript';
 import { TreeStatus, FoldingType, TreeModelSettings } from '../../../../shared/Ng2-Tree/src/tree.types';
 import { Injectable } from '@angular/core';
@@ -21,7 +21,7 @@ export class TutorBitsFileTreeService extends IFileTreeService {
     if (this.internalSelectedPath) { // If not null figure out the path type
       this.internalSelectedPathType = this.GetPathTypeForPath(path);
       // TODO selection
-      this.emit(FileTreeEvents[FileTreeEvents.SelectedNode], path);
+      this.emit(FileTreeEvents[FileTreeEvents.SelectedNode], path, this.internalSelectedPathType, this.GetNodeTypeByPath(path));
     } else {
       this.internalSelectedPathType = PathType.none;
     }
@@ -91,7 +91,7 @@ export class TutorBitsFileTreeService extends IFileTreeService {
       if (path.startsWith('res:')) {
         model.resourceId = fileJson[path];
         path = path.replace('res:', '');
-        model.type = ResourceType.asset;
+        model.type = ResourceNodeType.asset;
       }
 
       files[path] = model;
@@ -136,7 +136,7 @@ export class TutorBitsFileTreeService extends IFileTreeService {
     parentPath = parentPath || '/project';
 
     let model: TutorBitsTreeModel = null;
-    const type: ResourceType = tmodel.type || ResourceType.code;
+    const type: ResourceNodeType = tmodel.type || ResourceNodeType.code;
     const id: string | number = tmodel.id;
     const nodeName = splitPath[0];
     const resourceId: string = tmodel.resourceId;
@@ -236,7 +236,7 @@ export class TutorBitsFileTreeService extends IFileTreeService {
     const newNodeModel = {
       value: path.split('/').pop(),
       resourceId,
-      type: ResourceType.asset // TODO add interpretation of file type so not everything is an asset (like code uploads)
+      type: ResourceNodeType.asset // TODO add interpretation of file type so not everything is an asset (like code uploads)
     } as TutorBitsTreeModel;
 
     this.emit(FileTreeEvents[FileTreeEvents.UpdatedNode], path, resourceId);
@@ -332,12 +332,12 @@ export class TutorBitsFileTreeService extends IFileTreeService {
     return this.internalModels[normalPath]._foldingType === FoldingType.Expanded;
   }
 
-  public GetNodeType(node: TutorBitsTreeModel): ResourceType {
-    return node.type || ResourceType.code;
+  public GetNodeType(node: TutorBitsTreeModel): ResourceNodeType {
+    return node.type || ResourceNodeType.code;
   }
 
-  public GetNodeTypeByPath(path: string): ResourceType {
-    return this.internalModels[path].type || ResourceType.code;
+  public GetNodeTypeByPath(path: string): ResourceNodeType {
+    return this.internalModels[path]?.type || ResourceNodeType.code;
   }
 
   public SanitizeFileName(name: string): string {

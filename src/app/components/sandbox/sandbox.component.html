@@ -14,7 +14,7 @@
     </app-saving-button>
   </div>
   <div class="controlsContainer">
-    <app-saving-button *ngIf="!loading && isLoggedIn && !loadProjectId" (click)="onPublish($event)"
+    <app-saving-button *ngIf="!loading && isLoggedIn && !loadBaseProjectId" (click)="onPublish($event)"
       text="Publish Example" icon="open_in_browser" [saving]="publishing" savingText="Saving...">
     </app-saving-button>
   </div>
