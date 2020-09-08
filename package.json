@@ -12,7 +12,8 @@
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
-    "postinstall": "patch-package"
+    "postinstall": "patch-package",
+    "hostContentServer": "mkdir %TMP%\\tutorbits || http-server %TMP%\\tutorbits -p 9001 --cors"
   },
   "private": true,
   "dependencies": {

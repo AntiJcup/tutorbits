@@ -1,8 +1,8 @@
 import { IWorkspacePluginService } from '../abstract/IWorkspacePluginService';
 import { ICodeService } from '../abstract/ICodeService';
-import { PythonWorkspacePlugin } from '../../../../shared/language-server/src/client/projects/Python/python-workspace-plugin';
-import { WebsiteWorkspacePlugin } from '../../../../shared/language-server/src/client/projects/Website/website-workspace-plugin';
-import { BaseWorkspacePlugin } from '../../../../shared/language-server/src/client/base-workspace-plugin';
+import { PythonWorkspacePlugin } from 'shared/language-client/client/projects/Python/python-workspace-plugin';
+import { WebsiteWorkspacePlugin } from 'shared/language-client/client/projects/Website/website-workspace-plugin';
+import { BaseWorkspacePlugin } from 'shared/language-client/client/base-workspace-plugin';
 import { Injectable } from '@angular/core';
 import { IFileTreeService } from '../abstract/IFileTreeService';
 import { IRecorderService } from '../abstract/IRecorderService';
