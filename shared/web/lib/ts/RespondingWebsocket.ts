@@ -46,17 +46,25 @@ export class RespondingWebSocket<TResponseMessageInterface, ResponseIdField exte
     setTimeout(() => response(parsedData), 0);
   }
 
-  public async listenForResponse(expectedValue: TResponseMessageInterface[ResponseIdField])
+  public async listenForResponse(expectedValue: TResponseMessageInterface[ResponseIdField], timeoutMS: number = 60000)
     : Promise<TResponseMessageInterface> {
     this.setupListener();
 
     let responseFinishCallback: (TResponseMessageInterface) => void;
+    let responseFailCallback: (reason: string) => void;
     // tslint:disable-next-line: no-shadowed-variable
-    const response = new Promise<TResponseMessageInterface>((resolve) => {
+    const response = new Promise<TResponseMessageInterface>((resolve, reject) => {
       responseFinishCallback = resolve;
+      responseFailCallback = reject;
     });
 
     this.expectedResponses.set(expectedValue, responseFinishCallback);
+    setTimeout(() => {
+      if (!this.expectedResponses.has(expectedValue)) {
+        return; // No time out if it has been resolved
+      }
+      responseFailCallback('timeout');
+    }, timeoutMS);
 
     return response;
   }
