@@ -17,8 +17,9 @@ export class TutorBitsResourceViewerService extends IResourceViewerService {
   }
   public set resource(r: ResourceData) {
     this.resource_ = r;
-
-    this.emit(ResourceViewerEvent[ResourceViewerEvent.changed], this.resource_);
+    this.evaluateResourceType().then(() => {
+      this.emit(ResourceViewerEvent[ResourceViewerEvent.changed], this.resource_);
+    });
   }
 
   public get url(): string {

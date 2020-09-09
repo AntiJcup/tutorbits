@@ -7,6 +7,9 @@ export class PythonWorkspacePlugin extends BaseWorkspacePlugin {
   }
 
   public async setupWorkspace(): Promise<{ [path: string]: string }> {
-    return { '/project/main.py': 'print("hello world!")' };
+    return {
+      '/project/': '',
+      '/project/main.py': 'print("hello world!")'
+    };
   }
 }

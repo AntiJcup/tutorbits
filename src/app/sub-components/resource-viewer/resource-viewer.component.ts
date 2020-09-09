@@ -1,7 +1,7 @@
-import { Component, OnInit, Input, OnDestroy } from '@angular/core';
+import { Component, OnInit, Input, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { ITracerProjectService } from 'src/app/services/abstract/ITracerProjectService';
 import { IErrorService } from 'src/app/services/abstract/IErrorService';
-import { IResourceViewerService, ResourceType } from 'src/app/services/abstract/IResourceViewerService';
+import { IResourceViewerService, ResourceType, ResourceViewerEvent } from 'src/app/services/abstract/IResourceViewerService';
 import { IFileTreeService, FileTreeEvents, PathType, ResourceNodeType } from 'src/app/services/abstract/IFileTreeService';
 import { EventSub } from 'shared/web/lib/ts/EasyEventEmitter';
 import { ICurrentTracerProjectService } from 'src/app/services/abstract/ICurrentTracerProjectService';
@@ -37,27 +37,12 @@ export class ResourceViewerComponent implements OnInit, OnDestroy {
 
   constructor(
     private resourceViewerService: IResourceViewerService,
-    private fileTreeService: IFileTreeService,
-    private currentProjectService: ICurrentTracerProjectService) { }
+    private changeDetector: ChangeDetectorRef) { }
 
   ngOnInit() {
-    this.selectSub = this.fileTreeService.sub(FileTreeEvents[FileTreeEvents.SelectedNode],
-      (path, pathType: PathType, nodeType: ResourceNodeType) => {
-        switch (nodeType) {
-          case ResourceNodeType.code:
-            this.resourceViewerService.resource = null;
-            break;
-          case ResourceNodeType.asset:
-            const model = this.fileTreeService.GetNodeForPath(path);
-            this.resourceViewerService.resource = {
-              projectId: model.overrideProjectId || this.currentProjectService.projectId,
-              fileName: model.value,
-              resourceId: model.resourceId,
-              path
-            } as ResourceData;
-            break;
-        }
-      });
+    this.resourceViewerService.on(ResourceViewerEvent[ResourceViewerEvent.changed], async () => {
+      this.changeDetector.markForCheck();
+    });
   }
 
   ngOnDestroy() {

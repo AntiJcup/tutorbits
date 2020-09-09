@@ -23,6 +23,7 @@ import { IPreviewService } from 'src/app/services/abstract/IPreviewService';
 import { IRecorderService } from 'src/app/services/abstract/IRecorderService';
 import { IPlayerService } from 'src/app/services/abstract/IPlayerService';
 import { TraceTransactionLog } from 'shared/Tracer/models/ts/Tracer_pb';
+import { IResourceViewerService, ResourceData } from 'src/app/services/abstract/IResourceViewerService';
 
 @Directive()
 @Injectable()
@@ -74,7 +75,8 @@ export abstract class NG2FileTreeComponent implements OnInit, OnDestroy {
     private previewService: IPreviewService,
     private recorderService: IRecorderService,
     private playerService: IPlayerService,
-    protected myElement: ElementRef) {
+    protected myElement: ElementRef,
+    private resourceViewerService: IResourceViewerService) {
     this.log = this.logServer.LogToConsole.bind(this.logServer, 'NG2FileTreeComponent');
   }
 
@@ -126,9 +128,25 @@ export abstract class NG2FileTreeComponent implements OnInit, OnDestroy {
     });
 
     // Hide any previews when a file tree node is selected
-    this.fileTreeService.on(FileTreeEvents[FileTreeEvents.SelectedNode], async () => {
-      await this.previewService.HidePreview();
-    });
+    this.fileTreeService.on(FileTreeEvents[FileTreeEvents.SelectedNode],
+      async (path, pathType: PathType, nodeType: ResourceNodeType) => {
+        await this.previewService.HidePreview();
+
+        switch (nodeType) {
+          case ResourceNodeType.code:
+            this.resourceViewerService.resource = null;
+            break;
+          case ResourceNodeType.asset:
+            const model = this.fileTreeService.GetNodeForPath(path);
+            this.resourceViewerService.resource = {
+              projectId: model.overrideProjectId || this.currentProjectService.projectId,
+              fileName: model.value,
+              resourceId: model.resourceId,
+              path
+            } as ResourceData;
+            break;
+        }
+      });
 
     this.fileTreeService.InitializeSession();
 

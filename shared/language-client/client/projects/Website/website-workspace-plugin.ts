@@ -8,6 +8,7 @@ export class WebsiteWorkspacePlugin extends BaseWorkspacePlugin {
 
   public async setupWorkspace(): Promise<{ [path: string]: string }> {
     return {
+      '/project/': '',
       '/project/index.html':
         '<!doctype html>\n<html lang="en">\n<head>\n\t<meta charset="utf-8">\n\n\t<title>Tutorbits Example HTML</title>\n\t<meta name="description" content="Tutorbits Base Html Template">\n\t<meta name="author" content="Tutorbits">\n\n\t<link rel="stylesheet" href="css/main.css?v=1.0">\n</head>\n\n<body>\n\t<div><h1>Hello World HTML</h1> The is an auto generated html.<br/>Feel to edit to your hearts content.</div>\n\t<script src="js/main.js"></script>\n</body>\n</html>\n',
       '/project/js/': '',

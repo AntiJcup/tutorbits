@@ -239,7 +239,7 @@ export class TutorBitsFileTreeService extends IFileTreeService {
       type: ResourceNodeType.asset // TODO add interpretation of file type so not everything is an asset (like code uploads)
     } as TutorBitsTreeModel;
 
-    this.emit(FileTreeEvents[FileTreeEvents.UpdatedNode], path, resourceId);
+    this.emit(FileTreeEvents[FileTreeEvents.AddedResource], path, resourceId);
     this.AddNode(`${path}`, false, newNodeModel);
   }
 
@@ -361,14 +361,15 @@ export class TutorBitsFileTreeService extends IFileTreeService {
     let index = 1;
     const splitPath = path.split('.');
     const indexToModify = Math.max(0, splitPath.length - 2);
-    let fileName = '';
+    let fileName = this.GetFileName(path);
 
     let altNewPath = newPath.endsWith('/') ? newPath.substr(0, newPath.length - 1) : (`${newPath}/`);
     while (this.DoesPathExist(newPath) || this.DoesPathExist(altNewPath)) {
       newPath = path;
       const newSplitPath = splitPath.concat([]);
-      fileName = newSplitPath[indexToModify] = `${splitPath[indexToModify]}_${index++}`;
+      newSplitPath[indexToModify] = `${splitPath[indexToModify]}_${index++}`;
       newPath = newSplitPath.join('.');
+      fileName = this.GetFileName(newPath);
       altNewPath = newPath.endsWith('/') ? newPath.substr(0, newPath.length - 1) : (`${newPath}/`);
     }
 
@@ -430,6 +431,15 @@ export class TutorBitsFileTreeService extends IFileTreeService {
 
     const outPath = splitPath.join('/');
     return outPath.length === 0 ? '/' : outPath;
+  }
+
+  public GetFileName(path: string): string {
+    const pathPieces = path.split('/');
+    if (path.endsWith('/')) {
+      pathPieces.pop();
+    }
+
+    return pathPieces.pop();
   }
 
   public GetNodeForPath(path: string): Readonly<TutorBitsTreeModel> {
