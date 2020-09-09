@@ -1,0 +1,17 @@
+
+{
+    "compilerOptions": {
+        "target": "es6",
+        "module": "commonjs",
+        "strict": true,
+        "sourceMap": true,
+        "typeRoots": [
+            "node_modules/@types"
+        ]
+    },
+    "exclude": [
+        "out",
+        "docker",
+        "node_modules"
+    ]
+}

@@ -1,0 +1,22 @@
+{
+    "extends": "./tsconfig.client.base.json",
+    "compilerOptions": {
+        "outDir": "./out/client",
+    },
+    "files": [
+        "shared/language-client/client/main.ts"
+    ],
+    "include": [
+        "src/**/*.d.ts"
+      ],
+    "lib": [
+        "es2018",
+        "dom"
+    ],
+    "exclude": [
+        "out",
+        "docker",
+        "node_modules",
+        "src"
+    ]
+}

@@ -25,13 +25,6 @@ import { ISyntaxErrorRange, IAutoCompleteItem, ICompletionResult, IDefinition, I
 import { ITextRangeCollection } from './textRangeCollection';
 import { FormatResponse } from 'shared/language-server/src/shared/plugin-types';
 
-// TODO move this into python plugin
-const DOCSTRING_PARAM_PATTERNS = [
-  '\\s*:type\\s*PARAMNAME:\\s*([^\\n, ]+)', // Sphinx
-  '\\s*:param\\s*(\\w?)\\s*PARAMNAME:[^\\n]+', // Sphinx param with type
-  '\\s*@type\\s*PARAMNAME:\\s*([^\\n, ]+)' // Epydoc
-];
-
 export abstract class BaseEditorPlugin implements
   monaco.languages.CompletionItemProvider,
   monaco.languages.DocumentRangeFormattingEditProvider,
