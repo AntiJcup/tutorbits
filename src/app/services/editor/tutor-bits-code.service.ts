@@ -25,6 +25,7 @@ export class TutorBitsCodeService extends ICodeService {
   protected codeEditor: monaco.editor.ICodeEditor;
   protected selectedFilePath: string;
   protected fileEditors: { [path: string]: CodeFile } = {};
+  protected currentCache: string;
   protected log: (...args: any[]) => void;
 
   private ignoreNext = false;
@@ -57,6 +58,7 @@ export class TutorBitsCodeService extends ICodeService {
     }
 
     this.codeEditor.setModel(cache);
+    this.currentCache = cache.getValue();
     monaco.editor.setModelLanguage(this.codeEditor.getModel(), this.GetLanguageByPath(this.selectedFilePath));
   }
 
@@ -125,36 +127,72 @@ export class TutorBitsCodeService extends ICodeService {
     }
   }
 
-  public UpdateCacheForFile(filePath: string, data: string): void {
+  public UpdateCacheForFile(filePath: string, data: string, sendEvents: boolean = true): void {
     this.log(`UpdateCacheForCurrentFile: ${filePath}`);
 
     if (!this.fileEditors[filePath]) {
       const fileModel = this.GenerateNewEditorModel(filePath, data);
+
       this.fileEditors[filePath] = new CodeFile(
         fileModel,
         fileModel.onDidChangeContent((e: monaco.editor.IModelContentChangedEvent) => {
-          this.emit(CodeEvents[CodeEvents.FileContentChanged], e, fileModel);
+          this.emit(
+            CodeEvents[CodeEvents.FileContentChanged],
+            e,
+            fileModel,
+            filePath === this.selectedFilePath ? this.currentCache : fileModel.getValue(),
+            filePath);
+          if (filePath === this.selectedFilePath) {
+            this.currentCache = fileModel.getValue();
+          }
         }));
+      if (data && sendEvents) {
+        this.emit(
+          CodeEvents[CodeEvents.FileContentChanged],
+          null,
+          this.fileEditors[filePath].model,
+          fileModel.getValue(),
+          filePath);
+      }
     } else {
+      if (sendEvents) {
+        this.emit(
+          CodeEvents[CodeEvents.FileContentChanged],
+          null,
+          this.fileEditors[filePath].model,
+          this.fileEditors[filePath].model.getValue(),
+          filePath);
+      }
+      if (filePath === this.selectedFilePath) {
+        this.currentCache = this.fileEditors[filePath].model.getValue();
+      }
+
       this.fileEditors[filePath].model.setValue(data);
-      this.emit(CodeEvents[CodeEvents.FileContentChanged], null, this.fileEditors[filePath].model);
     }
   }
 
-  public UpdateModelForFile(filePath: string, model: monaco.editor.ITextModel): void {
+  public UpdateModelForFile(filePath: string, fileModel: monaco.editor.ITextModel): void {
     this.log(`UpdateCacheForCurrentFile: ${filePath}`);
-    if (model.id === this.fileEditors[filePath]?.model?.id) {
+    if (fileModel.id === this.fileEditors[filePath]?.model?.id) {
       return;
     }
-    const listener = model.onDidChangeContent(async (e: monaco.editor.IModelContentChangedEvent) => {
-      this.emit(CodeEvents[CodeEvents.FileContentChanged], e, model);
+    const listener = fileModel.onDidChangeContent(async (e: monaco.editor.IModelContentChangedEvent) => {
+      this.emit(
+        CodeEvents[CodeEvents.FileContentChanged],
+        e,
+        fileModel,
+        filePath === this.selectedFilePath ? this.currentCache : fileModel.getValue(),
+        filePath);
+      if (filePath === this.selectedFilePath) {
+        this.currentCache = fileModel.getValue();
+      }
     });
     if (this.fileEditors[filePath]) {
-      this.fileEditors[filePath].model = model;
+      this.fileEditors[filePath].model = fileModel;
       this.fileEditors[filePath].listener.dispose();
       this.fileEditors[filePath].listener = listener;
     } else {
-      this.fileEditors[filePath] = new CodeFile(model, listener);
+      this.fileEditors[filePath] = new CodeFile(fileModel, listener);
     }
 
   }
@@ -201,10 +239,10 @@ export class TutorBitsCodeService extends ICodeService {
     return '';
   }
 
-  public PropogateEditor(files: { [path: string]: string; }): void {
+  public PropogateEditor(files: { [path: string]: string; }, sendEvents: boolean = true): void {
     for (const filePath of Object.keys(files)) {
       const fileData = files[filePath];
-      this.UpdateCacheForFile(filePath, fileData);
+      this.UpdateCacheForFile(filePath, fileData, sendEvents);
     }
   }
 

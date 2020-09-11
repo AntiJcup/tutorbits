@@ -24,6 +24,8 @@ import { IRecorderService } from 'src/app/services/abstract/IRecorderService';
 import { IPlayerService } from 'src/app/services/abstract/IPlayerService';
 import { TraceTransactionLog } from 'shared/Tracer/models/ts/Tracer_pb';
 import { IResourceViewerService, ResourceData } from 'src/app/services/abstract/IResourceViewerService';
+import { IEditorPluginService } from 'src/app/services/abstract/IEditorPluginService';
+import { ICodeService } from 'src/app/services/abstract/ICodeService';
 
 @Directive()
 @Injectable()
@@ -76,7 +78,9 @@ export abstract class NG2FileTreeComponent implements OnInit, OnDestroy {
     private recorderService: IRecorderService,
     private playerService: IPlayerService,
     protected myElement: ElementRef,
-    private resourceViewerService: IResourceViewerService) {
+    private resourceViewerService: IResourceViewerService,
+    private editorPluginService: IEditorPluginService,
+    private codeService: ICodeService) {
     this.log = this.logServer.LogToConsole.bind(this.logServer, 'NG2FileTreeComponent');
   }
 
@@ -406,6 +410,11 @@ export abstract class NG2FileTreeComponent implements OnInit, OnDestroy {
     const fileData: FileData = await FileUtils.SelectFile();
     // Update path to be relative to selected branch
     fileData.name = `${this.fileTreeService.selectedFolder}/${fileData.name}`;
+    if (this.editorPluginService.isSupportedCodeFile(fileData.name)) {
+      const cleanedFileName = this.fileTreeService.AddNode(fileData.name, false);
+      this.codeService.UpdateCacheForFile(cleanedFileName, await fileData.data.text());
+      return;
+    }
     const resourceId = await this.currentProjectService.UploadResource(fileData.name, fileData.data, this.authService.IsLoggedIn());
     this.fileTreeService.AddResourceNode(fileData.name, resourceId);
   }

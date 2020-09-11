@@ -25,4 +25,20 @@ export class TutorBitsEditorPluginService extends IEditorPluginService {
       await plugin.register();
     });
   }
+
+  public isSupportedCodeFile(path: string): boolean {
+    const extension = `.${path.split('.').pop()}`;
+    let supported = false;
+
+    switch (extension) {
+      case '.js': // Built in support
+        return true;
+      default:
+        this.getPlugins().forEach((plugin: BaseEditorPlugin) => {
+          supported = supported || plugin.isExtensionSupported(extension);
+        });
+    }
+
+    return supported;
+  }
 }

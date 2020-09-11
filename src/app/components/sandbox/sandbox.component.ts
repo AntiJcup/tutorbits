@@ -146,7 +146,7 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate, OnDestr
       this.fileTreeService.selectedPath = '/project';
 
       // Starts recording using the current assigned project
-      this.recorderService.StartRecording({
+      await this.recorderService.StartRecording({
         trackNonFileEvents: false,
         overrideSaveSpeed: 5000,
         saveUnfinishedPartitions: true,

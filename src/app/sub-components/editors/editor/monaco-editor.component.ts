@@ -35,9 +35,7 @@ export abstract class MonacoEditorComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.codeService.on(CodeEvents[CodeEvents.GotoDefinition], (e) => {
-      this.onGoToDefinition(e);
-    });
+
   }
 
   ngOnDestroy(): void {
@@ -55,6 +53,10 @@ export abstract class MonacoEditorComponent implements OnInit, OnDestroy {
   }
 
   editorOnInit(codeEditor: monaco.editor.IEditor) {
+    this.codeService.on(CodeEvents[CodeEvents.GotoDefinition], (e) => {
+      this.onGoToDefinition(e);
+    });
+
     this.codeService.on(CodeEvents[CodeEvents.SelectedFileChanged], (e) => {
       if (!this.codeService.currentFilePath || this.codeService.currentFilePath === '') {
         this.Show(false);

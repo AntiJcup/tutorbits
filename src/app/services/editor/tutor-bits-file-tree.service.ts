@@ -198,7 +198,7 @@ export class TutorBitsFileTreeService extends IFileTreeService {
     return model;
   }
 
-  public AddNode(path: string, isFolder: boolean, childModel?: TutorBitsTreeModel, startRename?: boolean): void {
+  public AddNode(path: string, isFolder: boolean, childModel?: TutorBitsTreeModel, startRename?: boolean): string {
     const normalPath = this.NormalizePath(path, isFolder);
     const parentPath = this.GetParentPath(normalPath);
     if (this.GetPathTypeForPath(parentPath) !== PathType.folder) {
@@ -221,6 +221,8 @@ export class TutorBitsFileTreeService extends IFileTreeService {
     }
     this.emit(FileTreeEvents[FileTreeEvents.AddedNode], fixedNormalPath);
     this.PropogateTree(this.internalModels);
+
+    return fixedPath.path;
   }
 
   public UpdateNodeSettings(path: string, isFolder: boolean, childModelSettings: TreeModelSettings): void {
@@ -232,7 +234,7 @@ export class TutorBitsFileTreeService extends IFileTreeService {
     this.PropogateTree(this.internalModels);
   }
 
-  public AddResourceNode(path: string, resourceId: string): void {
+  public AddResourceNode(path: string, resourceId: string): string {
     const newNodeModel = {
       value: path.split('/').pop(),
       resourceId,
@@ -240,7 +242,7 @@ export class TutorBitsFileTreeService extends IFileTreeService {
     } as TutorBitsTreeModel;
 
     this.emit(FileTreeEvents[FileTreeEvents.AddedResource], path, resourceId);
-    this.AddNode(`${path}`, false, newNodeModel);
+    return this.AddNode(`${path}`, false, newNodeModel);
   }
 
   public DeleteNode(path: string, isFolder: boolean): void {

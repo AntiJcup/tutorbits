@@ -3,7 +3,7 @@ import { IFileTreeService, FileTreeEvents, ResourceNodeType, PathType } from '..
 import { IPreviewService, PreviewEvents } from '../abstract/IPreviewService';
 import { ILogService } from '../abstract/ILogService';
 import { IErrorService } from '../abstract/IErrorService';
-import { ICodeService } from '../abstract/ICodeService';
+import { ICodeService, CodeEvents } from '../abstract/ICodeService';
 import { IAuthService } from '../abstract/IAuthService';
 import { ITracerProjectService } from '../abstract/ITracerProjectService';
 import { ICurrentTracerProjectService } from '../abstract/ICurrentTracerProjectService';
@@ -21,7 +21,7 @@ import { EventSub } from 'shared/web/lib/ts/EasyEventEmitter';
 
 @Injectable()
 export class TutorBitsRecorderService extends IRecorderService {
-  private fileChangeListener: monaco.IDisposable = null;
+  private fileChangeListener: EventSub = null;
   private scrollChangeListener: monaco.IDisposable = null;
 
   private mouseMoveCallbackWrapper: any = null;
@@ -113,9 +113,10 @@ export class TutorBitsRecorderService extends IRecorderService {
     presavedTransactions.pop();
     this.savedTransactionLogPartions = this.savedTransactionLogPartions.concat(presavedTransactions);
 
-    this.fileChangeListener = this.codeService.editor.onDidChangeModelContent((e: monaco.editor.IModelContentChangedEvent) => {
-      this.OnFileModified(e);
-    });
+    this.fileChangeListener = this.codeService.sub(CodeEvents[CodeEvents.FileContentChanged],
+      (e: monaco.editor.IModelContentChangedEvent, model: monaco.editor.ITextModel, previousData: string, path: string) => {
+        this.OnFileModified(e, model, previousData, path);
+      });
 
     this.fileTreeService.on(FileTreeEvents[FileTreeEvents.AddedNode], (path: string) => {
       this.OnNodeCreated(path);
@@ -168,7 +169,7 @@ export class TutorBitsRecorderService extends IRecorderService {
 
 
     if (this.fileChangeListener) {
-      this.fileChangeListener.dispose();
+      this.fileChangeListener.Dispose();
     }
 
     if (this.mouseMoveCallbackWrapper) {
@@ -194,28 +195,47 @@ export class TutorBitsRecorderService extends IRecorderService {
     return res;
   }
 
-  protected OnFileModified(e: monaco.editor.IModelContentChangedEvent): void {
-    this.log(`OnFileModified ${JSON.stringify(e)}`);
+  protected OnFileModified(
+    e: monaco.editor.IModelContentChangedEvent,
+    model: monaco.editor.ITextModel,
+    previousData: string,
+    path: string): void {
+    this.log(`OnFileModified ${path}`);
     if (this.codeService.ignoreNextEvent) { // Handles expected edits that shouldnt be tracked
-      this.log(`OnFileModified Ignoring ${e}`);
+      this.log(`OnFileModified Ignoring ${path}`);
       return;
     }
-    this.log(`OnFileModified change count: ${e.changes.length}`);
-    for (const change of e.changes) {
-      this.log(`OnFileModified change count: ${change}`);
-      const previousCache = this.codeService.GetCacheForCurrentFile();
-      const previousData = change.rangeLength <= 0 || !previousCache ?
-        undefined :
-        previousCache
-          .getValue()
-          .substring(change.rangeOffset, change.rangeOffset + change.rangeLength);
+
+    this.timeOffset = Date.now() - this.start;
+    let offsetStart = 0;
+    let offsetLength = 0;
+    let newData = model.getValue();
+    const previousCache = this.codeService.GetCacheForFileName(path);
+    if (e === null) {
+      this.log(`OnFileModified no event just model: ${model}`);
+      const transaction = this.ModifyFile(this.timeOffset, path, offsetStart,
+        offsetStart + offsetLength, newData, previousData);
       this.log(`OnFileModified Previous File Data: ${previousData}`);
-      this.timeOffset = Date.now() - this.start;
-      const transaction = this.ModifyFile(this.timeOffset, this.codeService.currentFilePath, change.rangeOffset,
-        change.rangeOffset + change.rangeLength, change.text, previousData);
       this.log(`OnFileModified File Modified: ${JSON.stringify(transaction.toObject())}`);
+    } else {
+      this.log(`OnFileModified change count: ${e.changes.length}`);
+      for (const change of e.changes) {
+        this.log(`OnFileModified change count: ${change}`);
+        offsetStart = change.rangeOffset;
+        offsetLength = change.rangeLength;
+        previousData = change.rangeLength <= 0 || !previousCache ?
+          undefined :
+          previousData.substring(offsetStart, offsetStart + offsetLength);
+        newData = change.text;
+        const transaction = this.ModifyFile(this.timeOffset, path, offsetStart,
+          offsetStart + offsetLength, newData, previousData);
+        this.log(`OnFileModified Previous File Data: ${previousData}`);
+        this.log(`OnFileModified File Modified: ${JSON.stringify(transaction.toObject())}`);
+      }
+
+
     }
-    this.codeService.UpdateCacheForCurrentFile();
+    // this.codeService.Up();
 
     this.TriggerDelayedSave();
   }

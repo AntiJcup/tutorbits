@@ -65,11 +65,11 @@ export abstract class IFileTreeService extends EasyEventEmitter {
 
   public abstract PropogateTree(files: { [path: string]: TutorBitsTreeModel }, options: PropogateTreeOptions): void;
 
-  public abstract AddNode(path: string, isFolder: boolean, childModel?: TutorBitsTreeModel, startRename?: boolean): void;
+  public abstract AddNode(path: string, isFolder: boolean, childModel?: TutorBitsTreeModel, startRename?: boolean): string;
 
   public abstract UpdateNodeSettings(path: string, isFolder: boolean, childModelSettings: TreeModelSettings): void;
 
-  public abstract AddResourceNode(path: string, resourceId: string): void;
+  public abstract AddResourceNode(path: string, resourceId: string): string;
 
   public abstract DeleteNode(path: string, isFolder: boolean): void;
 

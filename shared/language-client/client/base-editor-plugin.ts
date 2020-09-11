@@ -84,6 +84,10 @@ export abstract class BaseEditorPlugin implements
     this.disposables.push(monaco.languages.registerSignatureHelpProvider(this.language, this));
   }
 
+  public isExtensionSupported(extension: string): boolean {
+    return this.extensions.indexOf(extension) !== -1;
+  }
+
   //#region LanguageInterfaces
   public async validateEditor(e: monaco.editor.IModelContentChangedEvent, model: monaco.editor.ITextModel) {
     const source = model.getValue();
@@ -235,23 +239,6 @@ export abstract class BaseEditorPlugin implements
       let tooltip = '';
       const lines = item.docstring.split(/\r?\n/);
 
-      // If the docstring starts with the signature, then remove those lines from the docstring.
-      // if (lines.length > 0 && item.signature.indexOf(lines[0]) === 0) {
-      //   lines.shift();
-      //   const endIndex = lines.findIndex((line) => item.signature.endsWith(line));
-      //   if (endIndex >= 0) {
-      //     lines = lines.filter((_, index) => index > endIndex);
-      //   }
-      // }
-      // if (
-      //   lines.length > 0 &&
-      //   word.length > 0 &&
-      //   item.signature.startsWith(word) &&
-      //   lines[0].startsWith(word) &&
-      //   lines[0].endsWith(')')
-      // ) {
-      //   lines.shift();
-      // }
       lines.shift();
       lines.shift();
       lines.shift();

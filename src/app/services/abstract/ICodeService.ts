@@ -47,7 +47,7 @@ export abstract class ICodeService extends EasyEventEmitter {
 
   public abstract GetLanguageByPath(path: string): string;
 
-  public abstract PropogateEditor(files: { [path: string]: string }): void;
+  public abstract PropogateEditor(files: { [path: string]: string }, sendEvents?: boolean): void;
 
   public abstract GenerateNewEditorModel(path: string, data: string): monaco.editor.ITextModel;
 
