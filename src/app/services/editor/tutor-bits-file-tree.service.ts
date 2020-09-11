@@ -20,7 +20,6 @@ export class TutorBitsFileTreeService extends IFileTreeService {
     this.internalSelectedPath = path;
     if (this.internalSelectedPath) { // If not null figure out the path type
       this.internalSelectedPathType = this.GetPathTypeForPath(path);
-      // TODO selection
       this.emit(FileTreeEvents[FileTreeEvents.SelectedNode], path, this.internalSelectedPathType, this.GetNodeTypeByPath(path));
     } else {
       this.internalSelectedPathType = PathType.none;

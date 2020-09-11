@@ -102,6 +102,10 @@ export abstract class MonacoEditorComponent implements OnInit, OnDestroy {
   onGoToDefinition(event: GoToDefinitionEvent) {
     this.logService.LogToConsole(JSON.stringify(event));
 
+    if (!event.path.startsWith('/project')) {
+      return;
+    }
+
     this.fileTreeService.selectedPath = event.path;
     this.zone.runTask(() => {
       this.codeService.editor.focus();
