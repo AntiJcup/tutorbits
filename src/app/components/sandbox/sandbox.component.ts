@@ -98,11 +98,6 @@ export class SandboxComponent implements OnInit, ComponentCanDeactivate, OnDestr
     this.metaService.updateTag({ name: 'description', content: `TutotorBits Sandbox` },
       'name=\'description\'');
 
-    this.fileTreeService.on(FileTreeEvents[FileTreeEvents.SelectedNode], (path: string) => {
-      this.eventService.TriggerButtonClick('Preview', `PreviewClose - ${this.projectId}`);
-      this.previewService.HidePreview();
-    });
-
     this.codeService.once(CodeEvents[CodeEvents.InitializedSession], () => { this.onCodeInitialized(); });
   }
 

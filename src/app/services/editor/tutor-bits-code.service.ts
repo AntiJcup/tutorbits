@@ -1,6 +1,7 @@
 import { ICodeService, CodeEvents, GoToDefinitionEvent } from '../abstract/ICodeService';
 import { ILogService } from '../abstract/ILogService';
 import { Injectable } from '@angular/core';
+import { IEditorPluginService } from '../abstract/IEditorPluginService';
 
 class CodeFile {
   constructor(public model: monaco.editor.ITextModel, public listener: monaco.IDisposable) {
@@ -21,6 +22,7 @@ export class TutorBitsCodeService extends ICodeService {
   private static readOnlyOptions: monaco.editor.IEditorOptions = {
     readOnly: true
   };
+  private static externalFileStarter = '$external.';
 
   protected codeEditor: monaco.editor.ICodeEditor;
   protected selectedFilePath: string;
@@ -31,9 +33,11 @@ export class TutorBitsCodeService extends ICodeService {
   private ignoreNext = false;
   private initialized = false;
 
-  constructor(protected logServer: ILogService) {
+  constructor(
+    protected logService: ILogService,
+    protected editorPluginService: IEditorPluginService) {
     super();
-    this.log = this.logServer.LogToConsole.bind(this.logServer, 'CodeService');
+    this.log = this.logService.LogToConsole.bind(this.logService, 'CodeService');
   }
 
   public get currentFilePath(): string {
@@ -52,14 +56,19 @@ export class TutorBitsCodeService extends ICodeService {
 
     // Switch contents based on file name
     let cache = this.GetCacheForCurrentFile();
+    const language = this.GetLanguageByPath(this.selectedFilePath);
     if (!cache) {
-      cache = this.GenerateNewEditorModel(path, '');
+      let data = '';
+      if (this.selectedFilePath.startsWith(TutorBitsCodeService.externalFileStarter)) {
+        data = this.editorPluginService.getPlugin(language).externalContent;
+      }
+      cache = this.GenerateNewEditorModel(path, data);
       this.log(`failed to find cache for: ${path}`);
     }
 
     this.codeEditor.setModel(cache);
     this.currentCache = cache.getValue();
-    monaco.editor.setModelLanguage(this.codeEditor.getModel(), this.GetLanguageByPath(this.selectedFilePath));
+    monaco.editor.setModelLanguage(this.codeEditor.getModel(), language);
   }
 
   public get ignoreNextEvent(): boolean {
@@ -130,6 +139,10 @@ export class TutorBitsCodeService extends ICodeService {
   public UpdateCacheForFile(filePath: string, data: string, sendEvents: boolean = true): void {
     this.log(`UpdateCacheForCurrentFile: ${filePath}`);
 
+    if (filePath.startsWith(TutorBitsCodeService.externalFileStarter)) {
+      return;
+    }
+
     if (!this.fileEditors[filePath]) {
       const fileModel = this.GenerateNewEditorModel(filePath, data);
 
@@ -173,9 +186,10 @@ export class TutorBitsCodeService extends ICodeService {
 
   public UpdateModelForFile(filePath: string, fileModel: monaco.editor.ITextModel): void {
     this.log(`UpdateCacheForCurrentFile: ${filePath}`);
-    if (fileModel.id === this.fileEditors[filePath]?.model?.id) {
+    if (fileModel.id === this.fileEditors[filePath]?.model?.id || filePath.startsWith(TutorBitsCodeService.externalFileStarter)) {
       return;
     }
+
     const listener = fileModel.onDidChangeContent(async (e: monaco.editor.IModelContentChangedEvent) => {
       this.emit(
         CodeEvents[CodeEvents.FileContentChanged],
@@ -187,6 +201,7 @@ export class TutorBitsCodeService extends ICodeService {
         this.currentCache = fileModel.getValue();
       }
     });
+
     if (this.fileEditors[filePath]) {
       this.fileEditors[filePath].model = fileModel;
       this.fileEditors[filePath].listener.dispose();
@@ -224,19 +239,7 @@ export class TutorBitsCodeService extends ICodeService {
   }
 
   public GetLanguageByPath(path: string): string {
-    if (path.endsWith('.js')) {
-      return 'javascript';
-    } else if (path.endsWith('.html')) {
-      return 'html';
-    } else if (path.endsWith('.css')) {
-      return 'css';
-    } else if (path.endsWith('.cs')) {
-      return 'csharp';
-    } else if (path.endsWith('.py')) {
-      return 'python';
-    }
-
-    return '';
+    return this.editorPluginService.getLanguageOfCodeFile(path);
   }
 
   public PropogateEditor(files: { [path: string]: string; }, sendEvents: boolean = true): void {
@@ -251,7 +254,11 @@ export class TutorBitsCodeService extends ICodeService {
     const modelPath = monaco.Uri.file(path);
     const existing = monaco.editor.getModel(modelPath);
     if (existing) {
-      return existing;
+      if (!path.startsWith(TutorBitsCodeService.externalFileStarter)) {
+        return existing;
+      } else {
+        existing.dispose();
+      }
     }
 
     return monaco.editor.createModel(data, this.GetLanguageByPath(path), modelPath);

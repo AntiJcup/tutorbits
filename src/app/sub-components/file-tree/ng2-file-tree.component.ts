@@ -136,6 +136,14 @@ export abstract class NG2FileTreeComponent implements OnInit, OnDestroy {
       async (path, pathType: PathType, nodeType: ResourceNodeType) => {
         await this.previewService.HidePreview();
 
+        this.ignoreNextSelectEvent = true;
+        setTimeout(() => {
+          this.selectNodeByPath(
+            this.treeComponent.tree,
+            this.fileTreeService.selectedPath ? this.fileTreeService.selectedPath : '/project',
+            true);
+        }, 0);
+
         switch (nodeType) {
           case ResourceNodeType.code:
             this.resourceViewerService.resource = null;

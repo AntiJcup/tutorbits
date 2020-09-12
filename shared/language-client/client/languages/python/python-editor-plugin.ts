@@ -90,7 +90,7 @@ export class PythonEditorPlugin extends BaseEditorPlugin {
   }
 
   public get extensions(): string[] {
-    return ['.py'];
+    return ['.py', '.pyi'];
   }
 
   public get mimeTypes(): string[] {

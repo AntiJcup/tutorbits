@@ -18,12 +18,13 @@ export class TutorBitsFileTreeService extends IFileTreeService {
 
   public set selectedPath(path: string) {
     this.internalSelectedPath = path;
+    let nodeType = ResourceNodeType.code;
+    this.internalSelectedPathType = PathType.none;
     if (this.internalSelectedPath) { // If not null figure out the path type
       this.internalSelectedPathType = this.GetPathTypeForPath(path);
-      this.emit(FileTreeEvents[FileTreeEvents.SelectedNode], path, this.internalSelectedPathType, this.GetNodeTypeByPath(path));
-    } else {
-      this.internalSelectedPathType = PathType.none;
+      nodeType = this.GetNodeTypeByPath(path);
     }
+    this.emit(FileTreeEvents[FileTreeEvents.SelectedNode], path, this.internalSelectedPathType, nodeType);
   }
 
   public get selectedFolder(): string {
@@ -82,6 +83,7 @@ export class TutorBitsFileTreeService extends IFileTreeService {
   public PropogateTreeJson(fileJson: { [path: string]: string; }, options: PropogateTreeOptions = {}): void {
     const files: { [path: string]: TutorBitsTreeModel } = {};
 
+    const pathsToEventFor = [];
     for (let path of Object.keys(fileJson)) {
       const model = {
         id: Guid.create().toString()
@@ -94,9 +96,17 @@ export class TutorBitsFileTreeService extends IFileTreeService {
       }
 
       files[path] = model;
+      pathsToEventFor.push(path);
     }
 
     this.PropogateTree(files, options);
+    pathsToEventFor.sort((a, b) => {
+      // ASC  -> a.length - b.length
+      // DESC -> b.length - a.length
+      return a.length - b.length;
+    }).forEach((path: string) => {
+      this.emit(FileTreeEvents[FileTreeEvents.AddedNode], path);
+    });
   }
 
   public PropogateTree(files: { [path: string]: TutorBitsTreeModel }, options: PropogateTreeOptions = {}): void {

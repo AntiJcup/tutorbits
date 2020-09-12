@@ -43,9 +43,20 @@ export abstract class BaseEditorPlugin implements
   public abstract get symbolMappings(): Map<string, SymbolKind>;
   public abstract get paramPatterns(): string[];
   public abstract get serverUrl(): string;
+  public get externalContent(): string {
+    return this._externalContent;
+  }
+
+  public get externalContentPath(): string {
+    return this._externalContentPath;
+  }
 
   private disposables: monaco.IDisposable[] = [];
   private p2m = new ProtocolToMonacoConverter();
+  // tslint:disable-next-line: variable-name
+  private _externalContent: string;
+  // tslint:disable-next-line: variable-name
+  private _externalContentPath: string;
 
   protected connection: LanguageServerClient | undefined;
 
@@ -294,6 +305,15 @@ export abstract class BaseEditorPlugin implements
       definition.range.end_line,
       definition.range.end_column
     );
+
+    // Store externalContent for external gotoDefinitions
+    if (response.results[0].externalContent) {
+      this._externalContent = response.results[0].externalContent;
+      this._externalContentPath = definitionResource;
+    } else {
+      this._externalContent = null;
+      this._externalContentPath = null;
+    }
     return this.p2m.asLocation(Location.create((definitionResource).replace(/\\/g, '/') as DocumentUri, range));
   }
 

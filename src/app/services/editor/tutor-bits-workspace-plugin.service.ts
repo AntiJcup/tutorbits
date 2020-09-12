@@ -37,12 +37,12 @@ export class TutorBitsWorkspacePluginService extends IWorkspacePluginService {
         return;
       }
       const workspace = await plugin.setupWorkspace();
-      this.codeService.PropogateEditor(workspace);
       this.fileTreeService.PropogateTreeJson(workspace, {});
+      this.codeService.PropogateEditor(workspace);
 
-      if (this.recorderService.recording) {
-        await this.recorderService.PropogateJSON(workspace);
-      }
+      // if (this.recorderService.recording) {
+      //   await this.recorderService.PropogateJSON(workspace);
+      // }
     });
   }
 }

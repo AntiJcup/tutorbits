@@ -103,6 +103,15 @@ export abstract class MonacoEditorComponent implements OnInit, OnDestroy {
     this.logService.LogToConsole(JSON.stringify(event));
 
     if (!event.path.startsWith('/project')) {
+      const fileExtension = event.path.split('.').pop();
+      event.path = `$external.${fileExtension}`; // Fake selected path
+      this.codeService.currentFilePath = event.path;
+      this.zone.runTask(() => {
+        this.fileTreeService.selectedPath = '/project';
+        this.codeService.editor.focus();
+        this.codeService.editor.setPosition(event.offset);
+        this.codeService.editor.revealPositionInCenter(event.offset, monaco.editor.ScrollType.Smooth);
+      });
       return;
     }
 
@@ -110,6 +119,7 @@ export abstract class MonacoEditorComponent implements OnInit, OnDestroy {
     this.zone.runTask(() => {
       this.codeService.editor.focus();
       this.codeService.editor.setPosition(event.offset);
+      this.codeService.editor.revealPositionInCenter(event.offset, monaco.editor.ScrollType.Smooth);
     });
   }
 }

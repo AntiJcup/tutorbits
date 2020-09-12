@@ -5,4 +5,5 @@ export abstract class IEditorPluginService {
   public abstract getPlugins(): BaseEditorPlugin[];
   public async abstract registerPlugins(): Promise<void>;
   public abstract isSupportedCodeFile(path: string): boolean;
+  public abstract getLanguageOfCodeFile(path: string): string;
 }

@@ -41,4 +41,24 @@ export class TutorBitsEditorPluginService extends IEditorPluginService {
 
     return supported;
   }
+
+  public getLanguageOfCodeFile(path: string): string {
+    const extension = `.${path.split('.').pop()}`;
+    let language = '';
+
+    switch (extension) {
+      case 'js':
+        return 'javascript';
+      case 'html':
+        return 'html';
+      case 'css':
+        return 'css';
+      default:
+        this.getPlugins().forEach((plugin: BaseEditorPlugin) => {
+          language = language.length > 0 ? language : (plugin.isExtensionSupported(extension) ? plugin.language : '');
+        });
+    }
+
+    return language;
+  }
 }
