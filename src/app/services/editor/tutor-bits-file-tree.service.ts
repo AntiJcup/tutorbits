@@ -418,6 +418,10 @@ export class TutorBitsFileTreeService extends IFileTreeService {
   }
 
   public GetPathTypeForPath(path: string): PathType {
+    if (!path) {
+      return PathType.none;
+    }
+
     if (path === '/') {
       return PathType.folder;
     }

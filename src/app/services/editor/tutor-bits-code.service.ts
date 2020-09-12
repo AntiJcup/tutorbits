@@ -53,6 +53,9 @@ export class TutorBitsCodeService extends ICodeService {
     this.selectedFilePath = path;
 
     this.emit(CodeEvents[CodeEvents.SelectedFileChanged], path);
+    if (!this.selectedFilePath) {
+      return;
+    }
 
     // Switch contents based on file name
     let cache = this.GetCacheForCurrentFile();
@@ -137,7 +140,7 @@ export class TutorBitsCodeService extends ICodeService {
   }
 
   public UpdateCacheForFile(filePath: string, data: string, sendEvents: boolean = true): void {
-    this.log(`UpdateCacheForCurrentFile: ${filePath}`);
+    this.log(`UpdateCacheForFile: ${filePath}`);
 
     if (filePath.startsWith(TutorBitsCodeService.externalFileStarter)) {
       return;
@@ -186,7 +189,10 @@ export class TutorBitsCodeService extends ICodeService {
 
   public UpdateModelForFile(filePath: string, fileModel: monaco.editor.ITextModel): void {
     this.log(`UpdateCacheForCurrentFile: ${filePath}`);
-    if (fileModel.id === this.fileEditors[filePath]?.model?.id || filePath.startsWith(TutorBitsCodeService.externalFileStarter)) {
+    if (
+      fileModel.id === this.fileEditors[filePath]?.model?.id ||
+      !filePath ||
+      filePath.startsWith(TutorBitsCodeService.externalFileStarter)) {
       return;
     }
 

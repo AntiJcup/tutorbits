@@ -39,6 +39,7 @@ export abstract class NG2FileTreeComponent implements OnInit, OnDestroy {
   protected lastNodeCreated: { path: string, timestamp: number };
   protected readonly MINCREATETIME: number = 1000 * 1;
   protected ignoreNextSelectEvent = false;
+  protected previousPath: string;
 
   @ViewChild(TreeComponent, { static: true }) treeComponent: TreeComponent;
 
@@ -136,13 +137,14 @@ export abstract class NG2FileTreeComponent implements OnInit, OnDestroy {
       async (path, pathType: PathType, nodeType: ResourceNodeType) => {
         await this.previewService.HidePreview();
 
-        this.ignoreNextSelectEvent = true;
-        setTimeout(() => {
-          this.selectNodeByPath(
-            this.treeComponent.tree,
-            this.fileTreeService.selectedPath ? this.fileTreeService.selectedPath : '/project',
-            true);
-        }, 0);
+        if (this.fileTreeService.selectedPath === this.previousPath) {
+          return;
+        }
+        this.previousPath = this.fileTreeService.selectedPath;
+        this.selectNodeByPath(
+          this.treeComponent.tree,
+          this.fileTreeService.selectedPath ? this.fileTreeService.selectedPath : '/project',
+          true);
 
         switch (nodeType) {
           case ResourceNodeType.code:
@@ -258,8 +260,11 @@ export abstract class NG2FileTreeComponent implements OnInit, OnDestroy {
       this.ignoreNextSelectEvent = false;
       return;
     }
+
+    const newPath = this.getPathForNodeUI(event.node);
+
     this.log(event);
-    this.fileTreeService.selectedPath = this.getPathForNodeUI(event.node);
+    this.fileTreeService.selectedPath = newPath;
 
     if ((event.node.parent && event.node.parent.isRoot()) || !event.node.isBranch()) { // No collapsing root level nodes
       return;
