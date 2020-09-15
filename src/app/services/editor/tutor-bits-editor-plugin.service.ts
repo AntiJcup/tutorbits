@@ -1,15 +1,13 @@
 import { IEditorPluginService } from '../abstract/IEditorPluginService';
 import { BaseEditorPlugin } from 'shared/language-client/client/base-editor-plugin';
 import { PythonEditorPlugin } from 'shared/language-client/client/languages/python/python-editor-plugin';
+import { ICodeService } from '../abstract/ICodeService';
 
 export class TutorBitsEditorPluginService extends IEditorPluginService {
   private plugins: { [pluginId: string]: BaseEditorPlugin } = {};
 
   constructor() {
     super();
-
-    const pythonPlugin = new PythonEditorPlugin();
-    this.plugins[pythonPlugin.language] = pythonPlugin;
   }
 
   public getPlugin(pluginId: string): BaseEditorPlugin | undefined {
@@ -20,7 +18,10 @@ export class TutorBitsEditorPluginService extends IEditorPluginService {
     return Object.values(this.plugins);
   }
 
-  public async registerPlugins(): Promise<void> {
+  public async registerPlugins(codeService: ICodeService): Promise<void> {
+    const pythonPlugin = new PythonEditorPlugin(codeService);
+    this.plugins[pythonPlugin.language] = pythonPlugin;
+
     this.getPlugins().forEach(async (plugin: BaseEditorPlugin) => {
       await plugin.register();
     });
@@ -60,5 +61,13 @@ export class TutorBitsEditorPluginService extends IEditorPluginService {
     }
 
     return language;
+  }
+
+  public dispose(): void {
+    this.getPlugins().forEach((plugin: BaseEditorPlugin) => {
+      plugin.dispose();
+    });
+
+    this.plugins = {};
   }
 }

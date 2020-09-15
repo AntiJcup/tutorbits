@@ -465,4 +465,8 @@ export class TutorBitsFileTreeService extends IFileTreeService {
     this.internalModels = {};
     this.AddNode('/project', true);
   }
+
+  public GetPaths(): string[] {
+    return Object.keys(this.internalModels);
+  }
 }

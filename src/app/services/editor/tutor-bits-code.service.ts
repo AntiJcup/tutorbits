@@ -188,7 +188,7 @@ export class TutorBitsCodeService extends ICodeService {
   }
 
   public UpdateModelForFile(filePath: string, fileModel: monaco.editor.ITextModel): void {
-    this.log(`UpdateCacheForCurrentFile: ${filePath}`);
+    this.log(`UpdateModelForFile: ${filePath}`);
     if (
       fileModel.id === this.fileEditors[filePath]?.model?.id ||
       !filePath ||

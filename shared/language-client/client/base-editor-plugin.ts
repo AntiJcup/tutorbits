@@ -24,6 +24,7 @@ import './extensions';
 import { ISyntaxErrorRange, IAutoCompleteItem, ICompletionResult, IDefinition, IHoverItem, ISignature } from './types';
 import { ITextRangeCollection } from './textRangeCollection';
 import { FormatResponse } from 'shared/language-server/src/shared/plugin-types';
+import { CodeEvents, ICodeService } from 'src/app/services/abstract/ICodeService';
 
 export abstract class BaseEditorPlugin implements
   monaco.languages.CompletionItemProvider,
@@ -51,16 +52,18 @@ export abstract class BaseEditorPlugin implements
     return this._externalContentPath;
   }
 
-  private disposables: monaco.IDisposable[] = [];
+  private disposables: (monaco.IDisposable)[] = [];
   private p2m = new ProtocolToMonacoConverter();
   // tslint:disable-next-line: variable-name
   private _externalContent: string;
   // tslint:disable-next-line: variable-name
   private _externalContentPath: string;
+  // tslint:disable-next-line: variable-name
+  private _changedPaths: string[] = [];
 
   protected connection: LanguageServerClient | undefined;
 
-  constructor() {
+  constructor(protected codeService: ICodeService) {
   }
   signatureHelpTriggerCharacters?: readonly string[] | undefined;
   signatureHelpRetriggerCharacters?: readonly string[] | undefined;
@@ -93,10 +96,28 @@ export abstract class BaseEditorPlugin implements
     this.disposables.push(monaco.languages.registerHoverProvider(this.language, this));
     this.disposables.push(monaco.languages.registerDefinitionProvider(this.language, this));
     this.disposables.push(monaco.languages.registerSignatureHelpProvider(this.language, this));
+
+    this.codeService.sub(CodeEvents[CodeEvents.FileContentChanged], (event, model, cache, path) => {
+      this._changedPaths.push(path);
+    });
   }
 
   public isExtensionSupported(extension: string): boolean {
     return this.extensions.indexOf(extension) !== -1;
+  }
+
+  protected getUpdatesSinceLastMessage(): ClientUpdateSource[] {
+    const updates: ClientUpdateSource[] = [];
+    this._changedPaths.forEach((path: string) => {
+      const data = this.codeService.GetCacheForFileName(path)?.getValue();
+      updates.push({
+        updatedSourceCode: data,
+        updatedSourcePath: path,
+      } as ClientUpdateSource);
+    });
+    this._changedPaths = [];
+
+    return updates;
   }
 
   //#region LanguageInterfaces
@@ -108,7 +129,7 @@ export abstract class BaseEditorPlugin implements
       updatedSourcePath: path
     } as ClientUpdateSource;
     const cmd = this.connection?.generateLanguageCommand(LanguageCommandType.syntax, model.uri.path);
-    const response = await this.connection?.sendRequest(TargetType.language, cmd, sourceUpdate);
+    const response = await this.connection?.sendRequest(TargetType.language, cmd, [sourceUpdate]);
     const syntaxErrors = response.results as ISyntaxErrorRange[];
     const markers = syntaxErrors.map(error => {
       return {
@@ -129,17 +150,11 @@ export abstract class BaseEditorPlugin implements
     context: monaco.languages.CompletionContext,
     token: monaco.CancellationToken): Promise<monaco.languages.CompletionList> {
 
-    const source = model.getValue();
-    const path = model.uri.path;
-    const sourceUpdate = {
-      updatedSourceCode: source,
-      updatedSourcePath: path
-    } as ClientUpdateSource;
     const wordUntil = model.getWordUntilPosition(position);
     const defaultRange = new monaco.Range(position.lineNumber, wordUntil.startColumn, position.lineNumber, wordUntil.endColumn);
 
     const cmd = this.connection?.generateLanguageCommand(LanguageCommandType.completion, model.uri.path, position);
-    const response = await this.connection?.sendRequest(TargetType.language, cmd, sourceUpdate);
+    const response = await this.connection?.sendRequest(TargetType.language, cmd, this.getUpdatesSinceLastMessage());
     const results = response.results as IAutoCompleteItem[];
 
     results.forEach((item) => {
@@ -192,14 +207,8 @@ export abstract class BaseEditorPlugin implements
     range: monaco.Range,
     options: monaco.languages.FormattingOptions,
     token: monaco.CancellationToken): Promise<monaco.languages.TextEdit[]> {
-    const source = model.getValue();
-    const path = model.uri.path;
-    const sourceUpdate = {
-      updatedSourceCode: source,
-      updatedSourcePath: path
-    } as ClientUpdateSource;
     const cmd = this.connection?.generateFormatCommand(model.uri.path, range);
-    const response = await this.connection?.sendRequest(TargetType.format, cmd, sourceUpdate);
+    const response = await this.connection?.sendRequest(TargetType.format, cmd, this.getUpdatesSinceLastMessage());
     const results = response.results as FormatResponse;
 
     const editParser = new EditParser(model);
@@ -210,15 +219,8 @@ export abstract class BaseEditorPlugin implements
   async provideDocumentSymbols(
     model: monaco.editor.ITextModel,
     token: monaco.CancellationToken): Promise<monaco.languages.DocumentSymbol[]> {
-    const source = model.getValue();
-    const path = model.uri.path;
-    const sourceUpdate = {
-      updatedSourceCode: source,
-      updatedSourcePath: path
-    } as ClientUpdateSource;
-
     const cmd = this.connection?.generateLanguageCommand(LanguageCommandType.names, model.uri.path);
-    const response = await this.connection?.sendRequest(TargetType.language, cmd, sourceUpdate);
+    const response = await this.connection?.sendRequest(TargetType.language, cmd, this.getUpdatesSinceLastMessage());
     const results = response.results as SymbolInformation[];
 
     // TODO parse results (Currently returning something I dont expect)
@@ -229,23 +231,16 @@ export abstract class BaseEditorPlugin implements
     model: monaco.editor.ITextModel,
     position: monaco.Position,
     token: monaco.CancellationToken): Promise<monaco.languages.Hover> {
-    const source = model.getValue();
-    const path = model.uri.path;
-    const sourceUpdate = {
-      updatedSourceCode: source,
-      updatedSourcePath: path
-    } as ClientUpdateSource;
     const wordAtPos = model.getWordAtPosition(position);
     if (!wordAtPos) {
       this.p2m.asHover(null);
     }
     const word = wordAtPos.word;
     const cmd = this.connection?.generateLanguageCommand(LanguageCommandType.tooltip, model.uri.path, position);
-    const response = await this.connection?.sendRequest(TargetType.language, cmd, sourceUpdate);
+    const response = await this.connection?.sendRequest(TargetType.language, cmd, this.getUpdatesSinceLastMessage());
     const result = response.results as IHoverItem[];
 
     return this.p2m.asHover(result.map((item: IHoverItem): Hover => {
-      const textConverter = new RestTextConverter();
       const signature = this.getSignature(item.signature, item.kind, word);
       let tooltip = '';
       const lines = item.docstring.split(/\r?\n/);
@@ -258,7 +253,6 @@ export abstract class BaseEditorPlugin implements
         tooltip = ['```python', signature, '```', '', ''].join(model.getEOL());
       }
       const rawDescription = lines.join(model.getEOL() + model.getEOL());
-      const description = textConverter.toMarkdown(rawDescription);
 
       const header = this.p2m.asMarkdownString({
         language: 'python',
@@ -280,16 +274,9 @@ export abstract class BaseEditorPlugin implements
     model: monaco.editor.ITextModel,
     position: monaco.Position,
     token: monaco.CancellationToken): Promise<monaco.languages.Definition | monaco.languages.LocationLink[] | monaco.languages.Location> {
-    const source = model.getValue();
-    const path = model.uri.path;
-    const sourceUpdate = {
-      updatedSourceCode: source,
-      updatedSourcePath: path
-    } as ClientUpdateSource;
-
     const word = model.getWordAtPosition(position).word;
     const cmd = this.connection?.generateLanguageCommand(LanguageCommandType.definitions, model.uri.path, position);
-    const response = await this.connection?.sendRequest(TargetType.language, cmd, sourceUpdate);
+    const response = await this.connection?.sendRequest(TargetType.language, cmd, this.getUpdatesSinceLastMessage());
     const result = response.results as IDefinition[];
 
     if (result.length === 0) {
@@ -327,16 +314,9 @@ export abstract class BaseEditorPlugin implements
       return null;
     }
 
-    const source = model.getValue();
-    const path = model.uri.path;
-    const sourceUpdate = {
-      updatedSourceCode: source,
-      updatedSourcePath: path
-    } as ClientUpdateSource;
     const cmd = this.connection?.generateLanguageCommand(LanguageCommandType.arguments, model.uri.path, position);
-    const response = await this.connection?.sendRequest(TargetType.language, cmd, sourceUpdate);
+    const response = await this.connection?.sendRequest(TargetType.language, cmd, this.getUpdatesSinceLastMessage());
     const result = response.results as ISignature[];
-
 
     if (result && Array.isArray(result) && result.length > 0) {
       const signature = {

@@ -42,6 +42,7 @@ export abstract class MonacoEditorComponent implements OnInit, OnDestroy {
     window.removeEventListener('resize', this.windowCallback);
     this.codeService.EndSession();
     this.codeService.Cleanup();
+    this.editorPluginService.dispose();
 
     if (this.fileSelectSub) {
       this.fileSelectSub.Dispose();
@@ -74,7 +75,7 @@ export abstract class MonacoEditorComponent implements OnInit, OnDestroy {
       this.Show(false);
     }
 
-    this.editorPluginService.registerPlugins().then();
+    this.editorPluginService.registerPlugins(this.codeService).then();
 
     this.fileSelectSub = this.fileTreeService.sub(FileTreeEvents[FileTreeEvents.SelectedNode],
       (path: string, pathType: PathType, nodeType: ResourceNodeType) => {

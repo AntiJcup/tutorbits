@@ -7,6 +7,7 @@ import { IErrorService } from '../abstract/IErrorService';
 import { ICodeService } from '../abstract/ICodeService';
 import { IEditorPluginService } from '../abstract/IEditorPluginService';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
+import { IFileTreeService } from '../abstract/IFileTreeService';
 
 @Injectable()
 export class TutorBitsPreviewService extends IPreviewService {
@@ -50,6 +51,7 @@ export class TutorBitsPreviewService extends IPreviewService {
     protected errorService: IErrorService,
     protected codeService: ICodeService,
     protected editorPluginService: IEditorPluginService,
+    protected fileTreeService: IFileTreeService,
     private sanitizer: DomSanitizer) {
     super();
   }
@@ -164,11 +166,14 @@ export class TutorBitsPreviewService extends IPreviewService {
 
     const language = this.codeService.GetLanguageByPath(path);
     const languageServerUrl = this.editorPluginService.getPlugin(language)?.serverUrl;
+    const otherPaths = this.fileTreeService.GetPaths().filter((p: string) => {
+      return !p.endsWith('/');
+    });
 
     switch (extensionType) {
       case 'js':
       case 'py':
-        urlPath = `/preview-helpers/${extensionType}/preview.html?base=${encodeURIComponent(url)}&target=${encodeURIComponent(path)}`;
+        urlPath = `/preview-helpers/${extensionType}/preview.html?base=${encodeURIComponent(url)}&target=${encodeURIComponent(path)}&otherPaths=${encodeURIComponent(JSON.stringify(otherPaths))}`;
         break;
     }
 

@@ -106,4 +106,6 @@ export abstract class IFileTreeService extends EasyEventEmitter {
   public abstract GetParentPath(path: string): string;
 
   public abstract Reset(): void;
+
+  public abstract GetPaths(): string[];
 }
