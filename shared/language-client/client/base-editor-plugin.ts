@@ -78,7 +78,17 @@ export abstract class BaseEditorPlugin implements
   }
 
   public async register() {
-    this.connection = new LanguageServerClient(this.serverUrl);
+    this.connection = new LanguageServerClient(this.serverUrl, true);
+    this.connection.onWorkspaceInitializeHook = () => {
+      const fileSystem = this.codeService.ExportFileSystem();
+      for (const path of Object.keys(fileSystem)) {
+        if (!path.endsWith('/')) {
+          continue;
+        }
+        delete fileSystem[path];
+      }
+      return fileSystem;
+    };
 
     monaco.languages.register({
       id: this.language,

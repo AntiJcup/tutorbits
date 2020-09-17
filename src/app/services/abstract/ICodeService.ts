@@ -52,4 +52,6 @@ export abstract class ICodeService extends EasyEventEmitter {
   public abstract GenerateNewEditorModel(path: string, data: string): monaco.editor.ITextModel;
 
   public abstract ClearFiles(): void;
+
+  public abstract ExportFileSystem(): { [path: string]: string };
 }

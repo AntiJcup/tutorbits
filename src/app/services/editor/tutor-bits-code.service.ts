@@ -283,4 +283,13 @@ export class TutorBitsCodeService extends ICodeService {
       model.dispose();
     }
   }
+
+  public ExportFileSystem(): { [path: string]: string } {
+    const fileSystem: { [path: string]: string } = {};
+    for (const path of Object.keys(this.fileEditors)) {
+      fileSystem[path] = this.fileEditors[path].model.getValue();
+    }
+
+    return fileSystem;
+  }
 }
