@@ -9,8 +9,8 @@ import { Meta } from '@angular/platform-browser';
 })
 export class HomeComponent implements OnInit, OnDestroy {
   articles: Article[] = [{
-    title: 'Welcome to TutorBits!',
-    body: 'This website is designed to help teach programming by example while being able to tinker with the code as you go. \nWatch pros program all kinds of projects all the way through learning the process of making the project. Then tinker with the project in the sandbox adding your own features.\n\n Start by clicking the Tutorials button in the top right.\nThanks for visiting!',
+    title: 'Welcome to TutorBits Pre-Alpha!',
+    body: 'This website is designed to help teach programming by example while being able to tinker with the code as you go. \nWatch pros program all kinds of projects all the way through learning the process of making the project. Then tinker with the project in the sandbox adding your own features.\n\n Start by clicking the Tutorials button in the top right.\n\n WARNING THIS WEBSITE IS FAR FROM COMPLETE, EXPECT ISSUES, REPORT BUGS TO SUPPORT, AND LAST BUT NOT LEAST PLEASE HAVE PATIENCE AS WE WORK HARD TO IMPROVE PRODUCT.\n\nThanks for visiting!',
     owner: 'Jcup',
     dateCreated: '12/01/2019'
   } as Article,
