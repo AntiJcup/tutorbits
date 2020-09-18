@@ -31,6 +31,12 @@ export class HomeComponent implements OnInit, OnDestroy {
     body: 'With all the new features came bugs. Lately TutorBits development has been focused on polishing existing features before adding new language support and expanding on answer functionality. \nThe new language will most likely be C# as I love working with it and it should be easy enough to add. \nIt will feature a interactable terminal in the existing preview functionality.',
     owner: 'Jcup',
     dateCreated: '4/10/2020'
+  } as Article,
+  {
+    title: 'Tutorbits Progress Checkin 4',
+    body: 'Python is mostly implemented now using a custom built websocket based language server. Went with python for it\'s ease to use and popularity.\nIve refactored some service to make sure that making such large changes next time are easier.\nWe updated frameworks and libraries for better stability, security, and performance.\nThank you for your patience, sadly my real job has taken me away from this project for a few months with covid alot changed.',
+    owner: 'Jcup',
+    dateCreated: '9/18/2020'
   } as Article];
   constructor(private titleService: ITitleService, private metaService: Meta) { }
 
