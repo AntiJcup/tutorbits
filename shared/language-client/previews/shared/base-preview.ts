@@ -62,7 +62,7 @@ export abstract class BasePreview {
     const base: string = this.urlParams.get('base')!;
     this.targetPath = this.urlParams.get('target')!;
     const otherPaths: string[] = JSON.parse(decodeURIComponent(this.urlParams.get('otherPaths')!));
-    const allPaths = [this.targetPath, ...(otherPaths || [])];
+    const allPaths = [...(otherPaths || [])];
 
     const pathsLoadPromise = this.loadSources(base, this.targetPath!, allPaths);
     const promises: Promise<any>[] = [pathsLoadPromise];

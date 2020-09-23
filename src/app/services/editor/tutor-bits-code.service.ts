@@ -49,6 +49,10 @@ export class TutorBitsCodeService extends ICodeService {
       return;
     }
 
+    if (path && path.endsWith('/')) {
+      path = null;
+    }
+
     this.log(`currentFilePath update: ${path}`);
     this.selectedFilePath = path;
 
