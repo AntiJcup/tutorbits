@@ -31,7 +31,7 @@ export class BaseServerPreview extends BasePreview {
     });
 
     this.connection.addEventListener('open', (async (e: Event) => {
-      if (serverConnectionResolve) { //Check if already resolved
+      if (serverConnectionResolve) { // Check if already resolved
         console.log(`INTERNAL - Connected To Server`);
         serverConnectionResolve();
         serverConnectionResolve = null;
@@ -68,8 +68,9 @@ export class BaseServerPreview extends BasePreview {
     await this.connection.sendRequest(TargetType.execute, executeCmd);
   }
 
-  protected async sendServerExecuteRequest(): Promise<void> {
-
+  public sendInput(message: string): void {
+    const executeInteractCmd = this.connection.generateExecuteInteractCommand(message);
+    this.connection.sendRequest(TargetType.executeInteract, executeInteractCmd);
   }
 
   protected async onServerExecutionResponse(data: ExecuteResponse): Promise<void> {
@@ -80,10 +81,10 @@ export class BaseServerPreview extends BasePreview {
 
     switch (data.type) {
       case ExecuteResponseType.stdout:
-        console.log(`INTERNAL - Recieved Output: ${data.data}`);
+        console.log(`INTERNAL - Recieved Output:<br/>${data.data.replace(/\r\n/g, '<br/>').replace(/\n/g, '<br/>')}`);
         break;
       case ExecuteResponseType.stderr:
-        console.log(`INTERNAL - Recieved Error: ${data.data}`);
+        console.log(`INTERNAL - Recieved Error:<br/>${data.data.replace(/\r\n/g, '<br/>').replace(/\n/g, '<br/>')}`);
         break;
     }
   }

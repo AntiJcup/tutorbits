@@ -115,5 +115,6 @@ export class PythonEditorPlugin extends BaseEditorPlugin {
 
   public get serverUrl(): string {
     return 'ws://44.236.34.52:8999/';
+    // return 'ws://127.0.0.1:8999/';
   }
 }

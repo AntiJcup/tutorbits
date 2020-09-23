@@ -27,7 +27,7 @@ async function copyCommonPreview(language, target, stage, mainJSPath) {
 }
 
 async function previewJS() {
-    var target = './out/published_previews/js/';
+    var target = './src/assets/preview-helpers/js/';
     var stage = './stage/published_previews/js/';
     var mainJSPath = 'previews/languages/js/main.js';
     copyCommonPreview('js', target, stage, mainJSPath);
@@ -35,7 +35,7 @@ async function previewJS() {
 
 async function previewPY() {
     try {
-        var target = './out/published_previews/py/';
+        var target = './src/assets/preview-helpers/py/';
         var stage = './stage/published_previews/py/';
         var mainJSPath = 'previews/languages/py/main.js';
         copyCommonPreview('py', target, stage, mainJSPath);

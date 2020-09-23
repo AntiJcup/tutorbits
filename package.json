@@ -15,8 +15,8 @@
     "postinstall": "patch-package",
     "hostContentServer": "mkdir %TMP%\\tutorbits || http-server %TMP%\\tutorbits -p 9001 --cors",
     "updategulp": "babel --presets es2015 ./gulpfile.babel.js -o ./gulpfile.js",
-    "buildJSPreview": "npm run updategulp && gulp previewJS",
-    "buildPYPreview": "npm run updategulp && gulp previewPY"
+    "buildJSPreview": "npm run updategulp && gulp previewJS && npm run build",
+    "buildPYPreview": "npm run updategulp && gulp previewPY && npm run build"
   },
   "private": true,
   "dependencies": {

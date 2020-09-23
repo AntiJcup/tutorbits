@@ -1,4 +1,4 @@
-import { BaseServerPreview } from "../../shared/server-preview";
+import { BaseServerPreview } from '../../shared/server-preview';
 
 async function init(): Promise<void> {
     const preview = new BaseServerPreview();

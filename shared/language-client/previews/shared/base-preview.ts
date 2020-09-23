@@ -1,6 +1,7 @@
 export abstract class BasePreview {
   private outputDiv: Element | null;
   private sourceIframe: HTMLIFrameElement | null;
+  private inputField: HTMLInputElement | null;
   protected urlParams: URLSearchParams;
   protected sources: { [path: string]: string };
   protected targetSource: string | undefined;
@@ -8,6 +9,7 @@ export abstract class BasePreview {
 
   constructor() {
     this.outputDiv = document.querySelector('#consoleOutput');
+    this.inputField = document.querySelector('#consoleInputField');
     this.sourceIframe = document.querySelector('#sourceCode');
     this.urlParams = new URLSearchParams(window.location.search);
     this.sources = {};
@@ -15,6 +17,7 @@ export abstract class BasePreview {
     this.targetPath = '';
 
     this.overrideNativeLogging();
+    this.listenToInput();
   }
 
   private overrideNativeLogging(): void {
@@ -40,6 +43,19 @@ export abstract class BasePreview {
       console.error([].concat(argArray).join(' '));
     };
   }
+
+  private listenToInput(): void {
+    this.inputField.onkeydown = (e: KeyboardEvent) => {
+      // tslint:disable-next-line: deprecation
+      if (this.inputField.value && this.inputField.value.length > 0 && (e.key === 'Enter' || e.keyCode === 13)) {
+        console.log(`INTERNAL - Input received ${this.inputField.value}`);
+        this.sendInput(this.inputField.value);
+        this.inputField.value = '';
+      }
+    };
+  }
+
+  public abstract sendInput(message: string): void;
 
   public async initialize(): Promise<void> {
     console.log(`INTERNAL - Starting Initialization`);
@@ -74,7 +90,7 @@ export abstract class BasePreview {
             this.sources[path] = t;
             if (target === path) {
               this.targetSource = t;
-              this.sourceIframe!.srcdoc = t;
+              this.sourceIframe!.srcdoc = t.replace(/\r\n/g, '<br/>').replace(/\n/g, '<br/>');
             }
             resolve();
           });
