@@ -81,7 +81,7 @@ export abstract class BasePreview {
     // tslint:disable-next-line: forin
     for (const pathIndex in paths) {
       const path = paths[pathIndex];
-      const source = decodeURIComponent(`${base}/${path}`).replace(/\/\//g, '/');
+      const source = decodeURIComponent(`${base}${path}`);
       console.log(`INTERNAL - Loading Source: ${path}`);
       loadPromises.push(new Promise<void>((resolve) => {
         fetch(source).then((response) => {
